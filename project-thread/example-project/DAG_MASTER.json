@@ -1,0 +1,71 @@
+{
+  "schema": "orangebox-dag-master-v1",
+  "project": "example-project",
+  "created": "<ISO-TIMESTAMP-AT-FIRST-LAUNCH>",
+  "operator": "<YOUR_NAME>",
+  "goal": "<ONE_SENTENCE_GOAL>",
+  "current_node": "1A",
+  "nodes": [
+    {
+      "id": "1A",
+      "title": "Idea intake",
+      "department": "AE1",
+      "worker": "operator",
+      "status": "ready",
+      "dependencies": [],
+      "weight": 1,
+      "approval_required": false,
+      "triad_route": "STRATEGY",
+      "validation": "one paragraph in PROJECT_SPINE.md describing the original idea",
+      "evidence": null,
+      "notes": "",
+      "attempts": 0,
+      "receipt_path": null,
+      "proof_path": null,
+      "rollback_path": null
+    },
+    {
+      "id": "1B",
+      "title": "Project contract",
+      "department": "AE1",
+      "worker": "operator",
+      "status": "queued",
+      "dependencies": ["1A"],
+      "weight": 2,
+      "approval_required": false,
+      "triad_route": "STRATEGY",
+      "validation": "PROJECT_SPINE.md has goal, audience, acceptance criteria, hard constraints",
+      "evidence": null,
+      "notes": "",
+      "attempts": 0,
+      "receipt_path": null,
+      "proof_path": null,
+      "rollback_path": null
+    },
+    {
+      "id": "1C",
+      "title": "Source inventory",
+      "department": "AE2",
+      "worker": "operator-or-claude",
+      "status": "queued",
+      "dependencies": ["1B"],
+      "weight": 2,
+      "approval_required": false,
+      "triad_route": "STRATEGY",
+      "validation": "list of in-scope files/repos/deps written to PROJECT_SPINE.md",
+      "evidence": null,
+      "notes": "Replace this template with your real project. The numbered ladder is YOURS.",
+      "attempts": 0,
+      "receipt_path": null,
+      "proof_path": null,
+      "rollback_path": null
+    }
+  ],
+  "metadata": {
+    "spine_path": "PROJECT_SPINE.md",
+    "party_line_path": "../../party-line/example-project/messages.jsonl",
+    "receipts_root": "../../receipts/example-project/",
+    "proof_root": "../../proof/example-project/",
+    "note": "This is a starter template. Rename the project folder and edit nodes to match your actual project."
+  }
+}

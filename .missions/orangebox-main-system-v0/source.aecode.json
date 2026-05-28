@@ -1,0 +1,84 @@
+{
+  "aecode_source_version": "0.1",
+  "mission_id": "orangebox-main-system-v0",
+  "generated_at": "2026-05-28T19:44:50.006Z",
+  "axiom": {
+    "product_constitution": "Turn Orangebox into a receipt-backed local-first AI build organism without mutating current visuals.",
+    "authority": {
+      "human_approval_required": true,
+      "production_deploy_requires_final_stop": true,
+      "destructive_ops_forbidden_without_explicit_approval": true
+    },
+    "boundaries": [
+      "apps/web/**",
+      "apps/api/**/production-secrets/**",
+      ".env"
+    ]
+  },
+  "glyph_scene": {
+    "visual_required": false,
+    "visual_policy": "current_visual_build_paused; AECode governs visuals, it does not force redesign",
+    "redesign_required": false,
+    "screenshot_gate_required_for_ui_work": true
+  },
+  "flow_graph": {
+    "states": [
+      "PLANNED",
+      "VALIDATED",
+      "SANDBOX_READY",
+      "RUN_RECEIPTED",
+      "APPROVED",
+      "MERGED_OR_DEPLOYED"
+    ],
+    "current_state": "IN_PROGRESS",
+    "acceptance_tests": [
+      "node --check scripts/v4/gauntlet-engine.mjs",
+      "node --check scripts/v4/orangebox-system-proof-doctor.mjs",
+      "node --check scripts/v4/aecode-format-doctor.mjs",
+      "npm.cmd run system:doctor",
+      "npm.cmd run aecode:format",
+      "npm.cmd run gauntlet:fast",
+      "npm.cmd run gauntlet:security",
+      "npm.cmd run machine:test-drive"
+    ]
+  },
+  "dataforge": {
+    "target_repo": "C:\\AtomEons\\orangebox-delta",
+    "target_files": [
+      "package.json",
+      "scripts/v4/gauntlet-engine.mjs",
+      "scripts/v4/orangebox-system-proof-doctor.mjs",
+      "docs/ORANGEBOX_SYSTEM_PROOF_QUEUE_2026-05-27.md"
+    ],
+    "allowed_paths": [
+      "package.json",
+      "scripts/v4/",
+      "docs/",
+      ".missions/orangebox-main-system-v0/",
+      "receipts/"
+    ],
+    "forbidden_paths": [
+      "apps/web/**",
+      "apps/api/**/production-secrets/**",
+      ".env"
+    ]
+  },
+  "targetforge": {
+    "default_targets": [
+      "orangebox-cli",
+      "receipt-json",
+      "operator-status-json"
+    ],
+    "visual_targets_deferred": true,
+    "production_deploy_deferred": true
+  },
+  "receiptchain": {
+    "required": true,
+    "receipt_prefix": "orangebox-aecode-orangebox-main-system-v0",
+    "rollback_required": true
+  },
+  "integrity": {
+    "sha256": "bcf5475cafd660dd53610f84451ee93c7953a87df23d9b9b750f8c3bd1a8f4a0",
+    "deterministic_key_ordering": true
+  }
+}

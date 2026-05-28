@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ae.gauntlet_result.v0",
+  "title": "AECode Gauntlet Result",
+  "type": "object",
+  "required": ["gauntlet", "mission_id", "status", "checks", "started_at", "finished_at"],
+  "properties": {
+    "gauntlet": { "enum": ["fast", "build", "security", "release"] },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["passed", "failed", "blocked"] },
+    "checks": { "type": "array" },
+    "started_at": { "type": "string", "minLength": 1 },
+    "finished_at": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

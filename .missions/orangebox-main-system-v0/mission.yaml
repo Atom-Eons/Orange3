@@ -1,0 +1,35 @@
+mission_id: orangebox-main-system-v0
+title: Orangebox Main System v0
+intent: Turn Orangebox into a receipt-backed local-first AI build organism without mutating current visuals.
+target_repo: C:\AtomEons\orangebox
+target_files:
+  - package.json
+  - scripts/v4/gauntlet-engine.mjs
+  - scripts/v4/orangebox-system-proof-doctor.mjs
+  - docs/ORANGEBOX_SYSTEM_PROOF_QUEUE_2026-05-27.md
+allowed_paths:
+  - package.json
+  - scripts/v4/
+  - docs/
+  - .missions/orangebox-main-system-v0/
+  - receipts/
+forbidden_paths:
+  - apps/web/**
+  - apps/api/**/production-secrets/**
+  - .env
+risk_level: medium
+model_role: codex_execution_with_claude_code_reasoning_lane
+acceptance_tests:
+  - node --check scripts/v4/gauntlet-engine.mjs
+  - node --check scripts/v4/orangebox-system-proof-doctor.mjs
+  - node --check scripts/v4/aecode-format-doctor.mjs
+  - npm.cmd run system:doctor
+  - npm.cmd run aecode:format
+  - npm.cmd run gauntlet:fast
+  - npm.cmd run gauntlet:security
+  - npm.cmd run machine:test-drive
+visual_required: false
+visual_policy: current_visual_build_paused; AECode governs visuals, it does not force redesign
+approval_required: true
+created_at: 2026-05-28T19:44:45.418Z
+status: IN_PROGRESS

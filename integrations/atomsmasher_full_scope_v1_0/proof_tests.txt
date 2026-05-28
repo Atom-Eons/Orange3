@@ -1,0 +1,12 @@
+test_all_620_execute_live (test_full_scope.AtomSmasherFullScopeTests.test_all_620_execute_live) ... ok
+test_cache_route_saved_work_and_compile (test_full_scope.AtomSmasherFullScopeTests.test_cache_route_saved_work_and_compile) ... ok
+test_commitment_air_and_equation (test_full_scope.AtomSmasherFullScopeTests.test_commitment_air_and_equation) ... ok
+test_demo_and_proof (test_full_scope.AtomSmasherFullScopeTests.test_demo_and_proof) ... ok
+test_full_ingest_orders_hot_and_coverage (test_full_scope.AtomSmasherFullScopeTests.test_full_ingest_orders_hot_and_coverage) ... ok
+test_registry_contains_all_620_additions (test_full_scope.AtomSmasherFullScopeTests.test_registry_contains_all_620_additions) ... ok
+test_security_and_agent_governance (test_full_scope.AtomSmasherFullScopeTests.test_security_and_agent_governance) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 1.982s
+
+OK

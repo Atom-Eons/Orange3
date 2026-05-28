@@ -1,0 +1,1 @@
+from .version import VERSION, CODENAME, SCHEMA_VERSION, SYSTEM_LAW

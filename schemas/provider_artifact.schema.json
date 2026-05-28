@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ae.provider_artifact.v0",
+  "title": "AECode Provider Artifact",
+  "type": "object",
+  "required": ["schema_version", "mission_id", "artifact_type"],
+  "properties": {
+    "schema_version": { "const": "ae.provider_artifact.v0" },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "artifact_type": { "enum": ["file_patch", "unified_diff", "diagnostic", "plan"] },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "operation"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "operation": { "enum": ["create", "replace"] },
+          "content": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "diff": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,44 @@
+{
+  "order_id": "orgbx_ui_094",
+  "status": "IN_PROGRESS",
+  "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
+  "dag_graph": {
+    "step_1": {
+      "task_type": "synthesis",
+      "assigned_node": "qwen3-coder-32b",
+      "explicit_context": [
+        "context/SidebarProps.ts",
+        "context/oled_tokens.json"
+      ],
+      "output_schema": "ReactComponentStrict",
+      "retry_cap": 3,
+      "depends_on": []
+    },
+    "step_2": {
+      "task_type": "lint_relative_luminance",
+      "assigned_node": "pod-alpha-swarm",
+      "explicit_context": [
+        "step_1.output"
+      ],
+      "output_schema": "LuminanceReport",
+      "retry_cap": 2,
+      "depends_on": [
+        "step_1"
+      ]
+    },
+    "step_3": {
+      "task_type": "os_execution",
+      "assigned_node": "agy-cli",
+      "explicit_context": [
+        "step_1.output",
+        "step_2.output"
+      ],
+      "output_schema": "TerminalTrace",
+      "retry_cap": 1,
+      "depends_on": [
+        "step_1",
+        "step_2"
+      ]
+    }
+  }
+}

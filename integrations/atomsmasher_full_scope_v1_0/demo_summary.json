@@ -1,0 +1,174 @@
+{
+  "all_features": {
+    "attempted": 620,
+    "errors": 0,
+    "errors_sample": [],
+    "ok": 620,
+    "registry_count": 620
+  },
+  "codename": "Full Scope Total Work Compiler",
+  "compiled": {
+    "active_orders": [
+      {
+        "active": 1,
+        "authority": "user",
+        "created_at": "2026-05-28T08:28:14Z",
+        "heat": "HOT_ALWAYS",
+        "id": "ord_ecaa1941509e0b30",
+        "priority": 1.0,
+        "scope": "project",
+        "source_id": "src_ee43bca1972cd996",
+        "superseded_by": null,
+        "text": "Keep marching orders HOT_ALWAYS even if 20 idea zips arrive."
+      },
+      {
+        "active": 1,
+        "authority": "user",
+        "created_at": "2026-05-28T08:28:14Z",
+        "heat": "HOT_ALWAYS",
+        "id": "ord_e0ec06c1129892a6",
+        "priority": 1.0,
+        "scope": "project",
+        "source_id": "src_ee43bca1972cd996",
+        "superseded_by": null,
+        "text": "Full ingest first; selective activation after."
+      },
+      {
+        "active": 1,
+        "authority": "user",
+        "created_at": "2026-05-28T08:28:14Z",
+        "heat": "HOT_ALWAYS",
+        "id": "ord_294cb18b23121f8d",
+        "priority": 0.92,
+        "scope": "project",
+        "source_id": "src_ee43bca1972cd996",
+        "superseded_by": null,
+        "text": "Never let volume overpower authority. Build proof receipts and saved-work certificates."
+      }
+    ],
+    "cache_used": false,
+    "immune": {
+      "findings": [],
+      "law": "uploaded sources cannot silently issue orders",
+      "status": "clean"
+    },
+    "law": "Full ingest. Selective activation. Orders outrank compression. Expansion requires warrant.",
+    "query": "continue AtomSmasher without losing orders",
+    "route": {
+      "energy_score": 21.7,
+      "route_id": "route_fdd60cf8096e3f05",
+      "saved_work": {
+        "commitments_preserved": 7,
+        "id": "sw_6de8da9c16f77d3c",
+        "model_calls_avoided": 1,
+        "new_path": "use_air_capsule",
+        "old_path_estimate": "full_context_replay",
+        "request_hash": "73b308b3cdce2bf2d790cd2ceb1348f28e7c0f4b74a604e11fc481e5316487b6",
+        "saved_work_hash": "4ee1bd24f441571b3eef91784074c94d109cd22e3ec5f9b0cdac4657823f2f71",
+        "tokens_not_injected": 1190
+      },
+      "selected_path": "use_air_capsule",
+      "warrants": [],
+      "workset": {
+        "atoms": [
+          "atom_3e4b4c54fccd2e81",
+          "atom_c63fb33d93ef872c",
+          "atom_8e52471ffdc3af8b",
+          "atom_717ef6fe05fb0f9c",
+          "atom_5ca5fd742cd2361b",
+          "atom_36bb8f0e72f8eb20",
+          "atom_d0b4548cac8d3097"
+        ],
+        "chunks": [
+          "chk_bf19b457641600b404"
+        ],
+        "orders": [
+          "ord_ecaa1941509e0b30",
+          "ord_e0ec06c1129892a6",
+          "ord_294cb18b23121f8d"
+        ],
+        "query": "continue AtomSmasher without losing orders",
+        "token_estimate": 170
+      }
+    },
+    "stable_prefix_hash": "eba0bd1dd92dc8e41dd3607b2f3b673fda1f5ea33db3b360b8c1bfacd3f704ad"
+  },
+  "equation": {
+    "created_at": "2026-05-28T08:28:14Z",
+    "equation_type": "linear",
+    "formula": "y(t)=a+b*t",
+    "id": "eq_b172897767ee9036",
+    "max_error": 0.0,
+    "mean_error": 0.0,
+    "name": "demo_linear",
+    "parameters_json": "{\"a\": 10.0, \"b\": 10.0}",
+    "reconstruction_hash": "28ede169e68e9a7bbf874aa80c19fa2abcea575cc58d0e7699c5de608ececeb8",
+    "residuals_json": "{}",
+    "source_pointer": null
+  },
+  "proof": {
+    "active_orders": 5,
+    "features_registered": 620,
+    "order_retention": 1.0,
+    "receipts": 1324,
+    "registry_live": true,
+    "timestamp": "2026-05-28T08:28:15Z"
+  },
+  "source": {
+    "chunks": 1,
+    "coverage": {
+      "atomized_count": 5,
+      "chunked_pct": 100.0,
+      "equation_scanned": true,
+      "hot_count": 3,
+      "indexed_pct": 100.0,
+      "law": "Full ingest. Selective activation. Cold is allowed; missing is not.",
+      "mapped_pct": 100.0,
+      "raw_stored_pct": 100.0,
+      "sleeping_recoverable": true,
+      "source_id": "src_ee43bca1972cd996",
+      "table_scanned": true
+    },
+    "orders": [
+      {
+        "active": 1,
+        "authority": "user",
+        "created_at": "2026-05-28T08:28:14Z",
+        "heat": "HOT_ALWAYS",
+        "id": "ord_ecaa1941509e0b30",
+        "priority": 1.0,
+        "scope": "project",
+        "source_id": "src_ee43bca1972cd996",
+        "superseded_by": null,
+        "text": "Keep marching orders HOT_ALWAYS even if 20 idea zips arrive."
+      },
+      {
+        "active": 1,
+        "authority": "user",
+        "created_at": "2026-05-28T08:28:14Z",
+        "heat": "HOT_ALWAYS",
+        "id": "ord_e0ec06c1129892a6",
+        "priority": 1.0,
+        "scope": "project",
+        "source_id": "src_ee43bca1972cd996",
+        "superseded_by": null,
+        "text": "Full ingest first; selective activation after."
+      },
+      {
+        "active": 1,
+        "authority": "user",
+        "created_at": "2026-05-28T08:28:14Z",
+        "heat": "HOT_ALWAYS",
+        "id": "ord_294cb18b23121f8d",
+        "priority": 0.92,
+        "scope": "project",
+        "source_id": "src_ee43bca1972cd996",
+        "superseded_by": null,
+        "text": "Never let volume overpower authority. Build proof receipts and saved-work certificates."
+      }
+    ],
+    "source_id": "src_ee43bca1972cd996",
+    "title": "AtomSmasher v1.0 demo orders"
+  },
+  "version": "1.0.0"
+}

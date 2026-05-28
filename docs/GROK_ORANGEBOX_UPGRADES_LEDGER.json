@@ -1,0 +1,275 @@
+{
+  "version": "orangebox-grok-upgrades-ledger/v1",
+  "created_at": "2026-05-23T08:20:00-04:00",
+  "status": "candidate_intake_not_completion_claim",
+  "project": "ORANGEBOX",
+  "sources": {
+    "grok_share_url": "https://grok.com/share/c2hhcmQtNQ_58f9fe65-0f4b-41b5-9f74-8a409a6f6122",
+    "transcript": "C:\\AtomEons\\orangebox\\artifacts\\grok-intake\\grok-share-58f9fe65-transcript.txt",
+    "screenshot": "C:\\AtomEons\\orangebox\\artifacts\\grok-intake\\grok-share-58f9fe65.png",
+    "zip": "C:\\Users\\a\\Downloads\\GROK-ORANGBOXUPGRADES.zip",
+    "zip_sha256": "C9F111EEE71F2BD2D5F76237120682172F8E9D3C8FC63ACFA53C513F9F43B94C",
+    "pdf_extract_dir": "C:\\AtomEons\\orangebox\\artifacts\\grok-intake\\GROK-ORANGBOXUPGRADES",
+    "pdf_text_dir": "C:\\AtomEons\\orangebox\\artifacts\\grok-intake\\pdf-text"
+  },
+  "accepted_feature_families": [
+    {
+      "id": "aelang_full_system",
+      "status": "partial",
+      "priority": "critical",
+      "proof_gate": "obx aelang doctor --receipt",
+      "accepted_scope": [
+        "natural_language_to_aelang",
+        "aelang_high_to_core_compiler",
+        "core_to_js_hermes_execution_plan",
+        "mcp_call_syntax",
+        "trace_blocks",
+        "checkpoint_resume_syntax",
+        "semantic_cache_controls",
+        "route_packet_validator"
+      ]
+    },
+    {
+      "id": "receipt_driven_agent_continuity",
+      "status": "planned",
+      "priority": "critical",
+      "proof_gate": "obx agent doctor --continuity --receipt",
+      "accepted_scope": [
+        "agent_heartbeats",
+        "progress_receipts",
+        "stall_receipts",
+        "resume_tickets",
+        "last_good_receipt_recovery",
+        "restart_rehearsal",
+        "silent_canvas_stall_indicators",
+        "ae_operations_resume_controls"
+      ]
+    },
+    {
+      "id": "ideal_mcp_v0_2",
+      "status": "partial",
+      "priority": "critical",
+      "proof_gate": "obx mcp doctor --receipt",
+      "accepted_scope": [
+        "receipt_first_mcp_calls",
+        "versioned_tool_schemas",
+        "allow_list_execute",
+        "approval_status",
+        "timeout_fallback_metadata",
+        "get_receipt",
+        "create_resume_ticket",
+        "validate_route_packet",
+        "mutate_silent_canvas",
+        "check_ethereal_link_health",
+        "run_audit",
+        "checkpoint_mission",
+        "analytics_query"
+      ]
+    },
+    {
+      "id": "opentelemetry_trace_bridge",
+      "status": "planned",
+      "priority": "high",
+      "proof_gate": "obx telemetry doctor --receipt",
+      "accepted_scope": [
+        "trace_id_on_receipts",
+        "span_id_on_receipts",
+        "mission_spans",
+        "route_packet_spans",
+        "mcp_call_spans",
+        "api_call_spans",
+        "mutation_spans",
+        "stall_spans",
+        "rollback_spans",
+        "local_exporter"
+      ]
+    },
+    {
+      "id": "semantic_cache_vectors",
+      "status": "planned",
+      "priority": "high",
+      "proof_gate": "obx cache doctor --semantic --receipt",
+      "accepted_scope": [
+        "exact_cache_first",
+        "semantic_vector_cache",
+        "local_embedding_option",
+        "provider_embedding_requires_config",
+        "cache_hit_receipts",
+        "similarity_threshold_controls",
+        "privacy_policy"
+      ]
+    },
+    {
+      "id": "hybrid_exact_semantic_lookup",
+      "status": "planned",
+      "priority": "high",
+      "proof_gate": "obx search doctor --hybrid --receipt",
+      "accepted_scope": [
+        "grep_symbol_exact_first",
+        "semantic_match_fallback",
+        "confidence_evidence",
+        "mcp_hybrid_lookup_tool",
+        "route_context_packs"
+      ]
+    },
+    {
+      "id": "perfect_github_system",
+      "status": "planned",
+      "priority": "high",
+      "proof_gate": "obx git doctor --receipt",
+      "accepted_scope": [
+        "protected_main",
+        "branch_packet",
+        "commit_packet",
+        "pr_packet",
+        "review_packet",
+        "stage_hold_split",
+        "double_check_before_push",
+        "private_by_default",
+        "safe_delete_requires_DELETE",
+        "trash_first_delete",
+        "ai_computer_backup_manifest"
+      ]
+    },
+    {
+      "id": "grok_superheavy_lane",
+      "status": "planned",
+      "priority": "medium",
+      "proof_gate": "obx grok doctor --receipt",
+      "accepted_scope": [
+        "grok_lane_in_model_switchboard",
+        "grok_cli_availability_doctor",
+        "vendor_import_gate_for_skills",
+        "model_language_cartographer_translation",
+        "no_blind_install_script"
+      ]
+    },
+    {
+      "id": "project_memory_knowledge_base",
+      "status": "planned",
+      "priority": "high",
+      "proof_gate": "obx memory doctor --receipt",
+      "accepted_scope": [
+        "durable_project_memory",
+        "structured_facts",
+        "vector_context_memory",
+        "read_memory",
+        "write_memory",
+        "search_memory",
+        "stale_fact_warning",
+        "redaction_path"
+      ]
+    },
+    {
+      "id": "prompt_optimization_smart_cache",
+      "status": "planned",
+      "priority": "medium",
+      "proof_gate": "obx prompt doctor --receipt",
+      "accepted_scope": [
+        "prompt_rewrite_preview",
+        "operator_visible_diff",
+        "token_estimate_before_after",
+        "cache_key_by_model_params_route",
+        "disable_for_high_risk_actions"
+      ]
+    },
+    {
+      "id": "multi_model_ensemble_sovereignty",
+      "status": "planned",
+      "priority": "medium",
+      "proof_gate": "obx ensemble doctor --receipt",
+      "accepted_scope": [
+        "critical_task_ensemble",
+        "consensus_view",
+        "dissent_view",
+        "order_bias_warning",
+        "arbitration_receipt"
+      ]
+    },
+    {
+      "id": "route_packet_documentation_generator",
+      "status": "planned",
+      "priority": "medium",
+      "proof_gate": "obx docs doctor --route-packets --receipt",
+      "accepted_scope": [
+        "route_packet_to_markdown",
+        "receipt_links",
+        "proof_links",
+        "stale_doc_detection"
+      ]
+    },
+    {
+      "id": "visual_conflict_resolution",
+      "status": "planned",
+      "priority": "medium",
+      "proof_gate": "obx sync doctor --conflict-ui --receipt",
+      "accepted_scope": [
+        "silent_canvas_conflict_view",
+        "accept_local",
+        "accept_remote",
+        "manual_merge",
+        "ai_suggested_merge",
+        "screenshot_proof"
+      ]
+    },
+    {
+      "id": "project_health_score_predictive_alerts",
+      "status": "planned",
+      "priority": "medium",
+      "proof_gate": "obx health doctor --receipt",
+      "accepted_scope": [
+        "health_score",
+        "release_risk_warning",
+        "budget_risk_warning",
+        "department_bottleneck_warning"
+      ]
+    },
+    {
+      "id": "voice_multimodal_intake",
+      "status": "planned",
+      "priority": "medium",
+      "proof_gate": "obx multimodal doctor --receipt",
+      "accepted_scope": [
+        "voice_to_mission",
+        "voice_to_aelang",
+        "screenshot_to_fix_mission",
+        "diagram_to_route_packet",
+        "review_before_execution"
+      ]
+    },
+    {
+      "id": "built_in_security_scanner",
+      "status": "planned",
+      "priority": "high",
+      "proof_gate": "obx security doctor --receipt",
+      "accepted_scope": [
+        "dependency_vulnerability_scan",
+        "license_check",
+        "secret_detection",
+        "permission_review",
+        "ae11_security_veto"
+      ]
+    }
+  ],
+  "rejected_or_normalized_claims": [
+    "remote_artifact_paths_are_not_orangebox_proof",
+    "pdfs_are_reference_material_not_feature_completion",
+    "signed_receipts_require_local_signing_implementation",
+    "automatic_rollback_defaults_to_approved_rollback_or_safe_pause",
+    "vendor_model_claims_require_official_verification",
+    "curl_pipe_bash_requires_explicit_approval_and_receipt",
+    "marketplace_publish_is_not_immediate_bluebird_release_path"
+  ],
+  "smartest_build_order": [
+    "artifact_delivery_contract_doctor",
+    "receipt_schema_hardening",
+    "agent_continuity_heartbeat_resume_ticket",
+    "mcp_v0_2_query_and_receipt_tools",
+    "provider_model_circuit_breaker",
+    "semantic_cache_and_hybrid_lookup",
+    "safe_github_system",
+    "opentelemetry_trace_bridge",
+    "grok_lane_doctor",
+    "visual_conflict_resolution_and_health_score"
+  ]
+}

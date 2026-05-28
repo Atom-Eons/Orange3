@@ -1,0 +1,1431 @@
+{
+  "schema_version": "blueb0x-dag-v1",
+  "status": "verified",
+  "project": "orangebox",
+  "generated_at": "2026-05-19T11:23:02.255Z",
+  "updated_at": "2026-05-27T08:46:11.482Z",
+  "progress": {
+    "total_nodes": 29,
+    "complete_nodes": 0,
+    "total_weight": 49,
+    "complete_weight": 0,
+    "percent": 0,
+    "current_node_id": "1A",
+    "bottleneck_node_id": null
+  },
+  "approval_queue": [
+    {
+      "node_id": "1B",
+      "node_name": "Project contract",
+      "depends_on": [
+        "1A"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE1 executes: Define objective, audience, non-goals, evidence, rollback, and approval lines.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 3,
+      "owner_department": "AE1",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "STRATEGY",
+        "ext": "101",
+        "name": "Marketing + Product Strategy",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "qwen2.5:14b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "STRATEGY owns AE1 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1H",
+      "node_name": "Architecture route",
+      "depends_on": [
+        "1G"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE6 executes: Choose the smallest durable architecture and name the write boundaries.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 3,
+      "owner_department": "AE6",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE6 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1W",
+      "node_name": "Security scan",
+      "depends_on": [
+        "1V"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE11 executes: Scan raw secret patterns, permissions, supply chain, and state-changing paths.",
+      "validation_command": "GET /api/checkmate?force=1 + Semgrep/OSV gate",
+      "milestone_weight": 5,
+      "owner_department": "AE11",
+      "worker": "codexa",
+      "cost_profile": "big",
+      "attempts": 0,
+      "max_attempts": 5,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE11 big work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1Y",
+      "node_name": "Release plan",
+      "depends_on": [
+        "1X"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE8 executes: Name install/run path, smoke checks, rollback path, and operator handoff.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 3,
+      "owner_department": "AE8",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "EXPERIENCE owns AE8 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1Z",
+      "node_name": "Deploy or install smoke",
+      "depends_on": [
+        "1Y"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE8 executes: Only after approval, prove install/deploy with receipts and rollback.",
+      "validation_command": "operator-approved deploy/install smoke receipt",
+      "milestone_weight": 2,
+      "owner_department": "AE8",
+      "worker": "codexa",
+      "cost_profile": "big",
+      "attempts": 0,
+      "max_attempts": 5,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "EXPERIENCE owns AE8 big work; shadow judges required."
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": "1A",
+      "node_name": "Idea intake",
+      "depends_on": [],
+      "status": "in_progress",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE0 executes: Capture the raw idea, target outcome, operator constraints, and forbidden areas.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE0",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE0 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1B",
+      "node_name": "Project contract",
+      "depends_on": [
+        "1A"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE1 executes: Define objective, audience, non-goals, evidence, rollback, and approval lines.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 3,
+      "owner_department": "AE1",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "STRATEGY",
+        "ext": "101",
+        "name": "Marketing + Product Strategy",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "qwen2.5:14b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "STRATEGY owns AE1 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1C",
+      "node_name": "Source inventory",
+      "depends_on": [
+        "1B"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE2 executes: Map files, folders, prior docs, receipts, screenshots, and current system state.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE2",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "STRATEGY",
+        "ext": "101",
+        "name": "Marketing + Product Strategy",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "qwen2.5:14b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "STRATEGY owns AE2 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1D",
+      "node_name": "Memory recall",
+      "depends_on": [
+        "1C"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE10 executes: Load relevant lessons, mistakes, evolution reports, LakeStrike/Factory history, and current project position.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE10",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE10 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1E",
+      "node_name": "AECommander extract",
+      "depends_on": [
+        "1D"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE7 executes: Port only proven ideas: wave queue, handoff, FocusPane, cost gates, validator, snapshot receipts.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE7",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE7 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1F",
+      "node_name": "Scope map",
+      "depends_on": [
+        "1E"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE1 executes: Turn the goal into features, acceptance criteria, and what must be visible to the operator.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE1",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "STRATEGY",
+        "ext": "101",
+        "name": "Marketing + Product Strategy",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "qwen2.5:14b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "STRATEGY owns AE1 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1G",
+      "node_name": "Risk map",
+      "depends_on": [
+        "1F"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE11 executes: Flag secrets, destructive actions, network exposure, deploys, database writes, and vendor/plugin installs.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE11",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE11 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1H",
+      "node_name": "Architecture route",
+      "depends_on": [
+        "1G"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE6 executes: Choose the smallest durable architecture and name the write boundaries.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 3,
+      "owner_department": "AE6",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE6 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1I",
+      "node_name": "Mission graph",
+      "depends_on": [
+        "1H"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE0 executes: Convert the scope into ordered nodes with owners, status, blockers, and receipts.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE0",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE0 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1J",
+      "node_name": "UX and visual system",
+      "depends_on": [
+        "1I"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE3 executes: Define the command surface, interaction model, motion direction, responsive checks, and no-dead-control rule.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE3",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "EXPERIENCE owns AE3 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1K",
+      "node_name": "Positioning and copy",
+      "depends_on": [
+        "1J"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE4 executes: Make the value proposition, product language, onboarding, and launch copy specific.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE4",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "EXPERIENCE owns AE4 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1L",
+      "node_name": "Offer and value model",
+      "depends_on": [
+        "1K"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE5 executes: Clarify buyer value, pricing logic, proof of value, onboarding promise, and support boundary.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE5",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "EXPERIENCE owns AE5 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1M",
+      "node_name": "Claims and legal review",
+      "depends_on": [
+        "1L"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE9 executes: Check naming, claims, license posture, privacy, data handling, and customer-facing language.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE9",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "STRATEGY",
+        "ext": "101",
+        "name": "Marketing + Product Strategy",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "qwen2.5:14b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "STRATEGY owns AE9 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1N",
+      "node_name": "Data and memory contract",
+      "depends_on": [
+        "1M"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE12 executes: Define what is stored, summarized, forgotten, linked, exported, and used for handoff.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE12",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE12 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1O",
+      "node_name": "Codexa capacity gate",
+      "depends_on": [
+        "1N"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE10 executes: Prove Codexa rail, RAM, Docker, browser workers, local models, and network path before heavy work.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE10",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE10 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1P",
+      "node_name": "Work sharding",
+      "depends_on": [
+        "1O"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE13 executes: Split only independent work. Keep cockpit interactive. Cap frontier lanes and heavy jobs.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE13",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE13 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "1Q",
+      "node_name": "Implementation slice",
+      "depends_on": [
+        "1P"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE6 executes: Build the smallest complete useful slice, not a decorative dashboard.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE6",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE6 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1R",
+      "node_name": "Local checks",
+      "depends_on": [
+        "1Q"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE14 executes: Run syntax, build, tests, and endpoint smoke checks locally.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE14",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE14 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1S",
+      "node_name": "Codexa checks",
+      "depends_on": [
+        "1R"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE14 executes: Run heavier checks on Codexa, summarize logs, and save raw receipts out of context.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE14",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE14 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1T",
+      "node_name": "Visual proof loop",
+      "depends_on": [
+        "1S"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE3 executes: Capture desktop and compact screenshots; check overflow, blank panels, dead controls, and visual coherence.",
+      "validation_command": "POST /api/proof/visual",
+      "milestone_weight": 5,
+      "owner_department": "AE3",
+      "worker": "codexa",
+      "cost_profile": "big",
+      "attempts": 0,
+      "max_attempts": 5,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "EXPERIENCE owns AE3 big work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1U",
+      "node_name": "Checkmate verification",
+      "depends_on": [
+        "1T"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE7 executes: Run UI, runtime, API, data, security, and CI quality gates with honest statuses.",
+      "validation_command": "GET /api/checkmate?force=1",
+      "milestone_weight": 5,
+      "owner_department": "AE7",
+      "worker": "codexa",
+      "cost_profile": "big",
+      "attempts": 0,
+      "max_attempts": 5,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "EXPERIENCE owns AE7 big work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1V",
+      "node_name": "Hallucination gate",
+      "depends_on": [
+        "1U"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE7 executes: Separate verified facts from assumptions. Block RED claims and require evidence for completion.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE7",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "STRATEGY",
+        "ext": "101",
+        "name": "Marketing + Product Strategy",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "qwen2.5:14b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "STRATEGY owns AE7 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1W",
+      "node_name": "Security scan",
+      "depends_on": [
+        "1V"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE11 executes: Scan raw secret patterns, permissions, supply chain, and state-changing paths.",
+      "validation_command": "GET /api/checkmate?force=1 + Semgrep/OSV gate",
+      "milestone_weight": 5,
+      "owner_department": "AE11",
+      "worker": "codexa",
+      "cost_profile": "big",
+      "attempts": 0,
+      "max_attempts": 5,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE11 big work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1X",
+      "node_name": "Review panel",
+      "depends_on": [
+        "1W"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE7 executes: Apply Goose/Iceman/Phoenix/Slider/Viper judgment before ship.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE7",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "ENGINEERING owns AE7 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1Y",
+      "node_name": "Release plan",
+      "depends_on": [
+        "1X"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE8 executes: Name install/run path, smoke checks, rollback path, and operator handoff.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 3,
+      "owner_department": "AE8",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "EXPERIENCE owns AE8 small work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "1Z",
+      "node_name": "Deploy or install smoke",
+      "depends_on": [
+        "1Y"
+      ],
+      "status": "awaiting_approval",
+      "human_approval_required": true,
+      "approval_state": "waiting",
+      "execution_payload": "AE8 executes: Only after approval, prove install/deploy with receipts and rollback.",
+      "validation_command": "operator-approved deploy/install smoke receipt",
+      "milestone_weight": 2,
+      "owner_department": "AE8",
+      "worker": "codexa",
+      "cost_profile": "big",
+      "attempts": 0,
+      "max_attempts": 5,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "EXPERIENCE",
+        "ext": "103",
+        "name": "Lips Design + UI Experience",
+        "model": "llama3.3:70b-instruct-q4_0",
+        "fallbackModel": "deepseek-coder-v2-lite:16b-instruct-q4_K_M",
+        "targetRamGB": 42,
+        "defaultState": "warm",
+        "shadows": [
+          "MIRRORS",
+          "CHECKMATE"
+        ],
+        "reason": "EXPERIENCE owns AE8 big work; shadow judges required."
+      }
+    },
+    {
+      "node_id": "2A",
+      "node_name": "Receipt",
+      "depends_on": [
+        "1Z"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE0 executes: Record touched files, commands, tests, proof, risks, rollback, and next action.",
+      "validation_command": "receipt file exists and lists touched files, commands, proof, risk, rollback",
+      "milestone_weight": 1,
+      "owner_department": "AE0",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE0 small work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "2B",
+      "node_name": "Memory compile",
+      "depends_on": [
+        "2A"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE10 executes: Keep the lesson, decay noise, update wiki/spine, and surface what not to repeat.",
+      "validation_command": "npm.cmd run knowledge",
+      "milestone_weight": 2,
+      "owner_department": "AE10",
+      "worker": "codexa",
+      "cost_profile": "big",
+      "attempts": 0,
+      "max_attempts": 5,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE10 big work; light reality shadow only."
+      }
+    },
+    {
+      "node_id": "2C",
+      "node_name": "Next scope with new eyes",
+      "depends_on": [
+        "2B"
+      ],
+      "status": "pending",
+      "human_approval_required": false,
+      "approval_state": "not_required",
+      "execution_payload": "AE0 executes: Re-scope after evidence arrives. Iteration produces the innovation.",
+      "validation_command": "operator/checkmate evidence attached",
+      "milestone_weight": 1,
+      "owner_department": "AE0",
+      "worker": "cockpit",
+      "cost_profile": "small",
+      "attempts": 0,
+      "max_attempts": 3,
+      "started_at": null,
+      "completed_at": null,
+      "time_in_node_ms": 0,
+      "evidence": "",
+      "notes": "",
+      "checkpoint": {
+        "receipt_path": "",
+        "proof_path": "",
+        "rollback_path": ""
+      },
+      "triad_route": {
+        "head": "ENGINEERING",
+        "ext": "106",
+        "name": "Engineering + Security Review",
+        "model": "qwen2.5-coder:32b-instruct-q8_0",
+        "fallbackModel": "qwen2.5-coder:14b-instruct-q4_K_M",
+        "targetRamGB": 35,
+        "defaultState": "hot",
+        "shadows": [
+          "MIRRORS"
+        ],
+        "reason": "ENGINEERING owns AE0 small work; light reality shadow only."
+      }
+    }
+  ]
+}

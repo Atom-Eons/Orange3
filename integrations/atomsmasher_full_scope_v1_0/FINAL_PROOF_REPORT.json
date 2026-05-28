@@ -1,0 +1,28 @@
+{
+  "codename": "Full Scope Total Work Compiler",
+  "demo_active_orders": 3,
+  "demo_selected_path": "use_air_capsule",
+  "features_errors": 0,
+  "features_executed": 620,
+  "features_ok": 620,
+  "features_registered": 620,
+  "limitations": [
+    "Runtime-specific KV/prefix adapters emit local capability receipts unless vLLM/SGLang/llama.cpp/TensorRT-LLM are installed.",
+    "Environmental values are proxy receipts unless real telemetry plugin is connected."
+  ],
+  "proof": {
+    "active_orders": 5,
+    "features_registered": 620,
+    "order_retention": 1.0,
+    "receipts": 2637,
+    "registry_live": true,
+    "timestamp": "2026-05-28T08:28:49Z"
+  },
+  "schema_version": 10,
+  "system_law": "Only smart work is done.",
+  "tests_passed": 7,
+  "tests_run": 7,
+  "tests_status": "OK",
+  "verdict": "GREEN",
+  "version": "1.0.0"
+}

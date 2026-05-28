@@ -1,0 +1,6922 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ORANGEBOX AE See-Suite API",
+    "version": "6.3.0-alpha.8-contract",
+    "description": "Canonical ORANGEBOX v4 contract for AE See-Suite, AE Operations, CLI, MCP, Claude handoff, receipts, and Silent Canvas proof routes. This file is JSON-in-YAML so it remains valid YAML while parsing without a runtime dependency."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787",
+      "description": "Local ORANGEBOX sidecar"
+    }
+  ],
+  "paths": {
+    "/api/v4/openapi.json": {
+      "get": {
+        "operationId": "getOpenApiContract",
+        "summary": "Return the canonical ORANGEBOX OpenAPI contract.",
+        "responses": {
+          "200": {
+            "description": "OpenAPI document"
+          }
+        }
+      }
+    },
+    "/api/v4/api/doctor": {
+      "get": {
+        "operationId": "runApiDoctor",
+        "summary": "Run the OpenAPI contract doctor and report drift.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/model-switch/status": {
+      "get": {
+        "operationId": "getModelSwitchboardStatus",
+        "summary": "Return the active Running Brain profile and GPT, Opus, Grok, Gemini readiness without making model calls.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Switchboard status"
+          },
+          "409": {
+            "description": "Switchboard status failed"
+          }
+        }
+      }
+    },
+    "/api/v4/model-switch/select": {
+      "post": {
+        "operationId": "selectModelSwitchboardProfile",
+        "summary": "Select the active Running Brain profile; writes local config and optional receipt, but makes no model call.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profile_id": {
+                    "type": "string",
+                    "enum": [
+                      "gpt",
+                      "opus",
+                      "grok",
+                      "gemini",
+                      "grok-superheavy"
+                    ]
+                  },
+                  "receipt": {
+                    "type": "boolean"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "profile_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile selected"
+          },
+          "400": {
+            "description": "Invalid profile"
+          }
+        }
+      }
+    },
+    "/api/v4/model-switch/doctor": {
+      "get": {
+        "operationId": "runModelSwitchboardDoctor",
+        "summary": "Prove Running Brain profiles, no-token probes, route preference, persistence, and skill reporting.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/aelang/doctor": {
+      "get": {
+        "operationId": "runAELangDoctor",
+        "summary": "Prove AELang spec normalization, High-to-Core compile, Core route packet validation, and Operating Spine mapping.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AELang doctor passed"
+          },
+          "409": {
+            "description": "AELang doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/aelang/compile": {
+      "post": {
+        "operationId": "compileAELang",
+        "summary": "Compile AELang-High or AELang-Core into an ORANGEBOX route packet and Operating Spine handoff object.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string"
+                  },
+                  "tier": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "high",
+                      "core"
+                    ]
+                  },
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AELang compiled"
+          },
+          "400": {
+            "description": "AELang validation failed"
+          }
+        }
+      }
+    },
+    "/api/v4/install/doctor": {
+      "get": {
+        "operationId": "runInstallClarityDoctor",
+        "summary": "Run the Basic Install vs Advanced AI Computer clarity doctor.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Install clarity passed"
+          },
+          "409": {
+            "description": "Install clarity failed"
+          }
+        }
+      }
+    },
+    "/api/v4/install/rehearsal": {
+      "get": {
+        "operationId": "runInstallRehearsal",
+        "summary": "Run a clean one-machine Basic Install rehearsal from a fresh data root.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "clean_temp",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clean Basic Install rehearsal passed"
+          },
+          "409": {
+            "description": "Clean Basic Install rehearsal failed"
+          }
+        }
+      }
+    },
+    "/api/v4/install/rehearsal/latest": {
+      "get": {
+        "operationId": "getLatestInstallRehearsal",
+        "summary": "Return the latest persisted clean Basic Install rehearsal proof without running a new rehearsal.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest clean Basic Install rehearsal proof found"
+          },
+          "404": {
+            "description": "No clean Basic Install rehearsal proof found"
+          }
+        }
+      }
+    },
+    "/api/v4/install/recovery-guide": {
+      "get": {
+        "operationId": "getInstallRecoveryGuide",
+        "summary": "Return the read-only AE Operations repair, rollback, process, package, and vault recovery guide.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recovery guide returned"
+          }
+        }
+      }
+    },
+    "/api/v4/install/service-freshness": {
+      "get": {
+        "operationId": "runInstallServiceFreshness",
+        "summary": "Verify the running sidecar has the routes AE Operations expects.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "base_url",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Running service is fresh"
+          },
+          "409": {
+            "description": "Running service is stale, unavailable, or needs review"
+          }
+        }
+      }
+    },
+    "/api/v4/install/service-freshness/latest": {
+      "get": {
+        "operationId": "getLatestInstallServiceFreshness",
+        "summary": "Return the latest persisted Service Freshness proof without probing the live sidecar.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest Service Freshness proof found"
+          },
+          "404": {
+            "description": "No Service Freshness proof found"
+          }
+        }
+      }
+    },
+    "/api/v4/product-language/doctor": {
+      "get": {
+        "operationId": "runProductLanguageDoctor",
+        "summary": "Verify AE See-Suite and AE Operations product-facing language and report hidden compatibility debt.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "base_url",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_mutation_smoke",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product language gate passed"
+          },
+          "409": {
+            "description": "Product language gate found stale buyer-facing language or route/API copy drift"
+          }
+        }
+      }
+    },
+    "/api/v4/install/first-run-proof": {
+      "get": {
+        "operationId": "runFirstRunVisualProof",
+        "summary": "Capture proof that first-run setup presents Basic vs Advanced clearly.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "First-run visual proof passed"
+          },
+          "409": {
+            "description": "First-run visual proof failed"
+          }
+        }
+      }
+    },
+    "/api/v4/install/operations-proof": {
+      "get": {
+        "operationId": "runAeOperationsVisualProof",
+        "summary": "Capture proof that the operations surface renders as AE Operations.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AE Operations visual proof passed"
+          },
+          "409": {
+            "description": "AE Operations visual proof failed"
+          }
+        }
+      }
+    },
+    "/api/v4/install/see-suite-proof": {
+      "get": {
+        "operationId": "runAeSeeSuiteVisualProof",
+        "summary": "Capture proof that the creation surface renders as AE See-Suite.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AE See-Suite visual proof passed"
+          },
+          "409": {
+            "description": "AE See-Suite visual proof failed"
+          }
+        }
+      }
+    },
+    "/api/v4/finish/latest": {
+      "get": {
+        "operationId": "getLatestFinalGreenBoard",
+        "summary": "Read the latest ORANGEBOX finish-line proof board receipt without rerunning expensive proof gates.",
+        "responses": {
+          "200": {
+            "description": "Latest finish-line proof board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalGreenBoardLatest"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No finish-line proof board receipt exists yet"
+          }
+        }
+      }
+    },
+    "/api/v4/finish/process-doctor": {
+      "get": {
+        "operationId": "runProcessHygieneDoctor",
+        "summary": "Run the read-only ORANGEBOX process hygiene doctor with an approval-gated recovery plan.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Process hygiene passed"
+          },
+          "409": {
+            "description": "Process hygiene failed"
+          }
+        }
+      }
+    },
+    "/api/v4/finish/feature-reality": {
+      "get": {
+        "operationId": "runFeatureRealityDoctor",
+        "summary": "Run the anti-theater Bluebird feature reality matrix: source, command, API, receipt, screenshot, package, and blocker evidence.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature reality matrix has no failed features or critical theater hits. Watch items may remain visible."
+          },
+          "409": {
+            "description": "One or more promised features lack implementation/proof evidence, or a critical theater hit exists."
+          }
+        }
+      }
+    },
+    "/api/v4/finish/user-journey": {
+      "get": {
+        "operationId": "runUserJourneyDoctor",
+        "summary": "Simulate the ORANGEBOX box-map user journeys and report exactly where a user gets blocked.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "full",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All simulated user journeys passed. Watch items may remain visible."
+          },
+          "409": {
+            "description": "One or more simulated user journeys are blocked or missing proof."
+          }
+        }
+      }
+    },
+    "/api/v4/finish/closeout-plan": {
+      "get": {
+        "operationId": "getReleaseCloseoutPlan",
+          "summary": "Build the read-only release-candidate closeout plan: package hash, proof board status, git review groups, exact stage/hold curation paths, approval gates, and rollback path.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Release closeout plan generated. ok=false means operator review is still required; the command itself remained read-only."
+          }
+        }
+      }
+    },
+    "/api/v4/finish/decision-card": {
+      "get": {
+        "operationId": "writeReleaseDecisionCard",
+        "summary": "Write a plain-English release decision card from the latest package, board, closeout, and git review state.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decision card written and promotion is not blocked by release gates."
+          },
+          "409": {
+            "description": "Decision card written; release promotion still requires operator review."
+          }
+        }
+      }
+    },
+    "/api/v4/finish/path-lists": {
+      "get": {
+        "operationId": "writeReleasePathLists",
+        "summary": "Write exact stage and hold/archive path-list files for release-candidate operator review without staging, committing, deleting, or publishing.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Path lists written for operator review."
+          },
+          "409": {
+            "description": "Path lists written but package, board, or stage plan needs review."
+          }
+        }
+      }
+    },
+    "/api/v4/finish/release-packet": {
+      "get": {
+        "operationId": "writeReleasePacket",
+        "summary": "Write one synchronized release packet: decision card, closeout receipt, exact stage/hold path lists, guide, and summary under one timestamp.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Release packet written and promotion is not blocked by release gates."
+          },
+          "409": {
+            "description": "Release packet written; release promotion still requires operator review."
+          }
+        }
+      }
+    },
+    "/api/v4/finish/green-board": {
+      "get": {
+        "operationId": "runFinalGreenBoard",
+        "summary": "Run the complete ORANGEBOX finish-line proof board from AE Operations.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "full",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "require_clean",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Finish-line board passed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalGreenBoardLatest"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Finish-line board failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalGreenBoardLatest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/openapi/drift": {
+      "get": {
+        "operationId": "getOpenApiDrift",
+        "summary": "Report public v4 routes that are not yet represented in the canonical OpenAPI contract.",
+        "responses": {
+          "200": {
+            "description": "OpenAPI drift report"
+          },
+          "409": {
+            "description": "OpenAPI doctor failed while computing drift"
+          }
+        }
+      }
+    },
+    "/api/v4/privacy/summary": {
+      "get": {
+        "operationId": "getPrivacySummary",
+        "summary": "Return local egress, token, and cost summary for AE Operations privacy review.",
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Optional duration such as 1h, 24h, 7d, or 30m."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Privacy summary"
+          }
+        }
+      }
+    },
+    "/api/v4/privacy/record-egress": {
+      "post": {
+        "operationId": "recordPrivacyEgress",
+        "summary": "Record an ORANGEBOX egress event for local privacy and cost accounting.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Egress recorded"
+          }
+        }
+      }
+    },
+    "/api/v4/freeze/status": {
+      "get": {
+        "operationId": "getFreezeStatus",
+        "summary": "Read the current Freeze or Freeze-All state.",
+        "responses": {
+          "200": {
+            "description": "Freeze state"
+          }
+        }
+      }
+    },
+    "/api/v4/freeze/set": {
+      "post": {
+        "operationId": "setFreezeState",
+        "summary": "Activate, update, clear, or engage Freeze-All.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Freeze state updated"
+          },
+          "403": {
+            "description": "Freeze guard blocked the action"
+          }
+        }
+      }
+    },
+    "/api/v4/checkpoint/save": {
+      "post": {
+        "operationId": "saveCheckpoint",
+        "summary": "Create a continuous-work checkpoint from a receipt payload.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkpoint save result"
+          }
+        }
+      }
+    },
+    "/api/v4/checkpoint/restore": {
+      "get": {
+        "operationId": "restoreCheckpointPrompt",
+        "summary": "Build a session-restore prompt from recent checkpoints.",
+        "responses": {
+          "200": {
+            "description": "Restore prompt"
+          }
+        }
+      }
+    },
+    "/api/v4/checkpoint/list": {
+      "get": {
+        "operationId": "listCheckpoints",
+        "summary": "List recent WIP checkpoints.",
+        "responses": {
+          "200": {
+            "description": "Checkpoint list"
+          }
+        }
+      }
+    },
+    "/api/v4/context/save": {
+      "post": {
+        "operationId": "saveContextSnapshot",
+        "summary": "Save a markdown context snapshot for later recovery.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Context snapshot saved"
+          }
+        }
+      }
+    },
+    "/api/v4/context/list": {
+      "get": {
+        "operationId": "listContextSnapshots",
+        "summary": "List markdown context snapshots for a project and optional branch.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Context snapshot list"
+          }
+        }
+      }
+    },
+    "/api/v4/context/restore": {
+      "post": {
+        "operationId": "restoreContextSnapshot",
+        "summary": "Restore a markdown context snapshot by path.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "path"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Context restored"
+          },
+          "400": {
+            "description": "Path is required"
+          }
+        }
+      }
+    },
+    "/api/v4/handoff/compose": {
+      "post": {
+        "operationId": "composeHandoff",
+        "summary": "Compose an agent-to-agent handoff document.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Handoff composed"
+          }
+        }
+      }
+    },
+    "/api/v4/handoff/list": {
+      "get": {
+        "operationId": "listHandoffs",
+        "summary": "List recent handoff documents.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Handoff list"
+          }
+        }
+      }
+    },
+    "/api/v4/handoff/read": {
+      "post": {
+        "operationId": "readHandoff",
+        "summary": "Read a handoff document by id or path.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Handoff content"
+          },
+          "400": {
+            "description": "id or path required"
+          },
+          "404": {
+            "description": "Handoff not found"
+          }
+        }
+      }
+    },
+    "/api/first-run/status": {
+      "get": {
+        "operationId": "getFirstRunStatus",
+        "summary": "Read first-run completion and setup state.",
+        "responses": {
+          "200": {
+            "description": "First-run status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "completed": {
+                      "type": "boolean"
+                    },
+                    "completedAt": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "profile": {
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai-box/mode": {
+      "get": {
+        "operationId": "getAiBoxMode",
+        "summary": "Read whether ORANGEBOX is using Basic one-machine mode or Advanced AI Box mode.",
+        "responses": {
+          "200": {
+            "description": "AI Box mode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiBoxMode"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "setAiBoxMode",
+        "summary": "Save Basic one-machine mode or Advanced AI Box mode.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "local",
+                      "remote"
+                    ]
+                  },
+                  "config": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "mode"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved AI Box mode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiBoxMode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid mode"
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box-network/doctor": {
+      "get": {
+        "operationId": "runAiBoxNetworkDoctor",
+        "summary": "Run the read-only AI Box Network Priority doctor.",
+        "parameters": [
+          {
+            "name": "deep",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI Box Network Priority status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiBoxNetworkDoctor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box-network/pack": {
+      "post": {
+        "operationId": "buildAiBoxNetworkPack",
+        "summary": "Generate the operator-applied AI Box Network Priority policy pack.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "include_browsers": {
+                    "type": "boolean"
+                  },
+                  "include_game_launchers": {
+                    "type": "boolean"
+                  },
+                  "emergency_block_launchers": {
+                    "type": "boolean"
+                  },
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated AI Box Network Priority pack",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiBoxNetworkPack"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box-network/ethereal/doctor": {
+      "get": {
+        "operationId": "runEtherealLinkDoctor",
+        "summary": "Run the read-only Ethereal AI Link direct-cable doctor.",
+        "parameters": [
+          {
+            "name": "deep",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "adapter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subnet",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "host_ip",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "peer_ip",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ethereal AI Link status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtherealLinkDoctor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box-network/ethereal/latest": {
+      "get": {
+        "operationId": "getLatestEtherealLinkProof",
+        "summary": "Return the latest persisted Ethereal AI Link pack, validation command, rollback command, and receipt proof.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest Ethereal proof found"
+          },
+          "404": {
+            "description": "No Ethereal proof found"
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box-network/ethereal/pack": {
+      "post": {
+        "operationId": "buildEtherealLinkPack",
+        "summary": "Generate the operator-applied Ethereal AI Link direct-cable installer pack.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "both",
+                      "host",
+                      "peer"
+                    ]
+                  },
+                  "adapter_alias": {
+                    "type": "string"
+                  },
+                  "subnet": {
+                    "type": "string"
+                  },
+                  "host_ip": {
+                    "type": "string"
+                  },
+                  "peer_ip": {
+                    "type": "string"
+                  },
+                  "tcp_datacenter": {
+                    "type": "boolean"
+                  },
+                  "storage_mode": {
+                    "type": "string",
+                    "enum": [
+                      "None",
+                      "Auto",
+                      "NVMeTCP",
+                      "SMB",
+                      "TCP"
+                    ]
+                  },
+                  "share_name": {
+                    "type": "string"
+                  },
+                  "share_path": {
+                    "type": "string"
+                  },
+                  "drive": {
+                    "type": "string"
+                  },
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated Ethereal AI Link installer pack",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtherealLinkPack"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/route/plan": {
+      "get": {
+        "operationId": "getRoutePlan",
+        "summary": "Create a read-only operating spine route plan from query parameters.",
+        "parameters": [
+          {
+            "name": "objective",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route plan"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postRoutePlan",
+        "summary": "Create and optionally receipt an operating spine route plan.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "objective": {
+                    "type": "string"
+                  },
+                  "project": {
+                    "type": "string"
+                  },
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "objective"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Route plan"
+          },
+          "400": {
+            "description": "Missing objective"
+          }
+        }
+      }
+    },
+    "/api/v4/route/doctor": {
+      "get": {
+        "operationId": "runRouteDoctor",
+        "summary": "Run the operating spine proof gate.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/route/current": {
+      "get": {
+        "operationId": "getCurrentRoute",
+        "summary": "Read the durable current Mission Spine route.",
+        "responses": {
+          "200": {
+            "description": "Current route state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "current": {
+                      "$ref": "#/components/schemas/OperatingSpineRoute"
+                    },
+                    "projection": {
+                      "$ref": "#/components/schemas/RouteStateProjection"
+                    },
+                    "current_route_path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/route/rail": {
+      "get": {
+        "operationId": "getRouteRail",
+        "summary": "Read the current Mission Spine Vision Rail projection.",
+        "responses": {
+          "200": {
+            "description": "Vision Rail projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteStateProjection"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/route/history": {
+      "get": {
+        "operationId": "getRouteHistory",
+        "summary": "List Mission Spine route history with package and promotion status.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route history list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteHistory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/route/detail": {
+      "get": {
+        "operationId": "getRouteDetail",
+        "summary": "Read one Mission Spine route with route packet, package, promotion, proofs, and rollback artifact links.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "route_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route detail artifact bundle",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route not found"
+          }
+        }
+      }
+    },
+    "/api/v4/route/replay": {
+      "get": {
+        "operationId": "getRouteReplay",
+        "summary": "Read the Mission Spine replay timeline and scrubber cursor states for one route.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "route_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route replay timeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteReplay"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route not found"
+          }
+        }
+      }
+    },
+    "/api/v4/route/artifact": {
+      "get": {
+        "operationId": "getRouteArtifact",
+        "summary": "Preview one allow-listed Mission Spine artifact file with size and type limits.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "route_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "artifact",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "max_bytes",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artifact preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteArtifactPreview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artifact missing, blocked, binary, or route not found"
+          }
+        }
+      }
+    },
+    "/api/v4/route/progress": {
+      "post": {
+        "operationId": "postRouteProgress",
+        "summary": "Persist a Mission Spine macro-action status transition.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "macro_id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "ready",
+                      "pending",
+                      "active",
+                      "done",
+                      "blocked",
+                      "skipped"
+                    ]
+                  },
+                  "proof_note": {
+                    "type": "string"
+                  },
+                  "actor": {
+                    "type": "string"
+                  },
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Route progress transition recorded"
+          },
+          "409": {
+            "description": "Progress update failed"
+          }
+        }
+      }
+    },
+    "/api/v4/route/verify-gates": {
+      "post": {
+        "operationId": "postRouteVerifyGates",
+        "summary": "Run the current route proof-gate commands and record pass/fail into Mission Spine state.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receipt": {
+                    "type": "boolean"
+                  },
+                  "timeout_ms": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Required proof gates passed"
+          },
+          "409": {
+            "description": "One or more required proof gates failed"
+          }
+        }
+      }
+    },
+    "/api/v4/route/package": {
+      "post": {
+        "operationId": "postRoutePackage",
+        "summary": "Build a proof bundle manifest for the current Mission Spine route.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Route package manifest created"
+          },
+          "409": {
+            "description": "Package evidence is incomplete"
+          }
+        }
+      }
+    },
+    "/api/v4/route/receipt": {
+      "post": {
+        "operationId": "postRouteReceipt",
+        "summary": "Synthesize the current route closeout receipt.",
+        "responses": {
+          "200": {
+            "description": "Route closeout receipt created"
+          },
+          "409": {
+            "description": "Receipt synthesis refused due missing evidence"
+          }
+        }
+      }
+    },
+    "/api/v4/route/promote": {
+      "post": {
+        "operationId": "postRoutePromote",
+        "summary": "Promote the current route only if package, receipt, proof gates, browser proof, and rollback evidence are present.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Route promoted"
+          },
+          "409": {
+            "description": "Promotion refused due missing evidence"
+          }
+        }
+      }
+    },
+    "/api/v4/route/state-doctor": {
+      "get": {
+        "operationId": "runRouteStateDoctor",
+        "summary": "Run the durable Mission Spine route-state proof gate.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/claude/export-route": {
+      "post": {
+        "operationId": "exportClaudeRoute",
+        "summary": "Generate a Claude Code / Opus handoff packet from an ORANGEBOX route.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "objective": {
+                    "type": "string"
+                  },
+                  "project": {
+                    "type": "string"
+                  },
+                  "receipt": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Claude export packet"
+          }
+        }
+      }
+    },
+    "/api/v4/see-suite/status": {
+      "get": {
+        "operationId": "getSeeSuiteStatus",
+        "summary": "Read AE See-Suite health/status, including recoverable Basic Install setup states.",
+        "responses": {
+          "200": {
+            "description": "AE See-Suite status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeeSuiteStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box/tenant/issue": {
+      "post": {
+        "operationId": "postAiBoxTenantIssue",
+        "summary": "Issue an admin-gated AI Box tenant keypair.",
+        "security": [
+          {
+            "adminBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenant_id"
+                ],
+                "properties": {
+                  "tenant_id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "AI Box tenant private key returned once"
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box/tenant/revoke": {
+      "post": {
+        "operationId": "postAiBoxTenantRevoke",
+        "summary": "Revoke an admin-gated AI Box tenant.",
+        "security": [
+          {
+            "adminBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenant_id"
+                ],
+                "properties": {
+                  "tenant_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI Box tenant revoked"
+          }
+        }
+      }
+    },
+    "/api/v4/ai-box/tenant/list": {
+      "get": {
+        "operationId": "getAiBoxTenantList",
+        "summary": "List admin-gated AI Box tenants without private keys.",
+        "security": [
+          {
+            "adminBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI Box tenants"
+          }
+        }
+      }
+    },
+    "/api/v4/dept/registry": {
+      "get": {
+        "operationId": "getDepartmentRegistry",
+        "summary": "List Department OS registry.",
+        "responses": {
+          "200": {
+            "description": "Department registry"
+          }
+        }
+      }
+    },
+    "/api/v4/dept/trust": {
+      "get": {
+        "operationId": "getDepartmentTrust",
+        "summary": "Read Department OS trust posture.",
+        "responses": {
+          "200": {
+            "description": "Trust summary"
+          }
+        }
+      }
+    },
+    "/api/v4/dept/route": {
+      "post": {
+        "operationId": "postDepartmentRoute",
+        "summary": "Create a Department OS route packet.",
+        "responses": {
+          "200": {
+            "description": "Department route"
+          }
+        }
+      }
+    },
+    "/api/v4/dept/doctor": {
+      "get": {
+        "operationId": "runDepartmentDoctor",
+        "summary": "Run Department OS doctor.",
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/party-line/send": {
+      "post": {
+        "operationId": "postPartyLine",
+        "summary": "Post a party-line message.",
+        "responses": {
+          "201": {
+            "description": "Message recorded"
+          }
+        }
+      }
+    },
+    "/api/v4/party-line/recent": {
+      "get": {
+        "operationId": "getPartyLineRecent",
+        "summary": "Read recent party-line messages.",
+        "responses": {
+          "200": {
+            "description": "Party-line messages"
+          }
+        }
+      }
+    },
+    "/api/v4/receipts/emit": {
+      "post": {
+        "operationId": "emitReceipt",
+        "summary": "Emit a local ORANGEBOX receipt for proof, audit, or handoff.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Receipt created"
+          }
+        }
+      }
+    },
+    "/api/v4/receipts/list": {
+      "get": {
+        "operationId": "listReceipts",
+        "summary": "List recent receipts.",
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Optional ISO timestamp lower bound."
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt list"
+          }
+        }
+      }
+    },
+    "/api/v4/receipts/{id}": {
+      "get": {
+        "operationId": "getReceiptById",
+        "summary": "Read one local ORANGEBOX v4 receipt by id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt found"
+          },
+          "404": {
+            "description": "Receipt not found"
+          }
+        }
+      }
+    },
+    "/api/v4/receipts/share": {
+      "post": {
+        "operationId": "shareReceipt",
+        "summary": "Render a local receipt into a self-contained shareable HTML proof artifact.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receiptId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "receiptId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Receipt share artifact created"
+          },
+          "404": {
+            "description": "Receipt not found"
+          }
+        }
+      }
+    },
+    "/api/v4/receipts/export": {
+      "post": {
+        "operationId": "exportReceipts",
+        "summary": "Export receipts to markdown.",
+        "responses": {
+          "200": {
+            "description": "Receipts export result"
+          }
+        }
+      }
+    },
+    "/api/v4/dag/current": {
+      "get": {
+        "operationId": "getDagCurrent",
+        "summary": "Read the current project DAG state used by AE Operations.",
+        "responses": {
+          "200": {
+            "description": "Current DAG state"
+          }
+        }
+      }
+    },
+    "/api/v4/dag/update": {
+      "post": {
+        "operationId": "updateDagNode",
+        "summary": "Patch or create a project DAG node.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nodeId": {
+                    "type": "string"
+                  },
+                  "patch": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "nodeId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DAG updated"
+          },
+          "400": {
+            "description": "nodeId is required"
+          }
+        }
+      }
+    },
+    "/api/v4/queue/enqueue": {
+      "post": {
+        "operationId": "enqueueBackgroundAgentJob",
+        "summary": "Queue a background ORANGEBOX worker job.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": "string"
+                  },
+                  "worker": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title",
+                  "prompt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job queued"
+          },
+          "400": {
+            "description": "title and prompt are required"
+          }
+        }
+      }
+    },
+    "/api/v4/queue/list": {
+      "get": {
+        "operationId": "listBackgroundAgentJobs",
+        "summary": "List background ORANGEBOX worker jobs.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queued jobs"
+          }
+        }
+      }
+    },
+    "/api/v4/queue/cancel": {
+      "post": {
+        "operationId": "cancelBackgroundAgentJob",
+        "summary": "Cancel a background ORANGEBOX worker job.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job canceled"
+          },
+          "400": {
+            "description": "id is required or cancel failed"
+          }
+        }
+      }
+    },
+    "/api/v4/project/recent": {
+      "get": {
+        "operationId": "listRecentProjects",
+        "summary": "List recent projects for the AE See-Suite project surface.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent projects"
+          }
+        }
+      },
+      "post": {
+        "operationId": "addRecentProject",
+        "summary": "Add or reopen a recent project and emit a project-open receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "root"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recent project added"
+          },
+          "400": {
+            "description": "root required"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeRecentProject",
+        "summary": "Remove a project from the recent project list.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recent project removed"
+          }
+        }
+      }
+    },
+    "/api/v4/project/tree": {
+      "get": {
+        "operationId": "getProjectTree",
+        "summary": "Read a bounded project directory listing.",
+        "parameters": [
+          {
+            "name": "root",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dir",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project tree"
+          },
+          "400": {
+            "description": "root required"
+          }
+        }
+      }
+    },
+    "/api/v4/project/state": {
+      "get": {
+        "operationId": "getProjectState",
+        "summary": "Read persisted project UI and work state.",
+        "parameters": [
+          {
+            "name": "root",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project state"
+          },
+          "400": {
+            "description": "root required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "saveProjectState",
+        "summary": "Persist project UI and work state.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "root"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project state saved"
+          },
+          "400": {
+            "description": "root required"
+          }
+        }
+      }
+    },
+    "/api/v4/project/chat": {
+      "post": {
+        "operationId": "appendProjectChatMessage",
+        "summary": "Append a project-scoped chat or work note.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "root",
+                  "message"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project chat message appended"
+          },
+          "400": {
+            "description": "root and message required"
+          }
+        }
+      }
+    },
+    "/api/v4/project/git": {
+      "get": {
+        "operationId": "getProjectGitBranch",
+        "summary": "Read git branch state for a project root.",
+        "parameters": [
+          {
+            "name": "root",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project git state"
+          },
+          "400": {
+            "description": "root required"
+          }
+        }
+      }
+    },
+    "/api/v4/agent/run": {
+      "post": {
+        "operationId": "runAgentJob",
+        "summary": "Start a guarded multi-step ORANGEBOX agent job.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "goal": {
+                    "type": "string"
+                  },
+                  "workspace": {
+                    "type": "string"
+                  },
+                  "max_steps": {
+                    "type": "integer"
+                  },
+                  "model": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "goal"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent job started"
+          },
+          "400": {
+            "description": "goal required"
+          },
+          "423": {
+            "description": "Freeze guard blocked agent run"
+          },
+          "502": {
+            "description": "Required model key missing"
+          }
+        }
+      }
+    },
+    "/api/v4/agent/status/{id}": {
+      "get": {
+        "operationId": "getAgentJobStatus",
+        "summary": "Read one agent job status.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent job status"
+          },
+          "404": {
+            "description": "Agent job not found"
+          }
+        }
+      }
+    },
+    "/api/v4/agent/cancel/{id}": {
+      "post": {
+        "operationId": "cancelAgentJob",
+        "summary": "Cancel one running agent job.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent job cancel result"
+          }
+        }
+      }
+    },
+    "/api/v4/agent/list": {
+      "get": {
+        "operationId": "listAgentJobs",
+        "summary": "List recent ORANGEBOX agent jobs.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent job list"
+          }
+        }
+      }
+    },
+    "/api/v4/fs/tree": {
+      "post": {
+        "operationId": "readFilesystemTree",
+        "summary": "Read a safe bounded filesystem tree under an allowed root.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "depth": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 6
+                  }
+                },
+                "required": [
+                  "path"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Filesystem tree"
+          },
+          "400": {
+            "description": "Path is missing or cannot be statted"
+          },
+          "403": {
+            "description": "Path blocked by filesystem safety policy"
+          }
+        }
+      }
+    },
+    "/api/v4/fs/read": {
+      "post": {
+        "operationId": "readFilesystemFile",
+        "summary": "Read a safe UTF-8 file under an allowed root.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "path"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File content"
+          },
+          "403": {
+            "description": "Path blocked by filesystem safety policy"
+          },
+          "404": {
+            "description": "File cannot be read"
+          }
+        }
+      }
+    },
+    "/api/v4/fs/write": {
+      "post": {
+        "operationId": "writeFilesystemFile",
+        "summary": "Write a safe UTF-8 file under an allowed root and emit a receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "project": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "path",
+                  "content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File write result"
+          },
+          "403": {
+            "description": "Path blocked by filesystem safety or freeze policy"
+          }
+        }
+      }
+    },
+    "/api/v4/repo/index": {
+      "post": {
+        "operationId": "indexRepository",
+        "summary": "Build a local repository symbol index and emit a receipt.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "workspace": {
+                    "type": "string"
+                  },
+                  "max_files": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Repository index summary"
+          }
+        }
+      }
+    },
+    "/api/v4/repo/summary": {
+      "get": {
+        "operationId": "getRepositorySummary",
+        "summary": "Read the current repository symbol index summary.",
+        "parameters": [
+          {
+            "name": "workspace",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Repository summary"
+          }
+        }
+      }
+    },
+    "/api/v4/repo/find-symbol": {
+      "get": {
+        "operationId": "findRepositorySymbol",
+        "summary": "Find an exact symbol in the repository index.",
+        "parameters": [
+          {
+            "name": "workspace",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Symbol result"
+          },
+          "400": {
+            "description": "name required"
+          }
+        }
+      }
+    },
+    "/api/v4/repo/symbol-prefix": {
+      "get": {
+        "operationId": "searchRepositorySymbolPrefix",
+        "summary": "Search symbols by prefix in the repository index.",
+        "parameters": [
+          {
+            "name": "workspace",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "prefix",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Symbol prefix results"
+          },
+          "400": {
+            "description": "prefix required"
+          }
+        }
+      }
+    },
+    "/api/v4/ide/autocomplete": {
+      "post": {
+        "operationId": "runIdeAutocomplete",
+        "summary": "Request a small model completion for IDE autocomplete.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "before": {
+                    "type": "string"
+                  },
+                  "after": {
+                    "type": "string"
+                  },
+                  "lang": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "maxChars": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "before"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autocomplete suggestion"
+          },
+          "400": {
+            "description": "before is required"
+          },
+          "502": {
+            "description": "Model call failed or key missing"
+          }
+        }
+      }
+    },
+    "/api/v4/ide/composer": {
+      "post": {
+        "operationId": "runIdeComposer",
+        "summary": "Ask the IDE composer lane for a structured plan and file changes.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "instruction": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "files",
+                  "instruction"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Composer result"
+          },
+          "400": {
+            "description": "files and instruction are required"
+          },
+          "502": {
+            "description": "Model call failed"
+          }
+        }
+      }
+    },
+    "/api/v4/ide/complete": {
+      "post": {
+        "operationId": "runIdeTabComplete",
+        "summary": "Run cached tab completion for the project IDE surface.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prefix": {
+                    "type": "string"
+                  },
+                  "suffix": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string"
+                  },
+                  "file_path": {
+                    "type": "string"
+                  },
+                  "max_tokens": {
+                    "type": "integer"
+                  },
+                  "model": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "prefix"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tab completion result"
+          }
+        }
+      }
+    },
+    "/api/v4/ide/complete/cache-stats": {
+      "get": {
+        "operationId": "getIdeCompleteCacheStats",
+        "summary": "Read tab completion cache statistics.",
+        "responses": {
+          "200": {
+            "description": "Cache statistics"
+          }
+        }
+      }
+    },
+    "/api/v4/ide/complete/clear-cache": {
+      "post": {
+        "operationId": "clearIdeCompleteCache",
+        "summary": "Clear the tab completion cache.",
+        "responses": {
+          "200": {
+            "description": "Cache clear result"
+          }
+        }
+      }
+    },
+    "/api/v4/composer/scaffold": {
+      "post": {
+        "operationId": "scaffoldComposerPlan",
+        "summary": "Build a composer scaffold prompt and file block from safe files.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "prompt",
+                  "files"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Composer scaffold"
+          },
+          "400": {
+            "description": "Prompt/files invalid or scaffold failed"
+          },
+          "403": {
+            "description": "Access denied"
+          }
+        }
+      }
+    },
+    "/api/v4/composer/plan": {
+      "post": {
+        "operationId": "buildComposerPlanFromLlmResponse",
+        "summary": "Parse an LLM JSON response into a composer plan.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "llm_json": {}
+                },
+                "required": [
+                  "llm_json"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Composer plan"
+          },
+          "400": {
+            "description": "llm_json required"
+          }
+        }
+      }
+    },
+    "/api/v4/composer/run": {
+      "post": {
+        "operationId": "runComposerOneShot",
+        "summary": "Run the full composer path: scaffold, model call, plan, and optional apply.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "auto_apply": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "prompt",
+                  "files"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Composer one-shot result"
+          },
+          "400": {
+            "description": "Prompt/files invalid or plan invalid"
+          },
+          "403": {
+            "description": "Access denied or freeze guard blocked apply"
+          },
+          "502": {
+            "description": "Model call failed or key missing"
+          }
+        }
+      }
+    },
+    "/api/v4/composer/apply": {
+      "post": {
+        "operationId": "applyComposerPlan",
+        "summary": "Apply selected composer plan changes with freeze guard and receipt proof.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "plan": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "accept_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "plan"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Composer apply result"
+          },
+          "400": {
+            "description": "plan required"
+          },
+          "403": {
+            "description": "Access denied or freeze guard blocked apply"
+          }
+        }
+      }
+    },
+    "/api/v4/deps/status": {
+      "get": {
+        "operationId": "getDependencyStatus",
+        "summary": "Read bundled runtime dependency status.",
+        "responses": {
+          "200": {
+            "description": "Dependency status"
+          }
+        }
+      }
+    },
+    "/api/v4/deps/update": {
+      "post": {
+        "operationId": "updateDependencies",
+        "summary": "Update bundled runtime dependencies and emit a receipt.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "which": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dependency update result"
+          }
+        }
+      }
+    },
+    "/api/v4/vault/summary": {
+      "get": {
+        "operationId": "getVaultSummary",
+        "summary": "Inspect the local vault lattice without an API key.",
+        "responses": {
+          "200": {
+            "description": "Vault summary"
+          }
+        }
+      }
+    },
+    "/api/v4/vault/search": {
+      "post": {
+        "operationId": "searchVault",
+        "summary": "Run local keyword vault search without an API key.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vault search results"
+          },
+          "400": {
+            "description": "query is required"
+          }
+        }
+      }
+    },
+    "/api/v4/relevance/project": {
+      "get": {
+        "operationId": "getProjectRelevanceContext",
+        "summary": "Build a scoped project context projection for the current goal.",
+        "parameters": [
+          {
+            "name": "goal",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "selected_node",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scoped relevance context"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postProjectRelevanceContext",
+        "summary": "Build and receipt a scoped project context projection.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scoped relevance context"
+          }
+        }
+      }
+    },
+    "/api/v4/relevance/classify": {
+      "post": {
+        "operationId": "classifyRelevanceIntent",
+        "summary": "Classify operator intent for relevance-scoped context assembly.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Intent classification"
+          }
+        }
+      }
+    },
+    "/api/v4/memory/summary": {
+      "get": {
+        "operationId": "getMemorySummary",
+        "summary": "Read the four-tier ORANGEBOX memory summary.",
+        "responses": {
+          "200": {
+            "description": "Memory summary"
+          }
+        }
+      }
+    },
+    "/api/v4/memory/consolidate": {
+      "post": {
+        "operationId": "consolidateMemory",
+        "summary": "Run memory consolidation across active tiers.",
+        "responses": {
+          "200": {
+            "description": "Memory consolidation result"
+          }
+        }
+      }
+    },
+    "/api/v4/memory/decay": {
+      "post": {
+        "operationId": "decayMemory",
+        "summary": "Run one decay step over configured memory tiers.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tiers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Memory decay result"
+          }
+        }
+      }
+    },
+    "/api/v4/memory/write": {
+      "post": {
+        "operationId": "writeMemory",
+        "summary": "Write one document into a memory tier.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tier": {
+                    "type": "string"
+                  },
+                  "doc": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "tier",
+                  "doc"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Memory write result"
+          },
+          "400": {
+            "description": "tier and doc required"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/run": {
+      "post": {
+        "operationId": "runSilentCanvas",
+        "summary": "Start a Silent Canvas dual-model mutation run.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "goal": {
+                    "type": "string"
+                  },
+                  "workspace": {
+                    "type": "string"
+                  },
+                  "creative_provider": {
+                    "type": "string"
+                  },
+                  "creative_model": {
+                    "type": "string"
+                  },
+                  "interpreter_provider": {
+                    "type": "string"
+                  },
+                  "interpreter_model": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "goal"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Silent Canvas run started"
+          },
+          "400": {
+            "description": "goal required"
+          },
+          "423": {
+            "description": "Freeze guard blocked run"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/status/{id}": {
+      "get": {
+        "operationId": "getSilentCanvasStatus",
+        "summary": "Read one Silent Canvas run status.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Silent Canvas run status"
+          },
+          "404": {
+            "description": "Run not found"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/cancel/{id}": {
+      "post": {
+        "operationId": "cancelSilentCanvasRun",
+        "summary": "Cancel one Silent Canvas run.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancel result"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/list": {
+      "get": {
+        "operationId": "listSilentCanvasRuns",
+        "summary": "List recent Silent Canvas runs.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Run list"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/replay/{id}": {
+      "get": {
+        "operationId": "replaySilentCanvasRun",
+        "summary": "Replay Silent Canvas mutation events for one run.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Replay events"
+          },
+          "404": {
+            "description": "Run not found"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/compile": {
+      "post": {
+        "operationId": "compileSilentCanvas",
+        "summary": "Compile project graph node content to disk with hash-chain receipt proof.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "workspace": {
+                    "type": "string"
+                  },
+                  "opts": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compile result"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/wire-gate": {
+      "get": {
+        "operationId": "runSilentCanvasWireGate",
+        "summary": "Run the Silent Canvas wire-path geometry gate.",
+        "responses": {
+          "200": {
+            "description": "Wire gate result"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/snapshot": {
+      "get": {
+        "operationId": "getSilentCanvasSnapshot",
+        "summary": "Read the current Silent Canvas project graph snapshot.",
+        "responses": {
+          "200": {
+            "description": "Project graph snapshot"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/active-bbox": {
+      "get": {
+        "operationId": "getSilentCanvasActiveBoundingBox",
+        "summary": "Read active Silent Canvas graph bounds for viewport-focused rendering.",
+        "responses": {
+          "200": {
+            "description": "Active bounding box"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/alpha7-doctor": {
+      "get": {
+        "operationId": "runAlpha7Doctor",
+        "summary": "Run Silent Canvas alpha.7 readiness doctor.",
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/visual-engine-doctor": {
+      "get": {
+        "operationId": "runVisualEngineDoctor",
+        "summary": "Run AIGUI/Lumina living visual engine proof: primitives, event protocol, motion guardrails, state wiring, and reduced-motion behavior.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visual engine proof passed"
+          },
+          "409": {
+            "description": "Visual engine proof failed"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/relevance-doctor": {
+      "get": {
+        "operationId": "runRelevanceDoctor",
+        "summary": "Run Relevance Controller doctor.",
+        "responses": {
+          "200": {
+            "description": "Doctor result"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/benefits": {
+      "get": {
+        "operationId": "getSilentCanvasBenefits",
+        "summary": "Read Silent Canvas benefits and organism health telemetry.",
+        "responses": {
+          "200": {
+            "description": "Benefits telemetry"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/observatory": {
+      "get": {
+        "operationId": "getPipelineObservatory",
+        "summary": "Read Silent Canvas pipeline observatory state.",
+        "responses": {
+          "200": {
+            "description": "Pipeline observatory"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/solidify": {
+      "post": {
+        "operationId": "postSilentCanvasSolidify",
+        "summary": "Compile the current project graph to disk.",
+        "responses": {
+          "200": {
+            "description": "Solidify result"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/workspace-state": {
+      "get": {
+        "operationId": "getWorkspaceState",
+        "summary": "Read workspace-scoped project graph state.",
+        "responses": {
+          "200": {
+            "description": "Workspace state"
+          }
+        }
+      }
+    },
+    "/api/v4/surfaces/templates": {
+      "get": {
+        "operationId": "listSurfaceTemplates",
+        "summary": "List Surface Factory templates.",
+        "responses": {
+          "200": {
+            "description": "Template list"
+          }
+        }
+      }
+    },
+    "/api/v4/surfaces/list": {
+      "get": {
+        "operationId": "listSurfaces",
+        "summary": "List registered surfaces.",
+        "responses": {
+          "200": {
+            "description": "Surface registry"
+          }
+        }
+      }
+    },
+    "/api/v4/surfaces/doctor": {
+      "get": {
+        "operationId": "runSurfaceDoctor",
+        "summary": "Run Surface Factory doctor.",
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/surfaces/create": {
+      "post": {
+        "operationId": "createSurface",
+        "summary": "Create a Surface Factory workspace.",
+        "responses": {
+          "201": {
+            "description": "Surface created"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/servers": {
+      "get": {
+        "operationId": "listMcpServers",
+        "summary": "List ORANGEBOX MCP bridge servers.",
+        "responses": {
+          "200": {
+            "description": "MCP registry"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/doctor": {
+      "get": {
+        "operationId": "runMcpDoctor",
+        "summary": "Run MCP bridge doctor.",
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/register": {
+      "post": {
+        "operationId": "registerMcpServer",
+        "summary": "Register an MCP server under ORANGEBOX control.",
+        "responses": {
+          "201": {
+            "description": "MCP server registered"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/probe/{id}": {
+      "post": {
+        "operationId": "probeMcpServer",
+        "summary": "Probe one MCP server.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Probe result"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/tools/{id}": {
+      "get": {
+        "operationId": "listMcpTools",
+        "summary": "List tools observed for one MCP server.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tool list"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/disable/{id}": {
+      "post": {
+        "operationId": "disableMcpServer",
+        "summary": "Disable or enable an MCP server override.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disable/enable result"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/code-search": {
+      "post": {
+        "operationId": "mcpCodeSearch",
+        "summary": "Search ORANGEBOX docs/contracts for code-mode MCP agents.",
+        "responses": {
+          "200": {
+            "description": "Search hits"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/code-execute": {
+      "post": {
+        "operationId": "mcpCodeExecute",
+        "summary": "Execute an allow-listed ORANGEBOX CLI command for code-mode MCP agents.",
+        "responses": {
+          "200": {
+            "description": "Execution result"
+          },
+          "403": {
+            "description": "Blocked command"
+          }
+        }
+      }
+    },
+    "/api/v4/mcp/add": {
+      "post": {
+        "operationId": "addLegacyMcpServer",
+        "summary": "Add an MCP server entry through the legacy registry path.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "type",
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "MCP server added"
+          },
+          "400": {
+            "description": "name, type, and url are required"
+          }
+        }
+      }
+    },
+    "/api/v4/settings/api-keys": {
+      "get": {
+        "operationId": "getApiKeySettings",
+        "summary": "Read provider key presence and local ORANGEBOX preference flags without returning secrets.",
+        "responses": {
+          "200": {
+            "description": "Secret presence and settings"
+          }
+        }
+      },
+      "post": {
+        "operationId": "saveApiKeySettings",
+        "summary": "Persist provider keys and local ORANGEBOX preferences without echoing secrets back.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Settings saved"
+          }
+        }
+      }
+    },
+    "/api/v4/router/route": {
+      "post": {
+        "operationId": "routeModelTask",
+        "summary": "Choose the model lane for a task using the ORANGEBOX smart router.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string"
+                  },
+                  "hint": {
+                    "type": "string"
+                  },
+                  "budget": {
+                    "type": "string"
+                  },
+                  "prefer": {
+                    "type": "string"
+                  },
+                  "conversationTurns": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Router decision"
+          },
+          "400": {
+            "description": "task is required"
+          }
+        }
+      }
+    },
+    "/api/v4/router/estimate": {
+      "post": {
+        "operationId": "estimateRouterCost",
+        "summary": "Estimate tokens and cost for a model route using provider token counting when configured.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array"
+                  },
+                  "system": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "messages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cost estimate"
+          },
+          "502": {
+            "description": "Token count failed or key missing"
+          }
+        }
+      }
+    },
+    "/api/v4/router/combos": {
+      "get": {
+        "operationId": "listRouterCombos",
+        "summary": "List named router model combos.",
+        "responses": {
+          "200": {
+            "description": "Router combos"
+          }
+        }
+      },
+      "post": {
+        "operationId": "saveRouterCombos",
+        "summary": "Save named router model combos.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "combos": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Router combos saved"
+          }
+        }
+      }
+    },
+    "/api/v4/hermes/status": {
+      "get": {
+        "operationId": "getHermesStatus",
+        "summary": "Read Hermes availability status for the intelligence feed lane.",
+        "responses": {
+          "200": {
+            "description": "Hermes status"
+          }
+        }
+      }
+    },
+    "/api/v4/hermes/doctor": {
+      "get": {
+        "operationId": "runHermesDoctor",
+        "summary": "Run the Hermes integrity doctor.",
+        "parameters": [
+          {
+            "name": "receipt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hermes doctor passed"
+          },
+          "409": {
+            "description": "Hermes doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/hermes/feed": {
+      "get": {
+        "operationId": "getHermesFeed",
+        "summary": "Read the parsed Hermes feed, gracefully handling missing local installation.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hermes feed"
+          }
+        }
+      }
+    },
+    "/api/v4/cache/prewarm": {
+      "post": {
+        "operationId": "prewarmModelCache",
+        "summary": "Prewarm provider prompt cache when a configured provider key is present.",
+        "responses": {
+          "200": {
+            "description": "Cache prewarmed or already active"
+          },
+          "502": {
+            "description": "Provider key missing or prewarm failed"
+          }
+        }
+      }
+    },
+    "/api/v4/openrouter/probe": {
+      "get": {
+        "operationId": "probeOpenRouter",
+        "summary": "Probe the OpenRouter fallback lane.",
+        "responses": {
+          "200": {
+            "description": "OpenRouter probe result"
+          }
+        }
+      }
+    },
+    "/api/v4/pipes/list": {
+      "get": {
+        "operationId": "listSubscriptionPipes",
+        "summary": "List detected subscription CLI pipes for model routing.",
+        "responses": {
+          "200": {
+            "description": "Subscription pipe status"
+          }
+        }
+      }
+    },
+    "/api/v4/pipes/redetect": {
+      "post": {
+        "operationId": "redetectSubscriptionPipes",
+        "summary": "Redetect subscription CLI pipes and emit a receipt.",
+        "responses": {
+          "200": {
+            "description": "Subscription pipe redetect result"
+          }
+        }
+      }
+    },
+    "/api/v4/connectors/list": {
+      "get": {
+        "operationId": "listConnectors",
+        "summary": "List connector registry entries with current connection state.",
+        "responses": {
+          "200": {
+            "description": "Connector list"
+          }
+        }
+      }
+    },
+    "/api/v4/connectors/status": {
+      "get": {
+        "operationId": "getConnectorStatus",
+        "summary": "Read connected service status from the credentials vault.",
+        "responses": {
+          "200": {
+            "description": "Connector status"
+          }
+        }
+      }
+    },
+    "/api/v4/connectors/connect/{service}": {
+      "post": {
+        "operationId": "connectService",
+        "summary": "Connect one configured service using OAuth, API key, key pair, or webhook auth.",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connection result"
+          },
+          "400": {
+            "description": "Required credential payload missing"
+          },
+          "404": {
+            "description": "Unknown service"
+          },
+          "501": {
+            "description": "Auth type not supported"
+          }
+        }
+      }
+    },
+    "/api/v4/connectors/disconnect/{service}": {
+      "post": {
+        "operationId": "disconnectService",
+        "summary": "Disconnect one service and clear credentials from the vault.",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disconnect result"
+          }
+        }
+      }
+    },
+    "/api/v4/connectors/refresh/{service}": {
+      "post": {
+        "operationId": "refreshServiceConnection",
+        "summary": "Refresh one OAuth service connection.",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Refresh result"
+          }
+        }
+      }
+    },
+    "/api/v4/connectors/use/{service}": {
+      "post": {
+        "operationId": "useServiceConnector",
+        "summary": "Invoke an allowed connector helper method for one service.",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string"
+                  },
+                  "args": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "method"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connector method result"
+          },
+          "400": {
+            "description": "method required"
+          },
+          "404": {
+            "description": "Service or method not found"
+          }
+        }
+      }
+    },
+    "/api/v4/model/call": {
+      "post": {
+        "operationId": "callRoutedModel",
+        "summary": "Run a routed model call with local egress accounting and memory-tool auto-attach where applicable.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array"
+                  },
+                  "task": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "system": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "messages"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Model call result"
+          },
+          "400": {
+            "description": "messages array is required"
+          },
+          "502": {
+            "description": "Provider call failed or key missing"
+          }
+        }
+      }
+    },
+    "/api/v4/model/stream": {
+      "post": {
+        "operationId": "streamRoutedModel",
+        "summary": "Run a routed model call over server-sent events.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array"
+                  },
+                  "task": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "messages"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream"
+          },
+          "400": {
+            "description": "messages array is required"
+          },
+          "502": {
+            "description": "Provider stream failed or key missing"
+          }
+        }
+      }
+    },
+    "/api/v4/compound/build": {
+      "post": {
+        "operationId": "buildCompoundIntelligence",
+        "summary": "Build a compound intelligence route result from supplied task inputs.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compound intelligence result"
+          }
+        }
+      }
+    },
+    "/api/v4/telemetry/record": {
+      "post": {
+        "operationId": "recordTelemetryEvent",
+        "summary": "Record a local telemetry event only when telemetry is enabled.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event": {
+                    "type": "string"
+                  },
+                  "props": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "event"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Telemetry record result"
+          },
+          "400": {
+            "description": "event is required"
+          }
+        }
+      }
+    },
+    "/api/v4/telemetry/status": {
+      "get": {
+        "operationId": "getTelemetryStatus",
+        "summary": "Read local telemetry opt-in status.",
+        "responses": {
+          "200": {
+            "description": "Telemetry status"
+          }
+        }
+      }
+    },
+    "/api/v4/telemetry/enable": {
+      "post": {
+        "operationId": "enableTelemetry",
+        "summary": "Enable local telemetry and emit a receipt.",
+        "responses": {
+          "200": {
+            "description": "Telemetry enabled"
+          }
+        }
+      }
+    },
+    "/api/v4/telemetry/disable": {
+      "post": {
+        "operationId": "disableTelemetry",
+        "summary": "Disable local telemetry and emit a receipt.",
+        "responses": {
+          "200": {
+            "description": "Telemetry disabled"
+          }
+        }
+      }
+    },
+    "/api/v4/update/check": {
+      "get": {
+        "operationId": "checkForUpdates",
+        "summary": "Check the configured update manifest endpoint against the running package version.",
+        "responses": {
+          "200": {
+            "description": "Update check result"
+          }
+        }
+      }
+    },
+    "/api/v4/update/manifest": {
+      "get": {
+        "operationId": "getUpdateManifest",
+        "summary": "Read the configured update manifest.",
+        "responses": {
+          "200": {
+            "description": "Update manifest"
+          }
+        }
+      }
+    },
+    "/api/v4/setup/wizard": {
+      "get": {
+        "operationId": "getSetupWizardState",
+        "summary": "Read setup wizard state for onboarding.",
+        "responses": {
+          "200": {
+            "description": "Setup wizard state"
+          }
+        }
+      }
+    },
+    "/api/v4/setup/openrouter": {
+      "post": {
+        "operationId": "setupOpenRouter",
+        "summary": "Persist OpenRouter fallback setup from the setup wizard.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OpenRouter setup result"
+          }
+        }
+      }
+    },
+    "/api/v4/sprint/run": {
+      "post": {
+        "operationId": "runSprintPlan",
+        "summary": "Create an autoplan-style sprint plan and emit a receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "project": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "prompt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sprint plan"
+          },
+          "400": {
+            "description": "prompt is required"
+          },
+          "423": {
+            "description": "Freeze guard blocked sprint"
+          }
+        }
+      }
+    },
+    "/api/v4/sprint/decision": {
+      "post": {
+        "operationId": "appendSprintDecision",
+        "summary": "Append a decision row to an existing sprint plan.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sprint_id": {
+                    "type": "string"
+                  },
+                  "decision": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sprint_id",
+                  "decision"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sprint decision appended"
+          },
+          "400": {
+            "description": "sprint_id and decision required"
+          },
+          "404": {
+            "description": "sprint plan not found"
+          }
+        }
+      }
+    },
+    "/api/v4/careful/check": {
+      "post": {
+        "operationId": "checkCommandCarefulness",
+        "summary": "Pre-check a shell command for destructive patterns.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "command": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "command"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Careful check result"
+          },
+          "400": {
+            "description": "command is required"
+          }
+        }
+      }
+    },
+    "/api/v4/caveman": {
+      "post": {
+        "operationId": "compressOutputCaveman",
+        "summary": "Compress output text for low-token operator review.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "level": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compressed output"
+          },
+          "400": {
+            "description": "text is required"
+          }
+        }
+      }
+    },
+    "/api/v4/skills/list": {
+      "get": {
+        "operationId": "listSkills",
+        "summary": "Enumerate available ORANGEBOX skills, agents, rules, and internal helpers.",
+        "responses": {
+          "200": {
+            "description": "Skill list"
+          }
+        }
+      }
+    },
+    "/api/v4/skills/fire": {
+      "post": {
+        "operationId": "fireSkill",
+        "summary": "Resolve a skill into a suggested API call or action.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "prompt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Skill resolution"
+          },
+          "400": {
+            "description": "name is required"
+          },
+          "423": {
+            "description": "Freeze guard blocked skill"
+          }
+        }
+      }
+    },
+    "/api/v4/reasoning/extract": {
+      "post": {
+        "operationId": "extractReasoningBlocks",
+        "summary": "Extract reasoning blocks from a raw model call result.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rawContent": {
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "rawContent"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reasoning extraction"
+          },
+          "400": {
+            "description": "rawContent array required"
+          }
+        }
+      }
+    },
+    "/api/v4/benchmark/longmemeval/run": {
+      "post": {
+        "operationId": "runLongMemEvalBenchmark",
+        "summary": "Run the wired LongMemEval smoke benchmark and emit a receipt.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dataset": {},
+                  "topk": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Benchmark result"
+          },
+          "500": {
+            "description": "Benchmark error"
+          }
+        }
+      }
+    },
+    "/api/v4/shell/start": {
+      "post": {
+        "operationId": "startShellSession",
+        "summary": "Start a persistent local shell session under ORANGEBOX control.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Shell session started"
+          }
+        }
+      }
+    },
+    "/api/v4/shell/exec": {
+      "post": {
+        "operationId": "execShellCommand",
+        "summary": "Send a command to a persistent shell session after optional careful check.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "command": {
+                    "type": "string"
+                  },
+                  "careful": {
+                    "type": "boolean"
+                  },
+                  "wait_ms": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id",
+                  "command"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Shell command output or careful-check block"
+          },
+          "400": {
+            "description": "id and command required"
+          }
+        }
+      }
+    },
+    "/api/v4/shell/kill": {
+      "post": {
+        "operationId": "killShellSession",
+        "summary": "Kill a persistent shell session.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Shell kill result"
+          },
+          "400": {
+            "description": "id required"
+          }
+        }
+      }
+    },
+    "/api/v4/shell/list": {
+      "get": {
+        "operationId": "listShellSessions",
+        "summary": "List active persistent shell sessions.",
+        "responses": {
+          "200": {
+            "description": "Shell session list"
+          }
+        }
+      }
+    },
+    "/api/v4/cost/today": {
+      "get": {
+        "operationId": "getCostToday",
+        "summary": "Roll up today's model-call cost from local accounting.",
+        "responses": {
+          "200": {
+            "description": "Cost rollup"
+          }
+        }
+      }
+    },
+    "/api/v4/vault/cited-query": {
+      "post": {
+        "operationId": "queryVaultWithCitations",
+        "summary": "Ask a question against local vault documents with provider citation support when configured.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string"
+                  },
+                  "topN": {
+                    "type": "integer"
+                  },
+                  "vault": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "question"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cited answer"
+          },
+          "400": {
+            "description": "question is required"
+          },
+          "502": {
+            "description": "Provider key missing or call failed"
+          }
+        }
+      }
+    },
+    "/api/v4/vault/stream": {
+      "post": {
+        "operationId": "streamVaultQuery",
+        "summary": "Stream a vault-grounded answer over server-sent events.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "question"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream"
+          },
+          "400": {
+            "description": "question is required"
+          },
+          "502": {
+            "description": "Provider key missing or stream failed"
+          }
+        }
+      }
+    },
+    "/api/v4/vault/recovery": {
+      "get": {
+        "operationId": "getVaultRecoveryDiagnostics",
+        "summary": "Read credentials-vault recovery diagnostics.",
+        "responses": {
+          "200": {
+            "description": "Vault recovery diagnostics"
+          }
+        }
+      }
+    },
+    "/api/v4/terminal/suggest": {
+      "post": {
+        "operationId": "suggestTerminalCommand",
+        "summary": "Suggest a terminal command from operator intent with structured danger classification.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "intent": {
+                    "type": "string"
+                  },
+                  "shell": {
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "type": "string"
+                  },
+                  "history": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "platform": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "intent"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Suggested command"
+          },
+          "400": {
+            "description": "intent is required"
+          },
+          "502": {
+            "description": "Model call failed"
+          }
+        }
+      }
+    },
+    "/api/v4/terminal/ws": {
+      "get": {
+        "operationId": "upgradeTerminalWebSocket",
+        "summary": "Upgrade to the authenticated terminal WebSocket stream.",
+        "responses": {
+          "101": {
+            "description": "WebSocket upgrade"
+          }
+        }
+      }
+    },
+    "/api/v4/trilane/stream": {
+      "post": {
+        "operationId": "streamTrilaneLeg",
+        "summary": "Stream one tri-lane model leg over server-sent events.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream"
+          }
+        }
+      }
+    },
+    "/api/v4/trilane/conflicts": {
+      "post": {
+        "operationId": "detectTrilaneConflicts",
+        "summary": "Detect conflicts across tri-lane model responses.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "responses": {
+                    "type": "array"
+                  },
+                  "prompt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "responses"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conflict list"
+          },
+          "400": {
+            "description": "responses array required"
+          },
+          "502": {
+            "description": "Model call failed"
+          }
+        }
+      }
+    },
+    "/api/v4/trilane/synthesize": {
+      "post": {
+        "operationId": "synthesizeTrilane",
+        "summary": "Synthesize a final tri-lane verdict with receipt proof.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "legs": {
+                    "type": "array"
+                  },
+                  "votedFor": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "prompt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Synthesized verdict"
+          },
+          "400": {
+            "description": "prompt is required"
+          },
+          "502": {
+            "description": "Model call failed"
+          }
+        }
+      }
+    },
+    "/api/v4/trilane/vote": {
+      "post": {
+        "operationId": "recordTrilaneVote",
+        "summary": "Record an operator tri-lane vote.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vote recorded"
+          }
+        }
+      }
+    },
+    "/api/v4/trilane/votes": {
+      "get": {
+        "operationId": "listTrilaneVotes",
+        "summary": "List recent tri-lane votes.",
+        "responses": {
+          "200": {
+            "description": "Vote list"
+          }
+        }
+      }
+    },
+    "/api/v4/voice/transcribe": {
+      "post": {
+        "operationId": "transcribeVoice",
+        "summary": "Transcribe an uploaded or referenced voice input.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transcription result"
+          }
+        }
+      }
+    },
+    "/api/v4/voice/intent": {
+      "post": {
+        "operationId": "classifyVoiceIntent",
+        "summary": "Classify a voice transcript into an ORANGEBOX action intent.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transcript": {
+                    "type": "string"
+                  },
+                  "context": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "transcript"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Voice intent"
+          },
+          "400": {
+            "description": "transcript is required"
+          }
+        }
+      }
+    },
+    "/api/v4/voice/whisper-status": {
+      "get": {
+        "operationId": "getWhisperStatus",
+        "summary": "Read local Whisper availability for voice transcription.",
+        "responses": {
+          "200": {
+            "description": "Whisper status"
+          }
+        }
+      }
+    },
+    "/api/v4/zoom-out": {
+      "post": {
+        "operationId": "zoomOutStructure",
+        "summary": "Build a structural summary of a safe file or directory.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "string"
+                  },
+                  "workspace": {
+                    "type": "string"
+                  },
+                  "maxFiles": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "root"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Structural summary"
+          },
+          "400": {
+            "description": "root is required"
+          },
+          "403": {
+            "description": "Access denied"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/snapshots": {
+      "get": {
+        "operationId": "listSilentCanvasSnapshots",
+        "summary": "List Silent Canvas graph snapshots for a workspace.",
+        "responses": {
+          "200": {
+            "description": "Snapshot list"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/snapshot-file": {
+      "get": {
+        "operationId": "getSilentCanvasSnapshotFile",
+        "summary": "Read one Silent Canvas snapshot file.",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Snapshot file"
+          },
+          "400": {
+            "description": "file is required"
+          }
+        }
+      }
+    },
+    "/api/v4/silent-canvas/desync-recover": {
+      "post": {
+        "operationId": "recoverSilentCanvasDesync",
+        "summary": "Recover Silent Canvas state from a snapshot and emit a receipt.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recovery succeeded"
+          },
+          "409": {
+            "description": "Recovery failed"
+          }
+        }
+      }
+    },
+    "/api/v4/incident/intake": {
+      "post": {
+        "operationId": "intakeIncident",
+        "summary": "Intake an incident alert, persist an RCA seed, create a sprint plan, and emit a receipt.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Incident intake result"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/capi/dispatch": {
+      "post": {
+        "operationId": "dispatchMetaCapi",
+        "summary": "Dispatch a Meta CAPI event through the guarded ads architecture lane.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pixel_id": {
+                    "type": "string"
+                  },
+                  "event_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "pixel_id",
+                  "event_name"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dispatch result"
+          },
+          "400": {
+            "description": "pixel_id and event_name required"
+          },
+          "423": {
+            "description": "Freeze guard blocked dispatch"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/google-enhanced/dispatch": {
+      "post": {
+        "operationId": "dispatchGoogleEnhancedConversion",
+        "summary": "Dispatch a Google Enhanced Conversion event through the guarded ads architecture lane.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer_id": {
+                    "type": "string"
+                  },
+                  "conversion_action_resource": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "customer_id",
+                  "conversion_action_resource"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dispatch result"
+          },
+          "400": {
+            "description": "customer_id and conversion_action_resource required"
+          },
+          "423": {
+            "description": "Freeze guard blocked dispatch"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/utm/standardize": {
+      "post": {
+        "operationId": "standardizeAdsUtm",
+        "summary": "Standardize ad UTM fields.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Standardized UTM result"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/dco/pools": {
+      "get": {
+        "operationId": "listDcoAssetPools",
+        "summary": "List DCO asset pools.",
+        "responses": {
+          "200": {
+            "description": "DCO pool list"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDcoAssetPool",
+        "summary": "Create a DCO asset pool and emit a receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "assets": {
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DCO pool created"
+          },
+          "400": {
+            "description": "name and kind required"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/dco/pools/{pool_id}": {
+      "get": {
+        "operationId": "getDcoAssetPool",
+        "summary": "Read a DCO asset pool. Asset append uses the same guarded pool wildcard handler.",
+        "parameters": [
+          {
+            "name": "pool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DCO pool"
+          },
+          "404": {
+            "description": "Pool not found"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/guard": {
+      "get": {
+        "operationId": "getAdsGuard",
+        "summary": "Read the global ads guard state.",
+        "responses": {
+          "200": {
+            "description": "Ads guard state"
+          }
+        }
+      },
+      "post": {
+        "operationId": "setAdsGuard",
+        "summary": "Update global ads guard pause/simulation state and emit a receipt.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ads guard update result"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/rules": {
+      "get": {
+        "operationId": "listAdsRules",
+        "summary": "List automated ads rules.",
+        "responses": {
+          "200": {
+            "description": "Ads rule list"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAdsRule",
+        "summary": "Create an automated ads rule and emit a receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "condition": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "name",
+                  "condition",
+                  "action"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ads rule created"
+          },
+          "400": {
+            "description": "name, condition, and action required"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/rules/{rule_id}": {
+      "delete": {
+        "operationId": "deleteAdsRule",
+        "summary": "Delete an automated ads rule. Toggle and eval variants share this guarded rule wildcard handler.",
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ads rule delete result"
+          }
+        }
+      }
+    },
+    "/api/v4/ads/rules/engine/start": {
+      "post": {
+        "operationId": "startAdsRulesEngine",
+        "summary": "Start the automated ads rules engine behind freeze and guard controls.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "interval_minutes": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rules engine start result"
+          },
+          "423": {
+            "description": "Freeze guard blocked start"
+          }
+        }
+      }
+    },
+    "/api/v4/ae-alpha-news/feed": {
+      "get": {
+        "operationId": "getAeAlphaNewsFeed",
+        "summary": "Read AE alpha news candidate feed items.",
+        "responses": {
+          "200": {
+            "description": "News feed"
+          }
+        }
+      }
+    },
+    "/api/v4/ae-alpha-news/anchors": {
+      "get": {
+        "operationId": "getAeAlphaNewsAnchors",
+        "summary": "Read AE alpha news source anchors.",
+        "responses": {
+          "200": {
+            "description": "News anchors"
+          }
+        }
+      },
+      "post": {
+        "operationId": "setAeAlphaNewsAnchors",
+        "summary": "Save AE alpha news source anchors and emit a receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "anchors": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "anchors"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Anchors saved"
+          },
+          "400": {
+            "description": "anchors array required"
+          }
+        }
+      }
+    },
+    "/api/v4/ae-alpha-news/clear-cache": {
+      "post": {
+        "operationId": "clearAeAlphaNewsCache",
+        "summary": "Clear AE alpha news cache.",
+        "responses": {
+          "200": {
+            "description": "Cache clear result"
+          }
+        }
+      }
+    },
+    "/api/v4/ae-alpha-news/score": {
+      "post": {
+        "operationId": "scoreAeAlphaNewsItem",
+        "summary": "Score a candidate AE alpha news item.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Score result"
+          },
+          "400": {
+            "description": "text required"
+          }
+        }
+      }
+    },
+    "/api/v4/intel/items": {
+      "get": {
+        "operationId": "listIntelItems",
+        "summary": "List advisory candidate intel items.",
+        "responses": {
+          "200": {
+            "description": "Intel items"
+          }
+        }
+      }
+    },
+    "/api/v4/intel/brief": {
+      "get": {
+        "operationId": "getIntelBrief",
+        "summary": "Build an advisory candidate intel brief.",
+        "responses": {
+          "200": {
+            "description": "Intel brief"
+          }
+        }
+      }
+    },
+    "/api/v4/intel/doctor": {
+      "get": {
+        "operationId": "runIntelDoctor",
+        "summary": "Run candidate intel integrity doctor.",
+        "responses": {
+          "200": {
+            "description": "Doctor passed"
+          },
+          "409": {
+            "description": "Doctor failed"
+          }
+        }
+      }
+    },
+    "/api/v4/intel/surface": {
+      "post": {
+        "operationId": "createIntelSurface",
+        "summary": "Create/update the advisory Candidate Radar support surface.",
+        "responses": {
+          "201": {
+            "description": "Surface created"
+          },
+          "409": {
+            "description": "Surface failed"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "adminBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Use ORANGEBOX_ADMIN_TOKEN for local admin-gated routes."
+      }
+    },
+    "schemas": {
+      "DoctorResult": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "object"
+          },
+          "checks": {
+            "type": "array"
+          }
+        }
+      },
+      "FinalGreenBoardLatest": {
+        "type": "object",
+        "description": "Latest or freshly run ORANGEBOX finish-line board. The latest-board route intentionally returns compact check evidence so AE Operations can explain recovery state without transferring huge probe bodies.",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "receipt_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receipt_modified_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receipt_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finished_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "full": {
+            "type": "boolean"
+          },
+          "require_clean": {
+            "type": "boolean"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/FinalGreenBoardSummary"
+          },
+          "product_language": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "package_manifest": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "advisories": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinalGreenBoardCheck"
+            }
+          }
+        },
+        "required": [
+          "ok",
+          "summary",
+          "checks"
+        ]
+      },
+      "FinalGreenBoardSummary": {
+        "type": "object",
+        "properties": {
+          "checks": {
+            "type": "integer"
+          },
+          "passed": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "warnings": {
+            "type": "integer"
+          },
+          "advisory_count": {
+            "type": "integer"
+          },
+          "advisory_warnings": {
+            "type": "integer"
+          }
+        }
+      },
+      "FinalGreenBoardCheck": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "summary": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "evidence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ServiceFreshnessBoardEvidence"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Present for the service_freshness check; omitted or null for most compact checks."
+          },
+          "recovery": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "ok",
+          "status"
+        ]
+      },
+      "ServiceFreshnessBoardEvidence": {
+        "type": "object",
+        "description": "Compact Service Freshness evidence exposed through /api/v4/finish/latest for AE Operations recovery UI.",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "fresh",
+              "restart_required",
+              "unavailable",
+              "warning",
+              "review",
+              null
+            ]
+          },
+          "read_only": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "routes": {
+                "type": "integer"
+              },
+              "passed": {
+                "type": "integer"
+              },
+              "failed": {
+                "type": "integer"
+              },
+              "restart_required": {
+                "type": "boolean"
+              },
+              "source_routes_checked": {
+                "type": "integer"
+              },
+              "source_routes_present": {
+                "type": "integer"
+              },
+              "stale_installed_routes": {
+                "type": "integer"
+              }
+            }
+          },
+          "source_routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceFreshnessSourceRoute"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceFreshnessFailure"
+            }
+          },
+          "recovery": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ServiceFreshnessRecovery"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recovery_action": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "safe_commands": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "receipt_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ServiceFreshnessSourceRoute": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "present": {
+            "type": "boolean"
+          },
+          "diagnosis": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ServiceFreshnessFailure": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "method": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "purpose": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "diagnosis": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_route": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ServiceFreshnessSourceRoute"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ServiceFreshnessRecovery": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "read_only": {
+            "type": "boolean"
+          },
+          "no_data_deletion_required": {
+            "type": "boolean"
+          },
+          "restart_is_operator_action": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "stale_installed_routes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_file": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "AiBoxMode": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "local",
+              "remote"
+            ]
+          },
+          "config": {
+            "type": "object"
+          },
+          "savedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "config"
+        ]
+      },
+      "AiBoxNetworkDoctor": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "active_route": {
+            "type": "string"
+          },
+          "hosts": {
+            "type": "object"
+          },
+          "see_suite_addresses": {
+            "type": "array"
+          },
+          "probes": {
+            "type": "array"
+          },
+          "qos_policy_store": {
+            "type": "object"
+          },
+          "observed_background_hogs": {
+            "type": "array"
+          },
+          "pack": {
+            "type": "object"
+          },
+          "policy": {
+            "type": "object"
+          },
+          "blockers": {
+            "type": "array"
+          },
+          "next_action": {
+            "type": "string"
+          }
+        }
+      },
+      "AiBoxNetworkPack": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "pack_dir": {
+            "type": "string"
+          },
+          "files": {
+            "type": "object"
+          },
+          "hashes": {
+            "type": "object"
+          },
+          "approval_required": {
+            "type": "boolean"
+          },
+          "next_action": {
+            "type": "string"
+          },
+          "receipt_path": {
+            "type": "string"
+          }
+        }
+      },
+      "EtherealLinkDoctor": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "adapter_inventory": {
+            "type": "object"
+          },
+          "advanced_fabric_capabilities": {
+            "type": "object"
+          },
+          "candidates": {
+            "type": "array"
+          },
+          "handshake": {
+            "type": "object"
+          },
+          "pack": {
+            "type": "object"
+          },
+          "safety": {
+            "type": "object"
+          },
+          "blockers": {
+            "type": "array"
+          },
+          "next_action": {
+            "type": "string"
+          },
+          "receipt_path": {
+            "type": "string"
+          }
+        }
+      },
+      "EtherealLinkPack": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "pack_dir": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "files": {
+            "type": "object"
+          },
+          "hashes": {
+            "type": "object"
+          },
+          "approval_required": {
+            "type": "boolean"
+          },
+          "next_action": {
+            "type": "string"
+          },
+          "receipt_path": {
+            "type": "string"
+          }
+        }
+      },
+      "OperatingSpineRoute": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "macro_actions": {
+            "type": "array"
+          },
+          "coordination_profile": {
+            "type": "object"
+          },
+          "clarification_policy": {
+            "type": "object"
+          },
+          "proof_gates": {
+            "type": "array"
+          }
+        }
+      },
+      "RouteStateProjection": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "route_id": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "current_macro": {
+            "type": "object"
+          },
+          "vision_rail": {
+            "type": "array"
+          },
+          "proof_gates": {
+            "type": "array"
+          },
+          "coordination": {
+            "type": "object"
+          },
+          "clarification": {
+            "type": "object"
+          },
+          "model_lane": {
+            "type": "string"
+          },
+          "artifacts": {
+            "type": "object"
+          },
+          "counts": {
+            "type": "object"
+          }
+        }
+      },
+      "RouteHistory": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "history_path": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array"
+          },
+          "current_route_id": {
+            "type": "string"
+          }
+        }
+      },
+      "RouteDetail": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "route_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "paths": {
+            "type": "object"
+          },
+          "route": {
+            "$ref": "#/components/schemas/OperatingSpineRoute"
+          },
+          "route_packet": {
+            "$ref": "#/components/schemas/OperatingSpineRoute"
+          },
+          "artifact_summary": {
+            "$ref": "#/components/schemas/RouteArtifactSummary"
+          },
+          "proof_links": {
+            "$ref": "#/components/schemas/RouteProofLinks"
+          }
+        }
+      },
+      "RouteArtifactSummary": {
+        "type": "object",
+        "properties": {
+          "package_ok": {
+            "type": "boolean"
+          },
+          "promotion_ok": {
+            "type": "boolean"
+          },
+          "rollback_present": {
+            "type": "boolean"
+          },
+          "browser_proofs": {
+            "type": "integer"
+          },
+          "browser_screenshots": {
+            "type": "integer"
+          },
+          "evidence_files": {
+            "type": "integer"
+          },
+          "proof_gate_files": {
+            "type": "integer"
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RouteProofLinks": {
+        "type": "object",
+        "properties": {
+          "browser": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrowserProofLink"
+            }
+          },
+          "browser_screenshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EvidenceFileLink"
+            }
+          },
+          "proof_gates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EvidenceFileLink"
+            }
+          }
+        }
+      },
+      "BrowserProofLink": {
+        "type": "object",
+        "properties": {
+          "report_path": {
+            "type": "string"
+          },
+          "screenshot_path": {
+            "type": "string"
+          },
+          "screenshot_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "checked_at": {
+            "type": "string"
+          }
+        }
+      },
+      "EvidenceFileLink": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer"
+          },
+          "modified_at": {
+            "type": "string"
+          }
+        }
+      },
+      "RouteReplay": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "replay_version": {
+            "type": "string"
+          },
+          "route_id": {
+            "type": "string"
+          },
+          "event_count": {
+            "type": "integer"
+          },
+          "events": {
+            "type": "array"
+          },
+          "cursors": {
+            "type": "array"
+          },
+          "initial_macro_statuses": {
+            "type": "array"
+          },
+          "final_macro_statuses": {
+            "type": "array"
+          }
+        }
+      },
+      "RouteArtifactPreview": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          },
+          "artifact_version": {
+            "type": "string"
+          },
+          "route_id": {
+            "type": "string"
+          },
+          "artifact": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "object"
+          },
+          "available": {
+            "type": "array"
+          },
+          "meta": {
+            "type": "object"
+          },
+          "content": {
+            "type": "string"
+          },
+          "json": {},
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "SeeSuiteSubsystemStatus": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "true means ready, false means broken, null means recoverable setup or optional Basic Install state."
+          },
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "recoverable": {
+            "type": "boolean"
+          },
+          "optional": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          }
+        }
+      },
+      "SeeSuiteStatus": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "$ref": "#/components/schemas/SeeSuiteSubsystemStatus"
+          },
+          "vault": {
+            "$ref": "#/components/schemas/SeeSuiteSubsystemStatus"
+          },
+          "router": {
+            "$ref": "#/components/schemas/SeeSuiteSubsystemStatus"
+          },
+          "privacy": {
+            "$ref": "#/components/schemas/SeeSuiteSubsystemStatus"
+          },
+          "queue": {
+            "$ref": "#/components/schemas/SeeSuiteSubsystemStatus"
+          },
+          "aiBox": {
+            "$ref": "#/components/schemas/SeeSuiteSubsystemStatus"
+          },
+          "v6": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

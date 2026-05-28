@@ -1,0 +1,65 @@
+# ORANGEBOX v4 — Codexa Cloud — local dev compose
+# Port 8443 exposed. Volume ./data:/data. TLS self-signed (dev only).
+# Copy .env.codexa-cloud.example to .env.codexa-cloud and fill in secrets before running.
+# Production: use deploy-fly.sh or deploy-railway.sh instead.
+
+version: "3.9"
+
+services:
+  codexa-cloud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: codexa-cloud
+    restart: unless-stopped
+
+    ports:
+      - "8443:8443"
+
+    volumes:
+      # Tenant data root — receipts, knowledge, logs live here
+      - ./data:/data
+      # Optional: mount real TLS certs for production-like local test
+      # - ./certs/server.crt:/certs/server.crt:ro
+      # - ./certs/server.key:/certs/server.key:ro
+
+    env_file:
+      - .env.codexa-cloud
+
+    environment:
+      NODE_ENV: development
+      # Override to use real certs:
+      # CODEXA_TLS_SELFGEN: "false"
+      # CODEXA_TLS_CERT_PATH: "/certs/server.crt"
+      # CODEXA_TLS_KEY_PATH: "/certs/server.key"
+      CODEXA_TLS_SELFGEN: "true"
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - |
+          const https = require('https');
+          const opts = { hostname: 'localhost', port: 8443, path: '/v1/codexa/health',
+                         method: 'GET', rejectUnauthorized: false };
+          const req = https.request(opts, (res) => {
+            process.exit(res.statusCode === 200 ? 0 : 1);
+          });
+          req.on('error', () => process.exit(1));
+          req.end();
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Named volume alternative for production-style local dev:
+# volumes:
+#   codexa-data:

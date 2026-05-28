@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ae.visual_review.v0",
+  "title": "AECode Visual Review",
+  "type": "object",
+  "required": ["schema_version", "mission_id", "screenshots", "checks", "verdict"],
+  "properties": {
+    "schema_version": { "const": "ae.visual_review.v0" },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "route": { "type": "string" },
+    "screenshots": { "type": "array" },
+    "checks": { "type": "object" },
+    "issues": { "type": "array" },
+    "verdict": { "enum": ["passed", "failed", "deferred"] }
+  },
+  "additionalProperties": true
+}

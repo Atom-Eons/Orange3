@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ae.mission.v0",
+  "title": "AECode Mission Manifest",
+  "type": "object",
+  "required": [
+    "mission_id",
+    "title",
+    "intent",
+    "target_repo",
+    "target_files",
+    "allowed_paths",
+    "forbidden_paths",
+    "risk_level",
+    "model_role",
+    "acceptance_tests",
+    "visual_required",
+    "visual_policy",
+    "approval_required",
+    "created_at",
+    "status"
+  ],
+  "properties": {
+    "schema_version": { "const": "ae.mission.v0" },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "intent": { "type": "string", "minLength": 1 },
+    "target_repo": { "type": "string", "minLength": 1 },
+    "target_files": { "type": "array", "items": { "type": "string" } },
+    "allowed_paths": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "forbidden_paths": { "type": "array", "items": { "type": "string" } },
+    "risk_level": { "enum": ["low", "medium", "high", "critical"] },
+    "model_role": { "type": "string", "minLength": 1 },
+    "acceptance_tests": { "type": "array", "items": { "type": "string" } },
+    "visual_required": { "type": "boolean" },
+    "visual_policy": { "type": "string", "minLength": 1 },
+    "approval_required": { "type": "boolean" },
+    "created_at": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "minLength": 1 },
+    "factory_preset": { "type": ["string", "null"] }
+  },
+  "additionalProperties": true
+}

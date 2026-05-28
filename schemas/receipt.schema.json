@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ae.receipt.v0",
+  "title": "AECode Receipt",
+  "type": "object",
+  "required": ["schema_version", "mission_id", "status", "verdict", "created_at", "artifacts", "rollback"],
+  "properties": {
+    "schema_version": { "const": "ae.receipt.v0" },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["passed", "failed", "blocked", "pending"] },
+    "verdict": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "minLength": 1 },
+    "git": { "type": "object" },
+    "files_changed": { "type": "array" },
+    "model_calls": { "type": "array" },
+    "commands_run": { "type": "array" },
+    "visual": { "type": "object" },
+    "risks": { "type": "array" },
+    "approval": { "type": "object" },
+    "artifacts": { "type": "object" },
+    "rollback": { "type": "object" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atomeons.local/schemas/aecode-final-format.schema.json",
+  "title": "AECode Final Format Registry",
+  "type": "object",
+  "required": [
+    "version",
+    "source_contract",
+    "languages_we_code_in",
+    "active_targets",
+    "gated_targets",
+    "targets",
+    "compiler_law",
+    "gates",
+    "integrity"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "source_contract": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "canonical",
+        "source_sections",
+        "compiler_shape",
+        "not_a_store",
+        "not_a_visual_edit_permission"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "canonical": { "const": true },
+        "source_sections": {
+          "type": "array",
+          "minItems": 10,
+          "items": { "type": "string" }
+        },
+        "compiler_shape": { "type": "string" },
+        "not_a_store": { "const": true },
+        "not_a_visual_edit_permission": { "const": true }
+      }
+    },
+    "languages_we_code_in": {
+      "type": "array",
+      "minItems": 5,
+      "items": { "type": "string" }
+    },
+    "active_targets": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "gated_targets": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "purpose",
+          "languages",
+          "allowed_now",
+          "gate"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "enum": ["active", "gated"] },
+          "purpose": { "type": "string" },
+          "languages": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "allowed_now": { "type": "boolean" },
+          "gate": { "type": "string" }
+        }
+      }
+    },
+    "compiler_law": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "ok"],
+        "properties": {
+          "id": { "type": "string" },
+          "ok": { "type": "boolean" }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["sha256"],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

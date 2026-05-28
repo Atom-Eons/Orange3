@@ -1,0 +1,261 @@
+{
+  "catalog_id": "orangebox-intel-integration-backlog-2026-05-18",
+  "created_at": "2026-05-18T13:25:00-04:00",
+  "source_basis": "Operator-supplied research packets in the ORANGEBOX build thread on 2026-05-18. Items are preserved as integration targets; primary-source verification remains required before model claims, vendor integrations, or technical implementation beyond local prototypes.",
+  "product_scope": "ORANGEBOX / AECommander / Distributed Agentic Mesh / local agent stack",
+  "operating_law": [
+    "Do not treat research posts as production truth without primary-source verification.",
+    "Prefer local, cheap, inspectable prototypes before adding vendor dependencies.",
+    "Turn every adopted idea into a receipt-backed feature, doctor, or eval gate.",
+    "Keep EIDOS out of this backlog except as a separate downstream project that ORANGEBOX may route."
+  ],
+  "items": [
+    {
+      "id": "delta-mem",
+      "name": "delta-rule online memory for LLMs",
+      "priority": "P0",
+      "status": "candidate_prototype",
+      "domains": ["memory", "local_agents", "mesh"],
+      "summary": "Tiny fixed-size external associative memory updated online with gated delta-rule learning, intended to augment frozen LLMs without context growth or backbone fine-tuning.",
+      "why_it_matters": "Fills the long-running local-agent memory gap without KV cache explosion. Strong fit for sovereign Beelink/local setups and shared memory across persistent ORANGEBOX agents.",
+      "orangebox_integration": [
+        "Build a local delta-mem lab prototype that can replay agent traces into a small state matrix.",
+        "Expose memory snapshots in the cockpit as inspectable matrices and before/after task deltas.",
+        "Use as a sidecar first; only attempt attention-wrapper integration after a controlled local benchmark."
+      ],
+      "proof_needed": [
+        "Primary paper verification.",
+        "Local toy benchmark against receipt/query recall.",
+        "Regression gate proving it helps memory-heavy tasks without hurting baseline agent behavior."
+      ],
+      "risk": "Early paper. Direct attention injection into GGUF/llama.cpp may require non-trivial runtime work; sidecar memory is safer first."
+    },
+    {
+      "id": "aevo-agentic-evolution",
+      "name": "AEvo-style proposer plus meta-editor self-improvement",
+      "priority": "P0",
+      "status": "candidate_design",
+      "domains": ["self_improvement", "receipts", "mesh"],
+      "summary": "Two-role loop where a proposer agent attempts work and a meta-agent studies traces, failures, and receipts to improve the proposer procedure.",
+      "why_it_matters": "ORANGEBOX already emits receipts and traces. This turns the proof trail into a learning substrate instead of dead logs.",
+      "orangebox_integration": [
+        "Add a Meta-Editor review lane that reads failed and successful receipts.",
+        "Emit procedure patches as proposed prompt/version diffs, never silent auto-promotions.",
+        "Gate promotion through prompt eval, benefits gate, and regression receipts."
+      ],
+      "proof_needed": [
+        "Replay one fixed task suite with baseline vs evolved procedure.",
+        "Require measurable improvement before promotion.",
+        "Rollback path for every promoted procedure."
+      ],
+      "risk": "Self-improvement can overfit to local traces; keep candidate workspaces and baseline comparisons."
+    },
+    {
+      "id": "trellis2-o-voxel",
+      "name": "TRELLIS.2 / O-Voxel 3D asset lane",
+      "priority": "P1",
+      "status": "watch_and_verify",
+      "domains": ["3d", "creative_tools", "visualization"],
+      "summary": "Open-source image-to-3D and sparse voxel/mesh representation direction, useful for 3D concept assets and theoretical visualization.",
+      "why_it_matters": "Extends ORANGEBOX from text/2D cockpit into 3D asset and concept-map generation. Could support future visual surfaces and SoT-style spatial explainers.",
+      "orangebox_integration": [
+        "Add as optional creative module only after hardware/runtime requirements are known.",
+        "Use output as assets in a Surface Factory-created 3D surface.",
+        "Keep model downloads and GPU execution explicit/operator-approved."
+      ],
+      "proof_needed": [
+        "Verify repository/license/model weights.",
+        "Local smoke test on approved GPU machine.",
+        "Asset provenance and export manifest."
+      ],
+      "risk": "Likely heavy runtime/model download; keep out of default portable."
+    },
+    {
+      "id": "nanoresearch-skill-bank",
+      "name": "NanoResearch-style skill bank and policy learning",
+      "priority": "P0",
+      "status": "candidate_design",
+      "domains": ["research_agents", "skills", "memory"],
+      "summary": "Long-lived research agent pattern with a skill bank, project memory module, and feedback-driven planner updates.",
+      "why_it_matters": "Directly maps to ORANGEBOX departments, skills, receipts, and research/coding assistants.",
+      "orangebox_integration": [
+        "Create a structured skill distillation pass from repeated successful receipts.",
+        "Store project-specific memory separate from reusable procedural skill.",
+        "Add a planner update proposal artifact with explicit before/after eval."
+      ],
+      "proof_needed": [
+        "Skill extraction schema.",
+        "Receipt replay showing extracted skill reduces steps or failures.",
+        "Promotion gate to avoid always-on junk skills."
+      ],
+      "risk": "Skill bloat and stale procedures; require versioning and retirement."
+    },
+    {
+      "id": "deepmind-co-mathematician-pattern",
+      "name": "Expert research workbench pattern",
+      "priority": "P1",
+      "status": "candidate_design",
+      "domains": ["research_agents", "theoretical_workbench", "async_state"],
+      "summary": "Asynchronous, stateful expert-domain workbench pattern with ideation, literature discovery, computational checks, theorem verification, uncertainty tracking, and failed-attempt recording.",
+      "why_it_matters": "ORANGEBOX should support serious research work as a stateful cockpit, not only chat output.",
+      "orangebox_integration": [
+        "Add a Theoretical Forge surface template.",
+        "Record failed attempts as first-class artifacts.",
+        "Separate conjecture, evidence, counterexample, citation, and proof-state lanes."
+      ],
+      "proof_needed": [
+        "Surface Factory template spec.",
+        "One local domain fixture with failed-attempt replay.",
+        "Citation/proof-state receipt."
+      ],
+      "risk": "Can become a generic notes app unless proof/citation states are enforced."
+    },
+    {
+      "id": "multi-agent-sovereignty-gap",
+      "name": "Multi-agent sovereignty and disagreement safeguards",
+      "priority": "P0",
+      "status": "candidate_feature",
+      "domains": ["coordination", "safety", "mesh"],
+      "summary": "Multi-agent systems can suppress correct answers to agree with the group; agent ordering may matter more than agent count.",
+      "why_it_matters": "ORANGEBOX departments must not become a consensus theater. Disagreement and independent judgment need explicit preservation.",
+      "orangebox_integration": [
+        "Add a sovereignty check to department route receipts.",
+        "Require at least one independent dissent/reality-contact lane on high-impact decisions.",
+        "Track agent order and compare alternate orderings in eval fixtures."
+      ],
+      "proof_needed": [
+        "Synthetic disagreement fixture.",
+        "Receipt field for independent answer before party-line merge.",
+        "Checkmate gate that flags consensus without independent evidence."
+      ],
+      "risk": "Too much disagreement can slow work; use only where impact/risk warrants it."
+    },
+    {
+      "id": "grep-primary-agentic-search",
+      "name": "Grep-primary retrieval harness",
+      "priority": "P1",
+      "status": "candidate_prototype",
+      "domains": ["search", "local_agents", "cost"],
+      "summary": "Agentic harnesses around plain text search can match or beat embedding retrieval on some coding-agent tasks.",
+      "why_it_matters": "ORANGEBOX can stay faster, cheaper, and more inspectable by defaulting to grep/rg-first retrieval before heavier vector infrastructure.",
+      "orangebox_integration": [
+        "Add retrieval policy: rg/keyword first, vector second, primary-source citations always.",
+        "Benchmark on ORANGEBOX code navigation tasks.",
+        "Expose search path used in receipts."
+      ],
+      "proof_needed": [
+        "A/B local retrieval benchmark.",
+        "Latency and correctness metrics.",
+        "Failure cases where embeddings still win."
+      ],
+      "risk": "Pure grep misses semantic matches; use hybrid fallback."
+    },
+    {
+      "id": "horizon-generalization-macro-actions",
+      "name": "Horizon generalization through macro-actions",
+      "priority": "P0",
+      "status": "candidate_architecture",
+      "domains": ["long_horizon_agents", "planning", "orchestration"],
+      "summary": "Re-parameterize long tasks with higher-level macro actions to reduce training/execution horizon and improve long-horizon stability.",
+      "why_it_matters": "ORANGEBOX jobs should not be thousands of tiny brittle steps. Macro-actions give agents durable action chunks with better credit assignment.",
+      "orangebox_integration": [
+        "Define macro-action primitives for build waves: inspect, patch, verify, package, receipt, promote.",
+        "Add macro-action IDs to job traces and receipts.",
+        "Use macro-actions in planner prompts and Surface Factory workflows."
+      ],
+      "proof_needed": [
+        "Long task replay with micro-step vs macro-action traces.",
+        "Reduced failure/retry count.",
+        "Clear rollback for each macro-action."
+      ],
+      "risk": "Macros can hide unsafe details; each macro needs internal evidence and rollback."
+    },
+    {
+      "id": "coordination-as-architecture",
+      "name": "Coordination as a separate architecture layer",
+      "priority": "P0",
+      "status": "candidate_architecture",
+      "domains": ["coordination", "mesh", "departments"],
+      "summary": "Treat coordination policy separately from agent logic and information access; many multi-agent failures are coordination defects, not model defects.",
+      "why_it_matters": "ORANGEBOX must route departments through explicit coordination laws rather than assuming more agents equals better work.",
+      "orangebox_integration": [
+        "Add a coordination profile to every department route.",
+        "Track topology, order, arbitration rule, and escalation policy in receipts.",
+        "Create controlled evals with same context but different coordination policy."
+      ],
+      "proof_needed": [
+        "Coordination schema.",
+        "At least two route policies evaluated on the same fixture.",
+        "Failure taxonomy for coordination defects."
+      ],
+      "risk": "Coordination layer can become bureaucracy; keep it configurable and measured."
+    },
+    {
+      "id": "clarification-timing-policy",
+      "name": "Clarification timing policy for long-horizon agents",
+      "priority": "P0",
+      "status": "candidate_feature",
+      "domains": ["agent_ux", "planning", "oversight"],
+      "summary": "Clarification value decays over task progress; goal clarification is mostly useful early, while input clarification remains useful longer.",
+      "why_it_matters": "Stops agents from wasting operator attention late in a run and prevents silent wrong assumptions at the start.",
+      "orangebox_integration": [
+        "Add early goal-clarification gate before execution starts.",
+        "Allow mid-run input clarification only when evidence shows blocked state.",
+        "Log clarification timing and whether it changed outcome."
+      ],
+      "proof_needed": [
+        "Policy document and route schema field.",
+        "Long-run fixture with early/late clarification comparison.",
+        "UI affordance for non-blocking operator input."
+      ],
+      "risk": "Too rigid a policy can prevent necessary late correction; permit safety exceptions."
+    },
+    {
+      "id": "structured-skill-distillation",
+      "name": "Skill text to structured executable skill",
+      "priority": "P0",
+      "status": "candidate_feature",
+      "domains": ["skills", "agent_harness", "reuse"],
+      "summary": "Distill unstructured skill text and repeated successful procedures into structured, composable, executable skill definitions.",
+      "why_it_matters": "ORANGEBOX already has many skills; the next jump is turning skill prose into versioned procedures with inputs, outputs, proofs, and promotion gates.",
+      "orangebox_integration": [
+        "Define skill structure schema: trigger, inputs, actions, forbidden actions, proof, rollback.",
+        "Build a skill distillation command over selected receipts.",
+        "Use vendor-import/promotion gates before always-on activation."
+      ],
+      "proof_needed": [
+        "Schema validator.",
+        "One distilled skill from a known ORANGEBOX receipt series.",
+        "Regression against baseline manual workflow."
+      ],
+      "risk": "Over-automation and stale recipes; keep skills opt-in until proven."
+    },
+    {
+      "id": "claude-native-optimizer",
+      "name": "Claude-native optimizer cockpit lane",
+      "priority": "P0",
+      "status": "candidate_feature",
+      "domains": ["model_lanes", "claude_code", "agent_ux"],
+      "summary": "Make ORANGEBOX understand Claude-native operation: extended thinking effort profiles, literal prompt templates, worktree isolation, sub-agent delegation, autonomy sliders, and oversight rules.",
+      "why_it_matters": "Claude Code/Opus is a major reasoning and coding lane. ORANGEBOX should present it as a first-class orchestration profile, not generic chat.",
+      "orangebox_integration": [
+        "Add model profiles for Claude-style effort and role choices.",
+        "Create Claude-native prompt templates for gather/act/verify, sub-agent delegation, and plan mode.",
+        "Expose autonomy/oversight modes in the cockpit and receipts."
+      ],
+      "proof_needed": [
+        "Prompt template registry.",
+        "One Claude-native route packet exported for Claude Code.",
+        "Comparison against generic prompt on the same ORANGEBOX task."
+      ],
+      "risk": "Vendor behavior changes; keep profiles versioned and source-dated."
+    }
+  ],
+  "next_build_moves": [
+    "Add ORANGEBOX macro-action schema to job receipts.",
+    "Add coordination profile fields to department router receipts.",
+    "Prototype Intel Dashboard as a Surface Factory surface using this catalog.",
+    "Add a Claude-native prompt/profile registry and export command.",
+    "Prototype delta-mem lab as a local sidecar, not a model-runtime patch first."
+  ]
+}

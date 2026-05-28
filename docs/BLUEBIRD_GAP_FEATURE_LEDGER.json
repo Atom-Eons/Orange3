@@ -1,0 +1,383 @@
+{
+  "version": "orangebox-bluebird-gap-feature-ledger/v1",
+  "created_at": "2026-05-23T06:08:00-04:00",
+  "status": "feature_intake_not_completion_claim",
+  "project": "ORANGEBOX",
+  "product_surfaces": [
+    "AE See-Suite",
+    "AE Operations",
+    "Silent Canvas",
+    "Ethereal AI Link",
+    "ORANGEBOX engine"
+  ],
+  "source_documents": [
+    {
+      "path": "C:\\Users\\a\\Downloads\\Orangeb0x_Gap_Analysis.pdf",
+      "sha256": "DBBC1BBB21C60CAC230703D7CC7132E28F9AFE367634AAF9F529096EF016846A",
+      "role": "candidate gap analysis"
+    },
+    {
+      "path": "https://grok.com/share/c2hhcmQtNQ_f68c92d4-a6ad-4b6e-9c20-9ee32263fef4",
+      "role": "candidate Grok share intake",
+      "note": "Rendered with Playwright. Contains AELang, offline sync, API stall, agent continuity, receipt schema, and failed remote artifact delivery discussion."
+    }
+  ],
+  "status_meanings": {
+    "implemented": "Code plus command/API/UI proof exists.",
+    "partial": "Real foundation exists, but product scope is incomplete.",
+    "planned": "Accepted into scope, not implemented yet."
+  },
+  "features": [
+    {
+      "id": "deep_codebase_indexing_semantic_search",
+      "tier": 1,
+      "status": "partial",
+      "priority": "critical",
+      "why": "Daily-driver parity with Cursor requires fast local codebase understanding.",
+      "existing_evidence": [
+        "scripts/v4/repo-indexer.mjs",
+        "/api/v4/repo/index",
+        "/api/v4/repo/summary",
+        "/api/v4/repo/find-symbol",
+        "/api/v4/repo/symbol-prefix"
+      ],
+      "missing": [
+        "persistent index storage",
+        "hybrid grep/symbol/vector ranking",
+        "stale index detection",
+        "route-aware context packs"
+      ],
+      "proof_gate": "obx repo doctor --semantic --receipt"
+    },
+    {
+      "id": "background_async_agents",
+      "tier": 1,
+      "status": "partial",
+      "priority": "critical",
+      "why": "Long missions must continue or pause cleanly when APIs freeze or Codex/Claude stalls.",
+      "existing_evidence": [
+        "scripts/v4/agent-jobs.mjs",
+        "/api/v4/agent/run",
+        "/api/v4/agent/status/:id",
+        "/api/v4/agent/cancel/:id",
+        "/api/v4/agent/list"
+      ],
+      "missing": [
+        "durable job persistence",
+        "heartbeat receipts",
+        "stall receipts",
+        "resume tickets",
+        "restart recovery rehearsal"
+      ],
+      "proof_gate": "obx agent doctor --continuity --receipt"
+    },
+    {
+      "id": "model_routing_intelligence",
+      "tier": 1,
+      "status": "partial",
+      "priority": "critical",
+      "why": "Provider stalls and rate limits require routing, fallback, and circuit breakers.",
+      "existing_evidence": [
+        "scripts/v4/model-switchboard.mjs",
+        "obx model status",
+        "obx model switch",
+        "obx model doctor",
+        "/api/v4/model-switch/status"
+      ],
+      "missing": [
+        "automatic task routing",
+        "provider health scoring",
+        "circuit breaker",
+        "fallback chain",
+        "route-level fallback receipts"
+      ],
+      "proof_gate": "obx model route-doctor --receipt"
+    },
+    {
+      "id": "cost_tracking_dashboard",
+      "tier": 1,
+      "status": "partial",
+      "priority": "critical",
+      "why": "A serious multi-model cockpit needs budget guardrails and clear incremental spend.",
+      "existing_evidence": [
+        "/api/v4/router/cost",
+        "/api/v4/cost/today",
+        "cost estimate code in scripts/v4/v4-server-routes.mjs"
+      ],
+      "missing": [
+        "mission budgets",
+        "department budgets",
+        "provider budget caps",
+        "subscription vs direct API accounting",
+        "budget-block receipts"
+      ],
+      "proof_gate": "obx cost doctor --receipt"
+    },
+    {
+      "id": "git_pr_workflows",
+      "tier": 1,
+      "status": "planned",
+      "priority": "critical",
+      "why": "Shipping work needs branch, commit, review, and PR packet visibility.",
+      "existing_evidence": [
+        "release closeout git-state review",
+        "stage/hold lists",
+        "Final Green Board dirty repo reporting"
+      ],
+      "missing": [
+        "branch visualization",
+        "commit packet",
+        "PR packet",
+        "inline review comments",
+        "approval-gated push"
+      ],
+      "proof_gate": "obx git doctor --receipt"
+    },
+    {
+      "id": "plugin_extension_sdk",
+      "tier": 2,
+      "status": "partial",
+      "priority": "high",
+      "why": "ORANGEBOX needs extensibility without unsafe third-party drift.",
+      "existing_evidence": [
+        "MCP bridge",
+        "OpenAPI contract",
+        "skills ecosystem"
+      ],
+      "missing": [
+        "signed extension package",
+        "permissions manifest",
+        "install validator",
+        "rollback",
+        "extension SDK"
+      ],
+      "proof_gate": "obx extension doctor --receipt"
+    },
+    {
+      "id": "built_in_testing_framework",
+      "tier": 2,
+      "status": "partial",
+      "priority": "high",
+      "why": "Doctors prove platform health; route-level generated tests prove shipped work.",
+      "existing_evidence": [
+        "doctor suite",
+        "visual proofs",
+        "user journey doctor",
+        "package verification"
+      ],
+      "missing": [
+        "route-generated tests",
+        "failure-driven repair loop",
+        "test proof packet"
+      ],
+      "proof_gate": "obx test doctor --receipt"
+    },
+    {
+      "id": "realtime_multi_user_collaboration",
+      "tier": 2,
+      "status": "planned",
+      "priority": "high",
+      "why": "Team adoption requires presence, comments, approvals, and conflict handling.",
+      "existing_evidence": [],
+      "missing": [
+        "presence",
+        "comments",
+        "shared route review",
+        "multi-user conflict handling"
+      ],
+      "proof_gate": "obx collab doctor --receipt"
+    },
+    {
+      "id": "rules_memories_system",
+      "tier": 2,
+      "status": "partial",
+      "priority": "high",
+      "why": "Project behavior must persist across sessions and models.",
+      "existing_evidence": [
+        "prompt registry",
+        "Knowledge v2",
+        "receipts",
+        "route packets"
+      ],
+      "missing": [
+        "project rules UI",
+        "active memory citations",
+        "override controls",
+        "freshness doctor"
+      ],
+      "proof_gate": "obx memory doctor --receipt"
+    },
+    {
+      "id": "advanced_analytics",
+      "tier": 2,
+      "status": "partial",
+      "priority": "high",
+      "why": "A command suite should tell the operator where time, failures, and risk concentrate.",
+      "existing_evidence": [
+        "feature reality doctor",
+        "user journey doctor",
+        "service freshness",
+        "provider watch receipts"
+      ],
+      "missing": [
+        "bottleneck detection",
+        "department throughput",
+        "agent stall metrics",
+        "proof freshness score"
+      ],
+      "proof_gate": "obx analytics doctor --receipt"
+    },
+    {
+      "id": "marketplace",
+      "tier": 3,
+      "status": "planned",
+      "priority": "medium",
+      "why": "Marketplace can compound extensions, doctors, route templates, and AELang examples.",
+      "existing_evidence": [],
+      "missing": [
+        "local registry",
+        "signed packages",
+        "rating/review metadata",
+        "install approval flow"
+      ],
+      "proof_gate": "obx marketplace doctor --receipt"
+    },
+    {
+      "id": "distributed_ai_box_clustering",
+      "tier": 3,
+      "status": "partial",
+      "priority": "medium",
+      "why": "The Advanced AI Computer path should scale beyond one worker when hardware exists.",
+      "existing_evidence": [
+        "Ethereal AI Link",
+        "AI Box worker rail docs",
+        "network doctors"
+      ],
+      "missing": [
+        "multi-node discovery",
+        "capability inventory",
+        "job placement",
+        "load balancing",
+        "failover"
+      ],
+      "proof_gate": "obx cluster doctor --receipt"
+    },
+    {
+      "id": "offline_first_sync",
+      "tier": 3,
+      "status": "planned",
+      "priority": "medium",
+      "why": "Local-first work needs safe sync and conflict resolution.",
+      "existing_evidence": [],
+      "missing": [
+        "local receipt ledger",
+        "mutation log",
+        "version vectors",
+        "sync receipts",
+        "visual conflict resolver"
+      ],
+      "proof_gate": "obx sync doctor --offline-simulation --receipt"
+    },
+    {
+      "id": "aelang_full_implementation",
+      "tier": 3,
+      "status": "partial",
+      "priority": "critical",
+      "why": "AELang is a differentiator only if it becomes a reliable route/runtime language, not just a spec.",
+      "existing_evidence": [
+        "docs/AELANG_SPEC.md",
+        "scripts/v4/aelang.mjs",
+        "obx aelang doctor",
+        "obx aelang compile",
+        "/api/v4/aelang/doctor",
+        "/api/v4/aelang/compile"
+      ],
+      "missing": [
+        "formal tokenizer and AST",
+        "fixture suite",
+        "runtime/transpiler target",
+        "permissions model",
+        "resiliency syntax",
+        "offline sync syntax",
+        "visual event bindings"
+      ],
+      "proof_gate": "obx aelang doctor --full --receipt"
+    },
+    {
+      "id": "artifact_delivery_contract",
+      "tier": "grok-intake",
+      "status": "planned",
+      "priority": "critical",
+      "why": "Grok claimed a PDF existed at a remote sandbox path the operator could not access. ORANGEBOX must never do that.",
+      "existing_evidence": [
+        "Grok share rendered text: /home/workdir/artifacts/Orangeb0x_Resiliency_Module.pdf was claimed but inaccessible to the operator"
+      ],
+      "missing": [
+        "artifact existence doctor",
+        "hash proof",
+        "open/download path",
+        "package inclusion status",
+        "missing-artifact failure receipts"
+      ],
+      "proof_gate": "obx artifact doctor --receipt"
+    },
+    {
+      "id": "api_resilience_agent_continuity",
+      "tier": "grok-intake",
+      "status": "planned",
+      "priority": "critical",
+      "why": "Provider stalls, Codex/Claude freezes, and half-done agents are the biggest live reliability pain.",
+      "existing_evidence": [],
+      "missing": [
+        "provider health monitor",
+        "retry/backoff queue",
+        "fallback lanes",
+        "circuit breakers",
+        "heartbeat receipts",
+        "stall receipts",
+        "resume tickets"
+      ],
+      "proof_gate": "obx resilience doctor --receipt"
+    },
+    {
+      "id": "formal_receipt_schema",
+      "tier": "grok-intake",
+      "status": "partial",
+      "priority": "critical",
+      "why": "Receipts already exist, but the platform needs a canonical schema for validation, rollback, sync, and continuity.",
+      "existing_evidence": [
+        "receipts directory",
+        "doctor receipts",
+        "route receipts",
+        "package receipts"
+      ],
+      "missing": [
+        "JSON Schema",
+        "required action/status taxonomy",
+        "before/after state conventions",
+        "rollback linkage",
+        "Silent Canvas metadata conventions",
+        "legacy receipt lane"
+      ],
+      "proof_gate": "obx receipts schema-doctor --receipt"
+    }
+  ],
+  "recommended_build_order": [
+    "aelang_resiliency_module",
+    "artifact_delivery_contract",
+    "formal_receipt_schema",
+    "api_resilience_agent_continuity",
+    "model_routing_intelligence",
+    "cost_tracking_dashboard",
+    "deep_codebase_indexing_semantic_search",
+    "git_pr_workflows",
+    "built_in_testing_framework",
+    "rules_memories_system",
+    "advanced_analytics",
+    "plugin_extension_sdk",
+    "realtime_multi_user_collaboration",
+    "marketplace",
+    "distributed_ai_box_clustering",
+    "offline_first_sync"
+  ]
+}

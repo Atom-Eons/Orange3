@@ -1,0 +1,171 @@
+ORANGEBOX Command — Commercial Software License Agreement
+Version 1.0 — 2026-05-13
+Copyright (c) 2026 AtomEons Systems Laboratory / Atom McCree
+All rights reserved.
+
+THIS IS A COMMERCIAL SOFTWARE LICENSE. THIS IS NOT OPEN SOURCE.
+
+1. GRANT.
+   Subject to payment of the license fee and the buyer's continued compliance
+   with this agreement, AtomEons Systems Laboratory grants the buyer a
+   non-exclusive, non-transferable license to install and use one (1) copy of
+   ORANGEBOX Command on one (1) operator's machine, for internal business or
+   personal-operator use, in perpetuity for version 1.x.
+
+2. SOURCE ACCESS.
+   The buyer is provided with the source code of ORANGEBOX Command for the
+   purpose of operator transparency, local modification, and integration with
+   the buyer's own workflows. The source is NOT released under an open-source
+   license. The buyer MAY modify the source for personal/internal use. The
+   buyer MAY NOT redistribute, sublicense, publish, mirror to public
+   repositories, or sell the source or any derivative work.
+
+3. NUMBER OF INSTALLATIONS.
+   One license = one operator install. Additional installations require
+   additional licenses (each at the then-current price, currently $49).
+
+4. UPDATES.
+   ALL v1.x updates are included in the original license fee forever.
+   Version 2.0+ may require a paid upgrade license (currently planned at
+   $49 for existing v1.x buyers).
+
+4A. ANTI-SUBSCRIPTION COMMITMENT.
+   AtomEons Systems Laboratory commits in writing that ORANGEBOX Command
+   will NEVER move to a recurring monthly or annual subscription billing
+   model. If at any point AtomEons attempts to convert this software to
+   a subscription model, every buyer who purchased a one-time license
+   under this agreement retains their license active and free in
+   perpetuity, with no payment owed. This commitment binds AtomEons and
+   any successor entity acquiring the software.
+
+5. PROHIBITED USES.
+   The buyer may not:
+   - redistribute the software in original or modified form
+   - publish the source code or binaries to a public repository or mirror
+   - rent, lease, or offer the software as a hosted service to third parties
+   - remove or alter copyright notices
+   - reverse-engineer for the purpose of competing reimplementation
+   - use the software for any illegal purpose
+
+6. WARRANTY DISCLAIMER.
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+7. LIMITATION OF LIABILITY.
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   AtomEons' aggregate liability under this agreement, regardless of cause,
+   is capped at the license fee paid by the buyer (currently $49 USD).
+
+8. MATERIAL FAILURE GUARANTEE.
+   If, within 30 days of purchase, the buyer demonstrates that ORANGEBOX
+   Command fails to install or fails to launch its cockpit window on a clean
+   x64 Windows 10 or Windows 11 machine with Node.js 20+ installed, AtomEons
+   will either (a) deliver a working build within 14 days, or (b) refund the
+   license fee in full. This guarantee replaces all implied warranties of
+   merchantability.
+
+   SUPPORTED PLATFORMS: This guarantee applies ONLY to x64 (64-bit) Windows
+   10 and Windows 11 desktop installations. The following are NOT supported
+   under this guarantee, and buyers on these platforms should request a
+   Workflow-Fit Refund (§8A) instead:
+     - ARM64 / ARM Windows (Snapdragon, Surface Pro X, etc.)
+     - Windows 7, Windows 8, Windows 8.1
+     - Windows Server (any edition)
+     - Virtualized Windows guests (VMware, Parallels, VirtualBox, WSL)
+     - Wine / CrossOver / other Windows compatibility layers
+
+8A. WORKFLOW-FIT REFUND.
+   Within 30 days of purchase, if the buyer determines that ORANGEBOX
+   Command does not fit their workflow, the buyer may request a full
+   refund by emailing a.mccree@gmail.com with subject line "ORANGEBOX
+   refund request." No questions asked, no friction. This refund applies
+   regardless of the reason — including simple buyer's remorse — and is
+   in addition to the Material Failure Guarantee in section 8.
+
+   REFUND MECHANISM: Refunds are issued via Stripe to the original payment
+   method within five (5) business days of the refund request being
+   received, less any payment-processor fees Stripe retains on the
+   original transaction. After 30 days from the original purchase date,
+   no refund is owed under this section.
+
+9. THIRD-PARTY COMPONENTS.
+   ORANGEBOX bundles or depends on:
+   - Tauri (MIT/Apache-2.0)
+   - tauri-plugin-opener (MIT/Apache-2.0)
+   - @tauri-apps/cli (MIT/Apache-2.0)
+   - Node.js (MIT) — buyer-installed runtime
+   These components retain their original licenses. See docs/THIRD-PARTY.md.
+
+10. TERMINATION.
+    This license terminates automatically if the buyer materially breaches
+    any term. Upon termination the buyer must uninstall and delete all copies.
+
+11. GOVERNING LAW.
+    This agreement is governed by the laws of the State of Florida, United
+    States, without regard to its conflict-of-laws provisions.
+
+12. CONTACT.
+    AtomEons Systems Laboratory
+    Atom McCree
+    Marco Island, FL
+    a.mccree@gmail.com
+
+13. PRIVACY.
+    ORANGEBOX Command is local-first by design. The software collects,
+    transmits, and stores ZERO operator data on AtomEons servers. There
+    is no telemetry, no analytics service, and no phone-home of any kind.
+    All project state, receipts, party-line messages, knowledge vault
+    entries, API keys, and operator profiles remain on the buyer's
+    machine in %APPDATA%\com.atomeons.orangebox.command\. AtomEons
+    cannot read this data even if AtomEons wanted to.
+
+    BUYER RESPONSIBILITY: The buyer is responsible for securing the
+    machine on which ORANGEBOX is installed (full-disk encryption,
+    physical access control, backups). AtomEons stores no buyer data
+    on its own servers and cannot recover lost local data.
+
+    If the buyer chooses to wire the cockpit to a third-party AI provider
+    (Anthropic, OpenAI, Google, Ollama, etc.), the buyer's data flows
+    directly to that provider under that provider's terms — AtomEons is
+    not an intermediary.
+
+    PAYMENT PROCESSING: When the buyer purchases ORANGEBOX, the payment
+    flow is operated by a third-party payment processor (Lemon Squeezy
+    as Merchant of Record for global sales, OR Stripe for direct US-only
+    sales). The processor collects buyer name, email, billing address,
+    and payment method — none of which are stored on AtomEons servers
+    beyond order metadata needed for license delivery and refund support.
+    See PRIVACY.md for full disclosure.
+
+14. AI CONTENT DISCLAIMER.
+    When the buyer connects ORANGEBOX to a third-party AI provider
+    (Anthropic, OpenAI, Google, Ollama, or any other model), the
+    cockpit displays content generated by that provider in response
+    to the buyer's prompts. AtomEons is NOT the publisher, controller,
+    author, or guarantor of any such content. The buyer assumes ALL
+    responsibility and liability for:
+      - the prompts the buyer authors;
+      - the outputs the buyer chooses to act on;
+      - the accuracy, legality, or fitness of any AI-generated material;
+      - compliance with the third-party AI provider's terms of service.
+
+15. SANCTIONS + EXPORT CONTROL.
+    The buyer represents that the buyer is not, and is not acting on
+    behalf of, any person or entity (a) located in, or organized under
+    the laws of, any country or region subject to comprehensive U.S.
+    sanctions (currently including Cuba, Iran, North Korea, Syria, and
+    the Crimea/DNR/LNR regions of Ukraine, and the Russian Federation
+    and Belarus to the extent applicable); or (b) identified on the
+    U.S. Treasury Department's Specially Designated Nationals List or
+    any equivalent sanctions list maintained by the European Union, the
+    United Kingdom, or the United Nations. The buyer agrees not to
+    export, re-export, or transfer the software in violation of any
+    applicable export control law.
+
+By installing or using ORANGEBOX Command, the buyer agrees to be bound by
+this license.

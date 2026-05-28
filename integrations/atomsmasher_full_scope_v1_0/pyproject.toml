@@ -1,0 +1,8 @@
+[project]
+name = "atomsmasher-full-scope"
+version = "1.0.0"
+description = "AtomSmasher Full Scope Total Work Compiler"
+requires-python = ">=3.10"
+
+[project.scripts]
+atomsmasher = "atomsmasher.cli:main"
