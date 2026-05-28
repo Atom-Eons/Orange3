@@ -19,8 +19,8 @@ const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+$/, "Z"
 const tokenCandidates = [
   process.env.ORANGEBOX_CODEXA_COMMAND_TOKEN || "",
   process.env.ORANGEBOX_AI_BOX_COMMAND_TOKEN || "",
-  "C:/AtomEons/aeskills/orangebox/exports/codexa-non-codex-rail-repair-pack/command-rail/INSTALL_CODEXA_COMMAND_RAIL.ps1",
   path.join(dataRoot, "exports", "codexa-command-rail-pack", "SET_COCKPIT_COMMAND_TOKEN.cmd"),
+  "C:/AtomEons/aeskills/orangebox/exports/codexa-non-codex-rail-repair-pack/command-rail/INSTALL_CODEXA_COMMAND_RAIL.ps1",
 ].filter(Boolean);
 
 function ensureDir(dir) {
@@ -178,7 +178,8 @@ async function deployDirectRail({ config, roleText, watcherScript }) {
 $root='C:\\AtomEons\\ai-box\\orangebox-config'
 $watcher=Join-Path $root 'orangebox-codexa-config-watcher.ps1'
 try {
-  Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*orangebox-codexa-config-watcher.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  $self = $PID
+  Get-CimInstance Win32_Process | Where-Object { $_.ProcessId -ne $self -and $_.CommandLine -like '*orangebox-codexa-config-watcher.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 } catch {}
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $watcher + '"')
 $trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -220,8 +221,14 @@ try {
     token,
     20000,
   );
-  const installVerified = install.ok && install.body?.status === "VERIFIED" && install.body?.response?.status === "VERIFIED";
-  const heartbeatVerified = heartbeat.ok && heartbeat.body?.status === "VERIFIED" && heartbeat.body?.response?.status === "VERIFIED";
+  const installVerified =
+    install.ok &&
+    install.body?.status === "VERIFIED" &&
+    (!install.body?.response || install.body.response?.status === "VERIFIED");
+  const heartbeatVerified =
+    heartbeat.ok &&
+    heartbeat.body?.status === "VERIFIED" &&
+    (!heartbeat.body?.response || heartbeat.body.response?.status === "VERIFIED");
   return {
     attempted: true,
     ok: installVerified && heartbeatVerified,
@@ -340,7 +347,8 @@ New-Item -ItemType Directory -Force -Path $root | Out-Null
 [IO.File]::WriteAllBytes((Join-Path $root 'OB0X_REMOTE_ROLE.md'), [Convert]::FromBase64String('${b64(fs.readFileSync(rolePath, "utf8"))}'))
 [IO.File]::WriteAllBytes((Join-Path $root 'orangebox-codexa-config-watcher.ps1'), [Convert]::FromBase64String('${b64(watcherScript)}'))
 try {
-  Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*orangebox-codexa-config-watcher.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  $self = $PID
+  Get-CimInstance Win32_Process | Where-Object { $_.ProcessId -ne $self -and $_.CommandLine -like '*orangebox-codexa-config-watcher.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 } catch {}
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \\"$root\\orangebox-codexa-config-watcher.ps1\\""
 $trigger = New-ScheduledTaskTrigger -AtLogOn
