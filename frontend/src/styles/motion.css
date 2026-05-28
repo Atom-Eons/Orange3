@@ -1,0 +1,15 @@
+.motion-soft-enter { animation: motion-soft-enter var(--motion-medium) var(--ease-system) both; }
+.motion-fade-up { animation: motion-fade-up var(--motion-medium) var(--ease-system) both; }
+.motion-scale-in { animation: motion-scale-in var(--motion-medium) var(--ease-system) both; }
+@keyframes motion-soft-enter {
+  from { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.98); filter: blur(4px); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+@keyframes motion-fade-up {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes motion-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}

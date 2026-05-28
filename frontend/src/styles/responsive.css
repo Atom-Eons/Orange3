@@ -1,0 +1,28 @@
+@media (max-width: 1180px) {
+  .drawer-shell { right: 14px; width: min(520px, calc(100vw - 110px)) !important; }
+  .artifact-canvas { grid-template-columns: 180px minmax(0, 1fr); }
+  .artifact-canvas__inspector { display: none; }
+  .left-rail { width: 72px; }
+  .left-rail__brand { grid-template-columns: 1fr; justify-items: center; }
+  .left-rail__brand div,
+  .left-rail button span,
+  .left-rail__footer,
+  .top-command-cluster__queue span { display: none; }
+  .left-rail button { grid-template-columns: 1fr; justify-items: center; }
+  .top-mode-rail { width: min(540px, calc(100vw - 330px)); }
+  .chat-dock { width: calc(100vw - 150px); }
+  .temporal-memory-ribbon { display: none; }
+  .agent-constellation__node div { display: none; }
+}
+@media (max-width: 860px) {
+  .top-mode-rail { left: 94px; right: 12px; transform: none; width: auto; overflow: auto; justify-content: start; }
+  .top-command-cluster { display: none; }
+  .command-palette-backdrop { padding-top: 7vh; }
+  .command-palette { width: calc(100vw - 24px); }
+  .drawer-shell { left: 82px; right: 12px; width: auto !important; }
+  .artifact-canvas { grid-template-columns: minmax(0, 1fr); }
+  .artifact-canvas__branches { display: none; }
+  .ambient-assistant-bubble { display: none; }
+  .chat-dock { left: 82px; right: 12px; transform: none; width: auto; }
+  .agent-queue-bar { max-width: calc(100vw - 110px); }
+}

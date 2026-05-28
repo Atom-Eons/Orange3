@@ -1,0 +1,34 @@
+@keyframes atmosphere-drift {
+  from { transform: translate3d(-1%, -1%, 0) rotate(0deg) scale(1); }
+  to { transform: translate3d(1.5%, 1%, 0) rotate(8deg) scale(1.06); }
+}
+@keyframes causal-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -60; }
+}
+@keyframes semantic-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -42; }
+}
+@keyframes data-wave-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -64; }
+}
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .causality-layer path,
+  .semantic-connection-layer path,
+  .data-wave path,
+  .run-status-overlay__spinner {
+    animation: none !important;
+  }
+}

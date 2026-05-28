@@ -1,0 +1,25 @@
+:root {
+  --cyan: #2ffcff;
+  --teal: #38ffdf;
+  --violet: #8b5cff;
+  --magenta: #f044ff;
+  --blue: #58a6ff;
+  --green: #38ffb3;
+  --gold: #ffbf48;
+  --orange: #ff8a32;
+  --red: #ff3b5f;
+  --text-primary: #edf8ff;
+  --text-secondary: rgba(229, 246, 255, 0.78);
+  --text-muted: rgba(214, 231, 248, 0.52);
+  --panel-bg: rgba(7, 13, 31, 0.62);
+  --z-scene: 2;
+  --z-panels: 20;
+  --glow-primary: 0 0 60px rgba(47, 252, 255, 0.22);
+  --glow-secondary: 0 0 34px rgba(47, 252, 255, 0.12);
+  --glow-muted: 0 0 18px rgba(47, 252, 255, 0.06);
+  --glow-alert: 0 0 72px rgba(255, 138, 50, 0.22);
+  --motion-fast: 160ms;
+  --motion-medium: 320ms;
+  --motion-slow: 640ms;
+  --ease-system: cubic-bezier(0.22, 1, 0.36, 1);
+}

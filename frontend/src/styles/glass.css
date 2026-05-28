@@ -1,0 +1,51 @@
+.glass {
+  border: 1px solid rgba(142, 227, 255, 0.15);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(47, 252, 255, 0.08), transparent 32%),
+    rgba(5, 11, 27, 0.66);
+  backdrop-filter: blur(16px) saturate(1.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 80px rgba(0, 0, 0, 0.36);
+}
+
+.neon-edge {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 38px rgba(47, 252, 255, 0.08),
+    0 22px 80px rgba(0, 0, 0, 0.36);
+}
+
+.floating-panel.glass,
+.chat-dock.glass,
+.drawer-shell.glass,
+.command-palette.glass {
+  background:
+    linear-gradient(146deg, rgba(9, 19, 43, 0.88), rgba(3, 8, 22, 0.82)),
+    radial-gradient(circle at 18% 0%, rgba(47, 252, 255, 0.14), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(139, 92, 255, 0.13), transparent 30%);
+}
+
+.floating-panel.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.1), transparent 22%),
+    linear-gradient(290deg, rgba(47, 252, 255, 0.14), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 48%, rgba(0, 0, 0, 0.16));
+  opacity: 0.78;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--text-muted);
+}
+
+.status-dot--success { background: var(--green); box-shadow: 0 0 14px rgba(56, 255, 179, 0.55); }
+.status-dot--warning { background: var(--gold); box-shadow: 0 0 14px rgba(255, 191, 72, 0.45); }
+.status-dot--critical { background: var(--red); box-shadow: 0 0 14px rgba(255, 59, 95, 0.45); }
