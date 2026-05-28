@@ -1,0 +1,56 @@
+name: Frontend Proof
+
+on:
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-proof.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-proof.yml"
+
+jobs:
+  frontend-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build -w @ae-see-suite/web
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Capture anchor visual states
+        working-directory: frontend
+        run: npm run proof:visual -- --states=01,06,26,37,61 --label=ci-anchors
+
+      - name: Produce non-strict pixel receipt
+        working-directory: frontend
+        run: npm run proof:pixel -- --states=01,06,26,37,61
+
+      - name: Summarize proof
+        working-directory: frontend
+        run: npm run proof:summary
+
+      - name: Upload visual proof artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-proof
+          path: frontend/proof/
+          if-no-files-found: warn
