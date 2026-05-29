@@ -1,0 +1,37 @@
+name: Project Green
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  syntax-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install
+
+      - name: Root syntax check
+        run: node --check ./scripts/orangebox-command-server.mjs && node --check ./scripts/orangebox-mcp-server.mjs && node --check ./src/app.js
+
+      - name: Generate Prisma client
+        run: npx prisma generate --schema apps/api/prisma/schema.prisma
+
+      - name: Build API workspace
+        run: npm run build -w @ae-see-suite/api
+
+      - name: Build frontend workspace
+        run: npm run build -w @ae-see-suite/web
+
+      - name: AtomSmasher runtime syntax
+        run: node --check ./scripts/v4/atomsmasher-runtime.mjs && node --check ./scripts/v4/atomsmasher-api-routes.mjs
