@@ -130,6 +130,23 @@ Why:
 
 The repo currently has no `package-lock.json`. `npm ci` would fail before proof ran. This was an unambiguous CI correctness bug.
 
+### 933f449 — `.github/workflows/project-green.yml`
+
+Added a cross-platform Project Green CI workflow.
+
+Why:
+
+Many local root scripts intentionally use `npm.cmd` because the operator machine is Windows. GitHub Actions runners are Linux by default. Project Green avoids mutating the Windows-first scripts while still proving syntax and workspace builds on GitHub.
+
+What it does:
+
+- Installs dependencies with `npm install`.
+- Runs Node syntax checks on command server, MCP server, and legacy app surface.
+- Generates Prisma client for `apps/api`.
+- Builds the API workspace.
+- Builds the frontend workspace.
+- Syntax-checks AtomSmasher runtime/API route files.
+
 ## Non-Delta Change Made Earlier
 
 ### f1fc691 — `AtomEons/orangebox-os/src-tauri/tauri.conf.json`
@@ -151,6 +168,7 @@ Functional progress:
 - AtomSmasher scripts are wired at root and imported into the command server.
 - Frontend proof tooling now exists in `frontend/`.
 - Frontend proof CI now exists.
+- Project Green CI now exists.
 
 Still not proven green locally from this chat:
 
