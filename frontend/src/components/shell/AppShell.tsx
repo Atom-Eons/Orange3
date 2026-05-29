@@ -4,6 +4,7 @@ import { useMetricSimulation } from "../../hooks/useMetricSimulation";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { usePersistentStore } from "../../hooks/usePersistentStore";
 import { useWorkspaceBootstrap } from "../../hooks/useWorkspaceBootstrap";
+import { useStartupStateCleanup } from "../../hooks/useStartupStateCleanup";
 import { usePresetFromUrl } from "../../dev/usePresetFromUrl";
 import { StatePresetSwitcher } from "../../dev/StatePresetSwitcher";
 import { LivingScene } from "../scene/LivingScene";
@@ -18,6 +19,7 @@ import { StateChoreographyOverlay } from "../overlays/StateChoreographyOverlay";
 import { StateWorkbenchOverlay } from "../overlays/StateWorkbenchOverlay";
 import { AgentConstellation } from "../overlays/AgentConstellation";
 import { TemporalMemoryRibbon } from "../overlays/TemporalMemoryRibbon";
+import { TemporalMemoryExpandedOverlay } from "../overlays/TemporalMemoryExpandedOverlay";
 import { LivingCanvas } from "../overlays/LivingCanvas";
 import { AmbientAssistantBubble } from "../overlays/AmbientAssistantBubble";
 import { ChatDock } from "../chat/ChatDock";
@@ -36,6 +38,7 @@ export function AppShell() {
   useKeyboardShortcuts();
   usePersistentStore();
   useWorkspaceBootstrap();
+  useStartupStateCleanup();
   usePresetFromUrl();
 
   const mode = useAppStore((s) => s.mode);
@@ -66,6 +69,7 @@ export function AppShell() {
           ))}
       </section>
       <TemporalMemoryRibbon />
+      <TemporalMemoryExpandedOverlay />
       <LivingCanvas />
       <AmbientAssistantBubble />
       <ChatDock />
