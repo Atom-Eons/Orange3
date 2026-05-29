@@ -17,6 +17,7 @@ import { FocusHalo } from "../overlays/FocusHalo";
 import { FlowFieldOverlay } from "../overlays/FlowFieldOverlay";
 import { StateChoreographyOverlay } from "../overlays/StateChoreographyOverlay";
 import { StateWorkbenchOverlay } from "../overlays/StateWorkbenchOverlay";
+import { ProductSurfaceOverlay } from "../overlays/ProductSurfaceOverlay";
 import { AgentConstellation } from "../overlays/AgentConstellation";
 import { TemporalMemoryRibbon } from "../overlays/TemporalMemoryRibbon";
 import { TemporalMemoryExpandedOverlay } from "../overlays/TemporalMemoryExpandedOverlay";
@@ -76,6 +77,7 @@ export function AppShell() {
       <AgentQueueDrawer />
       <MemoryBrowserDrawer />
       <ToolApprovalDrawer />
+      <ProductSurfaceOverlay />
       <StateWorkbenchOverlay />
       <CommandPalette />
       <EventToastLayer />
