@@ -1,4 +1,4 @@
-import type { PanelId, SystemMode } from "../types/app";
+import type { DrawerId, ModalId, PanelId, SystemMode } from "../types/app";
 import { handleSubmitCommand } from "./taskRunner";
 import { useAppStore } from "../store/useAppStore";
 import { mockupStateBank } from "./mockupStateBank";
@@ -41,6 +41,36 @@ function setModeAction(mode: SystemMode, title: string): CommandPaletteAction {
     run: () => {
       const store = useAppStore.getState();
       store.setMode(mode);
+      store.setCommandPaletteOpen(false);
+    },
+  };
+}
+
+function openDrawerAction(id: DrawerId, title: string, subtitle: string, keywords: string[], kind: CommandPaletteActionKind = "workspace"): CommandPaletteAction {
+  return {
+    id: `open-drawer-${id}`,
+    kind,
+    title,
+    subtitle,
+    keywords: ["drawer", "open", title, ...(keywords ?? [])],
+    run: () => {
+      const store = useAppStore.getState();
+      store.setDrawerOpen(id);
+      store.setCommandPaletteOpen(false);
+    },
+  };
+}
+
+function openModalAction(id: ModalId, title: string, subtitle: string, keywords: string[], kind: CommandPaletteActionKind = "workspace"): CommandPaletteAction {
+  return {
+    id: `open-modal-${id}`,
+    kind,
+    title,
+    subtitle,
+    keywords: ["modal", "open", title, ...(keywords ?? [])],
+    run: () => {
+      const store = useAppStore.getState();
+      store.setModalOpen(id);
       store.setCommandPaletteOpen(false);
     },
   };
@@ -97,6 +127,18 @@ export function getCommandPaletteActions(): CommandPaletteAction[] {
       },
     },
     {
+      id: "open-dashboard",
+      kind: "workspace",
+      title: "Return to Dashboard",
+      subtitle: "Bring floating panels back to the front",
+      keywords: ["dashboard", "return", "panels", "system"],
+      run: () => {
+        const s = useAppStore.getState();
+        s.setWorkspaceView("dashboard");
+        s.setCommandPaletteOpen(false);
+      },
+    },
+    {
       id: "open-agent-queue",
       kind: "agent",
       title: "Open Agent Queue",
@@ -117,6 +159,30 @@ export function getCommandPaletteActions(): CommandPaletteAction[] {
       run: () => {
         const s = useAppStore.getState();
         s.setDrawerOpen("memory");
+        s.setCommandPaletteOpen(false);
+      },
+    },
+    openDrawerAction("settings", "Open Settings", "Motion, memory, backend, and operator preferences", ["settings", "preferences", "motion", "backend"], "workspace"),
+    openDrawerAction("notifications", "Open Notifications", "Alerts, tool results, task completions, and workspace events", ["notifications", "alerts", "events", "toast"], "debug"),
+    openDrawerAction("artifact-inspector", "Open Artifact Inspector", "Inspect generated work and source context", ["artifact", "inspector", "export", "canvas"], "workspace"),
+    openModalAction("add-widget", "Add Widget", "Create a semantic panel from a metric, memory, or command", ["widget", "panel", "create", "add"], "workspace"),
+    openModalAction("context-picker", "Open Context Picker", "Attach panels and memory to the next command", ["context", "picker", "attach", "panels"], "run"),
+    openModalAction("model-selector", "Open Model Selector", "Choose model and reasoning mode", ["model", "selector", "mode", "router"], "run"),
+    openModalAction("export", "Export Workspace", "Package artifacts, timeline, and current state", ["export", "download", "bundle"], "workspace"),
+    openModalAction("approval", "Open Deployment Approval", "Review rollout risk and approval gates", ["approval", "deploy", "canary", "risk"], "tool"),
+    openModalAction("shortcuts", "Open Keyboard Shortcuts", "Show fast control commands", ["keyboard", "shortcuts", "hotkeys"], "workspace"),
+    openModalAction("compare", "Open Branch Compare", "Compare generated artifact branches", ["compare", "branch", "artifact", "diff"], "workspace"),
+    openModalAction("stop-confirm", "Confirm Stop Active Run", "Cancel active agent work with a clear checkpoint", ["stop", "cancel", "run", "task"], "debug"),
+    {
+      id: "expand-temporal-memory",
+      kind: "memory",
+      title: "Expand Temporal Memory",
+      subtitle: "Open the large timeline scrub and replay surface",
+      keywords: ["temporal", "memory", "timeline", "state", "22", "expand"],
+      run: () => {
+        const s = useAppStore.getState();
+        s.expandPanel("memory-ribbon", true);
+        s.setMode("reviewing");
         s.setCommandPaletteOpen(false);
       },
     },
