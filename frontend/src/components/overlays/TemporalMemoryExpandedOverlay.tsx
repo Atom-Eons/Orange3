@@ -47,7 +47,7 @@ export function TemporalMemoryExpandedOverlay() {
           </div>
 
           <div className="temporal-expanded__track" aria-label="Memory events">
-            {events.map((event, index) => (
+            {events.map((event) => (
               <button
                 key={event.id}
                 type="button"
@@ -57,7 +57,6 @@ export function TemporalMemoryExpandedOverlay() {
                   focusPanel(event.relatedPanelIds[0]);
                   setComposerValue(`/timeline explain "${event.title}"`);
                 }}
-                style={{ "--event-index": index } as React.CSSProperties}
               >
                 <i>{event.timeLabel}</i>
                 <strong>{event.title}</strong>
