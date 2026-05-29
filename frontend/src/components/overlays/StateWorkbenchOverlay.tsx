@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { getMockupStateSpec } from "../../engine/mockupStateBank";
 import { useAppStore } from "../../store/useAppStore";
-import { ProductSurfaceOverlay, isProductSurfaceDrawer, isProductSurfaceModal } from "./ProductSurfaceOverlay";
+import { isProductSurfaceDrawer, isProductSurfaceModal } from "./ProductSurfaceOverlay";
 
 const drawerTitles: Record<string, string> = {
   performance: "Performance Overlay",
@@ -28,7 +28,6 @@ export function StateWorkbenchOverlay() {
 
   return (
     <>
-      <ProductSurfaceOverlay />
       <AnimatePresence>
         {drawerTitle ? (
           <motion.aside
