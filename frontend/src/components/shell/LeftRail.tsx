@@ -10,6 +10,7 @@ import {
   Home,
   LayoutDashboard,
   PackageCheck,
+  Settings,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -19,28 +20,35 @@ const navItems = [
   { label: "Home", icon: Home, action: "dashboard" },
   { label: "Projects", icon: Folder, action: "dashboard" },
   { label: "Datasets", icon: Database, action: "dashboard" },
-  { label: "Models", icon: Box, action: "dashboard" },
+  { label: "Models", icon: Box, action: "model-selector" },
   { label: "Pipelines", icon: GitBranch, action: "dashboard" },
-  { label: "Deployments", icon: PackageCheck, action: "canvas" },
+  { label: "Deployments", icon: PackageCheck, action: "approval" },
   { label: "Monitoring", icon: ShieldCheck, action: "dashboard" },
   { label: "Agents", icon: Bot, action: "agent-queue" },
   { label: "Memory", icon: Database, action: "memory" },
-  { label: "Alerts", icon: Bell, action: "dashboard", badge: 3 },
-  { label: "Reports", icon: FileText, action: "canvas" },
+  { label: "Alerts", icon: Bell, action: "notifications", badge: 3 },
+  { label: "Reports", icon: FileText, action: "artifact-inspector" },
+  { label: "Settings", icon: Settings, action: "settings" },
 ] as const;
 
 export function LeftRail() {
   const setWorkspaceView = useAppStore((s) => s.setWorkspaceView);
   const setDrawerOpen = useAppStore((s) => s.setDrawerOpen);
+  const setModalOpen = useAppStore((s) => s.setModalOpen);
   const workspaceView = useAppStore((s) => s.workspaceView);
 
   const runAction = (action: (typeof navItems)[number]["action"]) => {
-    if (action === "agent-queue" || action === "memory") {
-      setDrawerOpen(action);
+    if (action === "dashboard" || action === "canvas") {
+      setWorkspaceView(action);
       return;
     }
 
-    setWorkspaceView(action);
+    if (["agent-queue", "memory", "notifications", "artifact-inspector", "settings"].includes(action)) {
+      setDrawerOpen(action as never);
+      return;
+    }
+
+    setModalOpen(action as never);
   };
 
   return (
