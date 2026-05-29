@@ -2,34 +2,16 @@ import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { getMockupStateSpec } from "../../engine/mockupStateBank";
 import { useAppStore } from "../../store/useAppStore";
+import { ProductSurfaceOverlay, isProductSurfaceDrawer, isProductSurfaceModal } from "./ProductSurfaceOverlay";
 
 const drawerTitles: Record<string, string> = {
-  settings: "Settings",
-  notifications: "Notifications",
-  "artifact-inspector": "Artifact Inspector",
   performance: "Performance Overlay",
 };
 
-const modalTitles: Record<string, string> = {
-  "add-widget": "Add Widget",
-  "context-picker": "Context Picker",
-  "model-selector": "Model Selector",
-  export: "Export Workspace",
-  approval: "Deployment Approval",
-  shortcuts: "Keyboard Shortcuts",
-  compare: "Artifact Branch Compare",
-  "stop-confirm": "Stop Active Run?",
-};
+const modalTitles: Record<string, string> = {};
 
 function linesForSurface(label: string) {
-  if (label.includes("Settings")) return ["Motion intensity", "Memory scope", "Backend: mock / remote", "Visual priority tuning"];
-  if (label.includes("Notifications")) return ["Critical latency", "Tool result returned", "Artifact created", "Agent task completed"];
-  if (label.includes("Artifact")) return ["Deployment Report", "Primary branch", "Related panels: pipeline, model, causality", "Export ready"];
-  if (label.includes("Context")) return ["System Health", "Project Nexus", "Causal Insights", "Temporal Memory"];
-  if (label.includes("Model")) return ["GPT-5.5 frontier", "Deep mode", "Latency budget: medium", "Tool policy: approved"];
-  if (label.includes("Approval")) return ["Canary 5%", "Risk: medium", "Rollback gate: ready", "Human approval required"];
-  if (label.includes("Shortcuts")) return ["Cmd/Ctrl+K command palette", "Cmd/Ctrl+L composer focus", "Cmd/Ctrl+Enter run", "Escape closes overlays"];
-  if (label.includes("Compare")) return ["Branch A: concise", "Branch B: evidence-rich", "Branch C: deployment-safe", "Recommended: Branch B"];
+  if (label.includes("Performance")) return ["FPS", "Memory", "Render cost", "Stream health"];
   return ["Workspace snapshot", "Timeline range", "Artifacts and memory", "Ready"];
 }
 
@@ -41,11 +23,12 @@ export function StateWorkbenchOverlay() {
   const setModalOpen = useAppStore((s) => s.setModalOpen);
 
   const mockup = getMockupStateSpec(activeMockupStateId);
-  const drawerTitle = activeDrawer ? drawerTitles[activeDrawer] : undefined;
-  const modalTitle = activeModal ? modalTitles[activeModal] : undefined;
+  const drawerTitle = activeDrawer && !isProductSurfaceDrawer(activeDrawer) ? drawerTitles[activeDrawer] : undefined;
+  const modalTitle = activeModal && !isProductSurfaceModal(activeModal) ? modalTitles[activeModal] : undefined;
 
   return (
     <>
+      <ProductSurfaceOverlay />
       <AnimatePresence>
         {drawerTitle ? (
           <motion.aside
