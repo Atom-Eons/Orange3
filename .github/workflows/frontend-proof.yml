@@ -35,11 +35,11 @@ jobs:
 
       - name: Capture anchor visual states
         working-directory: frontend
-        run: npm run proof:visual -- --states=01,06,26,37,61 --label=ci-anchors
+        run: npm run proof:visual -- --states=01,06,22,26,37,61 --label=ci-anchors
 
       - name: Produce non-strict pixel receipt
         working-directory: frontend
-        run: npm run proof:pixel -- --states=01,06,26,37,61
+        run: npm run proof:pixel -- --states=01,06,22,26,37,61
 
       - name: Summarize proof
         working-directory: frontend
