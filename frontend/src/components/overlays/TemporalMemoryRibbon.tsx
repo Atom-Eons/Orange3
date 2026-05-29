@@ -3,10 +3,21 @@ import { useAppStore } from "../../store/useAppStore";
 
 export function TemporalMemoryRibbon() {
   const timeline = useAppStore((s) => s.timeline);
-  const setDrawerOpen = useAppStore((s) => s.setDrawerOpen);
+  const expandPanel = useAppStore((s) => s.expandPanel);
+  const setMode = useAppStore((s) => s.setMode);
+  const setContextPanels = useAppStore((s) => s.setContextPanels);
   const events = timeline.slice(-7);
+
   return (
-    <button type="button" className="temporal-memory-ribbon glass" onClick={() => setDrawerOpen("memory")}>
+    <button
+      type="button"
+      className="temporal-memory-ribbon glass"
+      onClick={() => {
+        expandPanel("memory-ribbon", true);
+        setMode("reviewing");
+        setContextPanels(["memory-ribbon", "activity-feed", "causality"]);
+      }}
+    >
       <span className="temporal-memory-ribbon__label"><Clock size={15} /> Temporal Memory</span>
       <span className="temporal-memory-ribbon__track">
         {events.map((event) => (
