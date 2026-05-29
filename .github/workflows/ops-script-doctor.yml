@@ -1,0 +1,22 @@
+name: Ops Script Doctor
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  package-script-doctor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run package script doctor
+        run: node ./scripts/v4/package-script-doctor.mjs --json
