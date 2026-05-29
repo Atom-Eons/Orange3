@@ -9,6 +9,7 @@ This ledger tracks direct GitHub changes made by GPT-5.5 Thinking during the Ora
 - Do not mutate frontend visual taste unless the point is understood.
 - Track all changes in git.
 - Keep the whole project green/functional, not iterative theater.
+- After the frontend visual chat was linked, stay clear of additional frontend visual/code edits unless explicitly reopened.
 
 ## Current Project Understanding
 
@@ -155,13 +156,60 @@ Why:
 
 `apps/api` imports `@prisma/client`, but its build script only ran `tsc`. On a fresh checkout/CI run, Prisma Client may not exist unless generated first. `prebuild` and `pretest` now run `prisma generate` so local and CI behavior match.
 
-### cbe4c1b — `docs/DELTA_CHANGE_LEDGER_2026-05-28.md`
+### 7eb8f0f — `scripts/v4/frontend-dist-bridge.mjs`
 
-Updated this ledger after the Project Green workflow.
+Added a backend/Ops bridge from `frontend/dist` to `apps/web/dist`.
+
+Why:
+
+The canonical frontend workspace builds to `frontend/dist`, but the existing Ops command server serves `/v4/react` from `apps/web/dist`. This bridge copies the built frontend into the server's expected static path without changing frontend visuals.
+
+Important:
+
+This script is backend serving glue. It does not alter React source, visual design, or state behavior.
+
+### a748a7c — `scripts/v4/package-script-doctor.mjs`
+
+Added a non-mutating package script reference doctor.
+
+Why:
+
+Delta has many root/workspace scripts. The doctor checks obvious local file references inside `package.json` scripts and reports missing files before operators discover failures mid-run.
+
+What it does:
+
+- Reads root and workspace package files.
+- Extracts local `.mjs`, `.js`, `.ts`, `.json`, `.ps1`, `.sh`, and `.prisma` references.
+- Reports missing local files.
+- Writes an optional receipt.
+- Does not run scripts or mutate the repo.
+
+### f695dd3 — `.github/workflows/ops-script-doctor.yml`
+
+Added CI for the package script doctor.
+
+Why:
+
+Broken local script references should surface as proof in GitHub, not remain hidden until a local operator run.
+
+### 18ccdac / cbe4c1b / this file
+
+Updated this ledger as new backend/Ops commits landed.
 
 Why:
 
 The operator ordered every change tracked in git.
+
+## Blocked Writes / Not Forced
+
+Two attempted writes were blocked by the connector safety layer:
+
+- Rewriting root `package.json` again to wire `frontend-dist-bridge.mjs` directly into `build:web`.
+- Updating `project-green.yml` to call the bridge script.
+
+Decision:
+
+Do not fight the connector. The bridge script is committed and can be wired locally or by the frontend lane after visual work stabilizes.
 
 ## Non-Delta Change Made Earlier
 
@@ -187,6 +235,8 @@ Functional progress:
 - Frontend proof CI now exists.
 - Project Green CI now exists.
 - API build/test now generates Prisma Client first.
+- Backend bridge script exists for serving `frontend/dist` through the command server's current `apps/web/dist` expectation.
+- Package script doctor exists and has CI.
 
 Still not proven green locally from this chat:
 
@@ -210,25 +260,19 @@ Run from repo root:
 npm install
 npm run check
 npm run build:web
+node ./scripts/v4/frontend-dist-bridge.mjs
 npm run build:api
-npm run frontend:proof
 npm run atomsmasher:doctor
 npm run ops:readiness
 ```
 
-Then inspect:
-
-```text
-frontend/proof/**/visual-proof-receipt.json
-frontend/proof/**/pixel-compare-receipt.json
-receipts/**
-```
+Frontend visual lane should run visual proof separately unless the operator reopens frontend work here.
 
 ## Current Visual Truth
 
 Do not call it pixel-perfect yet.
 
-The frontend now has proof tooling. The masterpiece still needs source-exact visual tuning for anchor states `01`, `06`, `26`, `37`, and `61`, then all 72 states.
+The frontend has proof tooling. The visual masterpiece work belongs to the dedicated frontend chat until the operator reopens that lane here.
 
 ## Rule For Future Agents
 
@@ -236,7 +280,7 @@ Do not perform subjective visual edits unless the mockup target, state ID, and f
 
 Allowed without further clarification:
 
-- Fix broken scripts.
+- Fix broken backend/Ops scripts.
 - Fix empty receipts.
 - Fix CI errors.
 - Fix missing proof outputs.
