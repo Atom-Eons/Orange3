@@ -147,6 +147,22 @@ What it does:
 - Builds the frontend workspace.
 - Syntax-checks AtomSmasher runtime/API route files.
 
+### cac8707 — `apps/api/package.json`
+
+Added Prisma client generation before API build/test.
+
+Why:
+
+`apps/api` imports `@prisma/client`, but its build script only ran `tsc`. On a fresh checkout/CI run, Prisma Client may not exist unless generated first. `prebuild` and `pretest` now run `prisma generate` so local and CI behavior match.
+
+### cbe4c1b — `docs/DELTA_CHANGE_LEDGER_2026-05-28.md`
+
+Updated this ledger after the Project Green workflow.
+
+Why:
+
+The operator ordered every change tracked in git.
+
 ## Non-Delta Change Made Earlier
 
 ### f1fc691 — `AtomEons/orangebox-os/src-tauri/tauri.conf.json`
@@ -165,10 +181,12 @@ Functional progress:
 - Frontend workspace exists.
 - Frontend build script exists.
 - Backend Ops package exists.
+- API workspace exists.
 - AtomSmasher scripts are wired at root and imported into the command server.
 - Frontend proof tooling now exists in `frontend/`.
 - Frontend proof CI now exists.
 - Project Green CI now exists.
+- API build/test now generates Prisma Client first.
 
 Still not proven green locally from this chat:
 
@@ -182,7 +200,7 @@ Still not proven green locally from this chat:
 
 Reason:
 
-GitHub connector can edit/read repository files but does not execute npm builds/tests in the repo runtime.
+GitHub connector can edit/read repository files but does not execute npm builds/tests in the repo runtime. GitHub workflow runs were not visible through the connector after the commits at the time of this pass.
 
 ## Next Required Proof Run On Local Machine Or CI
 
