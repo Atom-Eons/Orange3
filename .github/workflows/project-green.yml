@@ -9,6 +9,8 @@ jobs:
   syntax-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      DATABASE_URL: postgresql://ae:ae@localhost:5432/ae_see_suite
     steps:
       - name: Checkout
         uses: actions/checkout@v4
