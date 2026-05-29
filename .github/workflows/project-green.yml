@@ -1,6 +1,7 @@
 name: Project Green
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches: [main]
@@ -32,7 +33,10 @@ jobs:
       - name: Build API workspace
         run: npm run build -w @ae-see-suite/api
 
-      - name: Build frontend workspace
+      - name: Test API workspace
+        run: npm run test -w @ae-see-suite/api
+
+      - name: Build frontend workspace without visual tuning
         run: npm run build -w @ae-see-suite/web
 
       - name: AtomSmasher runtime syntax
