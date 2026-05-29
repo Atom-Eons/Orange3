@@ -1,0 +1,31 @@
+name: AE See-Suite MCP
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ae-see-suite-mcp-*.mjs"
+      - ".github/workflows/ae-see-suite-mcp.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/ae-see-suite-mcp-*.mjs"
+      - ".github/workflows/ae-see-suite-mcp.yml"
+
+jobs:
+  ae-see-suite-mcp-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Syntax check AE See-Suite MCP tools
+        run: node --check ./scripts/ae-see-suite-mcp-tools.mjs
+
+      - name: Syntax check AE See-Suite MCP server
+        run: node --check ./scripts/ae-see-suite-mcp-server.mjs
