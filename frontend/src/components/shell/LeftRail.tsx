@@ -38,7 +38,7 @@ export function LeftRail() {
   const workspaceView = useAppStore((s) => s.workspaceView);
 
   const runAction = (action: (typeof navItems)[number]["action"]) => {
-    if (action === "dashboard" || action === "canvas") {
+    if (action === "dashboard") {
       setWorkspaceView(action);
       return;
     }
@@ -65,8 +65,7 @@ export function LeftRail() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active =
-            (item.action === "dashboard" && workspaceView === "dashboard" && item.label === "Home") ||
-            (item.action === "canvas" && workspaceView === "canvas" && item.label === "Deployments");
+            item.action === "dashboard" && workspaceView === "dashboard" && item.label === "Home";
 
           return (
             <button
