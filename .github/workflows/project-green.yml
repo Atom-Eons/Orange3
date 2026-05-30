@@ -9,6 +9,8 @@ jobs:
   syntax-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      DATABASE_URL: postgresql://ae:ae@localhost:5432/ae_see_suite
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,8 +32,26 @@ jobs:
       - name: Build API workspace
         run: npm run build -w @ae-see-suite/api
 
+      - name: Test API workspace
+        run: npm run test -w @ae-see-suite/api
+
       - name: Build frontend workspace
-        run: npm run build -w @ae-see-suite/web
+        shell: bash
+        run: |
+          mkdir -p frontend/proof/logs
+          set +e
+          npm run build -w @ae-see-suite/web 2>&1 | tee frontend/proof/logs/project-green-build-web.log
+          status=${PIPESTATUS[0]}
+          set -e
+          exit "$status"
 
       - name: AtomSmasher runtime syntax
         run: node --check ./scripts/v4/atomsmasher-runtime.mjs && node --check ./scripts/v4/atomsmasher-api-routes.mjs
+
+      - name: Upload green logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project-green-logs
+          path: frontend/proof/logs/
+          if-no-files-found: warn
