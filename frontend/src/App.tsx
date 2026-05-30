@@ -11,6 +11,8 @@ import "./styles/motion.css";
 import "./styles/command-palette.css";
 import "./styles/drawers.css";
 import "./styles/canvas.css";
+import "./styles/temporal.css";
+import "./styles/product-surfaces.css";
 import "./styles/animations.css";
 import "./styles/responsive.css";
 import "./styles/visual-atlas.css";

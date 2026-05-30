@@ -26,6 +26,7 @@ export function TopModeRail() {
   const setMode = useAppStore((s) => s.setMode);
   const setSelectedMode = useAppStore((s) => s.setSelectedMode);
   const setDrawerOpen = useAppStore((s) => s.setDrawerOpen);
+  const setModalOpen = useAppStore((s) => s.setModalOpen);
   const setCommandPaletteOpen = useAppStore((s) => s.setCommandPaletteOpen);
   const agents = useAppStore((s) => s.agents);
   const activeAgents = agents.filter((agent) => ["thinking", "working", "blocked"].includes(agent.state)).length;
@@ -58,7 +59,7 @@ export function TopModeRail() {
           <Command size={15} />
           <span>K</span>
         </button>
-        <button type="button" className="top-command-cluster__icon glass" aria-label="Live stream">
+        <button type="button" className="top-command-cluster__icon glass" aria-label="Live stream" onClick={() => setModalOpen("context-picker")}>
           <Radio size={17} />
         </button>
         <button type="button" className="top-command-cluster__queue glass" onClick={() => setDrawerOpen("agent-queue")}>
@@ -66,11 +67,11 @@ export function TopModeRail() {
           <span>Agent Queue</span>
           <b>{Math.max(4, activeAgents)}</b>
         </button>
-        <button type="button" className="top-command-cluster__icon glass" aria-label="Notifications">
+        <button type="button" className="top-command-cluster__icon glass" aria-label="Notifications" onClick={() => setDrawerOpen("notifications")}>
           <Bell size={17} />
           <b>8</b>
         </button>
-        <button type="button" className="top-command-cluster__create glass" aria-label="Create">
+        <button type="button" className="top-command-cluster__create glass" aria-label="Create" onClick={() => setModalOpen("add-widget")}>
           <Plus size={20} />
         </button>
       </aside>

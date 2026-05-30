@@ -7,9 +7,9 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "proof:visual": "node ./scripts/visual-proof.mjs --states=01,06,26,37,61 --label=anchors",
+    "proof:visual": "node ./scripts/visual-proof.mjs --states=01,06,22,26,37,61 --label=anchors",
     "proof:visual:72": "node ./scripts/visual-proof.mjs --states=all --label=72-state",
-    "proof:pixel": "node ./scripts/pixel-compare.mjs --states=01,06,26,37,61",
+    "proof:pixel": "node ./scripts/pixel-compare.mjs --states=01,06,22,26,37,61",
     "proof:summary": "node ./scripts/proof-summary.mjs"
   },
   "dependencies": {

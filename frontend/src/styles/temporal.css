@@ -1,0 +1,182 @@
+.temporal-expanded {
+  position: absolute;
+  z-index: 56;
+  left: 50%;
+  bottom: 180px;
+  width: min(980px, calc(100vw - 420px));
+  max-height: min(520px, calc(100vh - 270px));
+  transform: translateX(-50%);
+  border-radius: 30px;
+  padding: 16px;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.temporal-expanded__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(142, 227, 255, 0.12);
+}
+
+.temporal-expanded__header strong,
+.temporal-expanded__header span {
+  display: block;
+}
+
+.temporal-expanded__header strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.temporal-expanded__header span {
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.temporal-expanded__header button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(142, 227, 255, 0.14);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+}
+
+.temporal-expanded__search {
+  height: 42px;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0;
+  border: 1px solid rgba(142, 227, 255, 0.12);
+  border-radius: 999px;
+  color: var(--cyan);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0 12px;
+}
+
+.temporal-expanded__search span {
+  color: rgba(214, 231, 248, 0.5);
+  font-size: 12px;
+}
+
+.temporal-expanded__scrub {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.temporal-expanded__scrub button {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(142, 227, 255, 0.12);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0 11px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.temporal-expanded__track {
+  max-height: 330px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.temporal-expanded__event {
+  min-height: 88px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(142, 227, 255, 0.1);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(47, 252, 255, 0.08), transparent 34%),
+    rgba(255, 255, 255, 0.025);
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.temporal-expanded__event:hover {
+  border-color: rgba(47, 252, 255, 0.28);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(47, 252, 255, 0.14), transparent 34%),
+    rgba(47, 252, 255, 0.045);
+}
+
+.temporal-expanded__event i,
+.temporal-expanded__event em {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.temporal-expanded__event strong {
+  color: white;
+  font-size: 12px;
+}
+
+.temporal-expanded__event span {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.temporal-expanded__event--warning {
+  border-color: rgba(255, 191, 72, 0.22);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 191, 72, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.temporal-expanded__event--critical {
+  border-color: rgba(255, 59, 95, 0.28);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 59, 95, 0.13), transparent 34%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.temporal-expanded__event--success {
+  border-color: rgba(56, 255, 179, 0.24);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 255, 179, 0.11), transparent 34%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.temporal-expanded--state-22 {
+  border-color: rgba(255, 191, 72, 0.36);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 191, 72, 0.12), transparent 38%),
+    radial-gradient(circle at 12% 80%, rgba(47, 252, 255, 0.08), transparent 32%),
+    rgba(7, 13, 31, 0.72);
+}
+
+@media (max-width: 1180px) {
+  .temporal-expanded {
+    left: calc(50% + 36px);
+    width: calc(100vw - 170px);
+  }
+
+  .temporal-expanded__track {
+    grid-template-columns: 1fr;
+  }
+}

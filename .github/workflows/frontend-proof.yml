@@ -28,18 +28,25 @@ jobs:
         run: npm install
 
       - name: Build frontend
-        run: npm run build -w @ae-see-suite/web
+        shell: bash
+        run: |
+          mkdir -p frontend/proof/logs
+          set +e
+          npm run build -w @ae-see-suite/web 2>&1 | tee frontend/proof/logs/build-web.log
+          status=${PIPESTATUS[0]}
+          set -e
+          exit "$status"
 
       - name: Install Playwright Chromium
         run: npx playwright install chromium --with-deps
 
       - name: Capture anchor visual states
         working-directory: frontend
-        run: npm run proof:visual -- --states=01,06,26,37,61 --label=ci-anchors
+        run: npm run proof:visual -- --states=01,06,22,26,37,61 --label=ci-anchors
 
       - name: Produce non-strict pixel receipt
         working-directory: frontend
-        run: npm run proof:pixel -- --states=01,06,26,37,61
+        run: npm run proof:pixel -- --states=01,06,22,26,37,61
 
       - name: Summarize proof
         working-directory: frontend
