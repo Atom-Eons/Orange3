@@ -36,27 +36,42 @@ function normalizePathToken(token) {
     .replace(/\//g, path.sep);
 }
 
+function cleanShellToken(raw) {
+  return normalizePathToken(String(raw || "")
+    .trim()
+    .replace(/^[({[]+/, "")
+    .replace(/[)}\],]+$/, "")
+    .replace(/^['"]|['"]$/g, ""));
+}
+
+function isLocalFileRef(ref) {
+  if (!ref) return false;
+  if (/^[A-Za-z]:/.test(ref)) return false; // external absolute Windows path
+  if (ref.startsWith("http")) return false;
+  if (ref.startsWith("--")) return false;
+  if (!/\.(mjs|js|ts|json|ps1|sh|prisma)$/i.test(ref)) return false;
+  // Require an actual path separator. This prevents false positives such as
+  // `.example.json` being extracted from `MANIFEST.example.json`.
+  return ref.includes(path.sep);
+}
+
 function extractLocalRefs(script) {
   const refs = [];
+  const text = String(script || "");
   const patterns = [
     /(?:node|tsx|tauri|prisma)\s+([^&|;\n]+?\.(?:mjs|js|ts|json|prisma))(?:\s|$)/gi,
     /(?:-File|--file)\s+([^&|;\n]+?\.(?:ps1|mjs|js|ts))(?:\s|$)/gi,
-    /\b\.\/?[A-Za-z0-9_./\\-]+\.(?:mjs|js|ts|json|ps1|sh|prisma)\b/g,
+    /(?:^|\s)(\.{1,2}[\\/][A-Za-z0-9_./\\-]+\.(?:mjs|js|ts|json|ps1|sh|prisma))(?:\s|$)/g,
+    /(?:^|\s)([A-Za-z0-9_-]+[\\/][A-Za-z0-9_./\\-]+\.(?:mjs|js|ts|json|ps1|sh|prisma))(?:\s|$)/g,
   ];
   for (const pattern of patterns) {
-    for (const match of script.matchAll(pattern)) {
+    for (const match of text.matchAll(pattern)) {
       const raw = match[1] || match[0];
-      const first = String(raw).trim().split(/\s+/)[0];
-      refs.push(normalizePathToken(first));
+      const token = cleanShellToken(String(raw).trim().split(/\s+/)[0]);
+      if (isLocalFileRef(token)) refs.push(token);
     }
   }
-  return [...new Set(refs)].filter((ref) => {
-    if (!ref) return false;
-    if (/^[A-Za-z]:/.test(ref)) return false; // external absolute Windows path
-    if (ref.startsWith("http")) return false;
-    if (ref.startsWith("--")) return false;
-    return ref.includes(path.sep) || ref.startsWith(".");
-  });
+  return [...new Set(refs)];
 }
 
 function scriptRows(pkgFile, workspaceRoot) {
@@ -89,7 +104,7 @@ function main() {
   const missing = rows.filter((row) => !row.exists);
   const result = {
     ok: missing.length === 0,
-    version: "orangebox-package-script-doctor/v1",
+    version: "orangebox-package-script-doctor/v2",
     checked_at: new Date().toISOString(),
     packages_checked: packageFiles.map((file) => path.relative(root, file).replace(/\\/g, "/")),
     local_refs_checked: rows.length,
