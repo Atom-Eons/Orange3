@@ -28,7 +28,14 @@ jobs:
         run: npm install
 
       - name: Build frontend
-        run: npm run build -w @ae-see-suite/web
+        shell: bash
+        run: |
+          mkdir -p frontend/proof/logs
+          set +e
+          npm run build -w @ae-see-suite/web 2>&1 | tee frontend/proof/logs/build-web.log
+          status=${PIPESTATUS[0]}
+          set -e
+          exit "$status"
 
       - name: Install Playwright Chromium
         run: npx playwright install chromium --with-deps
