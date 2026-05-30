@@ -120,7 +120,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   focusPanelId: undefined,
   panels: seedPanels,
   agents: seedAgents,
-  activeCausalPath: createLatencyCausalPath(),
+  activeCausalPath: undefined,
   timeline: persisted?.timeline ?? seedTimeline,
   messages: persisted?.messages ?? seedMessages,
   tasks: [],
@@ -145,10 +145,9 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   pendingApprovals: [],
   eventToasts: [],
   performanceOverlayOpen: false,
-  chatDockExpanded: false,
+  chatDockExpanded: true,
   layoutEditMode: false,
   activeMockupStateId: undefined,
-
   setWorkspaceId: (workspaceId) => set({ workspaceId }),
   setMode: (mode) => set({ mode }),
   setWorkspaceView: (workspaceView) => set({ workspaceView }),
@@ -161,8 +160,8 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
           panels: state.panels.map((panel) => ({ ...panel, dimmed: false, highlighted: false })),
         };
       }
-      const focusedPanel = state.panels.find((panel) => panel.id === panelId);
-      const related = new Set<PanelId>(focusedPanel ? [focusedPanel.id, ...focusedPanel.connectedTo] : [panelId]);
+      const focused = state.panels.find((panel) => panel.id === panelId);
+      const related = new Set<PanelId>(focused ? [focused.id, ...focused.connectedTo] : [panelId]);
       return {
         focusPanelId: panelId,
         panels: state.panels.map((panel) => ({
@@ -170,10 +169,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
           dimmed: !related.has(panel.id),
           highlighted: related.has(panel.id) && panel.id !== panelId,
         })),
-        composer: {
-          ...state.composer,
-          contextPanelIds: Array.from(related).slice(0, 4),
-        },
+        composer: { ...state.composer, contextPanelIds: Array.from(related).slice(0, 4) },
       };
     }),
   clearFocus: () =>
@@ -183,271 +179,154 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     })),
   expandPanel: (panelId, expanded) =>
     set((state) => ({
-      panels: state.panels.map((panel) => ({ ...panel, expanded: panel.id === panelId ? expanded : false })),
+      panels: state.panels.map((panel) => (panel.id === panelId ? { ...panel, expanded } : panel)),
       focusPanelId: expanded ? panelId : state.focusPanelId,
     })),
-  collapseAllPanels: () =>
-    set((state) => ({
-      panels: state.panels.map((panel) => ({ ...panel, expanded: false })),
-    })),
-  setPanelSeverity: (panelId, severity) =>
-    set((state) => ({
-      panels: state.panels.map((panel) => (panel.id === panelId ? { ...panel, severity } : panel)),
-    })),
-  setComposerValue: (value) =>
-    set((state) => ({
-      composer: { ...state.composer, value, slashMenuOpen: value.startsWith("/") },
-      mode: state.composer.isFocused ? "listening" : state.mode,
-    })),
-  setComposerFocus: (isFocused) =>
-    set((state) => ({
-      composer: { ...state.composer, isFocused },
-      mode: isFocused && state.mode === "calm" ? "listening" : !isFocused && state.mode === "listening" ? "calm" : state.mode,
-    })),
+  collapseAllPanels: () => set((state) => ({ panels: state.panels.map((panel) => ({ ...panel, expanded: false })) })),
+  setPanelSeverity: (panelId, severity) => set((state) => ({ panels: state.panels.map((panel) => (panel.id === panelId ? { ...panel, severity } : panel)) })),
+  setComposerValue: (value) => set((state) => ({ composer: { ...state.composer, value, slashMenuOpen: value.startsWith("/") } })),
+  setComposerFocus: (isFocused) => set((state) => ({ composer: { ...state.composer, isFocused }, mode: isFocused ? "listening" : state.mode })),
   setSelectedMode: (selectedMode) => set((state) => ({ composer: { ...state.composer, selectedMode } })),
   setSelectedModel: (selectedModel) => set((state) => ({ composer: { ...state.composer, selectedModel } })),
   toggleTool: (tool) =>
-    set((state) => {
-      const selectedTools = state.composer.selectedTools.includes(tool)
-        ? state.composer.selectedTools.filter((item) => item !== tool)
-        : [...state.composer.selectedTools, tool];
-      return { composer: { ...state.composer, selectedTools } };
-    }),
+    set((state) => ({
+      composer: {
+        ...state.composer,
+        selectedTools: state.composer.selectedTools.includes(tool)
+          ? state.composer.selectedTools.filter((item) => item !== tool)
+          : [...state.composer.selectedTools, tool],
+      },
+    })),
   setContextPanels: (contextPanelIds) => set((state) => ({ composer: { ...state.composer, contextPanelIds } })),
   setSlashMenuOpen: (slashMenuOpen) => set((state) => ({ composer: { ...state.composer, slashMenuOpen } })),
   setPlanPreview: (planPreview) => set((state) => ({ composer: { ...state.composer, planPreview } })),
-  addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
-  updateMessage: (id, patch) =>
-    set((state) => ({
-      messages: state.messages.map((message) => (message.id === id ? { ...message, ...patch } : message)),
-    })),
+  addMessage: (message) => set((state) => ({ messages: [...state.messages, message].slice(-100) })),
+  updateMessage: (id, patch) => set((state) => ({ messages: state.messages.map((message) => (message.id === id ? { ...message, ...patch } : message)) })),
   addTimelineEvent: (event) => set((state) => ({ timeline: [...state.timeline, event].slice(-120) })),
-  addTask: (task) => set((state) => ({ tasks: [...state.tasks, task].slice(-40) })),
-  updateTask: (id, patch) =>
-    set((state) => ({
-      tasks: state.tasks.map((task) => (task.id === id ? { ...task, ...patch } : task)),
-    })),
+  addTask: (task) => set((state) => ({ tasks: [...state.tasks, task].slice(-80) })),
+  updateTask: (id, patch) => set((state) => ({ tasks: state.tasks.map((task) => (task.id === id ? { ...task, ...patch } : task)) })),
   completeTask: (id) =>
-    set((state) => {
-      const completedTask = state.tasks.find((task) => task.id === id);
-      return {
-        tasks: state.tasks.map((task) =>
-          task.id === id ? { ...task, status: "complete", progress: 100, completedAt: Date.now() } : task,
-        ),
-        agents: completedTask
-          ? state.agents.map((agent) =>
-              agent.id === completedTask.assignedAgentId ? { ...agent, state: "complete", taskId: undefined, energy: 0.68 } : agent,
-            )
-          : state.agents,
-      };
-    }),
+    set((state) => ({
+      tasks: state.tasks.map((task) => (task.id === id ? { ...task, status: "complete", progress: 100, completedAt: Date.now() } : task)),
+      agents: state.agents.map((agent) => (agent.taskId === id ? { ...agent, state: "complete", taskId: undefined, energy: 0.68 } : agent)),
+    })),
   cancelActiveTasks: () =>
     set((state) => ({
-      mode: state.activeCausalPath ? "alert" : "calm",
-      energy: state.activeCausalPath ? 0.82 : 0.55,
+      mode: "calm",
+      energy: 0.55,
       tasks: state.tasks.map((task) =>
         ["queued", "planning", "running", "waiting"].includes(task.status)
-          ? { ...task, status: "cancelled", progress: Math.min(task.progress, 99), completedAt: Date.now() }
+          ? { ...task, status: "cancelled", completedAt: Date.now() }
           : task,
       ),
-      agents: state.agents.map((agent) => ({
-        ...agent,
-        state: agent.state === "working" || agent.state === "thinking" || agent.state === "blocked" ? "idle" : agent.state,
-        taskId: undefined,
-        energy: Math.max(0.42, agent.energy * 0.7),
-      })),
+      agents: state.agents.map((agent) => ({ ...agent, state: agent.state === "blocked" ? "blocked" : "idle", taskId: undefined, energy: 0.48 })),
     })),
-  updateAgent: (id, patch) =>
-    set((state) => ({ agents: state.agents.map((agent) => (agent.id === id ? { ...agent, ...patch } : agent)) })),
+  updateAgent: (id, patch) => set((state) => ({ agents: state.agents.map((agent) => (agent.id === id ? { ...agent, ...patch } : agent)) })),
   setActiveCausalPath: (activeCausalPath) => set({ activeCausalPath, mode: activeCausalPath ? "alert" : "calm" }),
   triggerLatencyScenario: () =>
     set((state) => {
-      const activeCausalPath = createLatencyCausalPath();
-      const activeIds: PanelId[] = ["realtime-insights", "data-stream", "model-performance", "system-health", "activity-feed", "causality"];
+      const path = createLatencyCausalPath();
       return {
-        activeCausalPath,
         mode: "alert",
         energy: 1,
-        composer: { ...state.composer, contextPanelIds: activeIds.slice(0, 4) },
+        activeCausalPath: path,
         panels: state.panels.map((panel) => {
-          if (panel.id === "realtime-insights") return { ...panel, dimmed: false, severity: "warning" };
-          if (panel.id === "system-health") return { ...panel, dimmed: false, severity: "critical" };
-          if (panel.id === "data-stream") return { ...panel, dimmed: false, severity: "warning" };
-          return { ...panel, dimmed: !activeIds.includes(panel.id), highlighted: activeIds.includes(panel.id) };
+          if (["realtime-insights", "data-stream", "system-health"].includes(panel.id)) return { ...panel, severity: "warning", dimmed: false };
+          if (panel.id === "causality") return { ...panel, severity: "critical", dimmed: false };
+          return { ...panel, dimmed: !["model-performance", "activity-feed", "smart-suggestions"].includes(panel.id) };
         }),
-        agents: state.agents.map((agent) => {
-          if (agent.id === "watcher") return { ...agent, state: "working", energy: 1, connectedPanel: "realtime-insights" };
-          if (agent.id === "analyst") return { ...agent, state: "thinking", energy: 0.92, connectedPanel: "causality" };
-          return { ...agent, energy: Math.max(0.42, agent.energy * 0.76) };
-        }),
+        agents: state.agents.map((agent) =>
+          agent.id === "watcher" || agent.id === "analyst" ? { ...agent, state: "working", energy: 1, connectedPanel: "causality" } : { ...agent, energy: 0.48 },
+        ),
         timeline: [
           ...state.timeline,
-          createTimelineEvent({
-            title: "Latency anomaly activated",
-            description: "Causal path generated across gateway, model, resource, and user impact signals.",
-            type: "alert",
-            severity: "warning",
-            relatedPanelIds: activeIds,
-          }),
-        ],
-        eventToasts: [
-          ...state.eventToasts.slice(-4),
-          { id: createId("toast"), title: "Causal path generated", description: activeCausalPath.title, severity: "warning", createdAt: Date.now() },
-        ],
+          createTimelineEvent({ title: "Latency anomaly traced", description: path.title, type: "alert", severity: "warning", relatedPanelIds: ["causality", "data-stream", "system-health"] }),
+        ].slice(-120),
       };
     }),
   clearCausality: () =>
     set((state) => ({
-      activeCausalPath: undefined,
       mode: "calm",
       energy: 0.55,
+      activeCausalPath: undefined,
       panels: state.panels.map((panel) => ({ ...panel, dimmed: false, highlighted: false, severity: undefined })),
-      agents: state.agents.map((agent) => ({
-        ...agent,
-        state: agent.id === "watcher" || agent.id === "analyst" ? "watching" : "idle",
-        energy: 0.55,
-        taskId: undefined,
-      })),
+      agents: state.agents.map((agent) => ({ ...agent, state: agent.id === "watcher" ? "watching" : "idle", taskId: undefined, energy: 0.55 })),
     })),
   tickMetrics: () =>
     set((state) => {
-      const alertActive = state.mode === "alert";
-      const thinkingActive = ["thinking", "analyzing", "generating"].includes(state.mode);
-      const metrics: SystemMetrics = {
-        cpu: jitterMetric(state.metrics.cpu + (alertActive ? 1.2 : thinkingActive ? 0.5 : 0), alertActive ? 6 : 3, 12, 98),
-        memory: jitterMetric(state.metrics.memory + (thinkingActive ? 0.4 : 0), 3, 20, 96),
-        gpu: jitterMetric(state.metrics.gpu + (state.mode === "generating" ? 1 : 0), 5, 10, 98),
-        network: jitterMetric(state.metrics.network + (alertActive ? 1.4 : 0), 6, 18, 99),
-        latencyMs: jitterMetric(state.metrics.latencyMs + (alertActive ? 8 : -1.5), alertActive ? 28 : 8, 24, alertActive ? 220 : 120),
-        throughputTbs: jitterMetric(state.metrics.throughputTbs, 0.16, 1.2, 3.8),
-        eventsPerSecondM: jitterMetric(state.metrics.eventsPerSecondM, 0.24, 0.8, 3.4),
-        modelAccuracy: jitterMetric(state.metrics.modelAccuracy, 0.18, 88, 98),
-        precision: jitterMetric(state.metrics.precision, 0.22, 86, 98),
-        recall: jitterMetric(state.metrics.recall, 0.22, 86, 98),
-        f1: jitterMetric(state.metrics.f1, 0.18, 86, 98),
-        activeStreams: Math.round(jitterMetric(state.metrics.activeStreams, 3, 14, 42)),
-        pipelineSuccess: jitterMetric(state.metrics.pipelineSuccess - (alertActive ? 0.12 : 0), 0.25, 92, 99.8),
+      const metrics = {
+        ...state.metrics,
+        cpu: jitterMetric(state.metrics.cpu + (state.mode === "alert" ? 1.2 : 0), 5, 12, 98),
+        memory: jitterMetric(state.metrics.memory, 3, 20, 96),
+        gpu: jitterMetric(state.metrics.gpu + (state.mode === "generating" ? 1.3 : 0), 5, 10, 99),
+        network: jitterMetric(state.metrics.network + (state.mode === "alert" ? 1.8 : 0), 5, 18, 99),
+        latencyMs: Math.round(jitterMetric(state.metrics.latencyMs + (state.mode === "alert" ? 3.8 : -0.6), state.mode === "alert" ? 18 : 5, 28, state.mode === "alert" ? 260 : 90)),
       };
-      return { metrics, metricHistory: [...state.metricHistory.slice(-48), { timestamp: Date.now(), system: metrics }] };
+      return { metrics, metricHistory: [...state.metricHistory.slice(-40), { timestamp: Date.now(), system: metrics }] };
     }),
-  ingestMetricSnapshot: (incoming) =>
-    set((state) => {
-      const metrics = { ...state.metrics, ...incoming };
-      return { metrics, metricHistory: [...state.metricHistory.slice(-48), { timestamp: Date.now(), system: metrics }] };
-    }),
+  ingestMetricSnapshot: (incoming) => set((state) => {
+    const metrics = { ...state.metrics, ...incoming };
+    return { metrics, metricHistory: [...state.metricHistory.slice(-40), { timestamp: Date.now(), system: metrics }] };
+  }),
   setDrawerOpen: (activeDrawer) => set({ activeDrawer }),
   setModalOpen: (activeModal) => set({ activeModal }),
-  setCommandPaletteOpen: (commandPaletteOpen) =>
-    set({ commandPaletteOpen, commandPaletteQuery: commandPaletteOpen ? get().commandPaletteQuery : "" }),
+  setCommandPaletteOpen: (commandPaletteOpen) => set({ commandPaletteOpen, commandPaletteQuery: commandPaletteOpen ? get().commandPaletteQuery : "" }),
   setCommandPaletteQuery: (commandPaletteQuery) => set({ commandPaletteQuery }),
-  addPendingApproval: (approval) =>
-    set((state) => ({
-      pendingApprovals: [...state.pendingApprovals.filter((item) => item.id !== approval.id), approval],
-      activeDrawer: "tool-approval",
-    })),
-  resolveApproval: (id, status) =>
-    set((state) => ({
-      pendingApprovals: state.pendingApprovals.map((approval) => (approval.id === id ? { ...approval, status } : approval)),
-    })),
-  addEventToast: (toast) =>
-    set((state) => ({ eventToasts: [...state.eventToasts.slice(-4), { ...toast, id: createId("toast"), createdAt: Date.now() }] })),
+  addPendingApproval: (approval) => set((state) => ({ pendingApprovals: [...state.pendingApprovals.filter((item) => item.id !== approval.id), approval], activeDrawer: "tool-approval" })),
+  resolveApproval: (id, status) => set((state) => ({ pendingApprovals: state.pendingApprovals.map((approval) => (approval.id === id ? { ...approval, status } : approval)) })),
+  addEventToast: (toast) => set((state) => ({ eventToasts: [...state.eventToasts.slice(-4), { ...toast, id: createId("toast"), createdAt: Date.now() }] })),
   dismissEventToast: (id) => set((state) => ({ eventToasts: state.eventToasts.filter((toast) => toast.id !== id) })),
   setPerformanceOverlayOpen: (performanceOverlayOpen) => set({ performanceOverlayOpen }),
   setChatDockExpanded: (chatDockExpanded) => set({ chatDockExpanded }),
-  setLayoutEditMode: (layoutEditMode) => set({ layoutEditMode, mode: layoutEditMode ? "reviewing" : get().mode }),
+  setLayoutEditMode: (layoutEditMode) => set({ layoutEditMode }),
   setActiveMockupState: (activeMockupStateId) => set({ activeMockupStateId }),
-  resetToBaseline: () =>
-    set(() => {
-      const metrics = baselineMetrics();
-      return {
-      mode: "calm",
-      workspaceView: "dashboard",
-      energy: 0.78,
-      focusPanelId: undefined,
-      panels: baselinePanels(),
-      agents: baselineAgents(),
-      activeCausalPath: undefined,
-      timeline: baselineTimeline(),
-      messages: baselineMessages(),
-      tasks: [],
-      metrics,
-      metricHistory: [{ timestamp: Date.now(), system: metrics }],
-      composer: {
-        value: "",
-        isFocused: false,
-        selectedModel: "GPT-5.5",
-        selectedMode: "deep",
-        selectedTools: defaultSelectedTools,
-        contextPanelIds: ["project-nexus", "system-health"],
-        slashMenuOpen: false,
-        planPreview: undefined,
-      },
-      artifacts: [],
-      activeArtifactId: undefined,
-      activeDrawer: undefined,
-      activeModal: undefined,
-      commandPaletteOpen: false,
-      commandPaletteQuery: "",
-      pendingApprovals: [],
-      eventToasts: [],
-      performanceOverlayOpen: false,
-      chatDockExpanded: false,
-      layoutEditMode: false,
-      activeMockupStateId: undefined,
-      };
-    }),
-  resetToDemoBaseline: () =>
-    set(() => {
-      const metrics = baselineMetrics();
-      return {
-      workspaceView: "dashboard",
-      mode: "calm",
-      energy: 0.78,
-      focusPanelId: undefined,
-      panels: demoPanels(),
-      agents: baselineAgents(),
-      activeCausalPath: createLatencyCausalPath(),
-      tasks: [],
-      timeline: baselineTimeline(),
-      messages: baselineMessages(),
-      metrics,
-      metricHistory: [{ timestamp: Date.now(), system: metrics }],
-      composer: {
-        value: "",
-        isFocused: false,
-        selectedModel: "GPT-5.5",
-        selectedMode: "deep",
-        selectedTools: defaultSelectedTools,
-        contextPanelIds: ["project-nexus", "system-health"],
-        slashMenuOpen: false,
-        planPreview: undefined,
-      },
-      artifacts: [],
-      activeArtifactId: undefined,
-      activeDrawer: undefined,
-      activeModal: undefined,
-      commandPaletteOpen: false,
-      commandPaletteQuery: "",
-      pendingApprovals: [],
-      eventToasts: [],
-      performanceOverlayOpen: false,
-      chatDockExpanded: false,
-      layoutEditMode: false,
-      activeMockupStateId: undefined,
-      };
-    }),
-  addArtifact: (artifact) =>
-    set((state) => ({
-      artifacts: [
-        ...state.artifacts.filter((item) => item.id !== artifact.id),
-        { ...artifact, createdAt: artifact.createdAt ?? Date.now(), updatedAt: artifact.updatedAt ?? Date.now() },
-      ],
-      activeArtifactId: artifact.id,
-      workspaceView: "canvas",
-    })),
-  updateArtifact: (id, patch) =>
-    set((state) => ({
-      artifacts: state.artifacts.map((artifact) => (artifact.id === id ? { ...artifact, ...patch, updatedAt: Date.now() } : artifact)),
-    })),
+  resetToBaseline: () => set({
+    mode: "calm",
+    workspaceView: "dashboard",
+    energy: 0.55,
+    focusPanelId: undefined,
+    panels: baselinePanels(),
+    agents: baselineAgents(),
+    activeCausalPath: undefined,
+    tasks: [],
+    metrics: baselineMetrics(),
+    metricHistory: [{ timestamp: Date.now(), system: baselineMetrics() }],
+    activeDrawer: undefined,
+    activeModal: undefined,
+    commandPaletteOpen: false,
+    commandPaletteQuery: "",
+    pendingApprovals: [],
+    eventToasts: [],
+    performanceOverlayOpen: false,
+    layoutEditMode: false,
+    activeMockupStateId: undefined,
+  }),
+  resetToDemoBaseline: () => set({
+    mode: "calm",
+    workspaceView: "dashboard",
+    energy: 0.72,
+    panels: demoPanels(),
+    agents: baselineAgents(),
+    timeline: baselineTimeline(),
+    messages: baselineMessages(),
+    tasks: [],
+    metrics: baselineMetrics(),
+    metricHistory: [{ timestamp: Date.now(), system: baselineMetrics() }],
+    activeCausalPath: undefined,
+    activeDrawer: undefined,
+    activeModal: undefined,
+    commandPaletteOpen: false,
+    commandPaletteQuery: "",
+    pendingApprovals: [],
+    eventToasts: [],
+    performanceOverlayOpen: false,
+    layoutEditMode: false,
+  }),
+  addArtifact: (artifact) => set((state) => ({
+    artifacts: [...state.artifacts.filter((item) => item.id !== artifact.id), artifact],
+    activeArtifactId: artifact.id,
+    workspaceView: "canvas",
+  })),
+  updateArtifact: (id, patch) => set((state) => ({ artifacts: state.artifacts.map((artifact) => (artifact.id === id ? { ...artifact, ...patch, updatedAt: Date.now() } : artifact)) })),
   setActiveArtifact: (activeArtifactId) => set({ activeArtifactId, workspaceView: activeArtifactId ? "canvas" : "dashboard" }),
 }));
