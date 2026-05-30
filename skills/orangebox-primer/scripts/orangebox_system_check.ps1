@@ -4,7 +4,11 @@ param(
 
 $ErrorActionPreference = "Continue"
 $repo = $env:ORANGEBOX_REPO_ROOT
-if (-not $repo) { $repo = "C:\AtomEons\orangebox-delta" }
+if (-not $repo) {
+  $finalRepo = "C:\AtomEons\orangebox\finals\Orangebox Delta Final"
+  if (Test-Path -LiteralPath $finalRepo) { $repo = $finalRepo }
+  else { $repo = "C:\AtomEons\orangebox-delta" }
+}
 $data = Join-Path $env:USERPROFILE "OrangeBox-Data"
 $result = [ordered]@{
   ok = $true
@@ -15,6 +19,7 @@ $result = [ordered]@{
   latest = [ordered]@{}
   commands_run = @()
   guidance = @(
+    "Public-facing product name is Orangebox Version 1.",
     "Active lane is Orangebox Ops backend.",
     "AECode is the middle voice/compiler contract.",
     "AtomSmasher is a received backend compression capability pack; verify it from the latest doctor receipt.",

@@ -116,17 +116,17 @@ async function fetchJson(url, timeoutMs = 12_000) {
   }
 }
 
-async function waitForUrl(url, timeoutMs = 30_000) {
+async function waitForUrl(url, timeoutMs = 90_000) {
   const started = Date.now();
   let latest = null;
   while (Date.now() - started < timeoutMs) {
     try {
-      latest = await fetchJson(url, 2500);
+      latest = await fetchJson(url, 6000);
       if (latest.ok) return latest;
     } catch (error) {
       latest = { ok: false, url, error: error.message };
     }
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
   throw new Error(`Timed out waiting for ${url}: ${JSON.stringify(latest)}`);
 }
@@ -144,6 +144,10 @@ function spawnServer(name, command, commandArgs, options = {}) {
   return { name, child, log };
 }
 
+function psLiteral(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
 async function stopServer(server) {
   if (!server?.child || server.child.killed) return;
   server.child.kill();
@@ -159,7 +163,7 @@ function scriptTextBackend() {
   [string]$HostName = "127.0.0.1"
 )
 $ErrorActionPreference = "Stop"
-$repo = "C:\\AtomEons\\orangebox-delta"
+$repo = ${psLiteral(repoRoot)}
 Set-Location -LiteralPath $repo
 $env:ORANGEBOX_REPO_ROOT = $repo
 if (-not $env:ORANGEBOX_DATA_ROOT) { $env:ORANGEBOX_DATA_ROOT = Join-Path $env:USERPROFILE "OrangeBox-Data" }
@@ -172,7 +176,7 @@ function scriptTextApi() {
   [int]$Port = 8797
 )
 $ErrorActionPreference = "Stop"
-$repo = "C:\\AtomEons\\orangebox-delta"
+$repo = ${psLiteral(repoRoot)}
 Set-Location -LiteralPath (Join-Path $repo "apps\\api")
 $env:API_PORT = [string]$Port
 if (-not $env:NODE_ENV) { $env:NODE_ENV = "development" }
@@ -183,7 +187,7 @@ node .\\dist\\server.js
 
 function scriptTextProof() {
   return `$ErrorActionPreference = "Stop"
-$repo = "C:\\AtomEons\\orangebox-delta"
+$repo = ${psLiteral(repoRoot)}
 Set-Location -LiteralPath $repo
 npm.cmd run backend:proof
 `;

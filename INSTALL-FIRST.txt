@@ -1,0 +1,19 @@
+Orangebox Version 1
+Install First
+
+Start with Basic Install unless you already know you are setting up a second AI computer.
+
+Basic Install
+- Recommended for most people.
+- Runs Orangebox Version 1 on one computer.
+- Does not require a second box, network setup, admin networking prompts, or a remote AI Box.
+- Keeps the backend, primers, receipts, ChatBackup listener, Reality Watcher, AtomSmasher, and API proof path local-first.
+
+Advanced AI Box
+- Optional.
+- Use only when you are pairing this controller with a second AI computer.
+- Advanced routes can use Thunderbolt or Ethereal Ethernet when that hardware exists.
+- If the second machine is offline, Basic Install remains the fallback.
+
+Installer rule:
+Orangebox Version 1 must be useful immediately on one machine. Advanced AI Box is an upgrade lane, not a requirement.

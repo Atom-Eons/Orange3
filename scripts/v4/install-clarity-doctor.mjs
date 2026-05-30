@@ -69,7 +69,7 @@ const SOURCE_EXPECTATIONS = [
     required: [
       /What is an AI computer and where can I buy one\?/i,
       /mini PCs, creator PCs, gaming PCs, or workstations/i,
-      /AE See-Suite does not require one/i,
+      /(?:Orangebox Version 1|AE See-Suite) does not require one/i,
     ],
   },
   {
@@ -487,8 +487,9 @@ export async function runInstallClarityDoctor({
     created_at: new Date().toISOString(),
     project: "ORANGEBOX",
     product_language: {
-      top_surface: "AE See-Suite",
-      operations_surface: "AE Operations",
+      public_name: "Orangebox Version 1",
+      top_surface: "Orangebox Version 1",
+      operations_surface: "Orangebox Operations",
       basic_path: "Basic Install",
       advanced_path: "Advanced AI Box",
       ai_worker_surface: "optional AI Box",
@@ -497,7 +498,7 @@ export async function runInstallClarityDoctor({
       basic_default: true,
       advanced_optional: true,
       remote_ai_box_required_for_basic: false,
-      recovery_rule: "Basic Install is always the fallback; AE See-Suite must remain useful even when the AI computer is offline.",
+      recovery_rule: "Basic Install is always the fallback; Orangebox Version 1 must remain useful even when the AI computer is offline.",
     },
     summary: {
       checks: checks.length,

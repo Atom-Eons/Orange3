@@ -1,0 +1,17 @@
+Orangebox Version 1
+Start Here
+
+If this is your first touch, choose Basic Install.
+
+Basic Install gives you the local Orangebox backend, skills primer, receipts, API proof path, ChatBackup listener, Reality Watcher, and AtomSmasher operations without needing an AI computer.
+
+Advanced AI Box is only for users who already have a second AI computer ready to connect. It is optional. You can add it later.
+
+Local proof commands:
+1. npm install
+2. npm run backend:install
+3. npm run backend:proof
+4. npm run install:doctor
+
+The public-facing product name is Orangebox Version 1.
+The local release folder for this package is Orangebox Delta Final.

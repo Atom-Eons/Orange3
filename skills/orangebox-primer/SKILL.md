@@ -5,6 +5,12 @@ description: Prime a new Codex, Claude, Antigravity, or OBox See-Suite coding ch
 
 # Orangebox Primer
 
+Public-facing product name: **Orangebox Version 1**.
+
+Installed final package path: `C:\AtomEons\orangebox\finals\Orangebox Delta Final`.
+
+Development repo fallback: `C:\AtomEons\orangebox-delta`.
+
 ## Zero-Memory Assumption
 
 Assume this chat has no prior memory, no prior Orangebox context, and may be running from a fresh Claude/OpenAI/Gemini account. The skill itself must teach the agent enough to avoid hallucinating the system.
@@ -15,16 +21,22 @@ Read `references/zero-memory-bootstrap.md` before acting if the agent is new, un
 
 Start by proving the local system state. Do not assume this chat is using Orangebox just because the user says Orangebox.
 
-If shell access is available on Windows, run:
+If shell access is available on Windows, run the orange session badge first:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\AtomEons\orangebox-delta\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\AtomEons\orangebox\finals\Orangebox Delta Final\skills\orangebox-primer\scripts\orangebox_session_badge.ps1"
+```
+
+Then run the raw system check when you need machine-readable status:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\AtomEons\orangebox\finals\Orangebox Delta Final\skills\orangebox-primer\scripts\orangebox_system_check.ps1"
 ```
 
 If the task will mutate Orangebox backend code, refresh lightweight receipts first:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\AtomEons\orangebox-delta\skills\orangebox-primer\scripts\orangebox_system_check.ps1 -Refresh
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\AtomEons\orangebox\finals\Orangebox Delta Final\skills\orangebox-primer\scripts\orangebox_system_check.ps1" -Refresh
 ```
 
 Known mirrored installs may use the same script at:
@@ -38,7 +50,20 @@ C:\Users\a\AppData\Roaming\Claude-3p\skills\orangebox-primer\scripts\orangebox_s
 C:\Users\a\.gemini\config\plugins\orangebox-plugin\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 C:\Users\a\AppData\Roaming\Antigravity\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 C:\Users\a\.gemini\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+C:\AtomEons\orangebox\finals\Orangebox Delta Final\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 C:\AtomEons\orangebox-delta\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+```
+
+If the chat UI cannot show color, put this exact badge at the top of the response after the system check:
+
+```text
+ORANGEBOX VERSION 1 | OB0X ON | OPS BACKEND VERIFIED
+```
+
+If the system check has not been run or fails, use:
+
+```text
+ORANGEBOX VERSION 1 | OB0X PENDING | OPS BACKEND NEEDS PROOF
 ```
 
 If shell access is not available, read `references/orangebox-operating-law.md` and state that the system check could not be executed.
@@ -48,7 +73,7 @@ If shell access is not available, read `references/orangebox-operating-law.md` a
 When the user is already inside a normal chat that is not acting like Orangebox, generate the mid-session primer and use it as the bridge:
 
 ```powershell
-cd C:\AtomEons\orangebox-delta
+cd "C:\AtomEons\orangebox\finals\Orangebox Delta Final"
 npm.cmd run primer:mid -- --name "Current Chat Name"
 ```
 
@@ -131,6 +156,11 @@ C:\Users\a\OrangeBox-Data\aecode-format\latest-final-format.json
 C:\Users\a\OrangeBox-Data\atomsmasher\latest-atomsmasher-doctor.json
 C:\Users\a\OrangeBox-Data\atomsmasher\tool-merge\latest-tool-merge.json
 C:\Users\a\OrangeBox-Data\system-proof\latest-system-proof-queue.json
+C:\AtomEons\orangebox\finals\Orangebox Delta Final\receipts\
+C:\AtomEons\orangebox\finals\Orangebox Delta Final\docs\AECODE_FINAL_FORMAT_AND_TARGET_LANGUAGES_2026-05-28.md
+C:\AtomEons\orangebox\finals\Orangebox Delta Final\docs\ATOMSMASHER_ORANGEBOX_BACKEND_INTEGRATION_2026-05-28.md
+C:\AtomEons\orangebox\finals\Orangebox Delta Final\docs\ATOMSMASHER_TOOL_MERGE_2026-05-28.md
+C:\AtomEons\orangebox\finals\Orangebox Delta Final\docs\ORANGEBOX_SYSTEM_PROOF_QUEUE_2026-05-27.md
 C:\AtomEons\orangebox-delta\docs\AECODE_FINAL_FORMAT_AND_TARGET_LANGUAGES_2026-05-28.md
 C:\AtomEons\orangebox-delta\docs\ATOMSMASHER_ORANGEBOX_BACKEND_INTEGRATION_2026-05-28.md
 C:\AtomEons\orangebox-delta\docs\ATOMSMASHER_TOOL_MERGE_2026-05-28.md
