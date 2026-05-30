@@ -89,12 +89,22 @@ function main() {
     skill_primer: {
       ok:
         exists(path.join(userRoot, ".codex", "skills", "orangebox-primer", "SKILL.md")) &&
+        exists(path.join(userRoot, ".agents", "skills", "orangebox-primer", "SKILL.md")) &&
         exists(path.join(userRoot, ".claude", "skills", "orangebox-primer", "SKILL.md")) &&
+        exists(path.join(userRoot, "AppData", "Roaming", "Claude", "skills", "orangebox-primer", "SKILL.md")) &&
+        exists(path.join(userRoot, "AppData", "Roaming", "Claude-3p", "skills", "orangebox-primer", "SKILL.md")) &&
         exists(path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "orangebox-primer", "SKILL.md")) &&
+        exists(path.join(userRoot, "AppData", "Roaming", "Antigravity", "skills", "orangebox-primer", "SKILL.md")) &&
+        exists(path.join(userRoot, ".gemini", "skills", "orangebox-primer", "SKILL.md")) &&
         exists(path.join(repoRoot, "skills", "orangebox-primer", "SKILL.md")),
       codex: path.join(userRoot, ".codex", "skills", "orangebox-primer", "SKILL.md"),
+      shared_agents: path.join(userRoot, ".agents", "skills", "orangebox-primer", "SKILL.md"),
       claude: path.join(userRoot, ".claude", "skills", "orangebox-primer", "SKILL.md"),
+      claude_desktop: path.join(userRoot, "AppData", "Roaming", "Claude", "skills", "orangebox-primer", "SKILL.md"),
+      claude_3p: path.join(userRoot, "AppData", "Roaming", "Claude-3p", "skills", "orangebox-primer", "SKILL.md"),
       antigravity: path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "orangebox-primer", "SKILL.md"),
+      antigravity_appdata: path.join(userRoot, "AppData", "Roaming", "Antigravity", "skills", "orangebox-primer", "SKILL.md"),
+      gemini_user: path.join(userRoot, ".gemini", "skills", "orangebox-primer", "SKILL.md"),
       repo: path.join(repoRoot, "skills", "orangebox-primer", "SKILL.md"),
     },
     antigravity_redirect: {

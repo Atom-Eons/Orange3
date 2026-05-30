@@ -9,6 +9,10 @@
   "author": "AtomEons Systems Laboratory <a.mccree@gmail.com>",
   "scripts": {
     "start": "node ./scripts/orangebox-command-server.mjs",
+    "backend:install": "node ./scripts/v4/orangebox-backend-install-doctor.mjs --install --json --receipt",
+    "backend:proof": "node ./scripts/v4/orangebox-backend-install-doctor.mjs --json --receipt",
+    "backend:start": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\\AtomEons\\tools\\bin\\orangebox-delta-backend.ps1",
+    "backend:api": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\\AtomEons\\tools\\bin\\orangebox-delta-api.ps1",
     "check": "node --check ./scripts/orangebox-command-server.mjs && node --check ./scripts/orangebox-mcp-server.mjs && node --check ./src/app.js",
     "check:all": "npm.cmd run check && npm.cmd run build:web && npm.cmd run build:api",
     "dev:web": "npm.cmd run dev -w @ae-see-suite/web",

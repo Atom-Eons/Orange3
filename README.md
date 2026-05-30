@@ -50,6 +50,18 @@ npm.cmd run ops:readiness
 npm.cmd run system:full-green
 ```
 
+## Backend-Only Install
+
+Orangebox Delta Ops can be installed and proven without the visual frontend lane:
+
+```powershell
+npm.cmd install
+npm.cmd run backend:install
+npm.cmd run backend:proof
+```
+
+See [docs/ORANGEBOX_DELTA_BACKEND_INSTALL.md](docs/ORANGEBOX_DELTA_BACKEND_INSTALL.md).
+
 ## No-Visual-Ops Rule
 
 This repo contains `frontend/` because Orangebox products include visual outputs, but backend Ops work should not mutate frontend files unless the operator explicitly opens that lane.

@@ -18,21 +18,26 @@ Start by proving the local system state. Do not assume this chat is using Orange
 If shell access is available on Windows, run:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Users\a\.codex\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\AtomEons\orangebox-delta\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 ```
 
 If the task will mutate Orangebox backend code, refresh lightweight receipts first:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Users\a\.codex\skills\orangebox-primer\scripts\orangebox_system_check.ps1 -Refresh
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\AtomEons\orangebox-delta\skills\orangebox-primer\scripts\orangebox_system_check.ps1 -Refresh
 ```
 
 Known mirrored installs may use the same script at:
 
 ```text
+C:\Users\a\.codex\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 C:\Users\a\.agents\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 C:\Users\a\.claude\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+C:\Users\a\AppData\Roaming\Claude\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+C:\Users\a\AppData\Roaming\Claude-3p\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 C:\Users\a\.gemini\config\plugins\orangebox-plugin\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+C:\Users\a\AppData\Roaming\Antigravity\skills\orangebox-primer\scripts\orangebox_system_check.ps1
+C:\Users\a\.gemini\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 C:\AtomEons\orangebox-delta\skills\orangebox-primer\scripts\orangebox_system_check.ps1
 ```
 
@@ -169,5 +174,6 @@ A claim that Orangebox is green needs a receipt. Preferred proof levels:
 - compression/backend pack: `npm.cmd run atomsmasher:doctor`
 - backend tool merge: `npm.cmd run atomsmasher:merge-tools`
 - full backend: `npm.cmd run system:full-green`
+- backend-only install/proof: `npm.cmd run backend:install` then `npm.cmd run backend:proof`
 
 Do not call something done unless the proof path is named.
