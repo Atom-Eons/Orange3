@@ -183,6 +183,10 @@ function backendPackageJson() {
       "atomsmasher:proof": "node ./scripts/v4/atomsmasher-runtime.mjs proof --json --receipt",
       "atomsmasher:compile": "node ./scripts/v4/atomsmasher-runtime.mjs compile --query \"continue AtomSmasher without losing orders\" --json --receipt",
       "primer:sync": "node ./scripts/v4/orangebox-primer-skill-sync.mjs --json --receipt",
+      "chatbackup:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-chat-mirror-task.ps1",
+      "chatbackup:status": "node ./scripts/v4/chatbackup-status.mjs --json --receipt",
+      "reality:watch": "node ./scripts/v4/orangebox-reality-watch.mjs --json --receipt",
+      "reality:watcher:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-reality-watcher.ps1",
       "ops:readiness": "node ./scripts/v4/orangebox-ops-readiness-doctor.mjs --json --receipt",
       "install:doctor": "node ./scripts/obx.mjs install doctor --json --receipt",
       "package-script-doctor": "node ./scripts/v4/package-script-doctor.mjs --json --receipt",
@@ -235,6 +239,13 @@ Set-Location -LiteralPath $root
 function Write-Orange($Text) { Write-Host $Text -ForegroundColor DarkYellow }
 function Write-Green($Text) { Write-Host $Text -ForegroundColor Green }
 function Write-Muted($Text) { Write-Host $Text -ForegroundColor DarkGray }
+function Run-Step($Label, $Arguments) {
+  Write-Orange $Label
+  & npm.cmd @Arguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "Orangebox Version 1 installer failed at $Label (exit $LASTEXITCODE): npm.cmd $($Arguments -join ' ')"
+  }
+}
 
 Write-Orange "============================================================"
 Write-Orange "  ORANGEBOX VERSION 1"
@@ -246,17 +257,10 @@ Write-Muted  "No frontend build is required for this backend install."
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is required before installing Orangebox Version 1." }
 if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)) { throw "npm.cmd is required before installing Orangebox Version 1." }
 
-Write-Orange "[1/4] Installing package dependencies"
-npm.cmd install
-
-Write-Orange "[2/4] Installing and proving backend launchers"
-npm.cmd run backend:install
-
-Write-Orange "[3/4] Checking package script references"
-npm.cmd run package-script-doctor
-
-Write-Orange "[4/4] Proving install clarity"
-npm.cmd run install:doctor
+Run-Step "[1/4] Installing package dependencies" @("install")
+Run-Step "[2/4] Installing and proving backend launchers" @("run", "backend:install")
+Run-Step "[3/4] Checking package script references" @("run", "package-script-doctor")
+Run-Step "[4/4] Proving install clarity" @("run", "install:doctor")
 
 Write-Green "ORANGEBOX VERSION 1 INSTALL GREEN"
 Write-Muted  "Run backend: npm run backend:start"

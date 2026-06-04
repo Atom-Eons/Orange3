@@ -5,7 +5,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repo = $env:ORANGEBOX_REPO_ROOT
-if (-not $repo) { $repo = "C:\AtomEons\orangebox-delta" }
+if (-not $repo) {
+  $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
+}
+if (-not (Test-Path -LiteralPath (Join-Path $repo "scripts\v4\orangebox-reality-watcher.ps1"))) {
+  $repo = "C:\AtomEons\orangebox-delta"
+}
 $taskName = "Orangebox Reality Watcher"
 $watcher = Join-Path $repo "scripts\v4\orangebox-reality-watcher.ps1"
 $powershell = (Get-Command powershell.exe -ErrorAction Stop).Source

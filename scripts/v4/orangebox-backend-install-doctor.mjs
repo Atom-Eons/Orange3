@@ -289,6 +289,8 @@ async function main() {
   const packageJson = JSON.parse(await fsp.readFile(path.join(repoRoot, "package.json"), "utf8"));
   const backendScripts = {
     primer_sync: packageJson.scripts?.["primer:sync"],
+    chatbackup_install: packageJson.scripts?.["chatbackup:install"],
+    reality_watcher_install: packageJson.scripts?.["reality:watcher:install"],
     check: packageJson.scripts?.check,
     build_api: packageJson.scripts?.["build:api"],
     test_api: packageJson.scripts?.["test:api"],
@@ -330,6 +332,14 @@ async function main() {
     await installLaunchers(result);
     const primerSync = await runStep("primer:sync", npmBin, ["run", "primer:sync"], { timeout: 180_000 });
     result.commands.push(primerSync);
+    if (primerSync.ok) {
+      const chatbackupInstall = await runStep("chatbackup:install", npmBin, ["run", "chatbackup:install"], { timeout: 180_000 });
+      result.commands.push(chatbackupInstall);
+    }
+    if (result.commands.every((step) => step.ok)) {
+      const realityWatcherInstall = await runStep("reality:watcher:install", npmBin, ["run", "reality:watcher:install"], { timeout: 180_000 });
+      result.commands.push(realityWatcherInstall);
+    }
   }
 
   const commandPlan = [
