@@ -131,3 +131,25 @@ If Advanced mode fails:
 5. Repair one transport at a time: router LAN, Ethereal Ethernet, then advanced storage lanes.
 
 Basic Install is always the fallback. ORANGEBOX must stay useful even when the AI computer is offline.
+
+## Codexa Rail Recovery Script
+
+If the AI Box is powered on but the controller cannot reach the command rail, run this on Codexa as Administrator:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File C:\AtomEons\orangebox-delta\scripts\START_CODEXA_RAIL.ps1 -EnableRdp
+```
+
+If the script is copied from the final package instead of the repo, run it from that copied location. It repairs the Codexa-side rail without touching the visual/frontend lane.
+
+What it does:
+
+- starts the command rail on `0.0.0.0:8097`
+- starts the bridge rail on `0.0.0.0:8098` when the bridge server file is present
+- enables trusted-controller firewall rules for the configured controller IPs
+- optionally enables the Remote Desktop firewall rule with `-EnableRdp`
+- writes a controller token helper at `C:\AtomEons\ai-box\SET_CONTROLLER_ORANGEBOX_TOKENS.cmd`
+- writes receipts under `C:\AtomEons\ai-box\receipts`
+- optionally starts Ollama model pulls in the background with `-PullModels`
+
+`READY` only means the command rail answered locally. Large model pulls may still be running in the background.
