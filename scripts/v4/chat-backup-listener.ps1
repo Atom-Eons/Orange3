@@ -7,7 +7,12 @@ param(
 
 $ErrorActionPreference = "Continue"
 $repo = $env:ORANGEBOX_REPO_ROOT
-if (-not $repo) { $repo = "C:\AtomEons\orangebox-delta" }
+if (-not $repo) {
+  $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
+}
+if (-not (Test-Path -LiteralPath (Join-Path $repo "scripts\v4\chat-mirror.mjs"))) {
+  $repo = "C:\AtomEons\orangebox-delta"
+}
 $node = (Get-Command node.exe -ErrorAction SilentlyContinue).Source
 if (-not $node) {
   throw "node.exe not found on PATH"
