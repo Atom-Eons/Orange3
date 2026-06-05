@@ -21,6 +21,18 @@ if (-not (Test-Path -LiteralPath $listener)) {
   throw "Missing ChatBackup listener script: $listener"
 }
 
+function Stop-ExistingListener($ScriptPath) {
+  Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+    Where-Object {
+      $_.ProcessId -ne $PID -and
+      $_.CommandLine -and
+      $_.CommandLine.Contains($ScriptPath)
+    } |
+    ForEach-Object {
+      try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {}
+    }
+}
+
 $argument = "-NoProfile -ExecutionPolicy Bypass -File `"$listener`" -IntervalSeconds $IntervalSeconds -MaxBytesPerCycle $MaxBytesPerCycle -MaxBytesPerFile $MaxBytesPerFile -ReceiptEveryCycles $ReceiptEveryCycles"
 $action = New-ScheduledTaskAction -Execute $powershell -Argument $argument -WorkingDirectory $repo
 $trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -61,6 +73,7 @@ try {
   $shortcut.Save()
 
   try {
+    Stop-ExistingListener $listener
     Start-Process -FilePath $powershell -ArgumentList $argument -WorkingDirectory $repo -WindowStyle Hidden
     $started = $true
   } catch {

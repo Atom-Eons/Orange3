@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, sqlite3, time
+import json, sqlite3, time, uuid
 from pathlib import Path
 from typing import Any, Iterable
 from .version import SCHEMA_VERSION
@@ -224,7 +224,7 @@ class Store:
         self.conn.close()
 
     def insert_receipt(self, action: str, status: str='ok', summary: str='', payload: Any=None, feature_id: str|None=None) -> str:
-        rid = 'rcpt_' + sha256_text(f"{action}|{time.time()}|{summary}")[:16]
+        rid = 'rcpt_' + sha256_text(f"{action}|{time.time_ns()}|{summary}|{uuid.uuid4().hex}")[:16]
         self.execute("""INSERT INTO receipts(id,feature_id,action,status,summary,payload_json,created_at)
                       VALUES(?,?,?,?,?,?,?)""", (rid, feature_id, action, status, summary, json.dumps(payload or {}, sort_keys=True), now_iso()))
         return rid

@@ -291,6 +291,7 @@ async function main() {
     primer_sync: packageJson.scripts?.["primer:sync"],
     chatbackup_install: packageJson.scripts?.["chatbackup:install"],
     reality_watcher_install: packageJson.scripts?.["reality:watcher:install"],
+    ops_services: packageJson.scripts?.["ops:services"],
     check: packageJson.scripts?.check,
     build_api: packageJson.scripts?.["build:api"],
     test_api: packageJson.scripts?.["test:api"],
@@ -358,6 +359,13 @@ async function main() {
 
   if (result.commands.every((step) => step.ok)) {
     await smokeServers(result);
+  }
+
+  if (result.commands.every((step) => step.ok) && result.server_smoke?.ok) {
+    if (packageJson.scripts?.["ops:services"]) {
+      const services = await runStep("ops:services", npmBin, ["run", "ops:services"], { timeout: 360_000 });
+      result.commands.push(services);
+    }
   }
 
   if (result.commands.every((step) => step.ok) && result.server_smoke?.ok) {

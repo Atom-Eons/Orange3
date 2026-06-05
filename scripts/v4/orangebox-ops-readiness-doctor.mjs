@@ -54,6 +54,8 @@ function main() {
   const atomSmasherDoctor = readJson(atomSmasherDoctorPath);
   const atomSmasherToolMergePath = path.join(dataRoot, "atomsmasher", "tool-merge", "latest-tool-merge.json");
   const atomSmasherToolMerge = readJson(atomSmasherToolMergePath);
+  const opsServicesPath = path.join(dataRoot, "services", "latest-ops-services.json");
+  const opsServices = readJson(opsServicesPath);
   const midSessionPrimerPath = path.join(dataRoot, "primers", "ORANGEBOX_MID_SESSION_PRIMER.md");
   const titleProtocolPath = path.join(dataRoot, "primers", "OB0X_ON_TITLE_PROTOCOL.json");
   const sourceLockPath = path.join(dataRoot, "orangebox-source-of-truth.json");
@@ -124,6 +126,21 @@ function main() {
       ok: watcherFresh,
       heartbeat_path: watcherHeartbeatPath,
       heartbeat: watcherHeartbeat,
+    },
+    ops_services: {
+      ok:
+        opsServices?.ok === true &&
+        opsServices?.services?.command_server?.ok === true &&
+        opsServices?.services?.api_server?.ok === true &&
+        opsServices?.services?.local_llama_listener?.ok === true &&
+        opsServices?.final_probes?.command_server?.ok === true &&
+        opsServices?.final_probes?.api_server?.ok === true &&
+        opsServices?.final_probes?.local_llama_listener?.ok === true,
+      path: opsServicesPath,
+      status: opsServices?.status || null,
+      command_server: opsServices?.final_probes?.command_server || null,
+      api_server: opsServices?.final_probes?.api_server || null,
+      local_llama_listener: opsServices?.final_probes?.local_llama_listener || null,
     },
     chat_archive_export: {
       ok: Boolean(chatArchiveDir) && exists(path.join(chatArchiveDir || "", "chat-duplicate.md")) && exists(path.join(chatArchiveDir || "", "chat-screenplay.md")),

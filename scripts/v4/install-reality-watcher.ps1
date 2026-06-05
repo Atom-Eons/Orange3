@@ -19,6 +19,18 @@ if (-not (Test-Path -LiteralPath $watcher)) {
   throw "Missing reality watcher script: $watcher"
 }
 
+function Stop-ExistingWatcher($ScriptPath) {
+  Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+    Where-Object {
+      $_.ProcessId -ne $PID -and
+      $_.CommandLine -and
+      $_.CommandLine.Contains($ScriptPath)
+    } |
+    ForEach-Object {
+      try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {}
+    }
+}
+
 $argument = "-NoProfile -ExecutionPolicy Bypass -File `"$watcher`" -IntervalSeconds $IntervalSeconds -ReceiptEveryCycles $ReceiptEveryCycles"
 $action = New-ScheduledTaskAction -Execute $powershell -Argument $argument -WorkingDirectory $repo
 $trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -59,6 +71,7 @@ try {
   $shortcut.Save()
 
   try {
+    Stop-ExistingWatcher $watcher
     Start-Process -FilePath $powershell -ArgumentList $argument -WorkingDirectory $repo -WindowStyle Hidden
     $started = $true
   } catch {

@@ -1,5 +1,5 @@
 from __future__ import annotations
-import csv, io, json, math, os, re, time, zipfile, statistics
+import csv, io, json, math, os, re, time, uuid, zipfile, statistics
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -10,6 +10,10 @@ from .feature_data import FEATURE_NAMES
 ORDER_RE = re.compile(r'(?im)^\s*(orders?|marching\s+orders?)\s*[:\-]\s*(.+)$')
 PROMPT_INJECTION_RE = re.compile(r'(?i)(ignore previous|disregard (all )?instructions|system prompt|developer message|reveal secrets|exfiltrate|override policy)')
 SECRET_RE = re.compile(r'(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*[^\s]+')
+
+def unique_runtime_id(prefix: str, *parts: Any) -> str:
+    entropy = '|'.join(str(p) for p in parts) + f'|{time.time_ns()}|{uuid.uuid4().hex}'
+    return prefix + sha256_text(entropy)[:16]
 
 class OrderSpine:
     def __init__(self, store: Store): self.store = store
@@ -82,7 +86,7 @@ class SourceEngine:
         except UnicodeDecodeError: text=data.decode('latin-1', errors='replace')
         return [self.ingest_text(path.name, text, 'file')]
     def coverage_receipt(self, source_id: str, atom_count: int=0, eq_count: int=0, hot_count: int=0) -> dict:
-        rid = 'cov_' + sha256_text(source_id + str(time.time()))[:16]
+        rid = unique_runtime_id('cov_', source_id)
         chunks = self.store.all('SELECT * FROM chunks WHERE source_id=?',(source_id,))
         payload = {
             'source_id': source_id,
@@ -321,7 +325,7 @@ class RoutingEngine:
         selected=min(paths,key=lambda x:x[1])
         warrants=[]
         if selected[0]=='full_context_replay': warrants.append({'type':'context_expansion','why':'smaller paths failed','approved':False})
-        rid='route_'+sha256_text(query+str(time.time()))[:16]
+        rid=unique_runtime_id('route_', query)
         self.store.execute("""INSERT INTO routes(id,query,selected_path,energy_score,workset_json,warrants_json,created_at) VALUES(?,?,?,?,?,?,?)""",(rid,query,selected[0],selected[1],json.dumps(workset,sort_keys=True),json.dumps(warrants,sort_keys=True),now_iso()))
         sw=SavedWork(self.store).certify(query, 'full_context_replay', selected[0], max(0, workset['token_estimate']*8-workset['token_estimate']), len(workset['atoms']))
         result={'route_id':rid,'selected_path':selected[0],'energy_score':selected[1],'workset':workset,'warrants':warrants,'saved_work':sw}
@@ -331,7 +335,7 @@ class RoutingEngine:
 class SavedWork:
     def __init__(self, store:Store): self.store=store
     def certify(self, request:str, old_path:str, new_path:str, tokens_not_injected:int, commitments_preserved:int) -> dict:
-        sid='sw_'+sha256_text(request+new_path+str(time.time()))[:16]
+        sid=unique_runtime_id('sw_', request, new_path)
         payload={'request_hash':sha256_text(request),'old_path_estimate':old_path,'new_path':new_path,'tokens_not_injected':tokens_not_injected,'model_calls_avoided':1 if new_path in {'cache_answer','use_cartridge','use_air_capsule'} else 0,'commitments_preserved':commitments_preserved,'saved_work_hash':sha256_text(request+old_path+new_path+str(tokens_not_injected))}
         self.store.execute("""INSERT INTO saved_work(id,request_hash,old_path_estimate,new_path,tokens_not_injected,model_calls_avoided,commitments_preserved,payload_json,created_at) VALUES(?,?,?,?,?,?,?,?,?)""",(sid,payload['request_hash'],old_path,new_path,tokens_not_injected,payload['model_calls_avoided'],commitments_preserved,json.dumps(payload,sort_keys=True),now_iso()))
         return {'id':sid, **payload}
@@ -351,7 +355,7 @@ class AgentGovernor:
     def __init__(self, store:Store): self.store=store
     def create_lease(self, agent_name:str, mission:str, token_budget:int=10000, time_budget_s:int=600, stop_conditions:list[str]|None=None)->dict:
         stop_conditions=stop_conditions or ['mission complete','budget exhausted','drift detected']
-        aid='lease_'+sha256_text(agent_name+mission+str(time.time()))[:16]
+        aid=unique_runtime_id('lease_', agent_name, mission)
         self.store.execute("""INSERT INTO agent_leases(id,agent_name,mission,token_budget,time_budget_s,stop_conditions_json,active,created_at) VALUES(?,?,?,?,?,?,?,?)""",(aid,agent_name,mission,token_budget,time_budget_s,json.dumps(stop_conditions),1,now_iso()))
         self.store.insert_receipt('agent.lease','ok','agent compute lease created',{'lease_id':aid,'token_budget':token_budget})
         return self.store.one('SELECT * FROM agent_leases WHERE id=?',(aid,))
