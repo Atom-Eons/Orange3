@@ -22,6 +22,10 @@ export const MCP_DOCTOR_VERSION = "orangebox-mcp-bridge-doctor/v1";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..", "..");
 
+function persistentDataRoot() {
+  return process.env.ORANGEBOX_DATA_ROOT || path.join(os.homedir(), "OrangeBox-Data");
+}
+
 function stampForFile(date = new Date()) {
   const z = (n) => String(n).padStart(2, "0");
   return `${date.getFullYear()}${z(date.getMonth() + 1)}${z(date.getDate())}T${z(date.getHours())}${z(date.getMinutes())}${z(date.getSeconds())}`;
@@ -238,6 +242,19 @@ async function writeDoctorReceipt(result) {
   return file;
 }
 
+async function writeLatestDoctorReport(result) {
+  const dir = path.join(persistentDataRoot(), "mcp");
+  await fs.mkdir(dir, { recursive: true });
+  const file = path.join(dir, "latest-mcp-doctor.json");
+  const payload = {
+    ...result,
+    latest_report_path: file,
+    note: "MCP doctor proves registry/tool-list/code-mode safety without installing MCP servers or mutating host MCP configs.",
+  };
+  await fs.writeFile(file, JSON.stringify(payload, null, 2) + "\n", "utf8");
+  return file;
+}
+
 export async function runMcpDoctor({ writeReceipt = false, keepTemp = false } = {}) {
   const dataRoot = tempRoot();
   await fs.mkdir(dataRoot, { recursive: true });
@@ -272,6 +289,7 @@ export async function runMcpDoctor({ writeReceipt = false, keepTemp = false } = 
   };
 
   if (writeReceipt) result.receipt_path = await writeDoctorReceipt(result);
+  result.latest_report_path = await writeLatestDoctorReport(result);
   if (!keepTemp) {
     try { await fs.rm(dataRoot, { recursive: true, force: true }); } catch {}
   }

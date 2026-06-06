@@ -138,6 +138,7 @@ async function main() {
     research_scout: latestReceipt("orangebox-external-research-scout-"),
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
     codexa_alert: latestReceipt("orangebox-codexa-alert-"),
+    mcp_doctor: latestReceipt("orangebox-mcp-doctor-"),
     openclaw_retirement: latestReceipt("orangebox-openclaw-retirement-"),
   };
   const latest = {
@@ -148,6 +149,7 @@ async function main() {
     research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
     codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
+    mcp_doctor: readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(receiptPaths.mcp_doctor || ""),
     openclaw_retirement: readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json")) || readJson(receiptPaths.openclaw_retirement || ""),
   };
 
@@ -176,6 +178,7 @@ async function main() {
   if (!devProbes.local_llama_health.ok) warnings.push("Local llama listener is not reachable.");
   if (!devProbes.strongarm_gate.ok) warnings.push("STRONGARM gate is not reachable.");
   if (!openclawRetired) warnings.push("OpenClaw startup hook is still present or no retirement receipt exists.");
+  if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) warnings.push("MCP quarantine/tool bridge doctor is not green.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
@@ -190,8 +193,10 @@ async function main() {
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
+  if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
 
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired;
+  const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -253,6 +258,14 @@ async function main() {
         status: latest.codexa_alert?.status || null,
         popup_notified: latest.codexa_alert?.popup?.notified || false,
         message: latest.codexa_alert?.message || null,
+      },
+      mcp_doctor: {
+        path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
+        status: latest.mcp_doctor?.ok === true ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
+        checks: latest.mcp_doctor?.summary?.checks || 0,
+        passed: latest.mcp_doctor?.summary?.passed || 0,
+        failed: latest.mcp_doctor?.summary?.failed ?? null,
+        host_mcp_config_mutated: latest.mcp_doctor?.host_mcp_config_mutated ?? null,
       },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: latest.openclaw_retirement?.status || null },
     },

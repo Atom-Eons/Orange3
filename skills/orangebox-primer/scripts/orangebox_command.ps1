@@ -103,6 +103,11 @@ $commands = [ordered]@{
     args = @("run", "codexa:alert:popup")
     description = "Probe Codexa/AI Box rails and show a throttled Windows popup if attention is required."
   }
+  "mcp-doctor" = @{
+    kind = "npm"
+    args = @("run", "mcp:doctor")
+    description = "Verify MCP quarantine/tool bridge without installs, paid APIs, or host MCP config mutation."
+  }
   "obox2-pack" = @{
     kind = "npm"
     args = @("run", "obox2:pack")

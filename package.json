@@ -31,6 +31,7 @@
     "proof:see-suite-72-state": "npm.cmd run build:web && node ./scripts/v4/react-see-suite-72-state-proof.mjs",
     "proof:see-suite-pixel-compare": "node ./scripts/v4/react-see-suite-pixel-compare.mjs",
     "mcp": "node ./scripts/orangebox-mcp-server.mjs",
+    "mcp:doctor": "node ./scripts/v4/mcp-doctor.mjs --json --receipt",
     "knowledge": "node ./scripts/orangebox-knowledge-v2.mjs",
     "knowledge:v1": "node ./scripts/orangebox-knowledge.mjs",
     "knowledge:v2": "node ./scripts/orangebox-knowledge-v2.mjs",

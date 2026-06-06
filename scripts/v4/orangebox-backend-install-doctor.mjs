@@ -304,6 +304,7 @@ async function main() {
     knowledge_improvements: packageJson.scripts?.["knowledge:improvements"],
     research_scout: packageJson.scripts?.["research:scout"],
     codexa_alert: packageJson.scripts?.["codexa:alert"],
+    mcp_doctor: packageJson.scripts?.["mcp:doctor"],
     ops_readiness: packageJson.scripts?.["ops:readiness"],
   };
   const backendScriptText = Object.values(backendScripts).join("\n");
@@ -362,6 +363,7 @@ async function main() {
     ["soul:doctor", npmBin, ["run", "soul:doctor"], { timeout: 120_000 }],
     ["knowledge:improvements", npmBin, ["run", "knowledge:improvements"], { timeout: 120_000 }],
     ["codexa:alert", npmBin, ["run", "codexa:alert"], { timeout: 60_000 }],
+    ["mcp:doctor", npmBin, ["run", "mcp:doctor"], { timeout: 120_000 }],
   ];
 
   for (const [name, command, commandArgs, options] of commandPlan) {

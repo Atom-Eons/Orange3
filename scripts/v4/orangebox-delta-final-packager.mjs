@@ -242,6 +242,7 @@ function backendPackageJson() {
       "codexa:rail-pack": "node ./scripts/v4/codexa-rail-recovery-pack.mjs --json --receipt",
       "codexa:alert": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt",
       "codexa:alert:popup": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt --popup",
+      "mcp:doctor": "node ./scripts/v4/mcp-doctor.mjs --json --receipt",
       "health:report": "node ./scripts/v4/orangebox-health-report.mjs --json --receipt",
       "project:report": "node ./scripts/v4/orangebox-project-report.mjs --json --receipt",
       "chatbackup:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-chat-mirror-task.ps1",

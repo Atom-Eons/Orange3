@@ -244,6 +244,7 @@ A claim that Orangebox is green needs a receipt. Preferred proof levels:
 - system: `npm.cmd run system:doctor`
 - compression/backend pack: `npm.cmd run atomsmasher:doctor`
 - backend tool merge: `npm.cmd run atomsmasher:merge-tools`
+- MCP/tool bridge: `npm.cmd run mcp:doctor`
 - full backend: `npm.cmd run system:full-green`
 - backend-only install/proof: `npm.cmd run backend:install` then `npm.cmd run backend:proof`
 

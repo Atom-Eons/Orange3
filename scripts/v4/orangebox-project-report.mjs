@@ -127,6 +127,7 @@ async function main() {
   const knowledgeImprovements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
+  const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -147,6 +148,12 @@ async function main() {
   const researchScoutReady =
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_READY" ||
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_DEGRADED";
+  const mcpQuarantineGreen =
+    mcpDoctor?.ok === true &&
+    mcpDoctor?.summary?.failed === 0 &&
+    mcpDoctor?.install_attempted === false &&
+    mcpDoctor?.host_mcp_config_mutated === false &&
+    mcpDoctor?.paid_api_attempted === false;
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -161,6 +168,16 @@ async function main() {
       next: localOpsBackendGreen
         ? "Keep backend proof in every release gate. Treat two-device full-green as a separate Codexa readiness gate."
         : "Run npm.cmd run backend:proof and npm.cmd run ops:readiness.",
+    },
+    {
+      area: "MCP quarantine/tool bridge",
+      status: status(mcpQuarantineGreen, exists(path.join(repoRoot, "scripts", "v4", "mcp-doctor.mjs"))),
+      reality: mcpQuarantineGreen
+        ? `MCP registry, local HTTP tool-list probe, metadata-only stdio probe, disable override, CLI/API source probe, and code-mode execute guard are green (${mcpDoctor?.summary?.passed || 0}/${mcpDoctor?.summary?.checks || 0}).`
+        : "MCP bridge source exists, but the quarantine doctor is not green yet.",
+      next: mcpQuarantineGreen
+        ? "Keep all new MCPs as candidates until health, tools, scopes, output caps, receipts, and operator-confirmed write mode are proven."
+        : "Run npm.cmd run mcp:doctor and fix the exact failed gate.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -286,6 +303,7 @@ async function main() {
         project_report: packageScript("project:report", packageJson),
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
+        mcp_doctor: packageScript("mcp:doctor", packageJson),
       },
     },
     models: {
@@ -327,6 +345,10 @@ async function main() {
       knowledge_improvements: { path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), status: knowledgeImprovements?.status || null },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
+      mcp_doctor: {
+        path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
+        status: mcpQuarantineGreen ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
+      },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },
     },

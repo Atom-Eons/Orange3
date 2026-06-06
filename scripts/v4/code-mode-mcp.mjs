@@ -288,7 +288,7 @@ export async function runCodeModeDoctor({ dataRoot = null } = {}) {
   }));
   checks.push(await gate("execute_allows_read_only_doctor", async () => {
     const out = await executeSnippet({
-      command: "obx route doctor --json",
+      command: "obx api doctor --json",
       dataRoot: root,
       writeReceipt: true,
       timeoutMs: 120000,
@@ -302,7 +302,7 @@ export async function runCodeModeDoctor({ dataRoot = null } = {}) {
   }));
   checks.push(await gate("execute_blocks_shell_escape", async () => {
     const out = await executeSnippet({
-      command: "obx route doctor --json ; del C:\\AtomEons",
+      command: "obx api doctor --json ; del C:\\AtomEons",
       dataRoot: root,
       writeReceipt: true,
     });

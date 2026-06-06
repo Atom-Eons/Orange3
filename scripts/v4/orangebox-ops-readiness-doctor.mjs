@@ -81,6 +81,8 @@ function main() {
   const codexaConfig = readJson(codexaConfigPath);
   const codexaAlertPath = path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json");
   const codexaAlert = readJson(codexaAlertPath);
+  const mcpDoctorPath = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
+  const mcpDoctor = readJson(mcpDoctorPath);
   const antigravityRoot = path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "SKILL.md");
   const antigravityText = exists(antigravityRoot) ? fs.readFileSync(antigravityRoot, "utf8") : "";
 
@@ -112,6 +114,20 @@ function main() {
       status: codexaAlert?.status || null,
       message: codexaAlert?.message || null,
       note: "This check proves the Codexa/AI Box link has an explicit alert receipt. CODEXA_READY is not required for local Basic Install.",
+    },
+    mcp_quarantine_doctor: {
+      ok:
+        mcpDoctor?.ok === true &&
+        mcpDoctor?.install_attempted === false &&
+        mcpDoctor?.host_mcp_config_mutated === false &&
+        mcpDoctor?.paid_api_attempted === false &&
+        mcpDoctor?.summary?.failed === 0,
+      path: mcpDoctorPath,
+      status: mcpDoctor?.ok === true ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
+      checks: mcpDoctor?.summary?.checks || 0,
+      passed: mcpDoctor?.summary?.passed || 0,
+      failed: mcpDoctor?.summary?.failed ?? null,
+      note: "Proves MCP registry/tool-list/code-mode safety without package installs, paid APIs, or host MCP config mutation.",
     },
     skill_primer: {
       ok:
