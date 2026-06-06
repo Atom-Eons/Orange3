@@ -558,7 +558,9 @@ async function main() {
     scope,
     not_real_yet: notRealYet,
     recommended_next_actions: [
-      "Retire OpenClaw startup if not already retired.",
+      openclawRetired
+        ? "OpenClaw startup retirement is proven; keep it retired and do not reintroduce startup hooks."
+        : "Retire OpenClaw startup if not already retired.",
       obox2ContractGreen
         ? `OBOX2 setup package contract proof is green (${obox2Contracts.check_count} checks); run it on Codexa as admin when operator time is available.`
         : "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
