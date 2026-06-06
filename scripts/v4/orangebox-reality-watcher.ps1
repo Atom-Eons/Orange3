@@ -1,6 +1,7 @@
 param(
   [int]$IntervalSeconds = 120,
-  [int]$ReceiptEveryCycles = 30
+  [int]$ReceiptEveryCycles = 30,
+  [int]$ResearchEveryCycles = 720
 )
 
 $ErrorActionPreference = "Continue"
@@ -18,6 +19,8 @@ if (-not $node) {
 
 $watchScript = Join-Path $repo "scripts\v4\orangebox-reality-watch.mjs"
 $alertScript = Join-Path $repo "scripts\v4\orangebox-codexa-alert-doctor.mjs"
+$researchScript = Join-Path $repo "scripts\v4\orangebox-external-research-scout.mjs"
+$knowledgeScript = Join-Path $repo "scripts\v4\orangebox-knowledge-improvement-queue.mjs"
 $dataRoot = if ($env:ORANGEBOX_DATA_ROOT) { $env:ORANGEBOX_DATA_ROOT } else { Join-Path $env:USERPROFILE "OrangeBox-Data" }
 $watchRoot = Join-Path $dataRoot "watcher"
 $logDir = Join-Path $watchRoot "listener-logs"
@@ -135,6 +138,14 @@ while ($true) {
       & $node $alertScript --json --popup 2>&1 | Out-Null
     }
   } catch {}
+  try {
+    if (($ResearchEveryCycles -gt 0) -and (($cycle % $ResearchEveryCycles) -eq 0) -and (Test-Path -LiteralPath $researchScript)) {
+      & $node $researchScript --json --receipt 2>&1 | Out-Null
+      if (Test-Path -LiteralPath $knowledgeScript) {
+        & $node $knowledgeScript --json --receipt 2>&1 | Out-Null
+      }
+    }
+  } catch {}
   $output | Select-Object -Last 80 | Set-Content -LiteralPath $logPath -Encoding UTF8
   Get-ChildItem -LiteralPath $logDir -Filter "cycle-*.log" -File -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTime -Descending |
@@ -148,6 +159,7 @@ while ($true) {
     last_finished = (Get-Date).ToUniversalTime().ToString("o")
     interval_seconds = $IntervalSeconds
     receipt_every_cycles = $ReceiptEveryCycles
+    research_every_cycles = $ResearchEveryCycles
     last_exit_code = $exit
     last_log = $logPath
     repo = $repo
