@@ -168,6 +168,7 @@ async function main() {
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
   const actionClassifier = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(latestReceipt("orangebox-action-classifier-"));
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
+  const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -220,6 +221,7 @@ async function main() {
     mcpDoctor?.paid_api_attempted === false;
   const actionClassifierGreen = actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
+  const toolErgonomicsGreen = toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -271,6 +273,16 @@ async function main() {
       next: skillLifecycleGreen
         ? "Promote new skills only when they reduce repeated work, have command/proof mappings, and pass stale-skill gates."
         : "Run npm.cmd run skills:lifecycle and fix the exact failed root or command mapping.",
+    },
+    {
+      area: "Tool ergonomics eval lane",
+      status: status(toolErgonomicsGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-tool-ergonomics-doctor.mjs"))),
+      reality: toolErgonomicsGreen
+        ? `Tool ergonomics is green: ${toolErgonomics?.command_surface?.command_count || 0} commands checked for distinct names, concise descriptions, receipt-backed proofs, bounded outputs, and backend-only constraints.`
+        : "Tool ergonomics doctor source exists or is planned, but the current receipt is not green yet.",
+      next: toolErgonomicsGreen
+        ? "Run this doctor before adding, renaming, or promoting Orangebox commands/tools."
+        : "Run npm.cmd run tool:ergonomics and fix the exact failed command/tool surface check.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -470,6 +482,7 @@ async function main() {
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
+        tool_ergonomics: packageScript("tool:ergonomics", packageJson),
         ops_green: packageScript("ops:green", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
@@ -593,6 +606,12 @@ async function main() {
       skill_lifecycle: {
         path: path.join(dataRoot, "skills", "latest-skill-lifecycle.json"),
         status: skillLifecycle?.status || null,
+      },
+      tool_ergonomics: {
+        path: path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"),
+        status: toolErgonomics?.status || null,
+        command_count: toolErgonomics?.command_surface?.command_count || 0,
+        failures: toolErgonomics?.failures?.length ?? null,
       },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },

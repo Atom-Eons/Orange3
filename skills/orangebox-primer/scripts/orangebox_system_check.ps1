@@ -47,6 +47,7 @@ Add-Check "atomsmasher_tool_merge_present_data" (Test-Path -LiteralPath (Join-Pa
 Add-Check "latest_health_report_present" (Test-Path -LiteralPath (Join-Path $data "reports\health\latest-health-report.json")) "latest-health-report.json"
 Add-Check "latest_project_report_present" (Test-Path -LiteralPath (Join-Path $data "reports\project\latest-project-report.json")) "latest-project-report.json"
 Add-Check "latest_harness_benchmark_present" (Test-Path -LiteralPath (Join-Path $data "harness\latest-harness-benchmark.json")) "latest-harness-benchmark.json"
+Add-Check "latest_tool_ergonomics_present" (Test-Path -LiteralPath (Join-Path $data "tool-ergonomics\latest-tool-ergonomics.json")) "latest-tool-ergonomics.json"
 Add-Check "source_of_truth_lock_present" (Test-Path -LiteralPath (Join-Path $data "orangebox-source-of-truth.json")) "orangebox-source-of-truth.json"
 Add-Check "mid_session_primer_present" (Test-Path -LiteralPath (Join-Path $data "primers\ORANGEBOX_MID_SESSION_PRIMER.md")) "ORANGEBOX_MID_SESSION_PRIMER.md"
 Add-Check "codexa_config_present" (Test-Path -LiteralPath (Join-Path $data "codexa-sync\latest-codexa-config.json")) "latest-codexa-config.json"
@@ -84,6 +85,17 @@ if (Test-Path -LiteralPath (Join-Path $data "harness\latest-harness-benchmark.js
     Add-Check "harness_benchmark_green" (([bool]$harness.ok) -and ($harness.status -eq "ORANGEBOX_HARNESS_BENCHMARK_GREEN")) $harness.status
   } catch {
     Add-Check "latest_harness_benchmark_readable" $false $_.Exception.Message
+  }
+}
+
+if (Test-Path -LiteralPath (Join-Path $data "tool-ergonomics\latest-tool-ergonomics.json")) {
+  try {
+    $tool = Get-Content -LiteralPath (Join-Path $data "tool-ergonomics\latest-tool-ergonomics.json") -Raw | ConvertFrom-Json
+    $result.latest.tool_ergonomics_status = $tool.status
+    $result.latest.tool_ergonomics_command_count = $tool.command_surface.command_count
+    Add-Check "tool_ergonomics_green" (([bool]$tool.ok) -and ($tool.status -eq "ORANGEBOX_TOOL_ERGONOMICS_GREEN")) $tool.status
+  } catch {
+    Add-Check "latest_tool_ergonomics_readable" $false $_.Exception.Message
   }
 }
 

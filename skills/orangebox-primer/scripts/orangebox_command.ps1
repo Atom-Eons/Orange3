@@ -103,6 +103,11 @@ $commands = [ordered]@{
     args = @("run", "harness:benchmark")
     description = "Run offline oracle tasks for Orangebox tool, routing, receipt, and proof harness quality."
   }
+  "tool-ergonomics" = @{
+    kind = "npm"
+    args = @("run", "tool:ergonomics")
+    description = "Verify Orangebox commands are distinct, concise, bounded, receipt-backed, and scoped."
+  }
   "codexa-alert" = @{
     kind = "npm"
     args = @("run", "codexa:alert")

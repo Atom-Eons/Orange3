@@ -99,6 +99,8 @@ function main() {
   const actionClassifier = readJson(actionClassifierPath);
   const skillLifecyclePath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
   const skillLifecycle = readJson(skillLifecyclePath);
+  const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
+  const toolErgonomics = readJson(toolErgonomicsPath);
   const terminalProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
   const terminalProfileText = exists(terminalProfilePath) ? fs.readFileSync(terminalProfilePath, "utf8") : "";
   const terminalProfileReceiptPath = newestFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
@@ -193,6 +195,14 @@ function main() {
       stale_count: skillLifecycle?.stale_count ?? null,
       command_failures: skillLifecycle?.command_failures?.length ?? null,
       note: "Proves Orangebox skills are installed, non-stale, command-mapped, and receipt-visible.",
+    },
+    tool_ergonomics: {
+      ok: toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN",
+      path: toolErgonomicsPath,
+      status: toolErgonomics?.status || null,
+      command_count: toolErgonomics?.command_surface?.command_count || 0,
+      failures: toolErgonomics?.failures?.length ?? null,
+      note: "Proves Orangebox commands/tools are distinct, concise, bounded, receipt-backed, and backend-only before promotion.",
     },
     terminal_obox_profile: {
       ok:

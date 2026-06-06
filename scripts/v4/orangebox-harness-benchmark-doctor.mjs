@@ -144,6 +144,7 @@ const requiredOpsScripts = [
   "project:report",
   "research:scout",
   "knowledge:improvements",
+  "tool:ergonomics",
   "harness:benchmark",
   "codexa:alert",
   "codexa:smb-stage",
@@ -185,7 +186,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "tool-ergonomics", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -194,7 +195,7 @@ const tasks = [
       if (!packageJson?.scripts?.["harness:benchmark"]) failures.push("Package script harness:benchmark missing");
       if (lifecycle?.compression_proof?.status !== "SKILL_COMPRESSION_GREEN") failures.push(`Skill compression proof not green: ${lifecycle?.compression_proof?.status || "missing"}`);
       if (lifecycle?.compression_proof?.wrapper_mapping_rate !== 1) failures.push(`Skill wrapper mapping rate not 1: ${lifecycle?.compression_proof?.wrapper_mapping_rate ?? "missing"}`);
-      if ((lifecycle?.compression_proof?.command_count || 0) < 25) failures.push(`Skill command count too low: ${lifecycle?.compression_proof?.command_count || 0}`);
+      if ((lifecycle?.compression_proof?.command_count || 0) < 26) failures.push(`Skill command count too low: ${lifecycle?.compression_proof?.command_count || 0}`);
       return failures.length
         ? failTask("skill_command_roundtrip", failures, { commands_checked: commands.length, compression_status: lifecycle?.compression_proof?.status || null })
         : okTask("skill_command_roundtrip", { commands_checked: commands.length, compression_status: lifecycle?.compression_proof?.status, compression_command_count: lifecycle?.compression_proof?.command_count });
@@ -210,6 +211,7 @@ const tasks = [
         ["mcp", path.join(dataRoot, "mcp", "latest-mcp-doctor.json"), "MCP_QUARANTINE_GREEN"],
         ["action", path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"), "ORANGEBOX_ACTION_CLASSIFIER_GREEN"],
         ["skills", path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), "ORANGEBOX_SKILL_LIFECYCLE_GREEN"],
+        ["tool_ergonomics", path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"), "ORANGEBOX_TOOL_ERGONOMICS_GREEN"],
       ];
       if (!backendProofInProgress) {
         receiptSpecs.unshift(
@@ -359,6 +361,40 @@ const tasks = [
           backend_frontend_required: backendInstall?.frontend_required_for_backend ?? (backendProofInProgress ? false : null),
           final_frontend_included: finalPackage?.frontend_included ?? frontendDirExists,
           final_evidence: finalPackage ? "receipt_or_manifest" : "frontend_dir_absence",
+        });
+    },
+  },
+  {
+    id: "tool_ergonomics_eval_lane_truth",
+    category: "tool_ergonomics",
+    oracle: "Orangebox command/tool surfaces must be distinct, concise, receipt-backed, output-bounded, and backend-only before promotion.",
+    budget: { timeout_ms: 1600, max_files_read: 2, max_tool_calls: 0 },
+    run(trace) {
+      const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"), trace);
+      const failures = [];
+      const commandCount = toolErgonomics?.command_surface?.command_count || 0;
+      const outputContracts = toolErgonomics?.proof_contracts?.output_contracts || {};
+      const constraints = toolErgonomics?.constraints || {};
+      if (toolErgonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") failures.push(`Tool ergonomics not green: ${toolErgonomics?.status || "missing"}`);
+      if (commandCount < 26) failures.push(`Tool command count too low: ${commandCount}`);
+      if (Array.isArray(toolErgonomics?.failures) && toolErgonomics.failures.length > 0) failures.push(`Tool ergonomics has ${toolErgonomics.failures.length} failure(s)`);
+      if (outputContracts.wrapper_writes_command_receipts !== true) failures.push("Wrapper does not prove command receipt writes");
+      if (outputContracts.wrapper_tail_bounded !== true) failures.push("Wrapper does not prove bounded output tail");
+      if (outputContracts.package_proofs_json_receipt !== true) failures.push("Proof scripts are not all receipt-visible");
+      if (constraints.frontend_touched !== false) failures.push("Tool ergonomics doctor must prove frontend_touched=false");
+      if (constraints.install_attempted !== false) failures.push("Tool ergonomics doctor must prove install_attempted=false");
+      if (constraints.paid_api_attempted !== false) failures.push("Tool ergonomics doctor must prove paid_api_attempted=false");
+      return failures.length
+        ? failTask("tool_ergonomics_eval_lane_truth", failures, {
+          status: toolErgonomics?.status || null,
+          command_count: commandCount,
+          constraints,
+        })
+        : okTask("tool_ergonomics_eval_lane_truth", {
+          status: toolErgonomics.status,
+          command_count: commandCount,
+          command_hash: toolErgonomics?.command_surface?.command_hash || null,
+          constraints,
         });
     },
   },

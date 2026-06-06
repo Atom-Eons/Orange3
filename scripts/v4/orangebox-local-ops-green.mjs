@@ -161,6 +161,7 @@ async function main() {
     { script: "mcp:doctor", timeout: 60_000 },
     { script: "action:doctor", timeout: 60_000 },
     { script: "skills:lifecycle", timeout: 90_000 },
+    { script: "tool:ergonomics", timeout: 60_000 },
     { script: "harness:benchmark", timeout: 90_000 },
     { script: "ops:readiness", timeout: 180_000 },
     { script: "health:report", timeout: 90_000 },
@@ -182,6 +183,7 @@ async function main() {
   const mcpPath = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
   const actionPath = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
   const skillsPath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
+  const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const backendPath = latestReceipt("orangebox-backend-install-");
   const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
@@ -196,6 +198,7 @@ async function main() {
   const mcp = readJson(mcpPath);
   const action = readJson(actionPath);
   const skills = readJson(skillsPath);
+  const toolErgonomics = readJson(toolErgonomicsPath);
   const openclaw = readJson(openclawPath);
   const backend = readJson(backendPath || "");
   const opsReadiness = readJson(opsReadinessPath || "");
@@ -224,6 +227,7 @@ async function main() {
     gate("mcp_quarantine_green", mcp?.ok === true && mcp?.summary?.failed === 0, { status: mcp?.ok === true ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN" }),
     gate("action_classifier_green", action?.ok === true && action?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN", { status: action?.status || null }),
     gate("skill_lifecycle_green", skills?.ok === true && skills?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN", { status: skills?.status || null, command_count: skills?.command_count ?? null }),
+    gate("tool_ergonomics_green", toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { status: toolErgonomics?.status || null, command_count: toolErgonomics?.command_surface?.command_count ?? null }),
     gate("harness_benchmark_green", harness?.ok === true && harness?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN", { status: harness?.status || null, tasks_ok: harness?.tasks_ok ?? null, tasks_total: harness?.tasks_total ?? null }),
     gate("reality_watch_local_ops_truth", reality?.checks?.project_report?.local_ops_green === true || reality?.checks?.project_report?.ok === true, { status: reality?.status || null }),
     gate("reality_watcher_process_fresh", watcherFresh, { path: watcherHeartbeatPath, last_finished: watcherHeartbeat?.last_finished || null }),
@@ -257,6 +261,7 @@ async function main() {
       project_report: projectPath,
       reality_watch: realityPath,
       harness_benchmark: harnessPath,
+      tool_ergonomics: toolErgonomicsPath,
       backend_install: backendPath,
       ops_readiness: opsReadinessPath,
       final_verify: finalVerifyPath || (exists(finalManifestPath) ? finalManifestPath : null),

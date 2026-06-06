@@ -249,6 +249,7 @@ async function main() {
     mcp_doctor: latestReceipt("orangebox-mcp-doctor-"),
     action_classifier: latestReceipt("orangebox-action-classifier-"),
     skill_lifecycle: latestReceipt("orangebox-skill-lifecycle-doctor-"),
+    tool_ergonomics: latestReceipt("orangebox-tool-ergonomics-"),
     openclaw_retirement: latestReceipt("orangebox-openclaw-retirement-"),
   };
   const latest = {
@@ -265,6 +266,7 @@ async function main() {
     mcp_doctor: readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(receiptPaths.mcp_doctor || ""),
     action_classifier: readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(receiptPaths.action_classifier || ""),
     skill_lifecycle: readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(receiptPaths.skill_lifecycle || ""),
+    tool_ergonomics: readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(receiptPaths.tool_ergonomics || ""),
     openclaw_retirement: readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json")) || readJson(receiptPaths.openclaw_retirement || ""),
   };
 
@@ -320,6 +322,7 @@ async function main() {
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) warnings.push("MCP quarantine/tool bridge doctor is not green.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") warnings.push("Action classifier doctor is not green.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") warnings.push("Orangebox skill lifecycle doctor is not green.");
+  if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") warnings.push("Orangebox tool ergonomics doctor is not green.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
   if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
@@ -354,12 +357,14 @@ async function main() {
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") nextActions.push("Run npm.cmd run action:doctor to verify the pre-tool action classifier.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") nextActions.push("Run npm.cmd run skills:lifecycle to verify Orangebox skill install and command mappings.");
+  if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") nextActions.push("Run npm.cmd run tool:ergonomics to verify command/tool names, bounded outputs, and receipt-backed proof scripts.");
 
   const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
   const actionClassifierOk = latest.action_classifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleOk = latest.skill_lifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
+  const toolErgonomicsOk = latest.tool_ergonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
   const harnessBenchmarkOk = latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && harnessBenchmarkOk;
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && harnessBenchmarkOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -501,6 +506,12 @@ async function main() {
         status: latest.skill_lifecycle?.status || null,
         command_count: latest.skill_lifecycle?.command_count || 0,
         stale_count: latest.skill_lifecycle?.stale_count ?? null,
+      },
+      tool_ergonomics: {
+        path: path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"),
+        status: latest.tool_ergonomics?.status || null,
+        command_count: latest.tool_ergonomics?.command_surface?.command_count || 0,
+        failures: latest.tool_ergonomics?.failures?.length ?? null,
       },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: latest.openclaw_retirement?.status || null },
     },

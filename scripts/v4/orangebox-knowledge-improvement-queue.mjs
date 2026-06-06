@@ -94,6 +94,26 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "tool_ergonomics_eval_lane") {
+    const file = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.install_attempted === false
+      && proof?.constraints?.paid_api_attempted === false
+      && Number(proof?.command_surface?.command_count || 0) >= 1
+      && Array.isArray(proof?.failures)
+      && proof.failures.length === 0;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.command_surface.command_count} commands checked; no frontend/install/API mutation`,
+      }
+      : null;
+  }
   return null;
 }
 
@@ -126,6 +146,7 @@ function shouldSkipHistoricalReceipt(file) {
     "orangebox-project-report-",
     "orangebox-health-report-",
     "orangebox-knowledge-improvement-queue-",
+    "orangebox-tool-ergonomics-",
   ].some((prefix) => name.startsWith(prefix));
 }
 
@@ -288,7 +309,7 @@ const executionProfiles = {
   },
   tool_ergonomics_eval_lane: {
     priority: 93,
-    proof_command: "npm.cmd run harness:benchmark",
+    proof_command: "npm.cmd run tool:ergonomics && npm.cmd run harness:benchmark",
     acceptance_gate: "Tool-name, output-shape, transcript-repair, and budget fixtures pass before any tool description or command surface is promoted.",
   },
   eval_integrity_and_benchmark_hygiene: {
@@ -472,6 +493,7 @@ async function main() {
     path.join(dataRoot, "obox2", "latest-package-doctor.json"),
     path.join(dataRoot, "trilane", "latest-trilane-model-router.json"),
     path.join(dataRoot, "research-scout", "latest-external-research-scout.json"),
+    path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"),
   ];
   for (const file of reportFiles) {
     const data = readJson(file);
