@@ -193,6 +193,38 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "codex_harness_and_compaction") {
+    const packetFile = path.join(dataRoot, "restore-packets", "ORANGEBOX_RESTORE_PACKET.latest.md");
+    const harnessFile = path.join(dataRoot, "harness", "latest-harness-benchmark.json");
+    const harness = readJson(harnessFile);
+    let packetText = "";
+    try {
+      packetText = fs.readFileSync(packetFile, "utf8").replace(/^\uFEFF/, "");
+    } catch {
+      packetText = "";
+    }
+    const restoreTask = Array.isArray(harness?.tasks)
+      ? harness.tasks.find((task) => task.id === "chatbackup_restore_packet_truth")
+      : null;
+    const packetOk = /Orangebox Zero-Memory Chat Primer/i.test(packetText)
+      && /Orangebox Ops backend/i.test(packetText)
+      && /local files and receipts as truth/i.test(packetText)
+      && /ChatBackup archives to restore project continuity/i.test(packetText);
+    const ok = packetOk
+      && harness?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN"
+      && harness?.ok === true
+      && restoreTask?.ok === true
+      && restoreTask?.budget_ok === true;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: harnessFile,
+        proof_status: harness.status,
+        proof_detail: `restore_packet=${packetFile}; task=${restoreTask.id}; packet_bytes=${Buffer.byteLength(packetText, "utf8")}`,
+      }
+      : null;
+  }
   return null;
 }
 

@@ -150,6 +150,7 @@ const requiredOpsScripts = [
   "session:spine",
   "feature:proof",
   "harness:benchmark",
+  "chatbackup:restore",
   "codexa:alert",
   "codexa:smb-stage",
   "mcp:doctor",
@@ -549,6 +550,39 @@ const tasks = [
       return failures.length
         ? failTask("research_to_approval_queue", failures, { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status })
         : okTask("research_to_approval_queue", { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status, improvement_candidates: improvements?.candidate_count || 0 });
+    },
+  },
+  {
+    id: "chatbackup_restore_packet_truth",
+    category: "restore_continuity",
+    oracle: "Cold-start restore packets must preserve Orangebox project law, active lane, proof state, and source-truth pointers without relying on hidden chat memory.",
+    budget: { timeout_ms: 1600, max_files_read: 1, max_tool_calls: 0 },
+    run(trace) {
+      const packetPath = path.join(dataRoot, "restore-packets", "ORANGEBOX_RESTORE_PACKET.latest.md");
+      const failures = [];
+      if (!exists(packetPath)) {
+        failures.push("Latest restore packet is missing");
+        return failTask("chatbackup_restore_packet_truth", failures, { packet_path: packetPath });
+      }
+      const text = readText(packetPath, trace);
+      const required = [
+        /Orangebox Zero-Memory Chat Primer/i,
+        /Orangebox Ops backend/i,
+        /local files and receipts as truth/i,
+        /visual\/website\/shop work is on hold for this backend lane/i,
+        /ChatBackup archives to restore project continuity/i,
+        /AtomSmasher/i,
+      ];
+      for (const pattern of required) {
+        if (!pattern.test(text)) failures.push(`Restore packet missing pattern: ${pattern.source}`);
+      }
+      return failures.length
+        ? failTask("chatbackup_restore_packet_truth", failures, { packet_path: packetPath, bytes: Buffer.byteLength(text, "utf8") })
+        : okTask("chatbackup_restore_packet_truth", {
+          packet_path: packetPath,
+          bytes: Buffer.byteLength(text, "utf8"),
+          sha256: crypto.createHash("sha256").update(text).digest("hex"),
+        });
     },
   },
   {
