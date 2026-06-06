@@ -1,7 +1,8 @@
 param(
   [int]$IntervalSeconds = 120,
   [int]$ReceiptEveryCycles = 30,
-  [int]$ResearchEveryCycles = 720
+  [int]$ResearchEveryCycles = 720,
+  [int]$HarnessEveryCycles = 60
 )
 
 $ErrorActionPreference = "Continue"
@@ -21,6 +22,7 @@ $watchScript = Join-Path $repo "scripts\v4\orangebox-reality-watch.mjs"
 $alertScript = Join-Path $repo "scripts\v4\orangebox-codexa-alert-doctor.mjs"
 $researchScript = Join-Path $repo "scripts\v4\orangebox-external-research-scout.mjs"
 $knowledgeScript = Join-Path $repo "scripts\v4\orangebox-knowledge-improvement-queue.mjs"
+$harnessScript = Join-Path $repo "scripts\v4\orangebox-harness-benchmark-doctor.mjs"
 $dataRoot = if ($env:ORANGEBOX_DATA_ROOT) { $env:ORANGEBOX_DATA_ROOT } else { Join-Path $env:USERPROFILE "OrangeBox-Data" }
 $watchRoot = Join-Path $dataRoot "watcher"
 $logDir = Join-Path $watchRoot "listener-logs"
@@ -169,6 +171,33 @@ while ($true) {
       }
     }
   } catch {}
+  $harnessSummary = $null
+  try {
+    if (($HarnessEveryCycles -gt 0) -and (($cycle % $HarnessEveryCycles) -eq 0) -and (Test-Path -LiteralPath $harnessScript)) {
+      $harnessOutput = & $node $harnessScript --json --receipt 2>&1
+      $harnessText = ($harnessOutput | Out-String).Trim()
+      try {
+        $harness = $harnessText | ConvertFrom-Json
+        $harnessSummary = [ordered]@{
+          status = $harness.status
+          tasks_total = $harness.tasks_total
+          tasks_ok = $harness.tasks_ok
+          score = $harness.score
+          receipt_path = $harness.receipt_path
+        }
+      } catch {
+        $harnessSummary = [ordered]@{
+          status = "PARSE_FAILED"
+          error = $_.Exception.Message
+        }
+      }
+    }
+  } catch {
+    $harnessSummary = [ordered]@{
+      status = "RUN_FAILED"
+      error = $_.Exception.Message
+    }
+  }
   $output | Select-Object -Last 80 | Set-Content -LiteralPath $logPath -Encoding UTF8
   Get-ChildItem -LiteralPath $logDir -Filter "cycle-*.log" -File -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTime -Descending |
@@ -183,11 +212,13 @@ while ($true) {
     interval_seconds = $IntervalSeconds
     receipt_every_cycles = $ReceiptEveryCycles
     research_every_cycles = $ResearchEveryCycles
+    harness_every_cycles = $HarnessEveryCycles
     last_exit_code = $exit
     last_log = $logPath
     repo = $repo
     watch_root = $watchRoot
     codexa_alert = $codexaAlertSummary
+    harness_benchmark = $harnessSummary
   } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $heartbeat -Encoding UTF8
   Start-Sleep -Seconds $IntervalSeconds
 }

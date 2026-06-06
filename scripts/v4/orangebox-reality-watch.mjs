@@ -92,6 +92,8 @@ async function main() {
   const soulGenome = readJson(soulGenomePath);
   const knowledgeImprovementsPath = path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json");
   const knowledgeImprovements = readJson(knowledgeImprovementsPath);
+  const harnessBenchmarkPath = path.join(dataRoot, "harness", "latest-harness-benchmark.json");
+  const harnessBenchmark = readJson(harnessBenchmarkPath);
   const codexaAlertPath = path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json");
   const codexaAlert = readJson(codexaAlertPath);
   const openclawRetirementPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
@@ -122,6 +124,7 @@ async function main() {
     knowledgeImprovements?.ok === true &&
     knowledgeImprovements?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" &&
     knowledgeImprovements?.not_autonomous === true;
+  const harnessBenchmarkGreen = harnessBenchmark?.ok === true && harnessBenchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
   const openclawRetired = openclawRetirement?.status === "OPENCLAW_STARTUP_RETIRED" && !exists(openclawStartupPath);
   const warnings = [];
   if (!chatFresh) warnings.push("ChatBackup heartbeat is stale or missing.");
@@ -137,6 +140,7 @@ async function main() {
   if (!obox2PackageGreen) warnings.push("OBOX2 setup package has not passed package doctor.");
   if (!soulGenomeGreen) warnings.push("SOUL GENOME continuity map proof is missing or not green.");
   if (!knowledgeImprovementsReady) warnings.push("Knowledge Engine improvement candidate queue is missing or not green.");
+  if (!harnessBenchmarkGreen) warnings.push("Offline harness benchmark proof is missing or not green.");
   if (!codexaAlert?.status) warnings.push("Codexa/AI Box visible alert receipt is missing.");
   if (!openclawRetired) warnings.push("OpenClaw startup retirement is missing, stale, or the startup hook still exists.");
   if (!probes.ai_box_command_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
@@ -170,6 +174,8 @@ async function main() {
       soul_genome: "Knowledge Engine continuity map; not a model body, hidden ruler, rename, or training claim; validated by npm.cmd run soul:doctor.",
       knowledge_improvements:
         "receipt/report learner queue; candidates are observed, deduped, scored, and parked for operator approval; validated by npm.cmd run knowledge:improvements.",
+      harness_benchmark:
+        "offline oracle tasks with budgets, traces, and receipts; validates tool/routing/proof harness claims before promotion.",
       codexa_alert:
         "explicit AI Box/Codexa link alert; warns the operator when local Basic Install is green but Codexa rails/models are not usable.",
       openclaw_retirement: "legacy OpenClaw startup is retired surgically; rollback is the backup path in OrangeBox-Data.",
@@ -272,6 +278,15 @@ async function main() {
         candidate_count: knowledgeImprovements?.candidate_count || 0,
         not_autonomous: knowledgeImprovements?.not_autonomous || false,
         top_candidate: knowledgeImprovements?.candidates?.[0] || null,
+      },
+      harness_benchmark: {
+        ok: harnessBenchmarkGreen,
+        path: harnessBenchmarkPath,
+        status: harnessBenchmark?.status || null,
+        tasks_total: harnessBenchmark?.tasks_total || 0,
+        tasks_ok: harnessBenchmark?.tasks_ok || 0,
+        score: harnessBenchmark?.score ?? null,
+        suite_hash: harnessBenchmark?.suite_hash || null,
       },
       codexa_alert: {
         ok: Boolean(codexaAlert?.status),

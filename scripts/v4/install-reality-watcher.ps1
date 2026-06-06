@@ -1,7 +1,8 @@
 param(
   [int]$IntervalSeconds = 120,
   [int]$ReceiptEveryCycles = 30,
-  [int]$ResearchEveryCycles = 720
+  [int]$ResearchEveryCycles = 720,
+  [int]$HarnessEveryCycles = 60
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,7 +36,7 @@ function Stop-ExistingWatcher($ScriptPath) {
 
 Stop-ExistingWatcher $watcher
 
-$argument = "-NoProfile -ExecutionPolicy Bypass -File `"$watcher`" -IntervalSeconds $IntervalSeconds -ReceiptEveryCycles $ReceiptEveryCycles -ResearchEveryCycles $ResearchEveryCycles"
+$argument = "-NoProfile -ExecutionPolicy Bypass -File `"$watcher`" -IntervalSeconds $IntervalSeconds -ReceiptEveryCycles $ReceiptEveryCycles -ResearchEveryCycles $ResearchEveryCycles -HarnessEveryCycles $HarnessEveryCycles"
 $action = New-ScheduledTaskAction -Execute $powershell -Argument $argument -WorkingDirectory $repo
 $trigger = New-ScheduledTaskTrigger -AtLogOn
 $settings = New-ScheduledTaskSettingsSet `
@@ -95,6 +96,7 @@ try {
   interval_seconds = $IntervalSeconds
   receipt_every_cycles = $ReceiptEveryCycles
   research_every_cycles = $ResearchEveryCycles
+  harness_every_cycles = $HarnessEveryCycles
   watcher = $watcher
   powershell = $powershell
   note = "Always-on local deterministic watcher. It checks receipts, heartbeats, and local rails; it does not use paid model/API calls."
