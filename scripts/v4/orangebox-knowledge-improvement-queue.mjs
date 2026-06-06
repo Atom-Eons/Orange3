@@ -153,6 +153,28 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "operator_situation_awareness") {
+    const healthFile = path.join(dataRoot, "reports", "health", "latest-health-report.json");
+    const projectFile = path.join(dataRoot, "reports", "project", "latest-project-report.json");
+    const realityFile = path.join(dataRoot, "watcher", "latest-reality-watch.json");
+    const health = readJson(healthFile);
+    const project = readJson(projectFile);
+    const reality = readJson(realityFile);
+    const ok = health?.status === "ORANGEBOX_HEALTH_DEV_GREEN_AIBOX_WARN"
+      && project?.status === "ORANGEBOX_PROJECT_SCOPE_REPORTED_WITH_GAPS"
+      && project?.local_ops_green === true
+      && project?.full_project_green === false
+      && reality?.status === "ONE_REALITY_WITH_WARNINGS";
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: projectFile,
+        proof_status: project.status,
+        proof_detail: `health=${health.status}; reality=${reality.status}; gaps=${project.gap_count}`,
+      }
+      : null;
+  }
   if (area === "doer_watcher_session_spine") {
     const file = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
     const proof = readJson(file);
@@ -252,13 +274,46 @@ function listRecentJsonFiles(root, limit = 80) {
 
 function shouldSkipHistoricalReceipt(file) {
   const name = path.basename(file);
-  return [
+  if ([
     "orangebox-external-research-scout-",
     "orangebox-project-report-",
     "orangebox-health-report-",
     "orangebox-knowledge-improvement-queue-",
+    "orangebox-reality-watch-",
     "orangebox-tool-ergonomics-",
-  ].some((prefix) => name.startsWith(prefix));
+  ].some((prefix) => name.startsWith(prefix))) {
+    return true;
+  }
+  return latestProofAlreadyGreenForReceipt(name);
+}
+
+function latestProofAlreadyGreenForReceipt(name) {
+  const checks = [
+    {
+      prefix: "orangebox-harness-benchmark-",
+      file: path.join(dataRoot, "harness", "latest-harness-benchmark.json"),
+      status: "ORANGEBOX_HARNESS_BENCHMARK_GREEN",
+    },
+    {
+      prefix: "orangebox-feature-acceptance-matrix-",
+      file: path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"),
+      status: "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN",
+    },
+    {
+      prefix: "orangebox-doer-watcher-spine-",
+      file: path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json"),
+      status: "ORANGEBOX_DOER_WATCHER_SPINE_GREEN",
+    },
+    {
+      prefix: "orangebox-delta-final-package-",
+      file: path.join(dataRoot, "downloads", "latest-orangebox-delta-final-download-zip.json"),
+      status: "ORANGEBOX_DOWNLOAD_ZIP_VERIFIED_GREEN",
+    },
+  ];
+  const check = checks.find((item) => name.startsWith(item.prefix));
+  if (!check) return false;
+  const latest = readJson(check.file);
+  return latest?.status === check.status;
 }
 
 function pushFinding(findings, source, kind, text, severity = 0.5, evidence = {}) {
@@ -351,7 +406,7 @@ function collectFromObject(findings, source, object, prefix = "") {
 
 function classify(text) {
   if (/operator_signal_hygiene|alert fatigue|alarm fatigue|notification fatigue|popup throttling|severity labels|visible confidence|calibrated trust|human-ai teaming|human ai teaming/.test(text)) return { area: "operator_signal_hygiene", action: "Promote as signal-hygiene rule only: popup throttling, severity labels, alert fatigue limits, and visible confidence calibration." };
-  if (/operator_situation_awareness|automation bias|automation complacency|over-reliance|overreliance|vigilance|situation awareness|human factors|calibrated trust/.test(text)) return { area: "operator_situation_awareness", action: "Promote as watcher/health-report rule only: visible status, failure drills, calibrated trust, and no silent automation." };
+  if (/operator_situation_awareness|automation bias|automation complacency|over-reliance|overreliance|vigilance|situation awareness|human factors|calibrated trust|project report|project:report|full project completion/.test(text)) return { area: "operator_situation_awareness", action: "Promote as watcher/health-report rule only: visible status, failure drills, calibrated trust, and no silent automation." };
   if (/action_classifier_permission_gate|auto mode|action classifier|permission prompt|approval fatigue|overeager|credential exploration|review bypass|transcript classifier|deny-and-continue/.test(text)) return { area: "action_classifier_permission_gate", action: "Review an Orangebox command-action classifier candidate: block overeager scope expansion, credential hunting, review bypass, and exfiltration before tool execution." };
   if (/tool_ergonomics_eval_lane|tool ergonomics|tool names|tool descriptions|response_format|output caps|bad tool descriptions|writing effective tools/.test(text)) return { area: "tool_ergonomics_eval_lane", action: "Review tool-ergonomics candidate; promote only as command/tool fixtures with transcript repair proof and output caps." };
   if (/eval_integrity_and_benchmark_hygiene|eval awareness|benchmark leakage|contamination|canary|string|ai-resistant|ai resistant|benchmark hygiene|browsecomp|answer key/.test(text)) return { area: "eval_integrity_and_benchmark_hygiene", action: "Promote only as CHECKMATE benchmark hygiene: source leakage checks, eval-canary blocklists, web-trace warnings, and adversarial score validation." };
@@ -363,7 +418,7 @@ function classify(text) {
   if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/i.test(text)) return { area: "doer_watcher_session_spine", action: "Review durable session/harness candidate; promote as resumability, rail recovery, or watcher proof only." };
   if (/long_horizon_feature_proof|roadmapbench|featurebench|long-horizon|version upgrade|multi-target|acceptance matrices/.test(text)) return { area: "long_horizon_feature_proof", action: "Promote as project proof upgrade: feature contract, tests, rollback, and receipt-based completion claims." };
   if (/codex_harness_and_compaction|codex|agent loop|responses api|computer environment|shell-action receipts|compaction restore/.test(text)) return { area: "codex_harness_and_compaction", action: "Review Codex harness candidate; promote only as primer, restore packet, shell receipt, or cross-agent handoff check." };
-  if (/ai box|codexa|8097|8098|ollama|rail/i.test(text)) return { area: "codexa_ai_box", action: "Run power optimizer, rail starter, and model doctor on Codexa." };
+  if (/ai box|aibox|codexa|8097|8098|ollama|rail|two[-_ ]machine|full[-_ ]system|full[-_ ]green|DEV_GREEN_AIBOX_WARN|ONE_REALITY_WITH_WARNINGS|full_project_green|Project report has .*gap/i.test(text)) return { area: "codexa_ai_box", action: "Run power optimizer, rail starter, and model doctor on Codexa." };
   if (/pubmed|nih|biomedical|bioinformatics|clinical|healthcare|health care|assurance/i.test(text)) return { area: "research_assurance_lab", action: "Review assurance-lab candidate; translate only into playbook, benchmark, or proof-receipt work." };
   if (/local_model_lane_eval|model-card claims|model card|dolphin|qwen|hermes|abliterated|misfits|strongarm|judgement|mirror/i.test(text)) return { area: "local_model_lane_eval", action: "Review local model lane eval candidate; promote only through STRONGARM/Misfits/Mirror/Judgement packet tests and receipts." };
   if (/codexa_model_serving|vllm|llm serving|model serving|model-routing|model routing|throughput|quantization/i.test(text)) return { area: "codexa_model_serving", action: "Review Codexa model-serving candidate only after core Ollama proof is green; add model doctor checks before serving-stack changes." };
