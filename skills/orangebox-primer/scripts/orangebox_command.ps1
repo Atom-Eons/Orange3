@@ -93,6 +93,16 @@ $commands = [ordered]@{
     args = @("run", "research:scout")
     description = "Fetch low-bandwidth public research signals and park upgrade candidates."
   }
+  "codexa-alert" = @{
+    kind = "npm"
+    args = @("run", "codexa:alert")
+    description = "Probe Codexa/AI Box rails and write an explicit alert receipt."
+  }
+  "codexa-alert-popup" = @{
+    kind = "npm"
+    args = @("run", "codexa:alert:popup")
+    description = "Probe Codexa/AI Box rails and show a throttled Windows popup if attention is required."
+  }
   "obox2-pack" = @{
     kind = "npm"
     args = @("run", "obox2:pack")

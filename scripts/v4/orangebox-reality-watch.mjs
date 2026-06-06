@@ -92,6 +92,8 @@ async function main() {
   const soulGenome = readJson(soulGenomePath);
   const knowledgeImprovementsPath = path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json");
   const knowledgeImprovements = readJson(knowledgeImprovementsPath);
+  const codexaAlertPath = path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json");
+  const codexaAlert = readJson(codexaAlertPath);
   const openclawRetirementPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const openclawRetirement = readJson(openclawRetirementPath);
   const openclawStartupPath = path.join(userRoot, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "OpenClaw Gateway (atomeons).cmd");
@@ -135,6 +137,7 @@ async function main() {
   if (!obox2PackageGreen) warnings.push("OBOX2 setup package has not passed package doctor.");
   if (!soulGenomeGreen) warnings.push("SOUL GENOME continuity map proof is missing or not green.");
   if (!knowledgeImprovementsReady) warnings.push("Knowledge Engine improvement candidate queue is missing or not green.");
+  if (!codexaAlert?.status) warnings.push("Codexa/AI Box visible alert receipt is missing.");
   if (!openclawRetired) warnings.push("OpenClaw startup retirement is missing, stale, or the startup hook still exists.");
   if (!probes.ai_box_command_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!probes.ai_box_wiki_8098.ok) warnings.push("AI Box wiki/receipt rail 8098 is not reachable.");
@@ -167,6 +170,8 @@ async function main() {
       soul_genome: "Knowledge Engine continuity map; not a model body, hidden ruler, rename, or training claim; validated by npm.cmd run soul:doctor.",
       knowledge_improvements:
         "receipt/report learner queue; candidates are observed, deduped, scored, and parked for operator approval; validated by npm.cmd run knowledge:improvements.",
+      codexa_alert:
+        "explicit AI Box/Codexa link alert; warns the operator when local Basic Install is green but Codexa rails/models are not usable.",
       openclaw_retirement: "legacy OpenClaw startup is retired surgically; rollback is the backup path in OrangeBox-Data.",
     },
     checks: {
@@ -267,6 +272,13 @@ async function main() {
         candidate_count: knowledgeImprovements?.candidate_count || 0,
         not_autonomous: knowledgeImprovements?.not_autonomous || false,
         top_candidate: knowledgeImprovements?.candidates?.[0] || null,
+      },
+      codexa_alert: {
+        ok: Boolean(codexaAlert?.status),
+        path: codexaAlertPath,
+        status: codexaAlert?.status || null,
+        popup_notified: codexaAlert?.popup?.notified || false,
+        message: codexaAlert?.message || null,
       },
       openclaw_retirement: {
         ok: openclawRetired,

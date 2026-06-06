@@ -79,6 +79,8 @@ function main() {
   const sourceLock = readJson(sourceLockPath);
   const codexaConfigPath = path.join(dataRoot, "codexa-sync", "latest-codexa-config.json");
   const codexaConfig = readJson(codexaConfigPath);
+  const codexaAlertPath = path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json");
+  const codexaAlert = readJson(codexaAlertPath);
   const antigravityRoot = path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "SKILL.md");
   const antigravityText = exists(antigravityRoot) ? fs.readFileSync(antigravityRoot, "utf8") : "";
 
@@ -103,6 +105,13 @@ function main() {
       ok: codexaConfig?.status === "CODEXA_ORANGEBOX_CONFIG_READY" || codexaConfig?.version === "orangebox-codexa-config/v0",
       path: codexaConfigPath,
       status: codexaConfig?.status || null,
+    },
+    codexa_link_alert: {
+      ok: Boolean(codexaAlert?.status),
+      path: codexaAlertPath,
+      status: codexaAlert?.status || null,
+      message: codexaAlert?.message || null,
+      note: "This check proves the Codexa/AI Box link has an explicit alert receipt. CODEXA_READY is not required for local Basic Install.",
     },
     skill_primer: {
       ok:

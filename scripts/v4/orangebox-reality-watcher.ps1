@@ -17,6 +17,7 @@ if (-not $node) {
 }
 
 $watchScript = Join-Path $repo "scripts\v4\orangebox-reality-watch.mjs"
+$alertScript = Join-Path $repo "scripts\v4\orangebox-codexa-alert-doctor.mjs"
 $dataRoot = if ($env:ORANGEBOX_DATA_ROOT) { $env:ORANGEBOX_DATA_ROOT } else { Join-Path $env:USERPROFILE "OrangeBox-Data" }
 $watchRoot = Join-Path $dataRoot "watcher"
 $logDir = Join-Path $watchRoot "listener-logs"
@@ -130,9 +131,8 @@ while ($true) {
     Pop-Location
   }
   try {
-    $realityText = ($output | Out-String).Trim()
-    if ($realityText.StartsWith("{")) {
-      Maybe-NotifyCodexaLink ($realityText | ConvertFrom-Json)
+    if (Test-Path -LiteralPath $alertScript) {
+      & $node $alertScript --json --popup 2>&1 | Out-Null
     }
   } catch {}
   $output | Select-Object -Last 80 | Set-Content -LiteralPath $logPath -Encoding UTF8

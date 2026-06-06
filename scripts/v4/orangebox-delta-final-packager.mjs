@@ -147,6 +147,46 @@ async function rotateExistingFinal() {
   }
 }
 
+async function stopFinalRuntimeHolders() {
+  if (process.platform !== "win32") return { ok: true, skipped: true, reason: "not_windows" };
+  const script = `
+$ErrorActionPreference = "SilentlyContinue"
+$final = ${JSON.stringify(finalRoot)}
+$ids = @()
+$matches = Get-CimInstance Win32_Process | Where-Object {
+  $_.CommandLine -and (
+    $_.CommandLine -like "*$final*" -or
+    $_.CommandLine -like "*orangebox-delta-api.ps1*"
+  )
+}
+$ids += $matches.ProcessId
+$portOwners = Get-NetTCPConnection -LocalPort 8797 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+$ids += $portOwners
+$ids = $ids | Where-Object { $_ -and $_ -ne $PID } | Select-Object -Unique
+$stopped = @()
+foreach ($targetPid in $ids) {
+  try {
+    $proc = Get-Process -Id $targetPid -ErrorAction Stop
+    Stop-Process -Id $targetPid -Force -ErrorAction Stop
+    $stopped += [pscustomobject]@{ pid = $targetPid; name = $proc.ProcessName }
+  } catch {
+    $stopped += [pscustomobject]@{ pid = $targetPid; skipped = $true; error = $_.Exception.Message }
+  }
+}
+[pscustomobject]@{ ok = $true; stopped = $stopped } | ConvertTo-Json -Depth 4
+`;
+  try {
+    const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script], {
+      timeout: 30_000,
+      maxBuffer: 512_000,
+      windowsHide: true,
+    });
+    return JSON.parse(stdout || "{}");
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+}
+
 async function copyTree() {
   await fsp.mkdir(finalRoot, { recursive: true });
   for (const item of ROOT_ITEMS) {
@@ -200,6 +240,8 @@ function backendPackageJson() {
       "openclaw:retire:dry": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1",
       "primer:sync": "node ./scripts/v4/orangebox-primer-skill-sync.mjs --json --receipt",
       "codexa:rail-pack": "node ./scripts/v4/codexa-rail-recovery-pack.mjs --json --receipt",
+      "codexa:alert": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt",
+      "codexa:alert:popup": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt --popup",
       "health:report": "node ./scripts/v4/orangebox-health-report.mjs --json --receipt",
       "project:report": "node ./scripts/v4/orangebox-project-report.mjs --json --receipt",
       "chatbackup:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-chat-mirror-task.ps1",
@@ -348,6 +390,7 @@ async function runVerification() {
 async function main() {
   assertFinalPathSafe();
   await fsp.mkdir(finalsRoot, { recursive: true });
+  const stopped_runtime_holders = verifyInstall ? await stopFinalRuntimeHolders() : null;
   const rotation = await rotateExistingFinal();
   await copyTree();
   await writeFinalFiles();
@@ -366,6 +409,7 @@ async function main() {
     frontend_included: false,
     frontend_required_for_backend: false,
     package_stats: packageStats,
+    stopped_runtime_holders,
     entry_hashes: {
       install_script: sha256File(path.join(finalRoot, "INSTALL_ORANGEBOX_DELTA_FINAL.ps1")),
       package_json: sha256File(path.join(finalRoot, "package.json")),

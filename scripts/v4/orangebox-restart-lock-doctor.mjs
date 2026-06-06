@@ -49,6 +49,15 @@ function readJson(file) {
   }
 }
 
+function normalizeGitHubIdentity(value) {
+  return String(value || "")
+    .replace(/^git@github\.com:/i, "")
+    .replace(/^https?:\/\/github\.com\//i, "")
+    .replace(/\.git$/i, "")
+    .replace(/\/+$/g, "")
+    .toLowerCase();
+}
+
 function latestReceipt(prefix) {
   if (!exists(receiptDir)) return null;
   const files = fs
@@ -83,6 +92,14 @@ function main() {
 
   const startupDir = path.join(userRoot, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup");
   const chatBackupStartup = path.join(startupDir, "Orangebox ChatBackup Listener.lnk");
+  const expectedRemoteIds = [
+    githubOwnerRepo,
+    gh?.nameWithOwner,
+    gh?.url,
+  ]
+    .filter(Boolean)
+    .map(normalizeGitHubIdentity);
+  const actualRemoteId = normalizeGitHubIdentity(gitRemote.stdout);
   const checks = {
     repo_root_exists: { ok: exists(repoRoot), path: repoRoot },
     package_private: { ok: pkg?.private === true, path: packageJsonPath },
@@ -90,7 +107,11 @@ function main() {
       ok: Boolean(pkg?.scripts?.["system:full-green"]) && !pkg.scripts["system:full-green"].includes("--skip-control"),
       script: pkg?.scripts?.["system:full-green"] || null,
     },
-    github_remote: { ok: gitRemote.ok && gitRemote.stdout.toLowerCase().includes(githubOwnerRepo.toLowerCase()), remote: gitRemote.stdout },
+    github_remote: {
+      ok: gitRemote.ok && expectedRemoteIds.some((id) => id && actualRemoteId.includes(id)),
+      remote: gitRemote.stdout,
+      accepted_identities: expectedRemoteIds,
+    },
     github_private: { ok: gh?.isPrivate === true && gh?.visibility === "PRIVATE", repo: gh },
     chatbackup_startup: { ok: exists(chatBackupStartup), path: chatBackupStartup },
     primer_skill_codex: { ok: exists(path.join(userRoot, ".codex", "skills", "orangebox-primer", "SKILL.md")) },
@@ -108,7 +129,7 @@ function main() {
     repo_root: repoRoot,
     data_root: dataRoot,
     github: {
-      owner_repo: githubOwnerRepo,
+      owner_repo: gh?.nameWithOwner || githubOwnerRepo,
       private: gh?.isPrivate === true,
       visibility: gh?.visibility || null,
       url: gh?.url || `https://github.com/${githubOwnerRepo}`,

@@ -15,17 +15,21 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 
 ## Tool Surface
 
-- Package scripts scanned: 93
-- Eligible backend tools: 72
-- Excluded visual/product tools: 14
-- Sleeping other tools: 7
+- Package scripts scanned: 127
+- Eligible backend tools: 94
+- Excluded visual/product tools: 20
+- Sleeping other tools: 13
 
 ## Top Eligible Tools
 
+- `backend:install` -> proof_receipt, coverage_receipt, immune_scan, source_order_fence
+- `backend:proof` -> proof_receipt, coverage_receipt, immune_scan, source_order_fence
 - `knowledge` -> commitment_atom
 - `knowledge:v1` -> commitment_atom
 - `knowledge:v2` -> commitment_atom
 - `knowledge:repo` -> commitment_atom
+- `knowledge:improvements` -> commitment_atom
+- `research:scout` -> commitment_atom
 - `provider-watch` -> routing_engine, runtime_profile, agent_lease
 - `provider-watch:repo` -> routing_engine, runtime_profile, agent_lease
 - `awareness:update` -> routing_engine, runtime_profile, agent_lease
@@ -38,10 +42,6 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 - `temporal:doctor` -> proof_receipt, coverage_receipt
 - `glyphspeak:doctor` -> proof_receipt, coverage_receipt
 - `four:doctor` -> proof_receipt, coverage_receipt
-- `ae` -> least_action_route, saved_work_certificate, proof_gate
-- `gauntlet:fast` -> least_action_route, saved_work_certificate, proof_gate
-- `gauntlet:build` -> least_action_route, saved_work_certificate, proof_gate
-- `gauntlet:security` -> least_action_route, saved_work_certificate, proof_gate, immune_scan, source_order_fence
 
 ## AtomSmasher Proof
 

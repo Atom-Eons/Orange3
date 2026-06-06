@@ -126,9 +126,14 @@ async function main() {
   const soulDoctor = readJson(path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"));
   const knowledgeImprovements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
+  const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
+  const backendInstallPath = latestReceipt("orangebox-backend-install-");
+  const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
+  const backendInstall = readJson(backendInstallPath);
+  const opsReadiness = readJson(opsReadinessPath);
   const aecodeFormat = readJson(path.join(dataRoot, "aecode-format", "latest-final-format.json"));
 
   const mcpReal = exists(path.join(repoRoot, "scripts", "orangebox-mcp-server.mjs"))
@@ -142,19 +147,36 @@ async function main() {
   const researchScoutReady =
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_READY" ||
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_DEGRADED";
+  const localOpsBackendGreen =
+    backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
+    opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
 
   const scope = [
     {
       area: "Orangebox Ops backend",
-      status: status(fullGreen?.summary?.status === "ORANGEBOX_FULL_GREEN_LOCAL_RUNTIME" || fullGreen?.status === "ORANGEBOX_FULL_GREEN_LOCAL_RUNTIME"),
-      reality: "Local backend proof exists; command server, API server, local listener, and STRONGARM are startup-managed.",
-      next: "Keep backend proof in every release gate.",
+      status: status(localOpsBackendGreen, Boolean(backendInstall || opsReadiness)),
+      reality: localOpsBackendGreen
+        ? "Local backend proof and ops readiness are green; command server, API server, local listener, and STRONGARM are startup-managed."
+        : "Local backend has some proof receipts, but backend install and ops readiness are not both green.",
+      next: localOpsBackendGreen
+        ? "Keep backend proof in every release gate. Treat two-device full-green as a separate Codexa readiness gate."
+        : "Run npm.cmd run backend:proof and npm.cmd run ops:readiness.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
       status: status(mcpReal && aiBoxRailReachable, mcpReal),
       reality: mcpReal ? "MCP server and command-server AI Box routes exist; AI Box command rail is currently not reachable." : "No MCP/command bridge source found.",
       next: "Start Codexa rail 8097 on AI Box, then rerun health report.",
+    },
+    {
+      area: "Codexa visible alerting",
+      status: status(Boolean(codexaAlert?.status), exists(path.join(repoRoot, "scripts", "v4", "orangebox-codexa-alert-doctor.mjs"))),
+      reality: codexaAlert?.status
+        ? `Codexa alert doctor is real. Current status: ${codexaAlert.status}. It writes receipts and can show throttled Windows popups.`
+        : "Codexa alert script exists or is planned, but no alert receipt is current yet.",
+      next: codexaAlert?.status
+        ? "Keep alerting explicit until Codexa rails and Ollama are green."
+        : "Run npm.cmd run codexa:alert:popup, then rerun project/readiness proof.",
     },
     {
       area: "Hermes outer orchestration",
@@ -292,6 +314,8 @@ async function main() {
     ],
     evidence: {
       full_green: { path: path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"), status: fullGreen?.summary?.status || fullGreen?.status || null },
+      backend_install: { path: backendInstallPath, status: backendInstall?.status || null },
+      ops_readiness: { path: opsReadinessPath, status: opsReadiness?.status || null },
       atom_smasher: { path: path.join(dataRoot, "atomsmasher", "latest-atomsmasher-doctor.json"), status: atomSmasher?.summary?.status || null },
       atom_tools: { path: path.join(dataRoot, "atomsmasher", "tool-merge", "latest-tool-merge.json"), status: atomTools?.status || null },
       strongarm: { path: path.join(dataRoot, "strongarm", "latest-strongarm-doctor.json"), status: strongarm?.status || null },
@@ -302,6 +326,7 @@ async function main() {
       soul: { path: path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"), status: soulDoctor?.status || null },
       knowledge_improvements: { path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), status: knowledgeImprovements?.status || null },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
+      codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },
     },

@@ -137,6 +137,7 @@ async function main() {
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
     research_scout: latestReceipt("orangebox-external-research-scout-"),
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
+    codexa_alert: latestReceipt("orangebox-codexa-alert-"),
     openclaw_retirement: latestReceipt("orangebox-openclaw-retirement-"),
   };
   const latest = {
@@ -146,6 +147,7 @@ async function main() {
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
     research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
+    codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
     openclaw_retirement: readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json")) || readJson(receiptPaths.openclaw_retirement || ""),
   };
 
@@ -187,6 +189,7 @@ async function main() {
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
+  if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
 
   const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
@@ -244,6 +247,12 @@ async function main() {
         path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"),
         status: latest.knowledge_improvements?.status || null,
         candidate_count: latest.knowledge_improvements?.candidate_count || 0,
+      },
+      codexa_alert: {
+        path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"),
+        status: latest.codexa_alert?.status || null,
+        popup_notified: latest.codexa_alert?.popup?.notified || false,
+        message: latest.codexa_alert?.message || null,
       },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: latest.openclaw_retirement?.status || null },
     },
