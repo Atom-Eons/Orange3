@@ -66,6 +66,7 @@ knowledge-improvements refresh learned improvement candidates without self-promo
 research-scout       fetch public research signals and park upgrade candidates
 codexa-alert         probe AI Box rails and write an explicit alert receipt
 codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
+codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default
 mcp-doctor           verify MCP quarantine/tool bridge
 action-doctor        verify pre-tool action classifier and unsafe-command blocking
 obox2-pack            build Orangebox V2 Internal setup zip

@@ -77,6 +77,7 @@ const requiredCommands = [
   { name: "research-scout", kind: "npm", script: "research:scout" },
   { name: "codexa-alert", kind: "npm", script: "codexa:alert" },
   { name: "codexa-alert-popup", kind: "npm", script: "codexa:alert:popup" },
+  { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },
   { name: "mcp-doctor", kind: "npm", script: "mcp:doctor" },
   { name: "action-doctor", kind: "npm", script: "action:doctor" },
   { name: "obox2-pack", kind: "npm", script: "obox2:pack" },

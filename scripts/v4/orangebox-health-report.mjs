@@ -160,6 +160,7 @@ async function main() {
     research_scout: latestReceipt("orangebox-external-research-scout-"),
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
     codexa_alert: latestReceipt("orangebox-codexa-alert-"),
+    codexa_smb_stage: latestReceipt("orangebox-codexa-smb-stage-"),
     mcp_doctor: latestReceipt("orangebox-mcp-doctor-"),
     action_classifier: latestReceipt("orangebox-action-classifier-"),
     skill_lifecycle: latestReceipt("orangebox-skill-lifecycle-doctor-"),
@@ -174,6 +175,7 @@ async function main() {
     research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
     codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
+    codexa_smb_stage: readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json")) || readJson(receiptPaths.codexa_smb_stage || ""),
     mcp_doctor: readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(receiptPaths.mcp_doctor || ""),
     action_classifier: readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(receiptPaths.action_classifier || ""),
     skill_lifecycle: readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(receiptPaths.skill_lifecycle || ""),
@@ -217,6 +219,7 @@ async function main() {
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
   if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) warnings.push("AI Box SMB port is visible, but no remote execution path is proven.");
+  if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") warnings.push("AI Box SMB port is visible, but share access is denied/unavailable for staging.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
   if (!recoveryArtifacts.rail_recovery_pack?.exists && (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok)) warnings.push("Codexa rail recovery zip is not generated.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
@@ -229,6 +232,8 @@ async function main() {
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && !recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push("Run npm.cmd run codexa:rail-pack to generate a small Windows-native rail recovery zip.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push(`Use the rail recovery zip at ${recoveryArtifacts.rail_recovery_pack.path} when the full OBOX2 pack is too heavy.`);
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) nextActions.push("Treat SMB as staging-only until RDP, WinRM, or the 8097 command rail is reachable.");
+  if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") nextActions.push("SMB staging is not available from this cockpit without credentials/share access; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097.");
+  if (!latest.codexa_smb_stage?.status) nextActions.push("Run npm.cmd run codexa:smb-stage to prove whether SMB staging is available before relying on it.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
@@ -319,16 +324,23 @@ async function main() {
         status: latest.knowledge_improvements?.status || null,
         candidate_count: latest.knowledge_improvements?.candidate_count || 0,
       },
-      codexa_alert: {
-        path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"),
+    codexa_alert: {
+      path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"),
         status: latest.codexa_alert?.status || null,
         popup_notified: latest.codexa_alert?.popup?.notified || false,
         remote_control_available: latest.codexa_alert?.remote_control_available ?? null,
         remote_execution_available: latest.codexa_alert?.remote_execution_available ?? null,
         smb_port_visible: latest.codexa_alert?.smb_port_visible ?? null,
-        message: latest.codexa_alert?.message || null,
-      },
-      mcp_doctor: {
+      message: latest.codexa_alert?.message || null,
+    },
+    codexa_smb_stage: {
+      path: path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"),
+      status: latest.codexa_smb_stage?.status || null,
+      stage_ready: latest.codexa_smb_stage?.stage_ready ?? null,
+      stage_written: latest.codexa_smb_stage?.stage_written ?? null,
+      preferred_target: latest.codexa_smb_stage?.preferred_target?.path || null,
+    },
+    mcp_doctor: {
         path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
         status: latest.mcp_doctor?.ok === true ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
         checks: latest.mcp_doctor?.summary?.checks || 0,

@@ -103,6 +103,11 @@ $commands = [ordered]@{
     args = @("run", "codexa:alert:popup")
     description = "Probe Codexa/AI Box rails and show a throttled Windows popup if attention is required."
   }
+  "codexa-smb-stage" = @{
+    kind = "npm"
+    args = @("run", "codexa:smb-stage")
+    description = "Probe whether Codexa SMB can stage recovery artifacts; dry by default, no remote execution."
+  }
   "mcp-doctor" = @{
     kind = "npm"
     args = @("run", "mcp:doctor")

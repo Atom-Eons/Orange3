@@ -132,6 +132,7 @@ async function main() {
   const knowledgeImprovements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
+  const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
   const actionClassifier = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(latestReceipt("orangebox-action-classifier-"));
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
@@ -239,6 +240,24 @@ async function main() {
       next: codexaAlert?.status
         ? "Keep alerting explicit until Codexa rails and Ollama are green."
         : "Run npm.cmd run codexa:alert:popup, then rerun project/readiness proof.",
+    },
+    {
+      area: "Codexa SMB staging",
+      status: status(Boolean(codexaSmbStage?.stage_ready || codexaSmbStage?.stage_written), Boolean(codexaSmbStage?.status)),
+      reality: codexaSmbStage?.status
+        ? [
+          `SMB stage doctor status: ${codexaSmbStage.status}.`,
+          `Stage ready: ${Boolean(codexaSmbStage.stage_ready)}.`,
+          `Stage written: ${Boolean(codexaSmbStage.stage_written)}.`,
+          codexaSmbStage.preferred_target?.path ? `Preferred target: ${codexaSmbStage.preferred_target.path}.` : "No accessible staging target.",
+          "SMB is file delivery only, not remote execution or Codexa green proof.",
+        ].join(" ")
+        : "SMB stage doctor has not been run yet; SMB visibility is not enough to claim file staging or execution.",
+      next: codexaSmbStage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS"
+        ? "Share access is denied/unavailable; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097."
+        : codexaSmbStage?.stage_ready
+          ? "If operator intentionally approves file delivery, rerun codexa-smb-stage with --stage --operator-approved; still run setup on Codexa."
+          : "Run npm.cmd run codexa:smb-stage before relying on SMB staging.",
     },
     {
       area: "Hermes outer orchestration",
@@ -365,6 +384,7 @@ async function main() {
         project_report: packageScript("project:report", packageJson),
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
+        codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         action_doctor: packageScript("action:doctor", packageJson),
         skills_lifecycle: packageScript("skills:lifecycle", packageJson),
@@ -398,6 +418,9 @@ async function main() {
     codexaSmbVisible && !codexaRemoteExecutionAvailable
       ? "Treat SMB as staging-only; do not claim remote repair until RDP, WinRM, or 8097 command rail is reachable."
       : "Use the proven remote execution path when it appears in health:report.",
+    codexaSmbStage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS"
+      ? "SMB is visible but no share path is accessible from this cockpit; keep OBOX2/start-here as the Codexa repair path."
+      : "Run npm.cmd run codexa:smb-stage whenever SMB staging is proposed, then trust only its receipt.",
     "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
       "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
@@ -421,6 +444,13 @@ async function main() {
       codexa_recovery: {
         path: codexaRailRecoveryPack?.path || null,
         status: codexaRailRecoveryPack?.exists ? "CODEXA_RAIL_RECOVERY_PACK_READY" : "CODEXA_RAIL_RECOVERY_PACK_MISSING",
+      },
+      codexa_smb_stage: {
+        path: path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"),
+        status: codexaSmbStage?.status || null,
+        stage_ready: codexaSmbStage?.stage_ready ?? null,
+        stage_written: codexaSmbStage?.stage_written ?? null,
+        preferred_target: codexaSmbStage?.preferred_target?.path || null,
       },
       mcp_doctor: {
         path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),

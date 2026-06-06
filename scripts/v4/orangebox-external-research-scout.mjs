@@ -121,6 +121,27 @@ const SOURCE_TARGETS = [
     reason: "Multi-turn agent eval methods map to Orangebox CHECKMATE, STRONGARM, proof receipts, and task-specific acceptance gates.",
   },
   {
+    id: "anthropic_effective_context_engineering",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+    reason: "Just-in-time context, external indexes, and context rot map directly to Orangebox sparse worksets, AtomSmasher hydration, and no-full-history defaults.",
+  },
+  {
+    id: "anthropic_writing_tools_for_agents",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/writing-tools-for-agents",
+    reason: "Agent tool ergonomics, namespacing, response shaping, and tool eval loops map to Orangebox command surfaces and MCP quarantine tests.",
+  },
+  {
+    id: "anthropic_code_execution_with_mcp",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/code-execution-with-mcp",
+    reason: "Code execution with MCP supports Orangebox's least-action approach: load tools on demand, filter data before context, and keep intermediate results out of model prompts.",
+  },
+  {
     id: "anthropic_eval_awareness_contamination",
     tier: "T0_VENDOR_ENGINEERING",
     source_family: "anthropic",
@@ -142,6 +163,27 @@ const SOURCE_TARGETS = [
     reason: "Codex IDE read/edit/run-code workflows inform Orangebox primers, skill commands, shell-action receipts, and cross-agent handoffs.",
   },
   {
+    id: "openai_codex_agent_loop",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "openai",
+    url: "https://openai.com/index/unrolling-the-codex-agent-loop/",
+    reason: "Codex loop mechanics, AGENTS.md precedence, skill loading, compaction, caching, and sandbox messages map to Orangebox primer and restore-packet design.",
+  },
+  {
+    id: "openai_responses_websocket_agent_loop",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "openai",
+    url: "https://openai.com/index/speeding-up-agentic-workflows-with-websockets/",
+    reason: "Persistent agent-loop connections and latency reduction inform Orangebox rail design, doer/watcher split, and Codexa command-server performance targets.",
+  },
+  {
+    id: "openai_agent_skills_catalog",
+    tier: "T0_VENDOR_DOCS",
+    source_family: "openai",
+    url: "https://github.com/openai/skills",
+    reason: "Codex skills packaging and restart/discovery behavior inform Orangebox primer portability and stale-skill cleanup.",
+  },
+  {
     id: "openai_local_shell_tool",
     tier: "T0_VENDOR_ENGINEERING",
     source_family: "openai",
@@ -154,6 +196,34 @@ const SOURCE_TARGETS = [
     source_family: "mcp",
     url: "https://modelcontextprotocol.io/specification/latest",
     reason: "Protocol-level changes decide what Orangebox should expose to Codex, Claude, Antigravity, and local tools.",
+  },
+  {
+    id: "mcpb_desktop_extensions",
+    tier: "T0_STANDARD",
+    source_family: "mcp",
+    url: "https://github.com/modelcontextprotocol/mcpb",
+    reason: "MCPB one-click bundles are the right packaging lane for Orangebox local MCP/skill installers once quarantine proof is green.",
+  },
+  {
+    id: "harness_bench_agent_workflows",
+    tier: "T0_RESEARCH",
+    source_family: "benchmark",
+    url: "https://www.harness-bench.ai/",
+    reason: "Sandboxed offline agent workflow tasks, oracle graders, traces, and budget capture map to Orangebox CHECKMATE, proof receipts, and long-running ops benchmarks.",
+  },
+  {
+    id: "ollama_structured_outputs",
+    tier: "T0_VENDOR_DOCS",
+    source_family: "ollama",
+    url: "https://docs.ollama.com/capabilities/structured-outputs",
+    reason: "Ollama JSON schema output supports local STRONGARM/Misfits/Judgement packets without paid APIs when Codexa models are installed.",
+  },
+  {
+    id: "llama_cpp_grammars",
+    tier: "T0_VENDOR_DOCS",
+    source_family: "llama_cpp",
+    url: "https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md",
+    reason: "llama.cpp grammars and JSON-schema conversion support stricter local structured verdict generation than prompt-only JSON.",
   },
   {
     id: "ox_mcp_stdio_supply_chain",
@@ -566,10 +636,22 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Strengthen MCP quarantine: metadata-only STDIO, fixed command templates, localhost binding proof, output caps, and explicit operator approval before executable tools.",
     };
   }
+  if (/(structured outputs?|json schema|json-schema|constrained decoding|grammar-based|gbnf|schema-constrained|well-formed json|response_format)/.test(haystack) || /ollama|llama_cpp/.test(sourceFamily)) {
+    return {
+      area: "structured_local_verdicts",
+      proposed_action: "Add schema-constrained local verdict packets for STRONGARM, Misfits, and Judgement using Ollama structured outputs first and llama.cpp grammar constraints where tighter local control is needed.",
+    };
+  }
   if (/llm judge|judge|evidence verification|reflect|factual accuracy|tool-use failures|report-quality failures/.test(haystack)) {
     return {
       area: "judge_reliability_and_strongarm",
       proposed_action: "Keep deterministic gates ahead of AI judgement; add STRONGARM/Mirror tests where model judges must cite receipts and cannot overrule failed checks.",
+    };
+  }
+  if (/tool ergonomics|tool description|tool descriptions|namespacing|tool responses|tool definitions|tool eval|tool evaluation|agent tools/.test(haystack)) {
+    return {
+      area: "tool_ergonomics_eval_lane",
+      proposed_action: "Add Orangebox tool-ergonomics evals: distinct tool names, concise responses, response_format choices, output caps, and transcript-based repair of bad tool descriptions.",
     };
   }
   if (/skill|skills|procedural|rules|experience compression|compression spectrum/.test(haystack)) {
@@ -588,6 +670,18 @@ function mapCandidate(text, sourceFamily) {
     return {
       area: "mcp_quarantine_gateway",
       proposed_action: "Update MCP quarantine/test fixtures for scope, output limits, tool search, resources, and prompt-injection handling.",
+    };
+  }
+  if (/websocket|persistent connection|latency|time to first token|time-to-first-token|ttft|token per second|tokens per second|agent loop spends/.test(haystack)) {
+    return {
+      area: "rail_latency_and_persistent_sessions",
+      proposed_action: "Track Orangebox rail latency and explore persistent local connections for Codexa command/model loops only after health, receipts, and action-classifier gates remain green.",
+    };
+  }
+  if (/harness bench|oracle grader|oracle graders|sandboxed offline agent tasks|execution trajectories|artifact-based grading|shared budgets|shared budgets and timeouts/.test(haystack)) {
+    return {
+      area: "harness_benchmark_lane",
+      proposed_action: "Build Orangebox offline harness tasks with oracle graders, budget capture, tool traces, and receipt artifacts before claiming model or routing optimizations.",
     };
   }
   if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/.test(haystack)) {

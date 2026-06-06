@@ -187,6 +187,7 @@ async function main() {
     rail_recovery_pack: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack-WINDOWS-NATIVE.zip")),
     rail_recovery_dir: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack", "RUN_ON_CODEXA_AS_ADMIN.cmd")),
   };
+  const smbStageLatest = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const status = commandOk && ollamaOk
     ? "CODEXA_READY"
     : receiptsOk
@@ -209,6 +210,9 @@ async function main() {
   if (receiptsOk && !commandOk) nextActions.push("Receipts/dashboard rail is alive; focus on the 8097 command rail service before model pulls.");
   if (!commandOk && !rdpOk && !winrmOk) nextActions.push("RDP and WinRM are not reachable from this cockpit; Codexa cannot be repaired remotely from here until one access path is opened.");
   if (!commandOk && smbPortOpen && !winrmOk) nextActions.push("SMB port is visible on the LAN, but no remote execution path is proven. Do not call a repair complete until the 8097 rail answers.");
+  if (!commandOk && smbPortOpen && !smbStageLatest?.status) nextActions.push("Run npm.cmd run codexa:smb-stage to prove whether SMB can stage recovery artifacts before relying on file-copy repair.");
+  if (!commandOk && smbStageLatest?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") nextActions.push("SMB share access is denied/unavailable from this cockpit; use OBOX2 directly on Codexa or restore RDP/WinRM/8097.");
+  if (!commandOk && smbStageLatest?.stage_ready) nextActions.push("SMB staging has an accessible target, but it is file delivery only. It still requires operator-approved staging and local execution on Codexa.");
   if (ok) nextActions.push("Run npm.cmd run trilane:doctor and the Codexa model doctor before promoting heavy-lane routing.");
 
   const result = {
@@ -228,6 +232,12 @@ async function main() {
     remote_control_available: rdpOk || winrmOk,
     remote_execution_available: winrmOk,
     smb_port_visible: smbPortOpen,
+    smb_stage: smbStageLatest ? {
+      status: smbStageLatest.status || null,
+      stage_ready: smbStageLatest.stage_ready ?? null,
+      stage_written: smbStageLatest.stage_written ?? null,
+      preferred_target: smbStageLatest.preferred_target?.path || null,
+    } : null,
     recovery_artifacts: recoveryArtifacts,
     popup: {
       requested: wantsPopup,
