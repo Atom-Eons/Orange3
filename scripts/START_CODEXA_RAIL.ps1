@@ -87,10 +87,13 @@ function Set-PortFirewall($Name, $Port) {
 function Register-NodeTask($TaskName, $Node, $ArgLine, $WorkingDirectory) {
   Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue | Unregister-ScheduledTask -Confirm:$false
   $action = New-ScheduledTaskAction -Execute $Node -Argument $ArgLine -WorkingDirectory $WorkingDirectory
-  $trigger = New-ScheduledTaskTrigger -AtLogOn
-  $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Days 30)
-  $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest
-  Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description $TaskName | Out-Null
+  $triggers = @(
+    New-ScheduledTaskTrigger -AtStartup
+    New-ScheduledTaskTrigger -AtLogOn
+  )
+  $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Days 30) -StartWhenAvailable -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
+  $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+  Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $triggers -Settings $settings -Principal $principal -Description "$TaskName (Orangebox always-on rail)" | Out-Null
 }
 
 function Probe($Url) {
@@ -210,6 +213,8 @@ if ($bridgeServer) {
 $modelPull = if ($PullModels) { Start-ModelPulls $AiBoxRoot } else { [ordered]@{ started = $false; reason = "PullModels switch not set." } }
 
 Start-Sleep -Seconds 4
+$commandTask = Get-ScheduledTask -TaskName "OrangeBOX AI Box Command Rail" -ErrorAction SilentlyContinue
+$bridgeTask = Get-ScheduledTask -TaskName "OrangeBOX AI Box Bridge" -ErrorAction SilentlyContinue
 $checks = [ordered]@{
   command_local = Probe "http://127.0.0.1:$CommandPort/health"
   bridge_local = Probe "http://127.0.0.1:$BridgePort/health"
@@ -229,6 +234,14 @@ $receipt = [ordered]@{
   trusted_ips = $trustedList
   command = [ordered]@{ port = $CommandPort; server = $commandServer; started = $true }
   bridge = [ordered]@{ port = $BridgePort; server = $bridgeServer; started = $bridgeStarted; missing = $bridgeMissing }
+  scheduled_tasks = [ordered]@{
+    trigger_mode = "AtStartup+AtLogOn"
+    principal = "SYSTEM"
+    command_rail_registered = [bool]$commandTask
+    bridge_registered = [bool]$bridgeTask
+    restart_count = 3
+    restart_interval_minutes = 1
+  }
   rdp_firewall_requested = [bool]$EnableRdp
   model_pull = $modelPull
   token_export = $TokenExport

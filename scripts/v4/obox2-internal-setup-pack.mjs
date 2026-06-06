@@ -572,8 +572,8 @@ This pack updates the local model side of Orangebox:
 
 \`\`\`cmd
 RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd
-RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
 RUN_CODEXA_POWER_DOCTOR.cmd
+RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
 RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd
 RUN_MODEL_DOCTOR_ON_CODEXA.cmd
 RUN_HERMES_DOCTOR_ON_CODEXA.cmd
@@ -583,8 +583,8 @@ RUN_HERMES_DOCTOR_ON_CODEXA.cmd
 
 \`\`\`cmd
 RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd
-RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
 RUN_CODEXA_POWER_DOCTOR.cmd
+RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
 RUN_INSTALL_ALL_LLMS_ON_CODEXA.cmd
 RUN_MODEL_DOCTOR_ON_CODEXA.cmd
 RUN_INSTALL_HERMES_AGENT_ON_CODEXA.cmd
@@ -612,6 +612,8 @@ C:\\AtomEons\\ai-box\\receipts\\obox2-power-doctor-latest.json
 \`\`\`
 
 This is for Codexa / AI Box only. Do not apply it to a battery laptop unless the operator explicitly wants always-on behavior.
+
+The rail starter registers the command and bridge rails as Windows Scheduled Tasks using startup + logon triggers so Codexa can recover after reboot without waiting for a manual interactive login.
 
 ## Wildcard law
 
