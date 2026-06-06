@@ -117,7 +117,11 @@ function renderMarkdown(result) {
   lines.push("## Reports And Receipts");
   lines.push("");
   for (const [name, value] of Object.entries(result.evidence)) {
-    lines.push(`- ${name}: ${value.status || "unknown"} ${value.path ? `(${value.path})` : ""}`);
+    const details = [];
+    if (value.contract_ok !== undefined) details.push(`contracts=${value.contract_ok ? "GREEN" : "NOT GREEN"}`);
+    if (value.contract_checks !== undefined) details.push(`contract_checks=${value.contract_checks}`);
+    if (value.contract_failed !== undefined) details.push(`contract_failed=${value.contract_failed}`);
+    lines.push(`- ${name}: ${value.status || "unknown"}${details.length ? ` [${details.join(", ")}]` : ""} ${value.path ? `(${value.path})` : ""}`);
   }
   lines.push("");
   return `${lines.join("\n")}\n`;
@@ -125,6 +129,18 @@ function renderMarkdown(result) {
 
 function packageScript(name, packageJson) {
   return packageJson?.scripts?.[name] || null;
+}
+
+function operationalContractSummary(doctor) {
+  const contracts = doctor?.operational_contracts || null;
+  const checks = Array.isArray(contracts?.checks) ? contracts.checks : [];
+  const failures = checks.filter((check) => check?.ok !== true);
+  return {
+    ok: Boolean(contracts?.ok === true && checks.length > 0 && failures.length === 0),
+    check_count: checks.length,
+    failed_count: failures.length,
+    failed_ids: failures.map((check) => check?.id).filter(Boolean),
+  };
 }
 
 async function main() {
@@ -173,6 +189,8 @@ async function main() {
   const codexaObox2Pack = codexaAlert?.recovery_artifacts?.obox2_setup_pack || null;
   const openclawRetired = openclawRetire?.status === "OPENCLAW_STARTUP_RETIRED";
   const packageGreen = obox2Doctor?.status === "OBOX2_PACKAGE_VERIFIED_GREEN";
+  const obox2Contracts = operationalContractSummary(obox2Doctor);
+  const obox2ContractGreen = packageGreen && obox2Contracts.ok && obox2Contracts.check_count >= 30;
   const knowledgeImprovementsReady =
     knowledgeImprovements?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" &&
     knowledgeImprovements?.not_autonomous === true;
@@ -368,9 +386,15 @@ async function main() {
     },
     {
       area: "OBOX2 setup package",
-      status: status(packageGreen, obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN"),
-      reality: packageGreen ? "Zip was expanded and verified by package doctor; includes start-here launcher, Codexa always-on power optimizer, rail starter, model installer, and Hermes doctor." : "Zip exists or is planned, but package doctor is not green.",
-      next: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa first. Then use core/all model installers only after the rail and power proof are green.",
+      status: status(obox2ContractGreen, packageGreen || obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN"),
+      reality: obox2ContractGreen
+        ? `Zip was expanded and verified by package doctor with ${obox2Contracts.check_count} green setup-contract checks; includes start-here launcher, Codexa always-on power optimizer, rail starter, model installer, and Hermes doctor.`
+        : packageGreen
+          ? `Zip status is green, but setup-contract proof is incomplete (${obox2Contracts.check_count} checks, ${obox2Contracts.failed_count} failed).`
+          : "Zip exists or is planned, but package doctor is not green.",
+      next: obox2ContractGreen
+        ? "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa first. Then use core/all model installers only after the rail and power proof are green."
+        : "Run npm.cmd run obox2:doctor and fix any failed setup-contract checks before touching Codexa.",
     },
     {
       area: "SOUL GENOME continuity map",
@@ -454,21 +478,23 @@ async function main() {
     not_real_yet: notRealYet,
     recommended_next_actions: [
       "Retire OpenClaw startup if not already retired.",
-    "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
-    "On Codexa, run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd from the OBOX2 setup pack so power, rail, and doctors all produce one receipt-backed truth path.",
-    codexaRailRecoveryPack?.exists
-      ? `Use the small rail recovery zip when needed: ${codexaRailRecoveryPack.path}.`
-      : "Run npm.cmd run codexa:rail-pack so the small Codexa rail recovery zip exists.",
-    codexaObox2Pack?.exists
-      ? `Full OBOX2 setup pack is ready: ${codexaObox2Pack.path}. Preferred first click: RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd.`
-      : "Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor so the full OBOX2 setup zip exists.",
-    codexaSmbVisible && !codexaRemoteExecutionAvailable
-      ? "Treat SMB as staging-only; do not claim remote repair until RDP, WinRM, or 8097 command rail is reachable."
-      : "Use the proven remote execution path when it appears in health:report.",
-    codexaSmbStage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS"
-      ? "SMB is visible but no share path is accessible from this cockpit; keep OBOX2/start-here as the Codexa repair path."
-      : "Run npm.cmd run codexa:smb-stage whenever SMB staging is proposed, then trust only its receipt.",
-    "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
+      obox2ContractGreen
+        ? `OBOX2 setup package contract proof is green (${obox2Contracts.check_count} checks); run it on Codexa as admin when operator time is available.`
+        : "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
+      "On Codexa, run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd from the OBOX2 setup pack so power, rail, and doctors all produce one receipt-backed truth path.",
+      codexaRailRecoveryPack?.exists
+        ? `Use the small rail recovery zip when needed: ${codexaRailRecoveryPack.path}.`
+        : "Run npm.cmd run codexa:rail-pack so the small Codexa rail recovery zip exists.",
+      codexaObox2Pack?.exists
+        ? `Full OBOX2 setup pack is ready: ${codexaObox2Pack.path}. Preferred first click: RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd.`
+        : "Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor so the full OBOX2 setup zip exists.",
+      codexaSmbVisible && !codexaRemoteExecutionAvailable
+        ? "Treat SMB as staging-only; do not claim remote repair until RDP, WinRM, or 8097 command rail is reachable."
+        : "Use the proven remote execution path when it appears in health:report.",
+      codexaSmbStage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS"
+        ? "SMB is visible but no share path is accessible from this cockpit; keep OBOX2/start-here as the Codexa repair path."
+        : "Run npm.cmd run codexa:smb-stage whenever SMB staging is proposed, then trust only its receipt.",
+      "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
       "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
       "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
@@ -484,7 +510,14 @@ async function main() {
       gremlin: { path: path.join(dataRoot, "misfits", "latest-gremlin-misfits-doctor.json"), status: gremlin?.status || null },
       trilane: { path: path.join(dataRoot, "trilane", "latest-trilane-model-router.json"), status: triLane?.status || null },
       obox2_pack: { path: path.join(dataRoot, "obox2", "latest-internal-setup-pack.json"), status: obox2Pack?.status || null },
-      obox2_doctor: { path: path.join(dataRoot, "obox2", "latest-package-doctor.json"), status: obox2Doctor?.status || null },
+      obox2_doctor: {
+        path: path.join(dataRoot, "obox2", "latest-package-doctor.json"),
+        status: obox2Doctor?.status || null,
+        contract_ok: obox2Contracts.ok,
+        contract_checks: obox2Contracts.check_count,
+        contract_failed: obox2Contracts.failed_count,
+        contract_failed_ids: obox2Contracts.failed_ids,
+      },
       soul: { path: path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"), status: soulDoctor?.status || null },
       knowledge_improvements: { path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), status: knowledgeImprovements?.status || null },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },

@@ -143,6 +143,18 @@ function mdYesNo(value) {
   return value ? "yes" : "no";
 }
 
+function operationalContractSummary(doctor) {
+  const contracts = doctor?.operational_contracts || null;
+  const checks = Array.isArray(contracts?.checks) ? contracts.checks : [];
+  const failures = checks.filter((check) => check?.ok !== true);
+  return {
+    ok: Boolean(contracts?.ok === true && checks.length > 0 && failures.length === 0),
+    check_count: checks.length,
+    failed_count: failures.length,
+    failed_ids: failures.map((check) => check?.id).filter(Boolean),
+  };
+}
+
 function renderMarkdown(result) {
   const lines = [];
   lines.push("# Orangebox Health Report");
@@ -186,11 +198,19 @@ function renderMarkdown(result) {
     for (const [name, artifact] of Object.entries(result.ai_box.recovery_artifacts || {})) {
       lines.push(`- ${name}: ${mdBool(artifact.exists)} (${artifact.path})`);
     }
+    if (result.ai_box.setup_contracts) {
+      const contracts = result.ai_box.setup_contracts;
+      lines.push(`- OBOX2 setup contracts: ${mdBool(contracts.ok)} (${contracts.check_count} checks, ${contracts.failed_count} failed)`);
+    }
   }
   lines.push("");
   lines.push("## Current Proof Receipts");
   for (const [name, item] of Object.entries(result.receipts)) {
-    lines.push(`- ${name}: ${item.status || "unknown"} ${item.path ? `(${item.path})` : ""}`);
+    const details = [];
+    if (item.contract_ok !== undefined) details.push(`contracts=${mdBool(item.contract_ok)}`);
+    if (item.contract_checks !== undefined) details.push(`contract_checks=${item.contract_checks}`);
+    if (item.contract_failed !== undefined) details.push(`contract_failed=${item.contract_failed}`);
+    lines.push(`- ${name}: ${item.status || "unknown"}${details.length ? ` [${details.join(", ")}]` : ""} ${item.path ? `(${item.path})` : ""}`);
   }
   lines.push("");
   lines.push("## Warnings");
@@ -266,6 +286,7 @@ async function main() {
     rail_recovery_pack: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack-WINDOWS-NATIVE.zip")),
     rail_recovery_dir: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack", "RUN_ON_CODEXA_AS_ADMIN.cmd")),
   };
+  const obox2Contracts = operationalContractSummary(latest.obox2_package);
 
   const startupOpenClaw = startupPath("OpenClaw Gateway (atomeons).cmd");
   const openclawRetired = !exists(startupOpenClaw) && latest.openclaw_retirement?.status === "OPENCLAW_STARTUP_RETIRED";
@@ -291,6 +312,7 @@ async function main() {
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) warnings.push("AI Box SMB port is visible, but no remote execution path is proven.");
   if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") warnings.push("AI Box SMB port is visible, but share access is denied/unavailable for staging.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
+  if (!obox2Contracts.ok || obox2Contracts.check_count < 30) warnings.push(`OBOX2 setup contract proof is not green enough (${obox2Contracts.check_count} checks, ${obox2Contracts.failed_count} failed).`);
   if (!recoveryArtifacts.rail_recovery_pack?.exists && (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok)) warnings.push("Codexa rail recovery zip is not generated.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") warnings.push("Orangebox offline harness benchmark is not green.");
@@ -306,7 +328,7 @@ async function main() {
   if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") nextActions.push("SMB staging is not available from this cockpit without credentials/share access; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097.");
   if (!latest.codexa_smb_stage?.status) nextActions.push("Run npm.cmd run codexa:smb-stage to prove whether SMB staging is available before relying on it.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
-  if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
+  if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN" || !obox2Contracts.ok || obox2Contracts.check_count < 30) nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor; do not treat the Codexa setup pack as proven until setup contracts are green.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") nextActions.push("Run npm.cmd run harness:benchmark to prove offline oracle tasks before claiming tool/routing optimization.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
@@ -384,6 +406,7 @@ async function main() {
         signal_hygiene: codexaSignalHygiene(latest.codexa_alert),
       } : null,
       recovery_artifacts: recoveryArtifacts,
+      setup_contracts: obox2Contracts,
     },
     receipts: {
       ops_readiness: { path: receiptPaths.ops_readiness, status: latest.ops_readiness?.status || latest.ops_readiness?.checks?.ops_readiness?.status || null },
@@ -395,7 +418,14 @@ async function main() {
         gap_count: latest.project_report?.gap_count ?? null,
       },
       reality_watch: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: latest.reality_watch?.status || null },
-      obox2_package: { path: path.join(dataRoot, "obox2", "latest-package-doctor.json"), status: latest.obox2_package?.status || null },
+      obox2_package: {
+        path: path.join(dataRoot, "obox2", "latest-package-doctor.json"),
+        status: latest.obox2_package?.status || null,
+        contract_ok: obox2Contracts.ok,
+        contract_checks: obox2Contracts.check_count,
+        contract_failed: obox2Contracts.failed_count,
+        contract_failed_ids: obox2Contracts.failed_ids,
+      },
       research_scout: {
         path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"),
         status: latest.research_scout?.status || null,
