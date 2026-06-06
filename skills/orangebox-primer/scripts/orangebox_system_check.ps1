@@ -50,6 +50,7 @@ Add-Check "latest_harness_benchmark_present" (Test-Path -LiteralPath (Join-Path 
 Add-Check "latest_tool_ergonomics_present" (Test-Path -LiteralPath (Join-Path $data "tool-ergonomics\latest-tool-ergonomics.json")) "latest-tool-ergonomics.json"
 Add-Check "latest_checkmate_eval_present" (Test-Path -LiteralPath (Join-Path $data "checkmate\latest-checkmate-eval-lane.json")) "latest-checkmate-eval-lane.json"
 Add-Check "latest_signal_hygiene_present" (Test-Path -LiteralPath (Join-Path $data "signal-hygiene\latest-operator-signal-hygiene.json")) "latest-operator-signal-hygiene.json"
+Add-Check "latest_doer_watcher_spine_present" (Test-Path -LiteralPath (Join-Path $data "doer-watcher\latest-doer-watcher-spine.json")) "latest-doer-watcher-spine.json"
 Add-Check "source_of_truth_lock_present" (Test-Path -LiteralPath (Join-Path $data "orangebox-source-of-truth.json")) "orangebox-source-of-truth.json"
 Add-Check "mid_session_primer_present" (Test-Path -LiteralPath (Join-Path $data "primers\ORANGEBOX_MID_SESSION_PRIMER.md")) "ORANGEBOX_MID_SESSION_PRIMER.md"
 Add-Check "codexa_config_present" (Test-Path -LiteralPath (Join-Path $data "codexa-sync\latest-codexa-config.json")) "latest-codexa-config.json"
@@ -120,6 +121,17 @@ if (Test-Path -LiteralPath (Join-Path $data "signal-hygiene\latest-operator-sign
     Add-Check "signal_hygiene_green" (([bool]$signal.ok) -and ($signal.status -eq "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN")) $signal.status
   } catch {
     Add-Check "latest_signal_hygiene_readable" $false $_.Exception.Message
+  }
+}
+
+if (Test-Path -LiteralPath (Join-Path $data "doer-watcher\latest-doer-watcher-spine.json")) {
+  try {
+    $spine = Get-Content -LiteralPath (Join-Path $data "doer-watcher\latest-doer-watcher-spine.json") -Raw | ConvertFrom-Json
+    $result.latest.doer_watcher_spine_status = $spine.status
+    $result.latest.doer_watcher_spine_codexa_status = $spine.one_reality.codexa_status
+    Add-Check "doer_watcher_spine_green" (([bool]$spine.ok) -and ($spine.status -eq "ORANGEBOX_DOER_WATCHER_SPINE_GREEN")) $spine.status
+  } catch {
+    Add-Check "latest_doer_watcher_spine_readable" $false $_.Exception.Message
   }
 }
 

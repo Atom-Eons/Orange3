@@ -171,6 +171,7 @@ async function main() {
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
   const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
+  const doerWatcherSpine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(latestReceipt("orangebox-doer-watcher-spine-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -226,6 +227,7 @@ async function main() {
   const toolErgonomicsGreen = toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
   const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const signalHygieneGreen = signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
+  const doerWatcherSpineGreen = doerWatcherSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -307,6 +309,16 @@ async function main() {
       next: signalHygieneGreen
         ? "Run this doctor before changing alert, watcher, popup, or status-report behavior."
         : "Run npm.cmd run signal:hygiene and fix the exact failed signal/cadence check.",
+    },
+    {
+      area: "Doer/watcher session spine",
+      status: status(doerWatcherSpineGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-doer-watcher-session-spine-doctor.mjs"))),
+      reality: doerWatcherSpineGreen
+        ? `Doer/watcher spine is green: doer command=${doerWatcherSpine?.doer?.command_server?.ok === true}, watcher age=${doerWatcherSpine?.watcher?.watcher_process?.age_ms ?? "unknown"}ms, Codexa=${doerWatcherSpine?.one_reality?.codexa_status || "unknown"}.`
+        : "Doer/watcher session spine source exists or is planned, but the current receipt is not green yet.",
+      next: doerWatcherSpineGreen
+        ? "Keep this doctor in the local Ops proof chain before changing watcher, rail, command-server, or Codexa readiness behavior."
+        : "Run npm.cmd run session:spine and fix the exact failed doer/watcher check.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -509,6 +521,7 @@ async function main() {
         tool_ergonomics: packageScript("tool:ergonomics", packageJson),
         checkmate_doctor: packageScript("checkmate:doctor", packageJson),
         signal_hygiene: packageScript("signal:hygiene", packageJson),
+        session_spine: packageScript("session:spine", packageJson),
         ops_green: packageScript("ops:green", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
@@ -651,6 +664,14 @@ async function main() {
         severity: signalHygiene?.signal_hygiene?.severity || null,
         confidence_calibration: signalHygiene?.confidence_calibration || null,
         failures: signalHygiene?.failures?.length ?? null,
+      },
+      doer_watcher_spine: {
+        path: path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json"),
+        status: doerWatcherSpine?.status || null,
+        failures: doerWatcherSpine?.failures?.length ?? null,
+        doer_command_server_ok: doerWatcherSpine?.doer?.command_server?.ok ?? null,
+        watcher_process_age_ms: doerWatcherSpine?.watcher?.watcher_process?.age_ms ?? null,
+        codexa_status: doerWatcherSpine?.one_reality?.codexa_status || null,
       },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },

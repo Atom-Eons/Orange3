@@ -118,6 +118,11 @@ $commands = [ordered]@{
     args = @("run", "signal:hygiene")
     description = "Verify Orangebox alert cadence, severity labels, confidence calibration, and local/full-system split."
   }
+  "session-spine" = @{
+    kind = "npm"
+    args = @("run", "session:spine")
+    description = "Verify doer surfaces, watcher freshness, and one-reality state without touching frontend."
+  }
   "codexa-alert" = @{
     kind = "npm"
     args = @("run", "codexa:alert")

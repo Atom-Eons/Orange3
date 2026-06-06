@@ -252,6 +252,7 @@ async function main() {
     tool_ergonomics: latestReceipt("orangebox-tool-ergonomics-"),
     checkmate_eval_lane: latestReceipt("checkmate-eval-lane-"),
     signal_hygiene: latestReceipt("orangebox-operator-signal-hygiene-"),
+    doer_watcher_spine: latestReceipt("orangebox-doer-watcher-spine-"),
     openclaw_retirement: latestReceipt("orangebox-openclaw-retirement-"),
   };
   const latest = {
@@ -271,6 +272,7 @@ async function main() {
     tool_ergonomics: readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(receiptPaths.tool_ergonomics || ""),
     checkmate_eval_lane: readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(receiptPaths.checkmate_eval_lane || ""),
     signal_hygiene: readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(receiptPaths.signal_hygiene || ""),
+    doer_watcher_spine: readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(receiptPaths.doer_watcher_spine || ""),
     openclaw_retirement: readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json")) || readJson(receiptPaths.openclaw_retirement || ""),
   };
 
@@ -329,6 +331,7 @@ async function main() {
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") warnings.push("Orangebox tool ergonomics doctor is not green.");
   if (latest.checkmate_eval_lane?.status !== "CHECKMATE_EVAL_LANE_GREEN") warnings.push("CHECKMATE eval lane doctor is not green.");
   if (latest.signal_hygiene?.status !== "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN") warnings.push("Operator signal hygiene doctor is not green.");
+  if (latest.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") warnings.push("Doer/watcher session spine doctor is not green.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
   if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
@@ -366,6 +369,7 @@ async function main() {
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") nextActions.push("Run npm.cmd run tool:ergonomics to verify command/tool names, bounded outputs, and receipt-backed proof scripts.");
   if (latest.checkmate_eval_lane?.status !== "CHECKMATE_EVAL_LANE_GREEN") nextActions.push("Run npm.cmd run checkmate:doctor to verify eval gates before prompt/model/routing/tool changes.");
   if (latest.signal_hygiene?.status !== "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN") nextActions.push("Run npm.cmd run signal:hygiene to verify alert cadence, severity labels, and confidence calibration.");
+  if (latest.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") nextActions.push("Run npm.cmd run session:spine to verify doer surfaces, watcher freshness, and one-reality state.");
 
   const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
   const actionClassifierOk = latest.action_classifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
@@ -373,8 +377,9 @@ async function main() {
   const toolErgonomicsOk = latest.tool_ergonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
   const checkmateEvalOk = latest.checkmate_eval_lane?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const signalHygieneOk = latest.signal_hygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
+  const doerWatcherSpineOk = latest.doer_watcher_spine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
   const harnessBenchmarkOk = latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && harnessBenchmarkOk;
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && harnessBenchmarkOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -535,6 +540,13 @@ async function main() {
         severity: latest.signal_hygiene?.signal_hygiene?.severity || null,
         confidence_calibration: latest.signal_hygiene?.confidence_calibration || null,
         failures: latest.signal_hygiene?.failures?.length ?? null,
+      },
+      doer_watcher_spine: {
+        path: path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json"),
+        status: latest.doer_watcher_spine?.status || null,
+        failures: latest.doer_watcher_spine?.failures?.length ?? null,
+        doer_command_server_ok: latest.doer_watcher_spine?.doer?.command_server?.ok ?? null,
+        watcher_process_age_ms: latest.doer_watcher_spine?.watcher?.watcher_process?.age_ms ?? null,
       },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: latest.openclaw_retirement?.status || null },
     },

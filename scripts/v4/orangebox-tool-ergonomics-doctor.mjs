@@ -32,6 +32,7 @@ const requiredProofScripts = [
   "tool:ergonomics",
   "checkmate:doctor",
   "signal:hygiene",
+  "session:spine",
   "harness:benchmark",
   "health:report",
   "project:report",
@@ -51,6 +52,7 @@ const requiredSkillCommands = [
   "tool-ergonomics",
   "checkmate-eval",
   "signal-hygiene",
+  "session-spine",
   "mcp-doctor",
   "action-doctor",
   "skills-lifecycle",
@@ -229,6 +231,7 @@ async function main() {
     receiptSummary("skills", path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), (value) => value?.status || null),
     receiptSummary("checkmate", path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), (value) => value?.status || null),
     receiptSummary("signal_hygiene", path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json"), (value) => value?.status || null),
+    receiptSummary("session_spine", path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json"), (value) => value?.status || null),
     receiptSummary("harness", path.join(dataRoot, "harness", "latest-harness-benchmark.json"), (value) => value?.status || null),
   ];
   const latestHarness = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));

@@ -147,6 +147,7 @@ const requiredOpsScripts = [
   "tool:ergonomics",
   "checkmate:doctor",
   "signal:hygiene",
+  "session:spine",
   "harness:benchmark",
   "codexa:alert",
   "codexa:smb-stage",
@@ -188,7 +189,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "tool-ergonomics", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -207,7 +208,7 @@ const tasks = [
     id: "receipt_reality_trace",
     category: "receipt_provenance",
     oracle: "Critical proof receipts exist, expose status fields, and do not rely on chat summaries.",
-    budget: { timeout_ms: 2000, max_files_read: 14, max_tool_calls: 0 },
+    budget: { timeout_ms: 2000, max_files_read: 15, max_tool_calls: 0 },
     run(trace) {
       const receiptSpecs = [
         ["mcp", path.join(dataRoot, "mcp", "latest-mcp-doctor.json"), "MCP_QUARANTINE_GREEN"],
@@ -215,6 +216,7 @@ const tasks = [
         ["skills", path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), "ORANGEBOX_SKILL_LIFECYCLE_GREEN"],
         ["tool_ergonomics", path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"), "ORANGEBOX_TOOL_ERGONOMICS_GREEN"],
         ["checkmate", path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), "CHECKMATE_EVAL_LANE_GREEN"],
+        ["session_spine", path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json"), "ORANGEBOX_DOER_WATCHER_SPINE_GREEN"],
       ];
       if (!backendProofInProgress) {
         receiptSpecs.unshift(
@@ -320,6 +322,37 @@ const tasks = [
           checks: signal.checks.length,
           proof_hash: signal.proof_hash,
           confidence_calibration: signal.confidence_calibration,
+        });
+    },
+  },
+  {
+    id: "doer_watcher_session_spine_truth",
+    category: "doer_watcher_session_spine",
+    oracle: "Orangebox must prove an active doer, a fresh watcher, and one shared reality without touching frontend or hiding Codexa gaps.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const spine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const failures = [];
+      if (spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") failures.push(`Doer/watcher spine not green: ${spine?.status || "missing"}`);
+      if (spine?.constraints?.frontend_touched !== false || spine?.constraints?.visual_lane_touched !== false) failures.push("Doer/watcher spine must not touch frontend or visual lane");
+      if (spine?.doer?.command_server?.ok !== true) failures.push("Doer command server is not proven reachable");
+      if (spine?.watcher?.watcher_process?.ok !== true) failures.push("Watcher process heartbeat is not proven");
+      if (Number(spine?.watcher?.watcher_process?.age_ms || 999999999) > 15 * 60 * 1000) failures.push("Watcher process heartbeat is stale");
+      if (spine?.one_reality?.local_ops_green !== true) failures.push("Spine does not preserve local_ops_green=true");
+      if (spine?.one_reality?.codexa_status !== "CODEXA_READY" && spine?.one_reality?.full_system_green_blocked !== true) failures.push("Spine must keep full_system_green_blocked=true while Codexa is not ready");
+      if (project?.evidence?.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") failures.push("Project report does not mirror doer/watcher spine green status");
+      return failures.length
+        ? failTask("doer_watcher_session_spine_truth", failures, {
+          status: spine?.status || null,
+          constraints: spine?.constraints || null,
+          one_reality: spine?.one_reality || null,
+        })
+        : okTask("doer_watcher_session_spine_truth", {
+          status: spine.status,
+          doer_command_server_ok: spine.doer.command_server.ok,
+          watcher_process_age_ms: spine.watcher.watcher_process.age_ms,
+          codexa_status: spine.one_reality.codexa_status,
         });
     },
   },

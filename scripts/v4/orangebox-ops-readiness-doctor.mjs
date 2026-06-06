@@ -105,6 +105,8 @@ function main() {
   const checkmate = readJson(checkmatePath);
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const signalHygiene = readJson(signalHygienePath);
+  const doerWatcherPath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
+  const doerWatcher = readJson(doerWatcherPath);
   const terminalProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
   const terminalProfileText = exists(terminalProfilePath) ? fs.readFileSync(terminalProfilePath, "utf8") : "";
   const terminalProfileReceiptPath = newestFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
@@ -221,6 +223,13 @@ function main() {
       status: signalHygiene?.status || null,
       severity: signalHygiene?.signal_hygiene?.severity || null,
       note: "Proves alert cadence, severity labels, confidence calibration, and local/full-system separation.",
+    },
+    doer_watcher_spine: {
+      ok: doerWatcher?.ok === true && doerWatcher?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN",
+      path: doerWatcherPath,
+      status: doerWatcher?.status || null,
+      failures: doerWatcher?.failures?.length ?? null,
+      note: "Proves active doer surfaces, watcher freshness, and one-reality local/Codexa state.",
     },
     terminal_obox_profile: {
       ok:

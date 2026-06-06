@@ -153,6 +153,27 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "doer_watcher_session_spine") {
+    const file = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.visual_lane_touched === false
+      && proof?.doer?.command_server?.ok === true
+      && proof?.watcher?.watcher_process?.ok === true
+      && proof?.one_reality?.local_ops_green === true
+      && Array.isArray(proof?.failures)
+      && proof.failures.length === 0;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `doer=${proof.doer.command_server.ok}; watcher_age_ms=${proof.watcher.watcher_process.age_ms}; codexa=${proof.one_reality.codexa_status}`,
+      }
+      : null;
+  }
   return null;
 }
 
@@ -393,7 +414,7 @@ const executionProfiles = {
   },
   doer_watcher_session_spine: {
     priority: 81,
-    proof_command: "npm.cmd run reality:watch && npm.cmd run health:report && npm.cmd run harness:benchmark",
+    proof_command: "npm.cmd run session:spine && npm.cmd run project:report && npm.cmd run harness:benchmark",
     acceptance_gate: "Doer/watcher receipts prove process truth, stale service detection, and resume context without burning paid model calls.",
   },
   long_horizon_feature_proof: {
