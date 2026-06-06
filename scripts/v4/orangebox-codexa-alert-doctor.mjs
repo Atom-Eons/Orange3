@@ -149,6 +149,65 @@ function shouldNotify(previous, status, now) {
   return now.getTime() - last >= cooldownMinutes * 60 * 1000;
 }
 
+function notificationReason(previous, status, now) {
+  if (forcePopup) return "forced";
+  if (!wantsPopup) return "popup_not_requested";
+  if (status === "CODEXA_READY") return "ready_suppressed";
+  if (!previous?.status) return "first_non_ready_signal";
+  if (previous.status !== status) return "status_changed";
+  const last = previous.last_notified_at ? Date.parse(previous.last_notified_at) : 0;
+  if (!Number.isFinite(last) || last <= 0) return "no_prior_notification_time";
+  if (now.getTime() - last >= cooldownMinutes * 60 * 1000) return "cooldown_elapsed";
+  return "cooldown_active";
+}
+
+function nextPopupAfter(previous, status, now) {
+  if (!wantsPopup || forcePopup || status === "CODEXA_READY") return null;
+  const last = previous?.last_notified_at ? Date.parse(previous.last_notified_at) : 0;
+  if (!Number.isFinite(last) || last <= 0) return now.toISOString();
+  return new Date(last + cooldownMinutes * 60 * 1000).toISOString();
+}
+
+function signalSeverity(status, facts) {
+  if (status === "CODEXA_READY") return "green";
+  if (status === "CODEXA_COMMAND_ONLY") return "warning";
+  if (status === "CODEXA_RECEIPTS_ONLY") return facts.remoteControlAvailable ? "warning" : "attention";
+  return facts.receiptsOk || facts.smbPortOpen ? "attention" : "urgent";
+}
+
+function buildSignalHygiene(previous, status, alertHash, facts, now) {
+  const sameSignal = previous?.status === status && previous?.alert_hash === alertHash;
+  const previousSignal = previous?.signal_hygiene || {};
+  const repeatCount = sameSignal ? Number(previousSignal.repeat_count || 1) + 1 : 1;
+  const stableSince = sameSignal
+    ? previousSignal.stable_since || previous.checked_at || now.toISOString()
+    : now.toISOString();
+  const severity = signalSeverity(status, facts);
+  const humanLabel = status === "CODEXA_READY"
+    ? "Codexa ready"
+    : status === "CODEXA_RECEIPTS_ONLY"
+      ? "Codexa receipts only"
+      : status === "CODEXA_COMMAND_ONLY"
+        ? "Codexa command rail only"
+        : "Codexa unreachable";
+  return {
+    version: "orangebox-signal-hygiene/v1",
+    severity,
+    human_label: humanLabel,
+    repeat_count: repeatCount,
+    stable_since: stableSince,
+    notify_reason: notificationReason(previous, status, now),
+    next_popup_after: nextPopupAfter(previous, status, now),
+    cooldown_minutes: cooldownMinutes,
+    popup_requested: wantsPopup,
+    alert_fatigue_policy: "Popup only on status change or cooldown. Health/reality receipts keep logging every run.",
+    operator_action_required: status !== "CODEXA_READY" && !facts.remoteExecutionAvailable,
+    local_basic_install_blocked: false,
+    full_system_green_blocked: status !== "CODEXA_READY",
+    summary_line: `${humanLabel}; local Ops can continue; full two-machine routing remains gated.`,
+  };
+}
+
 async function main() {
   const startedAt = new Date();
   const probeEntries = [
@@ -198,8 +257,6 @@ async function main() {
   const ok = status === "CODEXA_READY";
   const message = buildMessage(status, probes);
   const previous = readJson(statePath);
-  const notify = shouldNotify(previous, status, startedAt);
-  const popup = notify ? await showPopup(`Orangebox Codexa Alert: ${status}`, message) : { ok: false, mode: "not_requested_or_throttled" };
 
   const nextActions = [];
   if (!commandOk) nextActions.push("On Codexa/AI Box, unzip the OBOX2 setup pack and run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd as Administrator. It applies always-on power, starts the rail, runs doctors, and writes C:\\AtomEons\\ai-box\\receipts\\obox2-start-here-latest.json.");
@@ -214,6 +271,15 @@ async function main() {
   if (!commandOk && smbStageLatest?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") nextActions.push("SMB share access is denied/unavailable from this cockpit; use OBOX2 directly on Codexa or restore RDP/WinRM/8097.");
   if (!commandOk && smbStageLatest?.stage_ready) nextActions.push("SMB staging has an accessible target, but it is file delivery only. It still requires operator-approved staging and local execution on Codexa.");
   if (ok) nextActions.push("Run npm.cmd run trilane:doctor and the Codexa model doctor before promoting heavy-lane routing.");
+  const alertHash = shortHash(`${status}\n${message}\n${JSON.stringify(nextActions)}`);
+  const signalHygiene = buildSignalHygiene(previous, status, alertHash, {
+    receiptsOk,
+    remoteControlAvailable: rdpOk || winrmOk,
+    remoteExecutionAvailable: winrmOk,
+    smbPortOpen,
+  }, startedAt);
+  const notify = shouldNotify(previous, status, startedAt);
+  const popup = notify ? await showPopup(`Orangebox Codexa Alert: ${status}`, message) : { ok: false, mode: signalHygiene.notify_reason };
 
   const result = {
     ok,
@@ -248,7 +314,8 @@ async function main() {
     },
     message,
     next_actions: nextActions,
-    alert_hash: shortHash(`${status}\n${message}\n${JSON.stringify(nextActions)}`),
+    alert_hash: alertHash,
+    signal_hygiene: signalHygiene,
     not_a_failure_of_local_basic_install: !ok,
   };
 

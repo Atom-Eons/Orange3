@@ -99,8 +99,48 @@ function skillRootStatus() {
   return roots.map((file) => ({ file, ok: exists(file) }));
 }
 
+function codexaSignalHygiene(alert) {
+  if (!alert?.status) return null;
+  if (alert.signal_hygiene) return alert.signal_hygiene;
+  const status = alert.status;
+  const severity = status === "CODEXA_READY"
+    ? "green"
+    : status === "CODEXA_COMMAND_ONLY"
+      ? "warning"
+      : status === "CODEXA_RECEIPTS_ONLY"
+        ? (alert.remote_control_available ? "warning" : "attention")
+        : (alert.receipts_reachable || alert.smb_port_visible ? "attention" : "urgent");
+  const humanLabel = status === "CODEXA_READY"
+    ? "Codexa ready"
+    : status === "CODEXA_RECEIPTS_ONLY"
+      ? "Codexa receipts only"
+      : status === "CODEXA_COMMAND_ONLY"
+        ? "Codexa command rail only"
+        : "Codexa unreachable";
+  return {
+    version: "orangebox-signal-hygiene/v1-fallback",
+    severity,
+    human_label: humanLabel,
+    repeat_count: null,
+    stable_since: alert.checked_at || null,
+    notify_reason: alert.popup?.result?.mode || "legacy_alert_shape",
+    next_popup_after: null,
+    cooldown_minutes: alert.popup?.cooldown_minutes ?? null,
+    popup_requested: alert.popup?.requested ?? null,
+    alert_fatigue_policy: "Derived by health report because the upstream alert receipt did not include signal_hygiene.",
+    operator_action_required: status !== "CODEXA_READY" && alert.remote_execution_available !== true,
+    local_basic_install_blocked: false,
+    full_system_green_blocked: status !== "CODEXA_READY",
+    summary_line: `${humanLabel}; local Ops can continue; full two-machine routing remains gated.`,
+  };
+}
+
 function mdBool(ok) {
   return ok ? "GREEN" : "NOT GREEN";
+}
+
+function mdYesNo(value) {
+  return value ? "yes" : "no";
 }
 
 function renderMarkdown(result) {
@@ -126,6 +166,15 @@ function renderMarkdown(result) {
     lines.push("");
     lines.push("## AI Box Access / Recovery");
     lines.push(`- Link alert: ${result.ai_box.link_alert.status}`);
+    if (result.ai_box.link_alert.signal_hygiene) {
+      const signal = result.ai_box.link_alert.signal_hygiene;
+      lines.push(`- Signal severity: ${signal.severity}`);
+      lines.push(`- Repeat count: ${signal.repeat_count}`);
+      lines.push(`- Popup reason: ${signal.notify_reason}`);
+      if (signal.next_popup_after) lines.push(`- Next popup after: ${signal.next_popup_after}`);
+      lines.push(`- Local install blocked: ${mdYesNo(signal.local_basic_install_blocked)}`);
+      lines.push(`- Full two-machine green blocked: ${mdYesNo(signal.full_system_green_blocked)}`);
+    }
     lines.push(`- Remote control available: ${mdBool(result.ai_box.link_alert.remote_control_available)}`);
     lines.push(`- Remote execution available: ${mdBool(result.ai_box.link_alert.remote_execution_available)}`);
     lines.push(`- SMB port visible: ${mdBool(result.ai_box.link_alert.smb_port_visible)}`);
@@ -305,6 +354,7 @@ async function main() {
         smb_port_visible: latest.codexa_alert.smb_port_visible ?? null,
         alert_hash: latest.codexa_alert.alert_hash || null,
         last_notified_at: latest.codexa_alert.last_notified_at || null,
+        signal_hygiene: codexaSignalHygiene(latest.codexa_alert),
       } : null,
       recovery_artifacts: recoveryArtifacts,
     },
@@ -343,6 +393,7 @@ async function main() {
         remote_control_available: latest.codexa_alert?.remote_control_available ?? null,
         remote_execution_available: latest.codexa_alert?.remote_execution_available ?? null,
         smb_port_visible: latest.codexa_alert?.smb_port_visible ?? null,
+        signal_hygiene: codexaSignalHygiene(latest.codexa_alert),
       message: latest.codexa_alert?.message || null,
     },
     codexa_smb_stage: {

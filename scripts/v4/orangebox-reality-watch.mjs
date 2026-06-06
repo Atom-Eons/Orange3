@@ -65,6 +65,42 @@ function latestReceipt(prefix) {
   return files[0]?.full || null;
 }
 
+function codexaSignalHygiene(alert) {
+  if (!alert?.status) return null;
+  if (alert.signal_hygiene) return alert.signal_hygiene;
+  const status = alert.status;
+  const severity = status === "CODEXA_READY"
+    ? "green"
+    : status === "CODEXA_COMMAND_ONLY"
+      ? "warning"
+      : status === "CODEXA_RECEIPTS_ONLY"
+        ? (alert.remote_control_available ? "warning" : "attention")
+        : (alert.receipts_reachable || alert.smb_port_visible ? "attention" : "urgent");
+  const humanLabel = status === "CODEXA_READY"
+    ? "Codexa ready"
+    : status === "CODEXA_RECEIPTS_ONLY"
+      ? "Codexa receipts only"
+      : status === "CODEXA_COMMAND_ONLY"
+        ? "Codexa command rail only"
+        : "Codexa unreachable";
+  return {
+    version: "orangebox-signal-hygiene/v1-fallback",
+    severity,
+    human_label: humanLabel,
+    repeat_count: null,
+    stable_since: alert.checked_at || null,
+    notify_reason: alert.popup?.result?.mode || "legacy_alert_shape",
+    next_popup_after: null,
+    cooldown_minutes: alert.popup?.cooldown_minutes ?? null,
+    popup_requested: alert.popup?.requested ?? null,
+    alert_fatigue_policy: "Derived by reality watcher because the upstream alert receipt did not include signal_hygiene.",
+    operator_action_required: status !== "CODEXA_READY" && alert.remote_execution_available !== true,
+    local_basic_install_blocked: false,
+    full_system_green_blocked: status !== "CODEXA_READY",
+    summary_line: `${humanLabel}; local Ops can continue; full two-machine routing remains gated.`,
+  };
+}
+
 async function main() {
   const chatHeartbeatPath = path.join(dataRoot, "chat-mirror", "listener-heartbeat.json");
   const chatHeartbeat = readJson(chatHeartbeatPath);
@@ -310,6 +346,7 @@ async function main() {
         status: codexaAlert?.status || null,
         popup_notified: codexaAlert?.popup?.notified || false,
         message: codexaAlert?.message || null,
+        signal_hygiene: codexaSignalHygiene(codexaAlert),
       },
       openclaw_retirement: {
         ok: openclawRetired,
