@@ -58,6 +58,11 @@ $commands = [ordered]@{
     args = @("run", "ops:readiness")
     description = "Verify Ops rails, primers, services, datasets, and package proofs."
   }
+  "ops-green" = @{
+    kind = "npm"
+    args = @("run", "ops:green")
+    description = "Refresh and prove local Orangebox Ops green without requiring Codexa/two-machine rails."
+  }
   "reality-watch" = @{
     kind = "npm"
     args = @("run", "reality:watch")

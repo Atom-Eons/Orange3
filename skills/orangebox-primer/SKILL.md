@@ -254,9 +254,10 @@ A claim that Orangebox is green needs a receipt. Preferred proof levels:
 - MCP/tool bridge: `npm.cmd run mcp:doctor`
 - skill lifecycle: `npm.cmd run skills:lifecycle`
 - local Ops backend install/proof: `npm.cmd run backend:proof`
+- local Ops green aggregate: `npm.cmd run ops:green`
 - final backend package proof: `npm.cmd run final:verify`
 - full two-machine/system proof: `npm.cmd run system:full-green`
 
-`system:full-green` is the broad gate. It may remain red when Codexa/AI Box rails, Ollama, Hermes, or wider two-device lanes are not proven. Do not confuse that with the local Ops backend, which is judged by `backend:proof`, `final:verify`, `health:report`, and `project:report`.
+`ops:green` proves the local backend/Ops machine. `system:full-green` is the broad gate. It may remain red when Codexa/AI Box rails, Ollama, Hermes, or wider two-device lanes are not proven. Do not confuse that with the local Ops backend, which is judged by `ops:green`, `backend:proof`, `final:verify`, `health:report`, and `project:report`.
 
 Do not call something done unless the proof path is named.

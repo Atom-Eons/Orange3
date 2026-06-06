@@ -117,6 +117,8 @@
     "reality:watch": "node ./scripts/v4/orangebox-reality-watch.mjs --json --receipt",
     "reality:watcher:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-reality-watcher.ps1",
     "ops:readiness": "node ./scripts/v4/orangebox-ops-readiness-doctor.mjs --json --receipt",
+    "ops:green": "node ./scripts/v4/orangebox-local-ops-green.mjs --json --receipt",
+    "ops:green:deep": "node ./scripts/v4/orangebox-local-ops-green.mjs --deep --json --receipt",
     "llama:listener": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\\AtomEons\\tools\\bin\\orangebox-llama-listener.ps1",
     "llama:stop": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\\AtomEons\\tools\\bin\\orangebox-llama-stop.ps1",
     "pack:portable": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt",

@@ -397,6 +397,7 @@ async function main() {
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
+        ops_green: packageScript("ops:green", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         action_doctor: packageScript("action:doctor", packageJson),
@@ -460,6 +461,10 @@ async function main() {
         tasks_total: harnessBenchmark?.tasks_total || 0,
         tasks_ok: harnessBenchmark?.tasks_ok || 0,
         score: harnessBenchmark?.score ?? null,
+      },
+      local_ops_green: {
+        path: path.join(dataRoot, "ops-green", "latest-local-ops-green.json"),
+        status: readJson(path.join(dataRoot, "ops-green", "latest-local-ops-green.json"))?.status || null,
       },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
       codexa_recovery: {
