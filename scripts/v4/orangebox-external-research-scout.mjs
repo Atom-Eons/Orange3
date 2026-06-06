@@ -40,6 +40,9 @@ const ORANGEBOX_TERMS = [
   "operator", "human factors", "long-horizon", "judge", "verification",
   "action classifier", "approval fatigue", "eval awareness", "benchmark hygiene",
   "memory interference", "indexed memory", "tool poisoning", "supply-chain injection",
+  "hermes", "dolphin", "qwen", "deepseek", "mistral", "vllm", "quantization",
+  "structured output", "function calling", "agent runtime", "human-ai teaming",
+  "calibrated trust", "alert fatigue", "workflow orchestration",
 ];
 
 const SOURCE_TARGETS = [
@@ -203,6 +206,62 @@ const SOURCE_TARGETS = [
     source_family: "mcp",
     url: "https://github.com/modelcontextprotocol/mcpb",
     reason: "MCPB one-click bundles are the right packaging lane for Orangebox local MCP/skill installers once quarantine proof is green.",
+  },
+  {
+    id: "owasp_genai_security_project",
+    tier: "T0_SECURITY_STANDARD",
+    source_family: "owasp",
+    url: "https://genai.owasp.org/",
+    reason: "OWASP GenAI risk guidance strengthens Orangebox MCP quarantine, tool intake, prompt-injection, and evidence-boundary checks.",
+  },
+  {
+    id: "nist_ai_rmf_playbook",
+    tier: "T0_GOVERNMENT_STANDARD",
+    source_family: "nist",
+    url: "https://airc.nist.gov/AI_RMF_Knowledge_Base/Playbook",
+    reason: "NIST AI RMF playbook patterns map to Orangebox assurance reports, risk gates, and operator-visible governance checks.",
+  },
+  {
+    id: "nous_hermes_agent_github",
+    tier: "T1_VENDOR_PROJECT",
+    source_family: "hermes",
+    url: "https://github.com/nousresearch/hermes-agent",
+    reason: "Hermes Agent source and docs inform Orangebox's OpenClaw replacement lane, local orchestration, memory, skills, and MCP migration checks.",
+  },
+  {
+    id: "nous_hermes_agent_docs",
+    tier: "T1_VENDOR_DOCS",
+    source_family: "hermes",
+    url: "https://hermes-agent.nousresearch.com/docs",
+    reason: "Hermes memory, skills, and MCP documentation informs Orangebox outer-agent setup and Codexa install doctors.",
+  },
+  {
+    id: "hf_dolphin3_llama31_8b",
+    tier: "T1_MODEL_CARD",
+    source_family: "huggingface_model",
+    url: "https://huggingface.co/dphn/Dolphin3.0-Llama3.1-8B",
+    reason: "Dolphin model-card capabilities and limits inform the Orangebox Gremlin/Misfits wildcard lane without making it final authority.",
+  },
+  {
+    id: "hf_hermes_43_36b",
+    tier: "T1_MODEL_CARD",
+    source_family: "huggingface_model",
+    url: "https://huggingface.co/NousResearch/Hermes-4.3-36B",
+    reason: "Hermes model-card capabilities and limits inform local Judgement/Misfits tests and the Codexa model install plan.",
+  },
+  {
+    id: "hf_qwen3_4b",
+    tier: "T1_MODEL_CARD",
+    source_family: "huggingface_model",
+    url: "https://huggingface.co/Qwen/Qwen3-4B",
+    reason: "Qwen small-model capabilities and limits inform Orangebox local structured-packet, STRONGARM, and classifier lanes.",
+  },
+  {
+    id: "vllm_docs",
+    tier: "T1_VENDOR_DOCS",
+    source_family: "vllm",
+    url: "https://docs.vllm.ai/",
+    reason: "vLLM serving patterns inform Codexa model serving tradeoffs after Ollama/llama.cpp core proof is green.",
   },
   {
     id: "harness_bench_agent_workflows",
@@ -433,9 +492,44 @@ const ARXIV_QUERIES = [
     id: "mcp_agent_tool_security",
     query: "\"Model Context Protocol\" \"prompt injection\" OR \"MCP\" \"tool poisoning\" OR \"agentic systems\" \"supply-chain\"",
     required_any: ["model context protocol", "mcp", "tool poisoning", "prompt injection", "supply-chain", "agentic systems", "tool-augmented"],
+    required_primary: ["model context protocol", "mcp", "tool poisoning"],
     source_family: "arxiv_security",
     tier: "T0_SECURITY_RESEARCH",
     reason: "MCP and tool-security research maps to Orangebox quarantine, plugin intake, static validation, and network/tool audit logs.",
+  },
+  {
+    id: "agent_supply_chain_security",
+    query: "\"AI agent\" \"supply chain\" OR \"tool poisoning\" \"agent\" OR \"indirect prompt injection\" \"agent\"",
+    required_any: ["supply chain", "tool poisoning", "indirect prompt injection", "prompt injection", "agent security", "tool"],
+    required_primary: ["supply chain", "tool poisoning", "indirect prompt injection", "prompt injection"],
+    source_family: "arxiv_security",
+    tier: "T0_SECURITY_RESEARCH",
+    reason: "Agent supply-chain and indirect-prompt-injection research strengthens Orangebox third-party package intake, MCP quarantine, and tool-result taint checks.",
+  },
+  {
+    id: "local_llm_routing_serving",
+    query: "\"local LLM\" \"routing\" OR \"LLM serving\" \"agents\" OR \"cost-aware\" \"model routing\"",
+    required_any: ["local llm", "llm serving", "model routing", "routing", "cost-aware", "agent"],
+    required_primary: ["local llm", "llm serving", "model routing", "cost-aware", "vllm", "inference serving"],
+    source_family: "arxiv",
+    tier: "T0_RESEARCH",
+    reason: "Local model routing and serving research maps to Orangebox Tri-lane, Codexa model doctors, and least-action routing.",
+  },
+  {
+    id: "multi_agent_workflow_orchestration",
+    query: "\"multi-agent\" \"workflow\" \"tool\" OR \"agent orchestration\" \"software\" OR \"tool use\" \"planning\" \"agents\"",
+    required_any: ["multi-agent", "agent orchestration", "workflow", "tool use", "planning", "software", "agents"],
+    source_family: "arxiv",
+    tier: "T0_RESEARCH",
+    reason: "Multi-agent orchestration research maps to Orangebox role packets, doer/watcher split, and council-to-judgement routing.",
+  },
+  {
+    id: "agent_sabotage_code_detection",
+    query: "\"AI agent sabotage\" \"code\" OR \"sabotage\" \"coding agent\" OR \"malicious\" \"software agent\"",
+    required_any: ["sabotage", "malicious", "coding agent", "software agent", "code", "developer"],
+    source_family: "arxiv_security",
+    tier: "T0_SECURITY_RESEARCH",
+    reason: "Agent sabotage and malicious-code research maps to Orangebox CHECKMATE, diff review, and no-trust code promotion gates.",
   },
 ];
 
@@ -460,6 +554,20 @@ const PUBMED_QUERIES = [
     source_family: "nih_pubmed",
     tier: "T0_HUMAN_FACTORS",
     reason: "AI trust, vigilance, transparency, and complacency research informs Orangebox user-visible state, confidence metrics, and watcher design.",
+  },
+  {
+    id: "alert_fatigue_decision_support",
+    query: "((alert fatigue[Title/Abstract]) OR (alarm fatigue[Title/Abstract]) OR (notification fatigue[Title/Abstract])) AND ((decision support[Title/Abstract]) OR (monitoring[Title/Abstract]) OR (operator[Title/Abstract]))",
+    source_family: "nih_pubmed",
+    tier: "T0_HUMAN_FACTORS",
+    reason: "Alert-fatigue research informs Orangebox popup throttling, Codexa warnings, health-report severity, and doer/watcher signal hygiene.",
+  },
+  {
+    id: "human_ai_teaming_calibrated_trust",
+    query: "((human AI teaming[Title/Abstract]) OR (human-AI teaming[Title/Abstract]) OR (human automation teaming[Title/Abstract]) OR (calibrated trust[Title/Abstract])) AND ((decision support[Title/Abstract]) OR (operator[Title/Abstract]) OR (monitoring[Title/Abstract]))",
+    source_family: "nih_pubmed",
+    tier: "T0_HUMAN_FACTORS",
+    reason: "Human-AI teaming and calibrated-trust research maps to Orangebox operator authority, visible confidence, and no-silent-automation rules.",
   },
 ];
 
@@ -519,6 +627,20 @@ const REDDIT_TARGETS = [
     source_family: "reddit",
     url: "https://www.reddit.com/r/mcp/search.rss?q=local%20safety%20filter%20MCP%20Claude%20Codex&restrict_sr=1&sort=new&t=month",
     reason: "Weak-signal MCP safety-filter and local firewall patterns for Orangebox quarantine candidates.",
+  },
+  {
+    id: "reddit_ollama_structured_outputs",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/LocalLLaMA/search.rss?q=ollama%20structured%20outputs%20json%20schema%20agents&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal pain around structured local verdict packets, JSON reliability, and local model guardrails.",
+  },
+  {
+    id: "reddit_hermes_agent_memory",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/LocalLLaMA/search.rss?q=Hermes%20agent%20memory%20skills%20MCP&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal operator reports around Hermes-style local agent memory, skills, MCP, and setup drift.",
   },
 ];
 
@@ -630,6 +752,12 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Add Orangebox memory-interference probes: revised-fact recall, multi-target aggregation, source-index dereference proof, and stale-memory failure receipts.",
     };
   }
+  if (/alert fatigue|alarm fatigue|notification fatigue|too many alerts|popup throttling|calibrated trust|human-ai teaming|human ai teaming/.test(haystack)) {
+    return {
+      area: "operator_signal_hygiene",
+      proposed_action: "Add Orangebox signal-hygiene checks: popup throttling, severity labels, alert fatigue limits, and visible confidence calibration.",
+    };
+  }
   if (/\brce\b|remote code execution|\bstdio\b|supply chain|prompt injection|command execution|localhost|dns rebinding|\bcors\b/.test(haystack)) {
     return {
       area: "mcp_supply_chain_security",
@@ -640,6 +768,12 @@ function mapCandidate(text, sourceFamily) {
     return {
       area: "structured_local_verdicts",
       proposed_action: "Add schema-constrained local verdict packets for STRONGARM, Misfits, and Judgement using Ollama structured outputs first and llama.cpp grammar constraints where tighter local control is needed.",
+    };
+  }
+  if (/dolphin|hermes|qwen|abliterated|wildcard|misfit|rebel|uncensored|model card/.test(haystack) || /huggingface_model/.test(sourceFamily)) {
+    return {
+      area: "local_model_lane_eval",
+      proposed_action: "Add local model lane evals for STRONGARM, Misfits, Mirror, and Judgement; never promote a model by model-card claims alone.",
     };
   }
   if (/llm judge|judge|evidence verification|reflect|factual accuracy|tool-use failures|report-quality failures/.test(haystack)) {
@@ -658,6 +792,18 @@ function mapCandidate(text, sourceFamily) {
     return {
       area: "skill_lifecycle_compression",
       proposed_action: "Score Orangebox skills as compressed procedures: promote only if they reduce repeated work and pass stale-skill/vendor gates.",
+    };
+  }
+  if (/hermes agent|nous|outer orchestration|agent runtime|persistent memory|agent skills/.test(haystack) || /hermes/.test(sourceFamily)) {
+    return {
+      area: "hermes_orchestration",
+      proposed_action: "Treat Hermes as an outer-orchestration candidate: install only through OBOX2 doctors, compare against OpenClaw retirement, and require Codexa receipts.",
+    };
+  }
+  if (/\bvllm\b|llm serving|model routing|cost-aware|quantization|throughput|inference serving/.test(haystack) || /vllm/.test(sourceFamily)) {
+    return {
+      area: "codexa_model_serving",
+      proposed_action: "Review Codexa model-serving tradeoffs after core Ollama proof is green; add model doctor checks before changing serving stacks.",
     };
   }
   if (/biomedical|nih|assurance|healthcare|health care|clinical|bioinformatics|research lifecycle/.test(haystack)) {
@@ -869,6 +1015,9 @@ function matchesAnyText(text, needles = []) {
 }
 
 function arxivEntryRelevant(query, entry) {
+  if (Array.isArray(query.required_primary) && query.required_primary.length) {
+    if (!matchesAnyText(`${entry.title} ${entry.summary}`, query.required_primary)) return false;
+  }
   if (!Array.isArray(query.required_any) || !query.required_any.length) return true;
   return matchesAnyText(`${entry.title} ${entry.summary}`, query.required_any);
 }
