@@ -381,6 +381,33 @@ async function countFiles(dir) {
   return { count, bytes };
 }
 
+async function gitMetadata() {
+  async function git(args) {
+    try {
+      const { stdout } = await execFileAsync("git", args, {
+        cwd: repoRoot,
+        timeout: 15_000,
+        maxBuffer: 256_000,
+        windowsHide: true,
+      });
+      return String(stdout || "").trim() || null;
+    } catch {
+      return null;
+    }
+  }
+  const source_commit = await git(["rev-parse", "HEAD"]);
+  const source_branch = await git(["rev-parse", "--abbrev-ref", "HEAD"]);
+  const source_remote = await git(["remote", "get-url", "origin"]);
+  const status = await git(["status", "--porcelain"]);
+  return {
+    source_root: repoRoot,
+    source_commit,
+    source_branch,
+    source_remote,
+    source_dirty: Boolean(status),
+  };
+}
+
 async function runVerification() {
   const npmBin = process.platform === "win32" ? "npm.cmd" : "npm";
   const steps = [];
@@ -408,6 +435,7 @@ async function main() {
   await copyTree();
   await writeFinalFiles();
   const packageStats = await countFiles(finalRoot);
+  const source = await gitMetadata();
   const verification = verifyInstall ? await runVerification() : null;
   const manifest = {
     ok: verification ? verification.ok : true,
@@ -415,6 +443,7 @@ async function main() {
     public_name: "Orangebox Version 1",
     package_name: "Orangebox Delta Final",
     final_root: finalRoot,
+    ...source,
     created_at: new Date().toISOString(),
     previous_final_backup: rotation?.backup_path || null,
     in_place_refresh: Boolean(rotation?.in_place_refresh),
