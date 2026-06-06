@@ -35,6 +35,9 @@ const ORANGEBOX_TERMS = [
   "evaluation", "eval", "benchmark", "coding", "software", "safety", "assurance",
   "receipt", "provenance", "retrieval", "workflow", "autonomous", "biomedical",
   "scientific", "claude code", "anthropic", "ollama", "local", "json schema",
+  "codex", "hooks", "skills", "sandbox", "supply chain", "prompt injection",
+  "automation bias", "complacency", "vigilance", "situation awareness",
+  "operator", "human factors", "long-horizon", "judge", "verification",
 ];
 
 const SOURCE_TARGETS = [
@@ -81,6 +84,34 @@ const SOURCE_TARGETS = [
     reason: "Agent Skills lifecycle and composability inform Orangebox primer/skill portability across Codex, Claude, Antigravity, and local tools.",
   },
   {
+    id: "anthropic_claude_code_hooks",
+    tier: "T0_VENDOR_DOCS",
+    source_family: "anthropic",
+    url: "https://code.claude.com/docs/en/hooks",
+    reason: "Claude Code hooks map directly to Orangebox doer/watcher alerts, deterministic guardrails, and stale-session prevention.",
+  },
+  {
+    id: "anthropic_agent_sdk_hooks",
+    tier: "T0_VENDOR_DOCS",
+    source_family: "anthropic",
+    url: "https://code.claude.com/docs/en/agent-sdk/hooks",
+    reason: "Agent SDK hook semantics inform Orangebox tool telemetry, MCP call logging, and watcher receipt callbacks.",
+  },
+  {
+    id: "openai_codex_ide",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "openai",
+    url: "https://developers.openai.com/codex/ide",
+    reason: "Codex IDE read/edit/run-code workflows inform Orangebox primers, skill commands, shell-action receipts, and cross-agent handoffs.",
+  },
+  {
+    id: "openai_local_shell_tool",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "openai",
+    url: "https://platform.openai.com/docs/guides/tools-local-shell",
+    reason: "Local shell tool orchestration informs Orangebox control-plane law: the model proposes shell actions, the local harness executes, receipts prove.",
+  },
+  {
     id: "mcp_latest_spec",
     tier: "T0_STANDARD",
     source_family: "mcp",
@@ -88,11 +119,46 @@ const SOURCE_TARGETS = [
     reason: "Protocol-level changes decide what Orangebox should expose to Codex, Claude, Antigravity, and local tools.",
   },
   {
+    id: "ox_mcp_stdio_supply_chain",
+    tier: "T1_SECURITY_RESEARCH",
+    source_family: "mcp_security",
+    url: "https://www.ox.security/blog/the-mother-of-all-ai-supply-chains-critical-systemic-vulnerability-at-the-core-of-the-mcp/",
+    reason: "MCP STDIO command-execution risk directly validates Orangebox MCP quarantine, metadata-only stdio probes, fixed command templates, and operator approval gates.",
+  },
+  {
+    id: "csa_mcp_rce_design_note",
+    tier: "T1_SECURITY_RESEARCH",
+    source_family: "mcp_security",
+    url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-mcp-rce-design-vulnerability-20260423-csa/",
+    reason: "CSA notes on MCP STDIO RCE and local-server exposure strengthen Orangebox MCP transport policy and 127.0.0.1 binding checks.",
+  },
+  {
     id: "nih_ai_assurance_lab",
     tier: "T0_GOVERNMENT_RESEARCH",
     source_family: "nih",
     url: "https://datascience.nih.gov/artificial-intelligence/initiatives/nih-ai-assurance-lab-insights",
     reason: "AI assurance lab patterns map directly to Orangebox proof, benchmark, and approval gates.",
+  },
+  {
+    id: "nih_automation_overreliance",
+    tier: "T0_HUMAN_FACTORS",
+    source_family: "nih_pmc",
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6534180/",
+    reason: "Automation over-reliance research informs Orangebox reality checks, doer/watcher split, operator accountability, and failure-exposure drills.",
+  },
+  {
+    id: "nih_automation_complacency_scale",
+    tier: "T0_HUMAN_FACTORS",
+    source_family: "nih_pmc",
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6389673/",
+    reason: "Automation-induced complacency research maps to Orangebox watcher cadence, proof transparency, and no-theater monitoring gates.",
+  },
+  {
+    id: "nih_agent_transparency_situation_awareness",
+    tier: "T0_HUMAN_FACTORS",
+    source_family: "nih_pmc",
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10756021/",
+    reason: "Agent transparency and situation-awareness research informs Orangebox health reports, visible rail state, and operator trust calibration.",
   },
   {
     id: "arxiv_memory_autonomous_agents_survey",
@@ -129,6 +195,34 @@ const SOURCE_TARGETS = [
     url: "https://arxiv.org/abs/2604.15877",
     reason: "Experience compression spectrum unifies memory, skills, and rules; directly informs AtomSmasher cartridge/AIR/commitment layering.",
   },
+  {
+    id: "arxiv_tool_orchestration_agents",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2603.22862",
+    reason: "Multi-tool orchestration research maps to Orangebox MCP quarantine, tool budgets, execution feedback, and verifiable trajectories.",
+  },
+  {
+    id: "arxiv_llm_judge_reflect",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2605.19196",
+    reason: "LLM-judge unreliability research supports Orangebox deterministic gates before AI review and STRONGARM/Mirror/Judgement separation.",
+  },
+  {
+    id: "arxiv_roadmapbench_long_horizon",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2605.15846",
+    reason: "Long-horizon version-upgrade benchmarks inform Orangebox acceptance matrices, receipts, and multi-target system proof.",
+  },
+  {
+    id: "arxiv_featurebench_agentic_features",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2602.10975",
+    reason: "Feature-oriented coding benchmarks reinforce Orangebox end-to-end feature proof instead of single-issue bug-fix theater.",
+  },
 ];
 
 const ARXIV_QUERIES = [
@@ -146,6 +240,20 @@ const ARXIV_QUERIES = [
     tier: "T0_RESEARCH",
     reason: "Agent evals decide which Orangebox features should graduate.",
   },
+  {
+    id: "llm_judges_evidence_verification",
+    query: "\"LLM judge\" OR \"evidence verification\" OR \"research agents\"",
+    source_family: "arxiv",
+    tier: "T0_RESEARCH",
+    reason: "Judge reliability research decides when Orangebox should trust model review versus deterministic receipts.",
+  },
+  {
+    id: "long_horizon_agentic_development",
+    query: "\"long-horizon\" \"software\" \"agent\" OR \"version upgrades\" \"agentic\"",
+    source_family: "arxiv",
+    tier: "T0_RESEARCH",
+    reason: "Long-horizon development research maps to Orangebox project proof and rollback gates.",
+  },
 ];
 
 const PUBMED_QUERIES = [
@@ -155,6 +263,13 @@ const PUBMED_QUERIES = [
     source_family: "nih_pubmed",
     tier: "T0_BIOMED_RESEARCH",
     reason: "Biomedical agent work stress-tests assurance, provenance, tool reliability, and multi-agent scientific workflows.",
+  },
+  {
+    id: "human_automation_operator_awareness",
+    query: "((automation bias[Title/Abstract]) OR (automation complacency[Title/Abstract]) OR (situation awareness[Title/Abstract]) OR (human automation interaction[Title/Abstract])) AND (operator OR monitoring OR decision support)",
+    source_family: "nih_pubmed",
+    tier: "T0_HUMAN_FACTORS",
+    reason: "Human-automation research keeps Orangebox from becoming invisible automation theater.",
   },
 ];
 
@@ -187,6 +302,20 @@ const REDDIT_TARGETS = [
     url: "https://www.reddit.com/r/LocalLLaMA/search.rss?q=local%20agent%20setup%202026%20ollama%20vllm&restrict_sr=1&sort=new&t=month",
     reason: "Weak-signal practical local inference patterns for Codexa model/router installation priorities.",
   },
+  {
+    id: "reddit_claude_code_hooks_skills",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/ClaudeCode/search.rss?q=hooks%20skills%20mcp%20memory&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal operator pain around Claude Code hooks, skills, MCP, stale memory, and setup drift.",
+  },
+  {
+    id: "reddit_codex_agents_md_skills",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/codex/search.rss?q=AGENTS.md%20skills%20MCP%20context&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal Codex pain around AGENTS.md, skills, MCP, compaction, and cross-agent portability.",
+  },
 ];
 
 function stamp(date = new Date()) {
@@ -200,6 +329,10 @@ function hashText(text) {
 function compact(text, max = 520) {
   const cleaned = String(text || "").replace(/\s+/g, " ").trim();
   return cleaned.length > max ? `${cleaned.slice(0, max)}...[truncated]` : cleaned;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function stripTags(html) {
@@ -252,6 +385,12 @@ function titleFromHtml(html, fallback) {
   return compact(stripTags(title || fallback || "untitled"), 160);
 }
 
+function looksBlockedPage(html) {
+  const title = titleFromHtml(html, "");
+  const text = stripTags(html);
+  return /checking your browser|recaptcha|access denied|verify you are human/i.test(`${title} ${text.slice(0, 800)}`);
+}
+
 function scoreText(text, extra = 0) {
   const haystack = String(text || "").toLowerCase();
   const hits = ORANGEBOX_TERMS.filter((term) => haystack.includes(term.toLowerCase()));
@@ -263,6 +402,36 @@ function scoreText(text, extra = 0) {
 
 function mapCandidate(text, sourceFamily) {
   const haystack = String(text || "").toLowerCase();
+  if (/automation bias|automation complacency|over-reliance|overreliance|vigilance|situation awareness|human factors|operator performance|mental workload/.test(haystack)) {
+    return {
+      area: "operator_situation_awareness",
+      proposed_action: "Convert into Orangebox watcher/health-report rules: visible status, failure drills, calibrated trust, no silent automation, and operator accountability prompts.",
+    };
+  }
+  if (/rce|remote code execution|stdio|supply chain|prompt injection|command execution|localhost|dns rebinding|cors/.test(haystack)) {
+    return {
+      area: "mcp_supply_chain_security",
+      proposed_action: "Strengthen MCP quarantine: metadata-only STDIO, fixed command templates, localhost binding proof, output caps, and explicit operator approval before executable tools.",
+    };
+  }
+  if (/codex|agent loop|responses api|computer environment|shell tool|compaction|hosted runtime/.test(haystack)) {
+    return {
+      area: "codex_harness_and_compaction",
+      proposed_action: "Map Codex loop mechanics into Orangebox primers, compaction restore packets, shell-action receipts, and cross-agent handoff checks.",
+    };
+  }
+  if (/llm judge|judge|evidence verification|reflect|factual accuracy|tool-use failures|report-quality failures/.test(haystack)) {
+    return {
+      area: "judge_reliability_and_strongarm",
+      proposed_action: "Keep deterministic gates ahead of AI judgement; add STRONGARM/Mirror tests where model judges must cite receipts and cannot overrule failed checks.",
+    };
+  }
+  if (/roadmapbench|featurebench|long-horizon|version upgrade|feature development|multi-target/.test(haystack)) {
+    return {
+      area: "long_horizon_feature_proof",
+      proposed_action: "Use roadmap-style acceptance matrices: feature contract, changed-file proof, tests, rollback, receipt, and no completion claim without end-to-end evidence.",
+    };
+  }
   if (/biomedical|nih|assurance|health|clinical|bioinformatics|scientific|research lifecycle/.test(haystack)) {
     return {
       area: "assurance_lab",
@@ -317,8 +486,65 @@ function mapCandidate(text, sourceFamily) {
   };
 }
 
+function evidenceWeight(tier) {
+  const value = String(tier || "");
+  if (value.startsWith("T0")) return 1.0;
+  if (value.startsWith("T1")) return 0.82;
+  if (value.startsWith("T2")) return 0.55;
+  return 0.22;
+}
+
+function buildFocusedSynthesis(candidates) {
+  const groups = new Map();
+  for (const candidate of candidates) {
+    if (!groups.has(candidate.area)) groups.set(candidate.area, []);
+    groups.get(candidate.area).push(candidate);
+  }
+  return [...groups.entries()]
+    .map(([area, items]) => {
+      const score = Math.round(items.reduce((sum, item) => sum + evidenceWeight(item.tier) * (item.orangebox_score || 0), 0) / Math.max(1, items.length));
+      const top = [...items].sort((a, b) => b.orangebox_score - a.orangebox_score)[0];
+      const evidence_tiers = [...new Set(items.map((item) => item.tier))].sort();
+      const source_families = [...new Set(items.map((item) => item.source_family))].sort();
+      const approval = score >= 55 && items.some((item) => String(item.tier || "").startsWith("T0"))
+        ? "APPROVAL_CANDIDATE"
+        : "HOLD_FOR_CORROBORATION";
+      return {
+        area,
+        approval_status: approval,
+        score,
+        source_count: items.length,
+        evidence_tiers,
+        source_families,
+        synthesis: top.proposed_action,
+        why_orangebox_cares: top.reason,
+        strongest_signal: {
+          title: top.title,
+          url: top.url,
+          tier: top.tier,
+        },
+        promotion_gate: {
+          required: true,
+          required_evidence: [
+            "task contract",
+            "operator approval",
+            "doctor/proof receipt",
+            "rollback path",
+            "no frontend mutation from Ops lane",
+          ],
+        },
+      };
+    })
+    .sort((a, b) => b.score - a.score || b.source_count - a.source_count)
+    .slice(0, 12);
+}
+
 function itemFromSource({ id, tier, source_family, url, reason, title, summary, published_at = null }) {
-  const scoring = scoreText(`${title} ${summary} ${reason}`, tier.startsWith("T0") ? 20 : 0);
+  const sourceBoost =
+    (tier.startsWith("T0") ? 20 : 0)
+    + (/HUMAN_FACTORS/i.test(tier) || /nih_pmc/i.test(source_family) ? 24 : 0)
+    + (/SECURITY/i.test(tier) || /mcp_security/i.test(source_family) ? 18 : 0);
+  const scoring = scoreText(`${title} ${summary} ${reason}`, sourceBoost);
   const mapped = mapCandidate(`${title} ${summary} ${reason}`, source_family);
   return {
     id: `research_${hashText(`${id}:${url}:${title}`).slice(0, 16)}`,
@@ -355,8 +581,12 @@ async function collectStaticTargets() {
     const fetched = await fetchText(target.url);
     fetches.push({ id: target.id, ok: fetched.ok, status: fetched.status, url: target.url, error: fetched.error || null });
     if (!fetched.ok) continue;
-    const title = titleFromHtml(fetched.body, target.id);
-    const text = compact(stripTags(fetched.body), 900);
+    const blocked = looksBlockedPage(fetched.body);
+    const title = blocked ? target.id : titleFromHtml(fetched.body, target.id);
+    const text = blocked
+      ? `Static fetch appears blocked by a browser challenge. Source pointer retained for manual/API corroboration. ${target.reason}`
+      : compact(stripTags(fetched.body), 900);
+    if (blocked) fetches[fetches.length - 1].blocked_by_browser_challenge = true;
     items.push(itemFromSource({ ...target, title, summary: text }));
   }
   return { items, fetches };
@@ -464,8 +694,13 @@ async function collectPubMed() {
       ids = JSON.parse(searched.body)?.esearchresult?.idlist || [];
     } catch {}
     if (!ids.length) continue;
+    await sleep(450);
     const summaryUrl = pubmedSummaryUrl(ids);
-    const summarized = await fetchText(summaryUrl);
+    let summarized = await fetchText(summaryUrl);
+    if (summarized.status === 429) {
+      await sleep(1250);
+      summarized = await fetchText(summaryUrl);
+    }
     fetches.push({ id: `${query.id}_summary`, ok: summarized.ok, status: summarized.status, url: summaryUrl, error: summarized.error || null });
     if (!summarized.ok) continue;
     let parsed = null;
@@ -554,7 +789,8 @@ async function main() {
 
   const fetches = collections.flatMap((collection) => collection.fetches);
   const items = dedupeItems(collections.flatMap((collection) => collection.items));
-  const candidates = items.filter((item) => item.orangebox_score >= 30).slice(0, 24);
+  const candidates = items.filter((item) => item.orangebox_score >= 30).slice(0, 48);
+  const focusedSynthesis = buildFocusedSynthesis(candidates);
   const primaryCandidateCount = candidates.filter((item) => item.tier.startsWith("T0")).length;
   const fetchOkCount = fetches.filter((fetch) => fetch.ok).length;
   const status = candidates.length && primaryCandidateCount
@@ -591,6 +827,7 @@ async function main() {
     candidate_count: candidates.length,
     primary_candidate_count: primaryCandidateCount,
     candidates,
+    focused_synthesis: focusedSynthesis,
     top_actions: [...new Map(candidates.map((item) => [item.area, item.proposed_action])).entries()]
       .map(([area, proposed_action]) => ({ area, proposed_action }))
       .slice(0, 10),

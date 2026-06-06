@@ -65,7 +65,9 @@ function listRecentJsonFiles(root, limit = 80) {
 }
 
 function pushFinding(findings, source, kind, text, severity = 0.5, evidence = {}) {
-  const normalized = String(text || "").trim();
+  const normalized = typeof text === "string"
+    ? text.trim()
+    : JSON.stringify(text || {}).slice(0, 900);
   if (!normalized) return;
   findings.push({
     source,
@@ -110,6 +112,23 @@ function collectFromObject(findings, source, object, prefix = "") {
       });
     }
   }
+  if (Array.isArray(object.focused_synthesis) && String(object.version || "").includes("external-research-scout")) {
+    for (const card of object.focused_synthesis.slice(0, 12)) {
+      const text = [
+        card.approval_status,
+        card.area,
+        card.synthesis,
+        card.strongest_signal?.title,
+        card.strongest_signal?.url,
+      ].filter(Boolean).join(" | ");
+      const severity = card.approval_status === "APPROVAL_CANDIDATE" ? 0.86 : 0.62;
+      pushFinding(findings, source, "research_synthesis", text, severity, {
+        area: card.area || null,
+        approval_status: card.approval_status || null,
+        url: card.strongest_signal?.url || null,
+      });
+    }
+  }
   if (Array.isArray(object.failures)) {
     for (const failure of object.failures) pushFinding(findings, source, "failure", failure, 0.84);
   }
@@ -127,13 +146,18 @@ function collectFromObject(findings, source, object, prefix = "") {
           value.summary,
           value.message,
         ].filter(Boolean).join(": ");
-        pushFinding(findings, source, "failed_check", detail, 0.76, { check: key, status: value.status || null, error: value.error || null });
+        pushFinding(findings, source, "failed_check", detail || value, 0.76, { check: key, status: value.status || null, error: value.error || null });
       }
     }
   }
 }
 
 function classify(text) {
+  if (/operator_situation_awareness|automation bias|automation complacency|over-reliance|overreliance|vigilance|situation awareness|human factors|calibrated trust/.test(text)) return { area: "operator_situation_awareness", action: "Promote as watcher/health-report rule only: visible status, failure drills, calibrated trust, and no silent automation." };
+  if (/mcp_supply_chain_security|rce|remote code execution|stdio|supply chain|prompt injection|command execution|localhost|dns rebinding|cors/.test(text)) return { area: "mcp_supply_chain_security", action: "Promote as MCP quarantine fixture only: metadata-only STDIO, fixed command templates, localhost proof, output caps, approval gate." };
+  if (/codex_harness_and_compaction|codex|agent loop|responses api|computer environment|shell-action receipts|compaction restore/.test(text)) return { area: "codex_harness_and_compaction", action: "Review Codex harness candidate; promote only as primer, restore packet, shell receipt, or cross-agent handoff check." };
+  if (/judge_reliability_and_strongarm|llm judge|judge reliability|evidence verification|reflect|cannot overrule failed checks/.test(text)) return { area: "judge_reliability_and_strongarm", action: "Add STRONGARM/Mirror evals requiring receipt citations; deterministic gates remain sovereign." };
+  if (/long_horizon_feature_proof|roadmapbench|featurebench|long-horizon|version upgrade|multi-target|acceptance matrices/.test(text)) return { area: "long_horizon_feature_proof", action: "Promote as project proof upgrade: feature contract, tests, rollback, and receipt-based completion claims." };
   if (/sandbox|filesystem isolation|network isolation|credential|exfiltrat|permission boundary/i.test(text)) return { area: "sandbox_and_permission_law", action: "Convert into path/network policy fixtures for MCP servers, Codexa rails, and installer proof." };
   if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/i.test(text)) return { area: "doer_watcher_session_spine", action: "Review durable session/harness candidate; promote as resumability, rail recovery, or watcher proof only." };
   if (/skill lifecycle|agent skills|procedural skill|experience compression|compression spectrum|declarative rules/i.test(text)) return { area: "skill_lifecycle_compression", action: "Review skill compression candidate; promote only if it reduces repeated work and passes stale-skill/vendor gates." };
