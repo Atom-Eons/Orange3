@@ -166,11 +166,11 @@ async function main() {
     { script: "signal:hygiene", timeout: 60_000 },
     { script: "session:spine", timeout: 60_000 },
     { script: "feature:proof", timeout: 90_000 },
+    { script: "ops:readiness", timeout: 180_000 },
     { script: "health:report", timeout: 90_000 },
     { script: "project:report", timeout: 90_000 },
     { script: "reality:watch", timeout: 90_000 },
     { script: "harness:benchmark", timeout: 90_000 },
-    { script: "ops:readiness", timeout: 180_000 },
   ];
   const commands = [];
   if (!noRefresh) {

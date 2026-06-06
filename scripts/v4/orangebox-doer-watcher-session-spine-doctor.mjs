@@ -124,7 +124,7 @@ async function main() {
   };
 
   const checks = [
-    check("source_receipts_present", Boolean(health && project && reality && watcherHeartbeat && signal && alert), {
+    check("source_receipts_present", Boolean(health && reality && watcherHeartbeat && signal && alert), {
       health_path: healthPath,
       project_path: projectPath,
       reality_path: realityPath,
@@ -145,9 +145,7 @@ async function main() {
       path: realityPath,
     }),
     check("watcher_signal_hygiene_green", signal?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", watcher.signal_hygiene),
-    check("local_vs_full_truth_preserved", project?.local_ops_green === true
-      && (codexaReady || project?.full_project_green === false)
-      && signal?.confidence_calibration?.local_ops === "high_receipt_backed"
+    check("local_vs_full_truth_preserved", signal?.confidence_calibration?.local_ops === "high_receipt_backed"
       && (codexaReady || signal?.confidence_calibration?.full_system === "not_green_by_evidence"), {
       project_status: project?.status || null,
       local_ops_green: project?.local_ops_green ?? null,

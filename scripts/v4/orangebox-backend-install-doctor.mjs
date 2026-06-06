@@ -381,7 +381,6 @@ async function main() {
     ["signal:hygiene", npmBin, ["run", "signal:hygiene"], { timeout: 60_000 }],
     ["session:spine", npmBin, ["run", "session:spine"], { timeout: 60_000 }],
     ["feature:proof", npmBin, ["run", "feature:proof"], { timeout: 60_000, env: { ORANGEBOX_BACKEND_PROOF_IN_PROGRESS: "1" } }],
-    ["harness:benchmark", npmBin, ["run", "harness:benchmark"], { timeout: 60_000, env: { ORANGEBOX_BACKEND_PROOF_IN_PROGRESS: "1" } }],
   ];
 
   for (const [name, command, commandArgs, options] of commandPlan) {
@@ -404,6 +403,21 @@ async function main() {
   if (result.commands.every((step) => step.ok) && result.server_smoke?.ok) {
     const readiness = await runStep("ops:readiness", npmBin, ["run", "ops:readiness"], { timeout: 180_000 });
     result.commands.push(readiness);
+  }
+
+  if (result.commands.every((step) => step.ok) && result.server_smoke?.ok) {
+    const health = await runStep("health:report", npmBin, ["run", "health:report"], { timeout: 120_000 });
+    result.commands.push(health);
+  }
+
+  if (result.commands.every((step) => step.ok) && result.server_smoke?.ok) {
+    const project = await runStep("project:report", npmBin, ["run", "project:report"], { timeout: 120_000 });
+    result.commands.push(project);
+  }
+
+  if (result.commands.every((step) => step.ok) && result.server_smoke?.ok) {
+    const harness = await runStep("harness:benchmark", npmBin, ["run", "harness:benchmark"], { timeout: 90_000, env: { ORANGEBOX_BACKEND_PROOF_IN_PROGRESS: "1" } });
+    result.commands.push(harness);
   }
 
   const commandOk = result.commands.every((step) => step.ok);

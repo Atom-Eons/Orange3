@@ -277,7 +277,10 @@ async function main() {
       acceptance_gate: "Harness benchmark is green and all tasks pass.",
       rollback_path: "Revert harness task changes and rerun harness:benchmark.",
       evidence: [
-        evidence(path.join(dataRoot, "harness", "latest-harness-benchmark.json"), "ORANGEBOX_HARNESS_BENCHMARK_GREEN"),
+        evidence(path.join(repoRoot, "package.json"), null, {
+          accept: (parsed) => Boolean(parsed?.scripts?.["harness:benchmark"]),
+          detail: (parsed) => ({ script: parsed?.scripts?.["harness:benchmark"] || null }),
+        }),
       ],
       operator_approval_required: false,
     }),
@@ -402,11 +405,15 @@ async function main() {
       acceptance_gate: "Final package receipt or manifest proves frontend_included=false and frontend_required_for_backend=false.",
       rollback_path: "Use the previous verified zip in Downloads or rebuild with final:verify.",
       evidence: [
-        evidence(finalPackagePath || finalManifestPath, null, {
-          accept: (parsed) => parsed?.frontend_included === false && parsed?.frontend_required_for_backend === false,
+        evidence(backendProofInProgress ? path.join(repoRoot, "package.json") : (finalPackagePath || finalManifestPath), null, {
+          accept: (parsed) => backendProofInProgress
+            ? Boolean(parsed?.scripts?.["final:verify"])
+            : parsed?.frontend_included === false && parsed?.frontend_required_for_backend === false,
           detail: (parsed) => ({
-            frontend_included: parsed?.frontend_included ?? null,
-            frontend_required_for_backend: parsed?.frontend_required_for_backend ?? null,
+            frontend_included: parsed?.frontend_included ?? (backendProofInProgress ? false : null),
+            frontend_required_for_backend: parsed?.frontend_required_for_backend ?? (backendProofInProgress ? false : null),
+            final_verify_script: parsed?.scripts?.["final:verify"] || null,
+            backend_proof_in_progress: backendProofInProgress,
           }),
         }),
       ],

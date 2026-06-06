@@ -256,6 +256,7 @@ function backendPackageJson() {
       "skills:lifecycle": "node ./scripts/v4/orangebox-skill-lifecycle-doctor.mjs --json --receipt",
       "chatbackup:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-chat-mirror-task.ps1",
       "chatbackup:status": "node ./scripts/v4/chatbackup-status.mjs --json --receipt",
+      "chatbackup:restore": "node ./scripts/v4/chatbackup-restore-packet.mjs --json --receipt",
       "ops:services": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/orangebox-ops-service-manager.ps1",
       "reality:watch": "node ./scripts/v4/orangebox-reality-watch.mjs --json --receipt",
       "reality:watcher:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-reality-watcher.ps1",

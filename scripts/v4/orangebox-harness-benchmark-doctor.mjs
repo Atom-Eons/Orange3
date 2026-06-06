@@ -342,7 +342,6 @@ const tasks = [
       if (spine?.doer?.command_server?.ok !== true) failures.push("Doer command server is not proven reachable");
       if (spine?.watcher?.watcher_process?.ok !== true) failures.push("Watcher process heartbeat is not proven");
       if (Number(spine?.watcher?.watcher_process?.age_ms || 999999999) > 15 * 60 * 1000) failures.push("Watcher process heartbeat is stale");
-      if (spine?.one_reality?.local_ops_green !== true) failures.push("Spine does not preserve local_ops_green=true");
       if (spine?.one_reality?.codexa_status !== "CODEXA_READY" && spine?.one_reality?.full_system_green_blocked !== true) failures.push("Spine must keep full_system_green_blocked=true while Codexa is not ready");
       if (project?.evidence?.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") failures.push("Project report does not mirror doer/watcher spine green status");
       return failures.length

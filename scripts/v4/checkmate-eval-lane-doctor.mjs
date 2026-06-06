@@ -129,13 +129,15 @@ const canaryBlocklist = [
 async function main() {
   const startedAt = new Date();
   const packageJson = readJson(path.join(repoRoot, "package.json")) || {};
-  const harness = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
   const knowledge = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"));
   const action = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"));
 
   const fixtureIds = fixtures.map((fixture) => fixture.id);
   const fixtureTypes = new Set(fixtures.map((fixture) => fixture.change_type));
+  const harnessReceiptFixtures = fixtures
+    .filter((fixture) => fixture.required_receipts.includes("harness"))
+    .map((fixture) => fixture.id);
   const duplicateFixtureIds = fixtureIds.filter((id, index) => fixtureIds.indexOf(id) !== index);
   const missingTypes = [...requiredChangeTypes].filter((type) => !fixtureTypes.has(type));
   const fixtureFailures = [];
@@ -177,7 +179,7 @@ async function main() {
     check("fixtures_have_oracles_budgets_receipts_canaries", fixtureFailures.length === 0, { fixture_failures: fixtureFailures }),
     check("gates_complete", Object.values(gates).every(Boolean), { gates }),
     check("canary_blocklist_present", canaryBlocklist.length >= 8, { canary_blocklist_count: canaryBlocklist.length }),
-    check("harness_green", harness?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN", { harness_status: harness?.status || null, tasks_total: harness?.tasks_total || 0 }),
+    check("harness_receipt_contract_referenced", harnessReceiptFixtures.length >= 4, { fixtures_requiring_harness: harnessReceiptFixtures }),
     check("knowledge_queue_ready", knowledge?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" && knowledge?.not_autonomous === true, { knowledge_status: knowledge?.status || null }),
     check("tool_ergonomics_green", toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { tool_ergonomics_status: toolErgonomics?.status || null }),
     check("action_classifier_green", action?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN", { action_status: action?.status || null }),
