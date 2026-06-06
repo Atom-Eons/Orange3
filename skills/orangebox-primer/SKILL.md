@@ -70,6 +70,7 @@ codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
 codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default
 mcp-doctor           verify MCP quarantine/tool bridge
 action-doctor        verify pre-tool action classifier and unsafe-command blocking
+skills-lifecycle     verify active skills are compressed executable procedures
 obox2-pack            build Orangebox V2 Internal setup zip
 obox2-doctor          expand and verify the setup zip
 openclaw-retire-dry   preview OpenClaw startup retirement

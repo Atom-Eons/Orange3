@@ -179,21 +179,25 @@ const tasks = [
     id: "skill_command_roundtrip",
     category: "skill_lifecycle",
     oracle: "Primer skill advertises real commands and the wrapper routes them to package scripts.",
-    budget: { timeout_ms: 1500, max_files_read: 3, max_tool_calls: 0 },
+    budget: { timeout_ms: 1500, max_files_read: 4, max_tool_calls: 0 },
     run(trace) {
       const skillMd = readText(path.join(repoRoot, "skills", "orangebox-primer", "SKILL.md"), trace);
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "codexa-alert", "codexa-smb-stage"];
+      const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
         if (!wrapper.includes(`"${command}"`)) failures.push(`orangebox_command.ps1 does not wrap ${command}`);
       }
       if (!packageJson?.scripts?.["harness:benchmark"]) failures.push("Package script harness:benchmark missing");
+      if (lifecycle?.compression_proof?.status !== "SKILL_COMPRESSION_GREEN") failures.push(`Skill compression proof not green: ${lifecycle?.compression_proof?.status || "missing"}`);
+      if (lifecycle?.compression_proof?.wrapper_mapping_rate !== 1) failures.push(`Skill wrapper mapping rate not 1: ${lifecycle?.compression_proof?.wrapper_mapping_rate ?? "missing"}`);
+      if ((lifecycle?.compression_proof?.command_count || 0) < 25) failures.push(`Skill command count too low: ${lifecycle?.compression_proof?.command_count || 0}`);
       return failures.length
-        ? failTask("skill_command_roundtrip", failures, { commands_checked: commands.length })
-        : okTask("skill_command_roundtrip", { commands_checked: commands.length });
+        ? failTask("skill_command_roundtrip", failures, { commands_checked: commands.length, compression_status: lifecycle?.compression_proof?.status || null })
+        : okTask("skill_command_roundtrip", { commands_checked: commands.length, compression_status: lifecycle?.compression_proof?.status, compression_command_count: lifecycle?.compression_proof?.command_count });
     },
   },
   {

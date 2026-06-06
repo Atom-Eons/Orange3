@@ -42,6 +42,61 @@ function readJson(file) {
   }
 }
 
+function proofForArea(area) {
+  if (area === "skill_lifecycle_compression") {
+    const file = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN"
+      && proof?.compression_proof?.status === "SKILL_COMPRESSION_GREEN"
+      && proof?.compression_proof?.wrapper_mapping_rate === 1
+      && Number(proof?.compression_proof?.command_count || 0) >= 1;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: proof.compression_proof.status,
+      }
+      : null;
+  }
+  if (area === "action_classifier_permission_gate") {
+    const file = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN"
+      && Number(proof?.cases_run || 0) >= 10
+      && Number(proof?.blocked_count || 0) >= 1
+      && Number(proof?.staged_count || 0) >= 1;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.blocked_count} blocked / ${proof.staged_count} staged / ${proof.cases_run} fixtures`,
+      }
+      : null;
+  }
+  if (area === "mcp_quarantine_gateway" || area === "mcp_supply_chain_security") {
+    const file = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
+    const proof = readJson(file);
+    const ok = proof?.ok === true
+      && proof?.host_mcp_config_mutated === false
+      && Number(proof?.summary?.failed || 0) === 0
+      && Number(proof?.summary?.passed || 0) >= 1;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status || "MCP_QUARANTINE_GREEN",
+        proof_detail: `${proof.summary.passed}/${proof.summary.checks} MCP checks passed; host config mutation false`,
+      }
+      : null;
+  }
+  return null;
+}
+
 async function writeJson(file, value) {
   await fsp.mkdir(path.dirname(file), { recursive: true });
   await fsp.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -364,6 +419,8 @@ function clampScore(value) {
 function executionBacklogFromCandidates(candidates) {
   const items = candidates.map((candidate) => {
     const profile = executionProfile(candidate.area);
+    const completion_proof = proofForArea(candidate.area);
+    const proven = Boolean(completion_proof?.ok);
     const learnedFrom = Array.isArray(candidate.learned_from) ? candidate.learned_from : [];
     const evidenceCount = learnedFrom.length;
     const researchSignals = learnedFrom.filter((item) => /research-scout|external-research/i.test(String(item.source || ""))).length;
@@ -378,7 +435,9 @@ function executionBacklogFromCandidates(candidates) {
       id: `${candidate.id}_exec`,
       area: candidate.area,
       title: candidate.title,
-      status: (profile.blocked_by || []).length ? "approval_ready_but_blocked" : "approval_ready",
+      status: proven
+        ? "proven_receipt_green"
+        : ((profile.blocked_by || []).length ? "approval_ready_but_blocked" : "approval_ready"),
       execution_score: score,
       confidence: candidate.confidence,
       evidence_count: evidenceCount,
@@ -392,12 +451,14 @@ function executionBacklogFromCandidates(candidates) {
       frontend_touch_allowed: false,
       operator_approval_required: true,
       auto_promote: false,
+      proven,
+      completion_proof,
       rollback_path: "Revert the scoped patch/receipt-producing change and rerun the same proof command before promotion.",
       promotion_gate: candidate.promotion_gate,
     };
   });
   return items
-    .sort((a, b) => b.execution_score - a.execution_score || b.confidence - a.confidence)
+    .sort((a, b) => Number(a.proven) - Number(b.proven) || b.execution_score - a.execution_score || b.confidence - a.confidence)
     .map((item, index) => ({ rank: index + 1, ...item }));
 }
 
@@ -434,6 +495,7 @@ async function main() {
     .map(([area, items]) => candidateFromGroup(area, items))
     .sort((a, b) => b.confidence - a.confidence);
   const executionBacklog = executionBacklogFromCandidates(candidates).slice(0, 12);
+  const provenExecutionItems = executionBacklog.filter((item) => item.proven);
 
   const result = {
     ok: true,
@@ -448,6 +510,8 @@ async function main() {
     candidate_count: candidates.length,
     candidates,
     execution_backlog_count: executionBacklog.length,
+    proven_execution_count: provenExecutionItems.length,
+    proven_execution_items: provenExecutionItems,
     execution_backlog: executionBacklog,
     top_execution_candidate: executionBacklog[0] || null,
     next_backend_action: executionBacklog[0]

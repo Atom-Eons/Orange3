@@ -82,6 +82,7 @@ const requiredCommands = [
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },
   { name: "mcp-doctor", kind: "npm", script: "mcp:doctor" },
   { name: "action-doctor", kind: "npm", script: "action:doctor" },
+  { name: "skills-lifecycle", kind: "npm", script: "skills:lifecycle" },
   { name: "obox2-pack", kind: "npm", script: "obox2:pack" },
   { name: "obox2-doctor", kind: "npm", script: "obox2:doctor" },
   { name: "openclaw-retire-dry", kind: "npm", script: "openclaw:retire:dry" },
@@ -183,16 +184,56 @@ async function main() {
   const staleCount = roots.reduce((sum, root) => sum + root.stale_count, 0);
   const missingRootCount = roots.filter((root) => !root.ok).length;
   const missingCommandCount = commandChecks.filter((command) => !command.ok).length;
+  const commandOkCount = commandChecks.filter((command) => command.ok).length;
+  const npmCommandCount = commandChecks.filter((command) => command.kind === "npm").length;
+  const powershellCommandCount = commandChecks.filter((command) => command.kind === "powershell").length;
+  const wrapperMappingCount = commandChecks.filter((command) => command.present_in_wrapper && command.wrapper_mapping_ok).length;
+  const compressionProofOk =
+    staleCount === 0 &&
+    missingRootCount === 0 &&
+    missingCommandCount === 0 &&
+    commandChecks.length >= 25 &&
+    wrapperMappingCount === commandChecks.length &&
+    exists(commandReceiptRoot);
+  const compressionProof = {
+    ok: compressionProofOk,
+    status: compressionProofOk ? "SKILL_COMPRESSION_GREEN" : "SKILL_COMPRESSION_NOT_GREEN",
+    doctrine: "A skill is active only when it is a compressed executable procedure: installed in real roots, non-stale, mapped to real commands, receipt-visible, and rollback-safe.",
+    command_count: commandChecks.length,
+    command_ok_count: commandOkCount,
+    npm_command_count: npmCommandCount,
+    powershell_command_count: powershellCommandCount,
+    wrapper_mapping_count: wrapperMappingCount,
+    wrapper_mapping_rate: Number((wrapperMappingCount / Math.max(1, commandChecks.length)).toFixed(4)),
+    active_root_count: roots.length,
+    active_roots_green: roots.filter((root) => root.ok).length,
+    stale_count: staleCount,
+    receipt_surface_exists: exists(commandReceiptRoot),
+    promotion_requirements: [
+      "must reduce repeated operator work",
+      "must map to a real local command or proof script",
+      "must write or reference a receipt",
+      "must have a rollback or non-mutating dry path when it changes system state",
+      "must stay out of active roots when stale, legacy, or vendor-unverified",
+    ],
+    rejected_shapes: [
+      "prompt-only folders with no executable proof",
+      "stale AE/OpenClaw/AESkills folders in active roots",
+      "commands that do not map to package scripts or files",
+      "silent skill promotion without operator approval",
+    ],
+  };
   const result = {
-    ok: staleCount === 0 && missingRootCount === 0 && missingCommandCount === 0,
+    ok: compressionProofOk,
     version: "orangebox-skill-lifecycle-doctor/v0",
-    status: staleCount === 0 && missingRootCount === 0 && missingCommandCount === 0
+    status: compressionProofOk
       ? "ORANGEBOX_SKILL_LIFECYCLE_GREEN"
       : "ORANGEBOX_SKILL_LIFECYCLE_NOT_GREEN",
     checked_at: new Date().toISOString(),
     repo_root: repoRoot,
     data_root: dataRoot,
     proof_law: "Skills are compressed procedures. They stay active only when installed, non-stale, command-mapped, receipt-visible, and rollback-safe.",
+    compression_proof: compressionProof,
     roots,
     stale_count: staleCount,
     command_checks: commandChecks,
