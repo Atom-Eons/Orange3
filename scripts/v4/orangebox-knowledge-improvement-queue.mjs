@@ -64,6 +64,16 @@ function listRecentJsonFiles(root, limit = 80) {
     .map((entry) => entry.full);
 }
 
+function shouldSkipHistoricalReceipt(file) {
+  const name = path.basename(file);
+  return [
+    "orangebox-external-research-scout-",
+    "orangebox-project-report-",
+    "orangebox-health-report-",
+    "orangebox-knowledge-improvement-queue-",
+  ].some((prefix) => name.startsWith(prefix));
+}
+
 function pushFinding(findings, source, kind, text, severity = 0.5, evidence = {}) {
   const normalized = typeof text === "string"
     ? text.trim()
@@ -154,11 +164,10 @@ function collectFromObject(findings, source, object, prefix = "") {
 
 function classify(text) {
   if (/operator_situation_awareness|automation bias|automation complacency|over-reliance|overreliance|vigilance|situation awareness|human factors|calibrated trust/.test(text)) return { area: "operator_situation_awareness", action: "Promote as watcher/health-report rule only: visible status, failure drills, calibrated trust, and no silent automation." };
-  if (/mcp_supply_chain_security|rce|remote code execution|stdio|supply chain|prompt injection|command execution|localhost|dns rebinding|cors/.test(text)) return { area: "mcp_supply_chain_security", action: "Promote as MCP quarantine fixture only: metadata-only STDIO, fixed command templates, localhost proof, output caps, approval gate." };
+  if (/mcp_supply_chain_security|\brce\b|remote code execution|\bstdio\b|supply chain|prompt injection|command execution|localhost|dns rebinding|\bcors\b/.test(text)) return { area: "mcp_supply_chain_security", action: "Promote as MCP quarantine fixture only: metadata-only STDIO, fixed command templates, localhost proof, output caps, approval gate." };
   if (/codex_harness_and_compaction|codex|agent loop|responses api|computer environment|shell-action receipts|compaction restore/.test(text)) return { area: "codex_harness_and_compaction", action: "Review Codex harness candidate; promote only as primer, restore packet, shell receipt, or cross-agent handoff check." };
   if (/judge_reliability_and_strongarm|llm judge|judge reliability|evidence verification|reflect|cannot overrule failed checks/.test(text)) return { area: "judge_reliability_and_strongarm", action: "Add STRONGARM/Mirror evals requiring receipt citations; deterministic gates remain sovereign." };
   if (/long_horizon_feature_proof|roadmapbench|featurebench|long-horizon|version upgrade|multi-target|acceptance matrices/.test(text)) return { area: "long_horizon_feature_proof", action: "Promote as project proof upgrade: feature contract, tests, rollback, and receipt-based completion claims." };
-  if (/sandbox|filesystem isolation|network isolation|credential|exfiltrat|permission boundary/i.test(text)) return { area: "sandbox_and_permission_law", action: "Convert into path/network policy fixtures for MCP servers, Codexa rails, and installer proof." };
   if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/i.test(text)) return { area: "doer_watcher_session_spine", action: "Review durable session/harness candidate; promote as resumability, rail recovery, or watcher proof only." };
   if (/skill lifecycle|agent skills|procedural skill|experience compression|compression spectrum|declarative rules/i.test(text)) return { area: "skill_lifecycle_compression", action: "Review skill compression candidate; promote only if it reduces repeated work and passes stale-skill/vendor gates." };
   if (/mcp|model context protocol|tool output|tool search|resources|prompt injection/i.test(text)) return { area: "mcp_quarantine_gateway", action: "Review MCP/source-scope candidate; promote only through quarantine gateway fixture and receipt." };
@@ -166,6 +175,7 @@ function classify(text) {
   if (/pubmed|nih|biomedical|bioinformatics|clinical|healthcare|assurance|scientific/i.test(text)) return { area: "research_assurance_lab", action: "Review assurance-lab candidate; translate only into playbook, benchmark, or proof-receipt work." };
   if (/hermes/i.test(text)) return { area: "hermes_orchestration", action: "Run Hermes install/doctor from OBOX2 pack after Codexa is stable." };
   if (/arxiv|agent memory|context compression|memory control|retrieval|compaction|context bloat/i.test(text)) return { area: "knowledge_engine_atomsmasher", action: "Review memory/control candidate; promote only as eval, benchmark, or AtomSmasher/Knowledge proof." };
+  if (/sandbox|filesystem isolation|network isolation|credential|exfiltrat|permission boundary|tool permission|network permission|filesystem permission|file permission/i.test(text)) return { area: "sandbox_and_permission_law", action: "Convert into path/network policy fixtures for MCP servers, Codexa rails, and installer proof." };
   if (/checkmate|benchmarking local models|custom workflow|model eval|local model|model route|model routing/i.test(text)) return { area: "checkmate_eval_lane", action: "Convert into a CHECKMATE eval fixture before changing prompts, models, or routing." };
   if (/knowledge|learned|candidate|self-upgrade/i.test(text)) return { area: "knowledge_engine", action: "Keep candidate queued; require operator promotion receipt." };
   if (/prisma|dll|eperm|lock/i.test(text)) return { area: "windows_process_lock", action: "Stop scoped Orangebox final API/node processes before Prisma generate or final verify." };
@@ -213,7 +223,10 @@ async function main() {
     const data = readJson(file);
     if (data) collectFromObject(findings, file, data);
   }
-  for (const file of listRecentJsonFiles(receiptDir, 80)) {
+  const receiptFilesScanned = listRecentJsonFiles(receiptDir, 80)
+    .filter((file) => !shouldSkipHistoricalReceipt(file));
+  for (const file of receiptFilesScanned) {
+    if (shouldSkipHistoricalReceipt(file)) continue;
     const data = readJson(file);
     if (data) collectFromObject(findings, file, data);
   }
@@ -236,7 +249,7 @@ async function main() {
     repo_root: repoRoot,
     data_root: dataRoot,
     doctrine: "Observe, dedupe, score, and queue. Do not self-promote. Operator approval and receipts are required.",
-    source_count: reportFiles.length + listRecentJsonFiles(receiptDir, 80).length,
+    source_count: reportFiles.length + receiptFilesScanned.length,
     finding_count: findings.length,
     candidate_count: candidates.length,
     candidates,

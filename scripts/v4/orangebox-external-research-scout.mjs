@@ -229,6 +229,7 @@ const ARXIV_QUERIES = [
   {
     id: "agent_memory_context",
     query: "\"agent memory\" OR \"context compression\" OR \"memory control\"",
+    required_any: ["agent memory", "memory control", "context compression", "long context", "retrieval", "memory"],
     source_family: "arxiv",
     tier: "T0_RESEARCH",
     reason: "Memory/context control is the AtomSmasher and Knowledge Engine frontier.",
@@ -236,6 +237,7 @@ const ARXIV_QUERIES = [
   {
     id: "software_agents_eval",
     query: "\"software engineering agents\" OR \"coding agents\" OR \"agent benchmark\"",
+    required_any: ["software engineering agent", "coding agent", "agent benchmark", "program repair", "repository", "code generation", "software"],
     source_family: "arxiv",
     tier: "T0_RESEARCH",
     reason: "Agent evals decide which Orangebox features should graduate.",
@@ -243,6 +245,7 @@ const ARXIV_QUERIES = [
   {
     id: "llm_judges_evidence_verification",
     query: "\"LLM judge\" OR \"evidence verification\" OR \"research agents\"",
+    required_any: ["llm judge", "judge", "evidence verification", "verifier", "factual", "evaluation", "research agent", "reflect"],
     source_family: "arxiv",
     tier: "T0_RESEARCH",
     reason: "Judge reliability research decides when Orangebox should trust model review versus deterministic receipts.",
@@ -250,6 +253,7 @@ const ARXIV_QUERIES = [
   {
     id: "long_horizon_agentic_development",
     query: "\"long-horizon\" \"software\" \"agent\" OR \"version upgrades\" \"agentic\"",
+    required_any: ["long-horizon", "long horizon", "version upgrade", "roadmap", "feature development", "agentic software", "software agent"],
     source_family: "arxiv",
     tier: "T0_RESEARCH",
     reason: "Long-horizon development research maps to Orangebox project proof and rollback gates.",
@@ -408,7 +412,7 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Convert into Orangebox watcher/health-report rules: visible status, failure drills, calibrated trust, no silent automation, and operator accountability prompts.",
     };
   }
-  if (/rce|remote code execution|stdio|supply chain|prompt injection|command execution|localhost|dns rebinding|cors/.test(haystack)) {
+  if (/\brce\b|remote code execution|\bstdio\b|supply chain|prompt injection|command execution|localhost|dns rebinding|\bcors\b/.test(haystack)) {
     return {
       area: "mcp_supply_chain_security",
       proposed_action: "Strengthen MCP quarantine: metadata-only STDIO, fixed command templates, localhost binding proof, output caps, and explicit operator approval before executable tools.",
@@ -444,12 +448,6 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Update MCP quarantine/test fixtures for scope, output limits, tool search, resources, and prompt-injection handling.",
     };
   }
-  if (/sandbox|filesystem isolation|network isolation|credential|exfiltrat|permission/.test(haystack)) {
-    return {
-      area: "sandbox_and_permission_law",
-      proposed_action: "Translate sandbox findings into Orangebox path/network policy fixtures for MCP servers, Codexa rails, and installer checks.",
-    };
-  }
   if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/.test(haystack)) {
     return {
       area: "doer_watcher_session_spine",
@@ -466,6 +464,12 @@ function mapCandidate(text, sourceFamily) {
     return {
       area: "knowledge_engine_atomsmasher",
       proposed_action: "Add or refresh memory-control evals: compaction-boundary tests, implicit-context probes, and retrieval-noise checks.",
+    };
+  }
+  if (/sandbox|filesystem isolation|network isolation|credential|exfiltrat|permission boundary|tool permission|network permission|filesystem permission|file permission/.test(haystack)) {
+    return {
+      area: "sandbox_and_permission_law",
+      proposed_action: "Translate sandbox findings into Orangebox path/network policy fixtures for MCP servers, Codexa rails, and installer checks.",
     };
   }
   if (/benchmark|eval|score|agentic process|reproducibility/.test(haystack)) {
@@ -617,6 +621,16 @@ function parseArxivEntries(xml) {
   });
 }
 
+function matchesAnyText(text, needles = []) {
+  const haystack = String(text || "").toLowerCase();
+  return needles.some((needle) => haystack.includes(String(needle).toLowerCase()));
+}
+
+function arxivEntryRelevant(query, entry) {
+  if (!Array.isArray(query.required_any) || !query.required_any.length) return true;
+  return matchesAnyText(`${entry.title} ${entry.summary}`, query.required_any);
+}
+
 function parseFeedEntries(xml, max = 8) {
   const text = String(xml || "");
   const atom = [...text.matchAll(/<entry[\s\S]*?>([\s\S]*?)<\/entry>/g)].map((match) => {
@@ -649,10 +663,16 @@ async function collectArxiv() {
   for (const query of ARXIV_QUERIES) {
     const url = arxivUrl(query.query);
     const fetched = await fetchText(url);
-    fetches.push({ id: query.id, ok: fetched.ok, status: fetched.status, url, error: fetched.error || null });
+    const fetchRecord = { id: query.id, ok: fetched.ok, status: fetched.status, url, error: fetched.error || null, accepted: 0, dropped_irrelevant: 0 };
+    fetches.push(fetchRecord);
     if (!fetched.ok) continue;
     for (const entry of parseArxivEntries(fetched.body)) {
       if (!entry.url || !entry.title) continue;
+      if (!arxivEntryRelevant(query, entry)) {
+        fetchRecord.dropped_irrelevant += 1;
+        continue;
+      }
+      fetchRecord.accepted += 1;
       items.push(itemFromSource({ ...query, url: entry.url, title: entry.title, summary: entry.summary, published_at: entry.published_at }));
     }
   }
@@ -679,6 +699,13 @@ function pubmedSummaryUrl(ids) {
     retmode: "json",
   });
   return `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?${params}`;
+}
+
+function pubmedTitleRelevant(query, title) {
+  if (query.id === "human_automation_operator_awareness") {
+    return /(automation bias|automation complacency|situation awareness|human automation|operator|monitoring|decision support|vigilance|over-?reliance)/i.test(title);
+  }
+  return /(agentic|large language model|llm|artificial intelligence|ai agent|multiagent|multi-agent)/i.test(title);
 }
 
 async function collectPubMed() {
@@ -712,7 +739,7 @@ async function collectPubMed() {
       const row = result[id];
       if (!row) continue;
       const title = row.title || `PubMed ${id}`;
-      if (!/(agentic|large language model|llm|artificial intelligence|ai agent|multiagent|multi-agent)/i.test(title)) continue;
+      if (!pubmedTitleRelevant(query, title)) continue;
       const journal = row.fulljournalname || row.source || "PubMed";
       const summary = `${journal}. ${row.pubdate || ""}. ${Array.isArray(row.authors) ? row.authors.slice(0, 5).map((a) => a.name).join(", ") : ""}`;
       items.push(itemFromSource({
