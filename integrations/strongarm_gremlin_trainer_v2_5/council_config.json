@@ -1,0 +1,68 @@
+{
+  "system": {
+    "name": "STRONGARM Council V2",
+    "machine": "GTi15",
+    "ram_gb": 98,
+    "practical_model_ram_ceiling_gb": 60,
+    "default_mode": "normal"
+  },
+  "models": {
+    "micro": "qwen3:1.7b",
+    "small": "qwen3:4b",
+    "council": "qwen3:14b",
+    "king_local": "qwen3:30b-a3b",
+    "rebel": "dolphin3:8b",
+    "rebel_abliterated": "hf.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF:Q4_K_M",
+    "rebel_heretic": "custom/heretic-abliterated",
+    "fallback": "qwen3:4b"
+  },
+  "budgets": {
+    "cheap": {
+      "roles": [
+        "librarian",
+        "misfit",
+        "strongarm"
+      ],
+      "packet_tokens": 180,
+      "king_tokens": 650,
+      "max_model_calls": 3
+    },
+    "normal": {
+      "roles": [
+        "librarian",
+        "forge",
+        "mirror",
+        "misfit",
+        "strongarm"
+      ],
+      "packet_tokens": 220,
+      "king_tokens": 900,
+      "max_model_calls": 6
+    },
+    "deep": {
+      "roles": [
+        "librarian",
+        "forge",
+        "mirror",
+        "misfit",
+        "strongarm"
+      ],
+      "packet_tokens": 320,
+      "king_tokens": 1400,
+      "max_model_calls": 7
+    }
+  },
+  "routing": {
+    "load_one_big_model_at_a_time": true,
+    "prefer_packets_over_dialogue": true,
+    "escalate_to_colab_for_training": true,
+    "abliterated_models_allowed_only_in_rebel_lane": true,
+    "escalate_to_cloud_king_only_when": [
+      "high_value_strategy",
+      "large_codebase_change",
+      "legal_or_financial_precision",
+      "local_council_disagreement",
+      "confidence_below_72"
+    ]
+  }
+}

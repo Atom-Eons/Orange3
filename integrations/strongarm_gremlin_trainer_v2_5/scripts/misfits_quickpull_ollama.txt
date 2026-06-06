@@ -1,0 +1,16 @@
+# Manual Ollama pull/run list for Misfits
+
+# Llama 3.1 8B abliterated GGUF
+ollama run hf.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF:Q4_K_M
+
+# Qwen3 abliterated family
+ollama pull huihui_ai/qwen3-abliterated
+
+# Qwen3 14B abliterated
+ollama run richardyoung/qwen3-14b-abliterated
+
+# Qwen3 30B A3B abliterated GGUF
+ollama run hf.co/mradermacher/Qwen3-30B-A3B-abliterated-GGUF:Q4_K_M
+
+# Llama 3.1 70B lorablated GGUF, heavy/deep only
+ollama run hf.co/bartowski/Llama-3.1-70B-Instruct-lorablated-GGUF:Q4_K_M

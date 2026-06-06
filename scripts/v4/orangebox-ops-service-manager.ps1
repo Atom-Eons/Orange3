@@ -21,16 +21,25 @@ $startupDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Star
 $toolBin = "C:\AtomEons\tools\bin"
 $powershell = (Get-Command powershell.exe -ErrorAction Stop).Source
 New-Item -ItemType Directory -Force -Path $serviceRoot, $startupDir | Out-Null
+Add-Type -AssemblyName System.Net.Http
 
 function Test-Http($Url, [int]$TimeoutSec = 3) {
+  if ($Url -like "*:$CommandPort/*" -and $TimeoutSec -lt 8) { $TimeoutSec = 8 }
   $sw = [Diagnostics.Stopwatch]::StartNew()
+  $client = $null
+  $response = $null
   try {
-    $response = Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec $TimeoutSec
+    $client = [System.Net.Http.HttpClient]::new()
+    $client.Timeout = [TimeSpan]::FromSeconds($TimeoutSec)
+    $response = $client.GetAsync($Url, [System.Net.Http.HttpCompletionOption]::ResponseHeadersRead).GetAwaiter().GetResult()
     $sw.Stop()
-    return [ordered]@{ ok = $true; status = [int]$response.StatusCode; ms = [int]$sw.ElapsedMilliseconds; url = $Url }
+    return [ordered]@{ ok = [bool]$response.IsSuccessStatusCode; status = [int]$response.StatusCode; ms = [int]$sw.ElapsedMilliseconds; url = $Url }
   } catch {
     $sw.Stop()
     return [ordered]@{ ok = $false; status = 0; ms = [int]$sw.ElapsedMilliseconds; url = $Url; error = $_.Exception.Message }
+  } finally {
+    if ($response) { $response.Dispose() }
+    if ($client) { $client.Dispose() }
   }
 }
 
@@ -155,7 +164,7 @@ $services.reality_watcher = Ensure-LoopService `
 
 $services.command_server = Ensure-PortService `
   "command_server" `
-  "http://127.0.0.1:$CommandPort/api/status?fast=1" `
+  "http://127.0.0.1:$CommandPort/api/realtime/health" `
   $backendScript `
   "-Port $CommandPort -HostName 127.0.0.1" `
   "Orangebox Backend Command Server.lnk" `
@@ -203,7 +212,7 @@ if (Test-Path -LiteralPath (Join-Path $repo "integrations\strongarm_easy_v0_4\st
 
 Start-Sleep -Seconds 2
 $finalProbes = [ordered]@{
-  command_server = Test-Http "http://127.0.0.1:$CommandPort/api/status?fast=1" 3
+  command_server = Test-Http "http://127.0.0.1:$CommandPort/api/realtime/health" 3
   api_server = Test-Http "http://127.0.0.1:$ApiPort/api/health" 3
   local_llama_listener = Test-Http "http://127.0.0.1:$LlamaPort/health" 3
   strongarm_gate = Test-Http "http://127.0.0.1:$StrongarmPort/health" 3

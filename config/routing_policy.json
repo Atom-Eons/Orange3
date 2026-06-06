@@ -1,0 +1,55 @@
+{
+  "version": "orangebox-routing-policy/v2",
+  "classifier_fields": [
+    "task_type",
+    "needs_tools",
+    "needs_current_info",
+    "needs_artifact",
+    "risk",
+    "budget_mode",
+    "required_voices"
+  ],
+  "budget_modes": {
+    "cheap": {
+      "roles": {
+        "librarian": "qwen3:4b",
+        "gremlin": "qwen3:4b",
+        "strongarm": "qwen3:4b",
+        "judgement": "qwen3:14b"
+      }
+    },
+    "normal": {
+      "roles": {
+        "librarian": "qwen3:4b",
+        "forge": "mistral-small:24b",
+        "mirror": "deepseek-r1:32b",
+        "gremlin": "dolphin3:8b",
+        "strongarm": "qwen3:4b",
+        "judgement": "qwen3:30b-a3b"
+      }
+    },
+    "deep": {
+      "roles": {
+        "librarian": "qwen3:4b",
+        "forge": "qwen2.5-coder:32b",
+        "mirror": "deepseek-r1:70b",
+        "gremlin": "llama3.1:8b-abliterated",
+        "strongarm": "qwen3:4b",
+        "judgement": "llama3.3:70b"
+      },
+      "cloud_escalation_when_local_confidence_low": ["claude-opus-4.7-max-1m", "gpt-5.5"]
+    }
+  },
+  "selection_score": "role_match + capability_score + json_reliability + receipt_success_rate + speed_score - ram_cost - token_cost - hallucination_risk - forbidden_role_penalty",
+  "wildcard_law": [
+    "Dolphin and abliterated models are allowed as Gremlin/Misfit pressure lanes.",
+    "Wildcard models may object, pressure, and expose fog.",
+    "Wildcard models may not be final Judgement, Mirror truth, policy decision, or final answer authority.",
+    "STRONGARM audits wildcard output before Judgement sees it."
+  ],
+  "receipt_learning": {
+    "enabled": true,
+    "fields": ["role", "model", "task_type", "trigger_level", "json_valid", "operator_accepted", "latency_ms", "ram_peak_gb", "notes"],
+    "minimum_runs_before_weighting": 50
+  }
+}

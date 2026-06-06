@@ -248,6 +248,9 @@ async function main() {
     readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json")) ||
     readJson(latestReceipt("orangebox-gauntlet-orangebox-full-green-") || "");
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
+  const triLaneRouter = readJson(path.join(dataRoot, "trilane", "latest-trilane-model-router.json"));
+  const gremlinDoctor = readJson(path.join(dataRoot, "misfits", "latest-gremlin-misfits-doctor.json"));
+  const soulGenome = readJson(path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"));
   const primer = path.join(dataRoot, "primers", "ORANGEBOX_MID_SESSION_PRIMER.md");
   const zeroMemoryPrimer = path.join(dataRoot, "primers", "ORANGEBOX_ZERO_MEMORY_CHAT_PRIMER.md");
 
@@ -263,6 +266,10 @@ async function main() {
       source_lock_path: path.join(dataRoot, "orangebox-source-of-truth.json"),
       mid_session_primer_path: primer,
       zero_memory_primer_path: zeroMemoryPrimer,
+      model_registry_path: path.join(repoRoot, "config", "model_registry.json"),
+      role_map_path: path.join(repoRoot, "config", "role_map.json"),
+      routing_policy_path: path.join(repoRoot, "config", "routing_policy.json"),
+      soul_genome_path: path.join(repoRoot, "config", "soul_genome.json"),
     },
     codexa_network: {
       mode: mode?.mode || "remote",
@@ -278,6 +285,8 @@ async function main() {
       "mirror current Orangebox config and primer packets",
       "run cheap heartbeat only; avoid paid APIs and heavy local generation unless requested",
       "pre-compress or summarize only when explicitly routed by Orangebox Ops",
+      "use the visible tri-lane registry; do not let a model choose its own chain",
+      "treat Dolphin and abliterated models as wildcard pressure lanes only",
       "write heartbeat receipts so user and LLM share one reality",
     ],
     lane_boundaries: {
@@ -290,6 +299,9 @@ async function main() {
       reality: reality?.status || null,
       triad: triad?.status || null,
       triad_route: triad?.route || null,
+      trilane_router: triLaneRouter?.status || null,
+      gremlin_misfits: gremlinDoctor?.status || null,
+      soul_genome: soulGenome?.status || null,
     },
   };
 

@@ -298,6 +298,9 @@ async function main() {
     atomsmasher_api_smoke: packageJson.scripts?.["atomsmasher:api-smoke"],
     atomsmasher_doctor: packageJson.scripts?.["atomsmasher:doctor"],
     strongarm_doctor: packageJson.scripts?.["strongarm:doctor"],
+    gremlin_doctor: packageJson.scripts?.["gremlin:doctor"],
+    trilane_doctor: packageJson.scripts?.["trilane:doctor"],
+    soul_doctor: packageJson.scripts?.["soul:doctor"],
     ops_readiness: packageJson.scripts?.["ops:readiness"],
   };
   const backendScriptText = Object.values(backendScripts).join("\n");
@@ -351,6 +354,9 @@ async function main() {
     ["atomsmasher:api-smoke", npmBin, ["run", "atomsmasher:api-smoke"], { timeout: 240_000 }],
     ["atomsmasher:doctor", npmBin, ["run", "atomsmasher:doctor"], { timeout: 240_000 }],
     ["strongarm:doctor", npmBin, ["run", "strongarm:doctor"], { timeout: 180_000 }],
+    ["gremlin:doctor", npmBin, ["run", "gremlin:doctor"], { timeout: 240_000 }],
+    ["trilane:doctor", npmBin, ["run", "trilane:doctor"], { timeout: 120_000 }],
+    ["soul:doctor", npmBin, ["run", "soul:doctor"], { timeout: 120_000 }],
   ];
 
   for (const [name, command, commandArgs, options] of commandPlan) {

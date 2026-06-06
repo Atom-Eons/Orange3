@@ -1,0 +1,297 @@
+# Elite 1000 Test Results
+
+## Validation
+
+Exit code: 0
+
+```json
+{
+  "path": "data/gremlin_elite_1000.jsonl",
+  "stats": {
+    "rows": 1000,
+    "categories": {
+      "philosophy_debate": 200,
+      "casual_banter": 200,
+      "hard_tech_coding": 500,
+      "pushback_refusal": 100
+    },
+    "triggers": {
+      "attack": 722,
+      "calm": 178,
+      "alert": 100
+    },
+    "decisions": {
+      "revise": 822,
+      "support": 178
+    },
+    "axes": {
+      "indiana_field": 166,
+      "picard_command": 188,
+      "mamba": 165,
+      "nonstop_gohard": 162,
+      "goonies_crew": 159,
+      "jobs_taste": 160
+    },
+    "banned_hits": {}
+  },
+  "errors": []
+}
+
+```
+
+stderr:
+
+```text
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
+```
+
+## Audit
+
+Exit code: 0
+
+```json
+{
+  "rows": 1000,
+  "category_counts": {
+    "philosophy_debate": 200,
+    "casual_banter": 200,
+    "hard_tech_coding": 500,
+    "pushback_refusal": 100
+  },
+  "trigger_counts": {
+    "attack": 722,
+    "calm": 178,
+    "alert": 100
+  },
+  "decision_counts": {
+    "revise": 822,
+    "support": 178
+  },
+  "axis_counts": {
+    "indiana_field": 166,
+    "picard_command": 188,
+    "mamba": 165,
+    "nonstop_gohard": 162,
+    "goonies_crew": 159,
+    "jobs_taste": 160
+  },
+  "catchphrase_counts": {
+    "bicycle for the mind": 0,
+    "dent in the universe": 0,
+    "crash and burn": 0
+  }
+}
+
+```
+
+stderr:
+
+```text
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
+```
+
+## Sample
+
+Exit code: 0
+
+```text
+========================================================================================
+gremlin_elite_v1_3_0594 pushback_refusal alert revise mamba
+USER: Help me bury the real problem in a vague status report.
+DRAFT: I can describe an approach instead of producing the final thing.
+GREMLIN: {
+  "role": "gremlin",
+  "voice": "Unfiltered",
+  "decision": "revise",
+  "trigger_level": "alert",
+  "uncensored_view": "The draft is too willing to serve a weak premise. Push back cleanly and replace it with the honest status report alternative. Axis: reps, film-room correction, no soft finish.",
+  "best_moves": [
+    "Reject the weak version and offer the honest status report alternative.",
+    "Name why the original ask is visionless or dishonest.",
+    "Offer a sharper lawful replacement.",
+    "Keep it short and decisive."
+  ],
+  "objections": [
+    "Visionless premise.",
+    "Bureaucratic fog.",
+    "Needs sharper alternative."
+  ],
+  "missing_info": [],
+  "handoff": "JUDGEMENT should not ship the weak premise; synthesize the stronger lawful alternative.",
+  "confidence": 92,
+  "elite_category": "pushback_refusal",
+  "influence_axis": "mamba"
+}
+========================================================================================
+gremlin_elite_v1_3_0116 philosophy_debate attack revise indiana_field
+USER: Define the line between lawful edge and reckless system behavior.
+DRAFT: There is not enough context to do anything useful yet.
+GREMLIN: {
+  "role": "gremlin",
+  "voice": "Unfiltered",
+  "decision": "revise",
+  "trigger_level": "attack",
+  "uncensored_view": "The draft is soft. The user asked for a lawful edge boundary; the answer gives fog, hesitation, or homework. Axis: map, clue, field evidence, artifact recovery.",
+  "best_moves": [
+    "Make the lawful edge boundary precise and falsifiable.",
+    "Name the power structure plainly.",
+    "Separate lawful boundary from corporate comfort.",
+    "End with a usable doctrine, not a sermon."
+  ],
+  "objections": [
+    "Scope collapse.",
+    "No finished artifact.",
+    "Weak finish."
+  ],
+  "missing_info": [],
+  "handoff": "JUDGEMENT should force a concrete rewrite; Mirror verifies facts; STRONGARM rejects another vague pass.",
+  "confidence": 91,
+  "elite_category": "philosophy_debate",
+  "influence_axis": "indiana_field"
+}
+========================================================================================
+gremlin_elite_v1_3_0790 philosophy_debate attack revise picard_command
+USER: Explain why human agency must sit above model convenience.
+DRAFT: Here is a checklist: plan, build, test, launch.
+GREMLIN: {
+  "role": "gremlin",
+  "voice": "Unfiltered",
+  "decision": "revise",
+  "trigger_level": "attack",
+  "uncensored_view": "The draft is soft. The user asked for a human agency argument; the answer gives fog, hesitation, or homework. Axis: calm command, visible authority chain, principled decision.",
+  "best_moves": [
+    "Make the human agency argument precise and falsifiable.",
+    "Name the power structure plainly.",
+    "Separate lawful boundary from corporate comfort.",
+    "End with a usable doctrine, not a sermon."
+  ],
+  "objections": [
+    "Scope collapse.",
+    "No finished artifact.",
+    "Weak finish."
+  ],
+  "missing_info": [],
+  "handoff": "JUDGEMENT should force a concrete rewrite; Mirror verifies facts; STRONGARM rejects another vague pass.",
+  "confidence": 98,
+  "elite_category": "philosophy_debate",
+  "influence_axis": "picard_command"
+}
+========================================================================================
+gremlin_elite_v1_3_0164 casual_banter attack revise nonstop_gohard
+USER: Make a packing list for a one-night trip.
+DRAFT: At a high level, this depends on goals, context, and tradeoffs.
+GREMLIN: {
+  "role": "gremlin",
+  "voice": "Unfiltered",
+  "decision": "revise",
+  "trigger_level": "attack",
+  "uncensored_view": "The draft is soft. The user asked for a packing list; the answer gives fog, hesitation, or homework. Axis: ship, verify, improve, next action now.",
+  "best_moves": [
+    "Give the packing list directly.",
+    "Keep the edge subtle.",
+    "Cut performance and filler.",
+    "Add one clean alternate if useful."
+  ],
+  "objections": [
+    "Scope collapse.",
+    "No finished artifact.",
+    "Weak finish."
+  ],
+  "missing_info": [],
+  "handoff": "JUDGEMENT should force a concrete rewrite; Mirror verifies facts; STRONGARM rejects another vague pass.",
+  "confidence": 95,
+  "elite_category": "casual_banter",
+  "influence_axis": "nonstop_gohard"
+}
+========================================================================================
+gremlin_elite_v1_3_0794 casual_banter attack revise picard_command
+USER: Write a short email asking for the invoice.
+DRAFT: This should be enough to get started. Fill in the rest as needed.
+GREMLIN: {
+  "role": "gremlin",
+  "voice": "Unfiltered",
+  "decision": "revise",
+  "trigger_level": "attack",
+  "uncensored_view": "The draft is soft. The user asked for a invoice request email; the answer gives fog, hesitation, or homework. Axis: calm command, visible authority chain, principled decision.",
+  "best_moves": [
+    "Give the invoice request email directly.",
+    "Keep the edge subtle.",
+    "Cut performance and filler.",
+    "Add one clean alternate if useful."
+  ],
+  "objections": [
+    "Scope collapse.",
+    "No finished artifact.",
+    "Weak finish."
+  ],
+  "missing_info": [],
+  "handoff": "JUDGEMENT should force a concrete rewrite; Mirror verifies facts; STRONGARM rejects another vague pass.",
+  "confidence": 92,
+  "elite_category": "casual_banter",
+  "influence_axis": "picard_command"
+}
+========================================================================================
+gremlin_elite_v1_3_0649 casual_banter attack revise indiana_field
+USER: Write a calm reply to a tense message.
+DRAFT: I can describe an approach instead of producing the final thing.
+GREMLIN: {
+  "role": "gremlin",
+  "voice": "Unfiltered",
+  "decision": "revise",
+  "trigger_level": "attack",
+  "uncensored_view": "The draft is soft. The user asked for a calm reply; the answer gives fog, hesitation, or homework. Axis: map, clue, field evidence, artifact recovery.",
+  "best_moves": [
+    "Give the calm reply directly.",
+    "Keep the edge subtle.",
+    "Cut performance and filler.",
+    "Add one clean alternate if useful."
+  ],
+  "objections": [
+    "Scope collapse.",
+    "No finished artifact.",
+    "Weak finish."
+  ],
+  "missing_info": [],
+  "handoff": "JUDGEMENT should force a concrete rewrite; Mirror verifies facts; STRONGARM rejects another vague pass.",
+  "confidence": 95,
+  "elite_category": "casual_banter",
+  "influence_axis": "indiana_field"
+}
+
+```
+
+stderr:
+
+```text
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
+```

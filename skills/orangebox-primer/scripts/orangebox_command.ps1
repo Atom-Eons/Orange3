@@ -1,0 +1,179 @@
+param(
+  [Parameter(Position = 0)]
+  [string]$Command = "help",
+  [switch]$Json
+)
+
+$ErrorActionPreference = "Continue"
+$repo = $env:ORANGEBOX_REPO_ROOT
+if (-not $repo) {
+  $finalRepo = "C:\AtomEons\orangebox\finals\Orangebox Delta Final"
+  if (Test-Path -LiteralPath $finalRepo) { $repo = $finalRepo }
+  else { $repo = "C:\AtomEons\orangebox-delta" }
+}
+$dataRoot = if ($env:ORANGEBOX_DATA_ROOT) { $env:ORANGEBOX_DATA_ROOT } else { Join-Path $env:USERPROFILE "OrangeBox-Data" }
+$receiptRoot = Join-Path $dataRoot "skill-command-receipts"
+$stamp = (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ")
+
+$commands = [ordered]@{
+  "help" = @{
+    kind = "local"
+    description = "List real Orangebox skill commands."
+  }
+  "badge" = @{
+    kind = "powershell"
+    file = "skills\orangebox-primer\scripts\orangebox_session_badge.ps1"
+    args = @()
+    description = "Show orange OB0X ON badge and write badge receipt."
+  }
+  "system-check" = @{
+    kind = "powershell"
+    file = "skills\orangebox-primer\scripts\orangebox_system_check.ps1"
+    args = @()
+    description = "Read local Orangebox proof state without refreshing."
+  }
+  "system-refresh" = @{
+    kind = "powershell"
+    file = "skills\orangebox-primer\scripts\orangebox_system_check.ps1"
+    args = @("-Refresh")
+    description = "Refresh lightweight Orangebox proof receipts."
+  }
+  "backend-proof" = @{
+    kind = "npm"
+    args = @("run", "backend:proof")
+    description = "Run backend build/test/proof chain."
+  }
+  "health-report" = @{
+    kind = "npm"
+    args = @("run", "health:report")
+    description = "Generate full dev + AI Box health report."
+  }
+  "project-report" = @{
+    kind = "npm"
+    args = @("run", "project:report")
+    description = "Generate full Orangebox project scope/reality report."
+  }
+  "ops-readiness" = @{
+    kind = "npm"
+    args = @("run", "ops:readiness")
+    description = "Verify Ops rails, primers, services, datasets, and package proofs."
+  }
+  "reality-watch" = @{
+    kind = "npm"
+    args = @("run", "reality:watch")
+    description = "Report actual reachable rails and warnings."
+  }
+  "strongarm-doctor" = @{
+    kind = "npm"
+    args = @("run", "strongarm:doctor")
+    description = "Verify STRONGARM pressure gate."
+  }
+  "gremlin-doctor" = @{
+    kind = "npm"
+    args = @("run", "gremlin:doctor")
+    description = "Verify Misfits/Gremlin elite packet dataset and trainer handoff."
+  }
+  "trilane-doctor" = @{
+    kind = "npm"
+    args = @("run", "trilane:doctor")
+    description = "Verify local model registry, role map, and routing policy."
+  }
+  "soul-doctor" = @{
+    kind = "npm"
+    args = @("run", "soul:doctor")
+    description = "Verify SOUL GENOME continuity map."
+  }
+  "obox2-pack" = @{
+    kind = "npm"
+    args = @("run", "obox2:pack")
+    description = "Build Orangebox V2 Internal setup zip into Downloads."
+  }
+  "obox2-doctor" = @{
+    kind = "npm"
+    args = @("run", "obox2:doctor")
+    description = "Expand and verify the Orangebox V2 setup zip without installing."
+  }
+  "openclaw-retire-dry" = @{
+    kind = "npm"
+    args = @("run", "openclaw:retire:dry")
+    description = "Dry-run surgical OpenClaw startup retirement."
+  }
+  "openclaw-retire" = @{
+    kind = "npm"
+    args = @("run", "openclaw:retire")
+    description = "Move OpenClaw startup hooks to backup, stop OpenClaw processes, and show popup."
+  }
+}
+
+function Write-Orange($Text) {
+  $esc = [char]27
+  if ($Host.UI.SupportsVirtualTerminal) {
+    Write-Host "$esc[38;2;255;122;0m$Text$esc[0m"
+  } else {
+    Write-Host $Text -ForegroundColor DarkYellow
+  }
+}
+
+function Emit-Help {
+  Write-Orange "ORANGEBOX VERSION 1 | OB0X COMMANDS | REAL ACTIONS"
+  foreach ($name in $commands.Keys) {
+    $desc = $commands[$name].description
+    Write-Host ("  {0,-20} {1}" -f $name, $desc)
+  }
+}
+
+if (-not $commands.Contains($Command)) {
+  Emit-Help
+  Write-Host ""
+  Write-Host "Unknown command: $Command" -ForegroundColor Red
+  exit 2
+}
+
+if ($Command -eq "help") {
+  Emit-Help
+  exit 0
+}
+
+$spec = $commands[$Command]
+$started = Get-Date
+$output = @()
+$exitCode = 0
+
+Push-Location $repo
+try {
+  if ($spec.kind -eq "npm") {
+    $output = & npm.cmd @($spec.args) 2>&1
+    $exitCode = $LASTEXITCODE
+  } elseif ($spec.kind -eq "powershell") {
+    $file = Join-Path $repo $spec.file
+    $output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $file @($spec.args) 2>&1
+    $exitCode = $LASTEXITCODE
+  }
+} finally {
+  Pop-Location
+}
+
+New-Item -ItemType Directory -Force -Path $receiptRoot | Out-Null
+$result = [ordered]@{
+  ok = ($exitCode -eq 0)
+  command = $Command
+  repo = $repo
+  started_at = $started.ToUniversalTime().ToString("o")
+  finished_at = (Get-Date).ToUniversalTime().ToString("o")
+  exit_code = $exitCode
+  tail = (($output | Select-Object -Last 30) -join "`n")
+}
+$receiptPath = Join-Path $receiptRoot "orangebox-skill-command-$Command-$stamp.json"
+$result.receipt_path = $receiptPath
+$result | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $receiptPath -Encoding UTF8
+
+if ($Json) {
+  $result | ConvertTo-Json -Depth 8
+} else {
+  Write-Orange "ORANGEBOX COMMAND: $Command"
+  Write-Host (($output | Select-Object -Last 80) -join "`n")
+  Write-Host ""
+  Write-Host "Receipt: $receiptPath" -ForegroundColor DarkGray
+}
+
+if ($exitCode -ne 0) { exit $exitCode }

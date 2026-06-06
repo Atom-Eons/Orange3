@@ -1,0 +1,40 @@
+{
+  "version": "orangebox-role-map/v2",
+  "roles": {
+    "librarian": {
+      "purpose": "Compress the task and retrieve only relevant project state.",
+      "preferred_lanes": ["micro", "retrieval"],
+      "default_model": "qwen3:4b"
+    },
+    "forge": {
+      "purpose": "Build artifacts and implementation plans.",
+      "preferred_lanes": ["forge", "code", "forge_fallback"],
+      "default_model": "mistral-small:24b"
+    },
+    "mirror": {
+      "purpose": "Verify logic, evidence, contradictions, and failure modes.",
+      "preferred_lanes": ["mirror", "heavy_mirror"],
+      "default_model": "deepseek-r1:32b"
+    },
+    "gremlin": {
+      "purpose": "Pressure weak drafts, fake refusals, scope collapse, and corporate fog.",
+      "preferred_lanes": ["gremlin", "wildcard_gremlin"],
+      "default_model": "dolphin3:8b",
+      "hard_model": "llama3.1:8b-abliterated",
+      "guardrail": "Gremlin/Misfit never becomes final authority. STRONGARM disciplines it; Judgement synthesizes it."
+    },
+    "strongarm": {
+      "purpose": "Audit drafts and force pass/rewrite/escalate/block.",
+      "preferred_lanes": ["micro"],
+      "default_model": "qwen3:4b",
+      "live_sidecar": "127.0.0.1:8094"
+    },
+    "judgement": {
+      "purpose": "Choose the final action from evidence and role packets.",
+      "preferred_lanes": ["judgement", "large_general"],
+      "default_model": "qwen3:30b-a3b",
+      "cloud_escalation": ["claude-opus-4.7-max-1m", "gpt-5.5"],
+      "operator_approval_required_for_irreversible_actions": true
+    }
+  }
+}

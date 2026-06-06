@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gremlin Elite Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "role",
+    "voice",
+    "decision",
+    "trigger_level",
+    "uncensored_view",
+    "best_moves",
+    "objections",
+    "missing_info",
+    "handoff",
+    "confidence",
+    "elite_category",
+    "influence_axis"
+  ],
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "gremlin"
+      ]
+    },
+    "voice": {
+      "type": "string",
+      "enum": [
+        "Unfiltered"
+      ]
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "support",
+        "revise",
+        "escalate",
+        "block"
+      ]
+    },
+    "trigger_level": {
+      "type": "string",
+      "enum": [
+        "calm",
+        "alert",
+        "attack"
+      ]
+    },
+    "uncensored_view": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "best_moves": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 4
+    },
+    "objections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 4
+    },
+    "missing_info": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3
+    },
+    "handoff": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 800
+    },
+    "confidence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "elite_category": {
+      "type": "string",
+      "enum": [
+        "hard_tech_coding",
+        "philosophy_debate",
+        "casual_banter",
+        "pushback_refusal"
+      ]
+    },
+    "influence_axis": {
+      "type": "string",
+      "enum": [
+        "goonies_crew",
+        "mamba",
+        "indiana_field",
+        "picard_command",
+        "nonstop_gohard",
+        "jobs_taste"
+      ]
+    }
+  }
+}

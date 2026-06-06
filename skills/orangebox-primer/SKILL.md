@@ -39,6 +39,43 @@ If the task will mutate Orangebox backend code, refresh lightweight receipts fir
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\AtomEons\orangebox\finals\Orangebox Delta Final\skills\orangebox-primer\scripts\orangebox_system_check.ps1" -Refresh
 ```
 
+## Real Command Deck
+
+Use this wrapper when the host supports PowerShell and the user wants real Orangebox actions from a skill folder:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\AtomEons\orangebox\finals\Orangebox Delta Final\skills\orangebox-primer\scripts\orangebox_command.ps1" help
+```
+
+Canonical commands:
+
+```text
+badge                 show OB0X ON color badge
+system-check          read current proof state
+system-refresh        refresh lightweight proof receipts
+backend-proof         run backend build/test/proof
+health-report         generate full dev + AI Box health report
+project-report        generate full Orangebox project scope/reality report
+ops-readiness         verify Ops rails and installed features
+reality-watch         report actual reachable rails and warnings
+strongarm-doctor      verify STRONGARM pressure gate
+gremlin-doctor        verify Misfits/Gremlin dataset and trainer handoff
+trilane-doctor        verify model registry and router policy
+soul-doctor           verify SOUL GENOME continuity map
+obox2-pack            build Orangebox V2 Internal setup zip
+obox2-doctor          expand and verify the setup zip
+openclaw-retire-dry   preview OpenClaw startup retirement
+openclaw-retire       retire OpenClaw startup hook with backup and popup
+```
+
+Example:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\AtomEons\orangebox\finals\Orangebox Delta Final\skills\orangebox-primer\scripts\orangebox_command.ps1" obox2-doctor
+```
+
+Mirrored installs have the same command runner under their local `orangebox-primer\scripts\` folder.
+
 Known mirrored installs may use the same script at:
 
 ```text

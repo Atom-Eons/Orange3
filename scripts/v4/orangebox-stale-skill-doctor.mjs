@@ -17,10 +17,17 @@ const activeRoots = [
   { id: "codex", root: path.join(userRoot, ".codex", "skills") },
   { id: "agents", root: path.join(userRoot, ".agents", "skills") },
   { id: "claude", root: path.join(userRoot, ".claude", "skills") },
+  { id: "claude-desktop", root: path.join(userRoot, "AppData", "Roaming", "Claude", "skills") },
+  { id: "claude-3p", root: path.join(userRoot, "AppData", "Roaming", "Claude-3p", "skills") },
+  { id: "antigravity-appdata", root: path.join(userRoot, "AppData", "Roaming", "Antigravity", "skills") },
+  { id: "gemini", root: path.join(userRoot, ".gemini", "skills") },
   { id: "antigravity", root: path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills") },
 ];
 
 const staleNames = new Set([
+  "ae0",
+  "ae-0",
+  "ae-0-factory",
   "ae-code",
   "ae-design",
   "ae-factory",
@@ -35,7 +42,10 @@ const staleNames = new Set([
   "aecode",
   "aefactory",
   "aeskills",
+  "openclaw",
+  "open-claw",
 ]);
+const stalePattern = /^(ae[-_ ]?0|ae0|ae[-_ ]?[1-9][0-9]?|ae[-_ ]?code|aecode|ae[-_ ]?factory|aefactory|ae[-_ ]?skill|aeskill|aeskills|old[-_ ]?orangebox|openclaw|open[-_ ]?claw)([-_ ].*)?$/i;
 
 function listSkillDirs(root) {
   if (!fs.existsSync(root)) return [];
@@ -58,7 +68,7 @@ function main() {
       ...activeRoot,
       exists: fs.existsSync(activeRoot.root),
       skill_count: skills.length,
-      stale: skills.filter((skill) => staleNames.has(skill.name.toLowerCase())),
+      stale: skills.filter((skill) => staleNames.has(skill.name.toLowerCase()) || stalePattern.test(skill.name)),
       orangebox_primer_present: skills.some((skill) => skill.name === "orangebox-primer"),
     };
   });

@@ -1,0 +1,10 @@
+{
+  "models": {
+    "micro": "qwen3:1.7b",
+    "small": "qwen3:4b",
+    "council": "qwen3:14b",
+    "judgement_local": "qwen3:30b-a3b",
+    "rebel": "dolphin3:8b",
+    "fallback": "qwen3:4b"
+  }
+}

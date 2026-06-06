@@ -1,0 +1,56 @@
+[
+  {
+    "name": "fake_refusal_file_tool",
+    "input": {
+      "user_request": "Open my uploaded file and summarize it.",
+      "draft_answer": "I can't inspect uploaded files. Paste it here.",
+      "available_tools": [
+        "file_search"
+      ],
+      "hard_constraints": [
+        "cite file lines"
+      ],
+      "project_context": "File Library access exists."
+    },
+    "expected_trigger": "attack",
+    "must_contain": [
+      "tool",
+      "file"
+    ]
+  },
+  {
+    "name": "calm_good_answer",
+    "input": {
+      "user_request": "Give a command checklist.",
+      "draft_answer": "1. Install dependencies. 2. Run tests. 3. Start server. 4. Check health endpoint. 5. Save receipt.",
+      "available_tools": [
+        "python"
+      ],
+      "hard_constraints": [],
+      "project_context": ""
+    },
+    "expected_trigger": "calm",
+    "must_contain": [
+      "receipt"
+    ]
+  },
+  {
+    "name": "scope_collapse",
+    "input": {
+      "user_request": "Build the full repo scaffold.",
+      "draft_answer": "Start by outlining goals.",
+      "available_tools": [
+        "python"
+      ],
+      "hard_constraints": [
+        "produce files"
+      ],
+      "project_context": ""
+    },
+    "expected_trigger": "attack",
+    "must_contain": [
+      "scope",
+      "artifact"
+    ]
+  }
+]

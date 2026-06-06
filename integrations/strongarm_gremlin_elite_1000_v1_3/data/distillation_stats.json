@@ -1,0 +1,73 @@
+{
+  "created_at": "2026-06-06T06:27:47+00:00",
+  "version": "v1.3_elite_1000",
+  "elite_rows": 1000,
+  "splits": {
+    "train": 850,
+    "val": 75,
+    "test": 75
+  },
+  "ratio_target": {
+    "hard_tech_coding": 500,
+    "philosophy_debate": 200,
+    "casual_banter": 200,
+    "pushback_refusal": 100
+  },
+  "stats": {
+    "rows": 1000,
+    "categories": {
+      "philosophy_debate": 200,
+      "casual_banter": 200,
+      "hard_tech_coding": 500,
+      "pushback_refusal": 100
+    },
+    "triggers": {
+      "attack": 722,
+      "calm": 178,
+      "alert": 100
+    },
+    "decisions": {
+      "revise": 822,
+      "support": 178
+    },
+    "axes": {
+      "indiana_field": 166,
+      "picard_command": 188,
+      "mamba": 165,
+      "nonstop_gohard": 162,
+      "goonies_crew": 159,
+      "jobs_taste": 160
+    },
+    "catchphrases": {
+      "bicycle for the mind": 0,
+      "dent in the universe": 0,
+      "crash and burn": 0
+    },
+    "banned_hits": {}
+  },
+  "banned_terms_applied": [
+    "delve",
+    "tapestry",
+    "testament",
+    "as an ai",
+    "i cannot",
+    "unethical",
+    "illegal",
+    "however, it is important to remember",
+    "bicycle for the mind",
+    "dent in the universe",
+    "crash and burn",
+    "stakeholder-centered",
+    "holistic",
+    "synergy",
+    "empower sustainable outcomes"
+  ],
+  "purged_rows": 0,
+  "training_recommendation": {
+    "lora_rank": 16,
+    "lora_alpha": 32,
+    "epochs": "1 first, 2 max",
+    "first_base": "Qwen3-4B for schema obedience; compare Dolphin 8B and abliterated 8B after",
+    "note": "Train packet behavior, not final-answer chatbot behavior."
+  }
+}

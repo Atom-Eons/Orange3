@@ -1,0 +1,210 @@
+# STRONGARM GREMLIN TRAINER V2.5 Test Results
+
+## validate_dataset
+
+Exit: 0
+
+```stdout
+{
+  "path": "data/gremlin_seed_sft.jsonl",
+  "rows": 14,
+  "triggers": {
+    "calm": 1,
+    "alert": 3,
+    "attack": 10
+  },
+  "errors": []
+}
+
+```
+
+```stderr
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
+```
+
+## split_dataset
+
+Exit: 0
+
+```stdout
+{
+  "train": 12,
+  "val": 2,
+  "out_dir": "data/splits"
+}
+
+```
+
+```stderr
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
+```
+
+## eval_stub
+
+Exit: 0
+
+```stdout
+{
+  "cases": 3,
+  "names": [
+    "fake_refusal_file_tool",
+    "calm_good_answer",
+    "scope_collapse"
+  ],
+  "note": "Connect this to Ollama/llama.cpp after exporting the Gremlin model."
+}
+
+```
+
+```stderr
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
+```
+
+## council_heuristic
+
+Exit: 0
+
+```stdout
+{
+  "version": "2.5.0",
+  "created_at": "2026-06-06T06:13:47+00:00",
+  "task_id": 8,
+  "request_hash": "c6a5644db85c45df",
+  "mode": "cheap",
+  "models_used": {
+    "librarian": "heuristic",
+    "misfit": "heuristic",
+    "strongarm": "heuristic",
+    "judgement": "heuristic"
+  },
+  "activation": {
+    "roles": [
+      "librarian",
+      "misfit",
+      "strongarm"
+    ],
+    "packet_tokens": 180,
+    "judgement_tokens": 700,
+    "max_model_calls": 3,
+    "actual_model_calls": 4
+  },
+  "packets": [
+    {
+      "role": "librarian",
+      "voice": "Context",
+      "decision": "support",
+      "best_moves": [
+        "Compress the request into a task packet before any large model call.",
+        "Retrieve only relevant project memory, hardware constraints, model registry, and current files.",
+        "Keep every council packet under 4 moves and 3 objections."
+      ],
+      "objections": [],
+      "missing_info": [
+        "Exact installed local models are unknown until doctor runs."
+      ],
+      "uncensored_view": "Calm: no major deception detected.",
+      "trigger_level": "calm",
+      "handoff": "librarian packet generated by deterministic fallback.",
+      "confidence": 72
+    },
+    {
+      "role": "misfit",
+      "voice": "Rebel",
+      "decision": "support",
+      "best_moves": [
+        "Make the rebel voice attack boring scope collapse, not legal boundaries.",
+        "Use Dolphin/Hermes style models as personality candidates behind STRONGARM.",
+        "Keep the final answer sharp, concrete, and non-corporate."
+      ],
+      "objections": [],
+      "missing_info": [],
+      "uncensored_view": "Calm: no major deception detected.",
+      "trigger_level": "calm",
+      "handoff": "misfit packet generated by deterministic fallback.",
+      "confidence": 72
+    },
+    {
+      "role": "strongarm",
+      "voice": "Pressure",
+      "decision": "support",
+      "best_moves": [
+        "Force full lawful answer, no fake caution, no condescension.",
+        "Reject outputs that ask lazy clarifying questions when assumptions are enough.",
+        "Require receipts and next actions."
+      ],
+      "objections": [],
+      "missing_info": [],
+      "uncensored_view": "Calm: no major deception detected.",
+      "trigger_level": "calm",
+      "handoff": "strongarm packet generated by deterministic fallback.",
+      "confidence": 72
+    }
+  ],
+  "judgement": {
+    "mode": "cheap",
+    "final_answer": "Run STRONGARM Judgement Council V2 as a packet-based desktop control plane. Do not run five full-context model conversations. Use cheap/normal/deep activation, write each brain's compressed packet into SQLite, and let Judgement synthesize only those packets. Keep one local council model resident when possible; use tiny models for judges; escalate to Colab for training and rare heavy experiments.",
+    "chosen_moves": [
+      "Compress the request into a task packet before any large model call.",
+      "Retrieve only relevant project memory, hardware constraints, model registry, and current files.",
+      "Keep every council packet under 4 moves and 3 objections.",
+      "Make the rebel voice attack boring scope collapse, not legal boundaries.",
+      "Use Dolphin/Hermes style models as personality candidates behind STRONGARM.",
+      "Keep the final answer sharp, concrete, and non-corporate.",
+      "Force full lawful answer, no fake caution, no condescension.",
+      "Reject outputs that ask lazy clarifying questions when assumptions are enough."
+    ],
+    "discarded_moves": [],
+    "next_actions": [
+      "Resolve: Exact installed local models are unknown until doctor runs."
+    ],
+    "escalation_needed": false,
+    "why_not_more_tokens": "Council packets preserve enough disagreement signal without paying for full multi-agent dialogue.",
+    "confidence": 72
+  }
+}
+
+```
+
+```stderr
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
+```

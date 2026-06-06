@@ -56,6 +56,18 @@ function main() {
   const atomSmasherToolMerge = readJson(atomSmasherToolMergePath);
   const strongarmDoctorPath = path.join(dataRoot, "strongarm", "latest-strongarm-doctor.json");
   const strongarmDoctor = readJson(strongarmDoctorPath);
+  const gremlinDoctorPath = path.join(dataRoot, "misfits", "latest-gremlin-misfits-doctor.json");
+  const gremlinDoctor = readJson(gremlinDoctorPath);
+  const triLaneRouterPath = path.join(dataRoot, "trilane", "latest-trilane-model-router.json");
+  const triLaneRouter = readJson(triLaneRouterPath);
+  const obox2PackPath = path.join(dataRoot, "obox2", "latest-internal-setup-pack.json");
+  const obox2Pack = readJson(obox2PackPath);
+  const obox2DoctorPath = path.join(dataRoot, "obox2", "latest-package-doctor.json");
+  const obox2Doctor = readJson(obox2DoctorPath);
+  const soulGenomePath = path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json");
+  const soulGenome = readJson(soulGenomePath);
+  const openclawRetirementPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
+  const openclawRetirement = readJson(openclawRetirementPath);
   const opsServicesPath = path.join(dataRoot, "services", "latest-ops-services.json");
   const opsServices = readJson(opsServicesPath);
   const midSessionPrimerPath = path.join(dataRoot, "primers", "ORANGEBOX_MID_SESSION_PRIMER.md");
@@ -179,6 +191,50 @@ function main() {
       status: strongarmDoctor?.status || null,
       integration_root: strongarmDoctor?.integration_root || path.join(repoRoot, "integrations", "strongarm_easy_v0_4"),
       default_mode: strongarmDoctor?.project_gate_policy?.default_mode || null,
+    },
+    gremlin_misfits_elite: {
+      ok: gremlinDoctor?.ok === true && gremlinDoctor?.status === "GREMLIN_MISFITS_ELITE_GREEN",
+      path: gremlinDoctorPath,
+      status: gremlinDoctor?.status || null,
+      trainer_root: gremlinDoctor?.trainer_root || path.join(repoRoot, "integrations", "strongarm_gremlin_trainer_v2_5"),
+      elite_root: gremlinDoctor?.elite_root || path.join(repoRoot, "integrations", "strongarm_gremlin_elite_1000_v1_3"),
+      training_status: gremlinDoctor?.training?.status || null,
+      rows: gremlinDoctor?.elite_proof?.rows || null,
+    },
+    trilane_router: {
+      ok: triLaneRouter?.ok === true && triLaneRouter?.status === "TRILANE_ROUTER_PACK_GREEN",
+      path: triLaneRouterPath,
+      status: triLaneRouter?.status || null,
+      local_config_ready: triLaneRouter?.install_status?.local_config_ready || false,
+      codexa_status_note: triLaneRouter?.codexa_status_note || null,
+    },
+    obox2_internal_setup_pack: {
+      ok: obox2Pack?.ok === true && obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN" && exists(obox2Pack?.zip_path || ""),
+      path: obox2PackPath,
+      status: obox2Pack?.status || null,
+      zip_path: obox2Pack?.zip_path || null,
+      note: "Codexa model installs are operator-run on the AI Box; this check proves the setup pack exists.",
+    },
+    obox2_package_doctor: {
+      ok: obox2Doctor?.ok === true && obox2Doctor?.status === "OBOX2_PACKAGE_VERIFIED_GREEN",
+      path: obox2DoctorPath,
+      status: obox2Doctor?.status || null,
+      zip_path: obox2Doctor?.zip_path || null,
+      note: "Validates the zip shape without installing models or services.",
+    },
+    soul_genome_knowledge_map: {
+      ok: soulGenome?.ok === true && soulGenome?.status === "SOUL_GENOME_KNOWLEDGE_MAP_GREEN",
+      path: soulGenomePath,
+      status: soulGenome?.status || null,
+      decision: soulGenome?.decision || null,
+      layer_count: soulGenome?.layers?.length || 0,
+    },
+    openclaw_startup_retired: {
+      ok: openclawRetirement?.status === "OPENCLAW_STARTUP_RETIRED",
+      path: openclawRetirementPath,
+      status: openclawRetirement?.status || null,
+      applied: openclawRetirement?.applied || false,
+      note: "OpenClaw should not start on boot after this retirement receipt.",
     },
     bookmaker_deferred: {
       ok: !exists(path.join(repoRoot, "scripts", "v4", "bookmaker-documentarian.mjs")),

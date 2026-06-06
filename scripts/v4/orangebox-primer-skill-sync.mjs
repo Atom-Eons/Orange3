@@ -31,21 +31,18 @@ const fixedTargets = [
   { id: "orangebox-repo", app: "Orangebox repo mirror", dir: path.join(repoRoot, "skills", "orangebox-primer"), type: "skill" },
 ];
 
-const legacyActiveSkills = [
-  path.join(userRoot, ".codex", "skills", "ae-factory"),
-  path.join(userRoot, ".agents", "skills", "ae-factory"),
-  path.join(userRoot, ".claude", "skills", "ae-code"),
-  path.join(userRoot, ".claude", "skills", "ae-design"),
-  path.join(userRoot, ".claude", "skills", "ae-factory"),
-  path.join(userRoot, ".claude", "skills", "ae-launch"),
-  path.join(userRoot, ".claude", "skills", "ae-legal"),
-  path.join(userRoot, ".claude", "skills", "ae-marketing"),
-  path.join(userRoot, ".claude", "skills", "ae-ops"),
-  path.join(userRoot, ".claude", "skills", "ae-product"),
-  path.join(userRoot, ".claude", "skills", "ae-researcher"),
-  path.join(userRoot, ".claude", "skills", "ae-review-panel"),
-  path.join(userRoot, ".claude", "skills", "ae-sales"),
+const legacySkillRoots = [
+  path.join(userRoot, ".codex", "skills"),
+  path.join(userRoot, ".agents", "skills"),
+  path.join(userRoot, ".claude", "skills"),
+  path.join(appData, "Claude", "skills"),
+  path.join(appData, "Claude-3p", "skills"),
+  path.join(appData, "Antigravity", "skills"),
+  path.join(userRoot, ".gemini", "skills"),
+  path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills"),
 ];
+
+const staleSkillPattern = /^(ae[-_ ]?0|ae0|ae[-_ ]?[1-9][0-9]?|ae[-_ ]?code|aecode|ae[-_ ]?factory|aefactory|ae[-_ ]?skill|aeskill|aeskills|old[-_ ]?orangebox|openclaw|open[-_ ]?claw)([-_ ].*)?$/i;
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -78,6 +75,11 @@ function moveLegacySkill(source) {
     path.join(userRoot, ".codex", "skills").toLowerCase(),
     path.join(userRoot, ".agents", "skills").toLowerCase(),
     path.join(userRoot, ".claude", "skills").toLowerCase(),
+    path.join(appData, "Claude", "skills").toLowerCase(),
+    path.join(appData, "Claude-3p", "skills").toLowerCase(),
+    path.join(appData, "Antigravity", "skills").toLowerCase(),
+    path.join(userRoot, ".gemini", "skills").toLowerCase(),
+    path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills").toLowerCase(),
   ];
   if (!allowedRoots.some((root) => lower.startsWith(root))) {
     throw new Error(`Refusing to move unexpected path: ${source}`);
@@ -88,6 +90,20 @@ function moveLegacySkill(source) {
   ensureDir(path.dirname(destination));
   fs.renameSync(source, destination);
   return { source, destination };
+}
+
+function discoverLegacySkills() {
+  const found = [];
+  for (const root of legacySkillRoots) {
+    if (!exists(root)) continue;
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (entry.name === "orangebox-primer") continue;
+      if (!staleSkillPattern.test(entry.name)) continue;
+      found.push(path.join(root, entry.name));
+    }
+  }
+  return [...new Set(found.map((item) => path.resolve(item)))];
 }
 
 function installedAppHints() {
@@ -194,6 +210,7 @@ function main() {
     throw new Error(`Missing canonical repo orangebox-primer skill: ${canonical}`);
   }
 
+  const legacyActiveSkills = discoverLegacySkills();
   const movedLegacy = legacyActiveSkills.map(moveLegacySkill).filter(Boolean);
   const synced = [];
   for (const target of fixedTargets) {

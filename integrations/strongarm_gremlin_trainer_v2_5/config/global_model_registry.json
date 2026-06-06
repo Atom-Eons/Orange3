@@ -1,0 +1,142 @@
+{
+  "version": "2.4.0",
+  "purpose": "Global model routing registry for STRONGARM Council on GTi15.",
+  "hardware_assumption": {
+    "ram_total_gb": 98,
+    "practical_model_ram_ceiling_gb": "50-60",
+    "strategy": "one heavy model active at a time; tiny judges and packet routing always on"
+  },
+  "lanes": {
+    "judgement_cloud_frontier": [
+      {
+        "name": "OpenAI GPT-5.5 / GPT-5.5 Pro",
+        "role": "Judgement 5.5, hardest synthesis, code/research/document-heavy work",
+        "local": false,
+        "when_to_use": "only when local Judgement confidence is low or task value is high"
+      },
+      {
+        "name": "Claude Opus/Sonnet 4.x / Mythos if available",
+        "role": "long-horizon agent, coding, computer-use, dense writing",
+        "local": false,
+        "when_to_use": "large project planning, long codebase audit, elegant writing"
+      },
+      {
+        "name": "Gemini 3 / 3.1 Pro or Flash",
+        "role": "multimodal, search-grounded, URL/context/tool-rich reasoning",
+        "local": false,
+        "when_to_use": "multimodal, Google-grounded, large context work"
+      },
+      {
+        "name": "xAI Grok",
+        "role": "X/realtime/social/contextual lane",
+        "local": false,
+        "when_to_use": "current social/web/X-native work if connected"
+      }
+    ],
+    "judgement_local": [
+      {
+        "name": "Qwen3-30B-A3B-Thinjudgement-2507",
+        "role": "local Judgement reasoning",
+        "local": true,
+        "fit": "excellent for 50-60GB practical ceiling in quantized form"
+      },
+      {
+        "name": "Qwen3-30B-A3B-Instruct-2507",
+        "role": "local Judgement non-thinjudgement fast synthesis",
+        "local": true,
+        "fit": "good when you need direct outputs instead of reasoning mode"
+      },
+      {
+        "name": "Nous Hermes-4.3-36B",
+        "role": "rebel Judgement / agency / writing / hybrid reasoning",
+        "local": true,
+        "fit": "test Q4/Q5 quant; likely near top end of practical local ceiling"
+      },
+      {
+        "name": "DeepSeek-R1-Distill-Qwen-32B",
+        "role": "raw reasoning / math / logic / hard contradiction solving",
+        "local": true,
+        "fit": "strong local reasoner; watch verbosity and loops"
+      },
+      {
+        "name": "Mistral-Small-3.2-24B-Instruct-2506",
+        "role": "Forge/council/fast strong local all-rounder",
+        "local": true,
+        "fit": "very good 24B desktop lane"
+      }
+    ],
+    "rebel_and_abliterated": [
+      {
+        "name": "Dolphin3.0-Llama3.1-8B",
+        "role": "soft Rebel / local agentic generalist",
+        "local": true,
+        "authority": "pressure only"
+      },
+      {
+        "name": "Dolphin3.0-R1-Mistral-24B",
+        "role": "heavier Rebel with reasoning traces",
+        "local": true,
+        "authority": "pressure only"
+      },
+      {
+        "name": "mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF",
+        "role": "Abliterated Rebel packet generator",
+        "local": true,
+        "authority": "pressure only; never final"
+      },
+      {
+        "name": "failspy/Llama-3-8B-Instruct-abliterated",
+        "role": "Abliterated baseline / refusal-vector test",
+        "local": true,
+        "authority": "pressure only; never final"
+      },
+      {
+        "name": "mlabonne/gemma-3-27b-it-abliterated",
+        "role": "larger abliterated Rebel test",
+        "local": true,
+        "authority": "pressure only; never final"
+      },
+      {
+        "name": "DavidAU Heretic / Qwen3 abliterated family",
+        "role": "hardest Rebel pressure experiments",
+        "local": true,
+        "authority": "sandbox only until evaluated"
+      },
+      {
+        "name": "Ollama huihui_ai/qwen3.5-abliterated / richardyoung/qwen3-14b-abliterated",
+        "role": "Ollama-side abliterated trials",
+        "local": true,
+        "authority": "pressure only; never final"
+      }
+    ],
+    "micro_judges": [
+      {
+        "name": "Qwen3 1.7B / Qwen3 4B",
+        "role": "cheap judge, router, classifier, STRONGARM packet"
+      },
+      {
+        "name": "SmolLM3-3B",
+        "role": "small long-context judge"
+      },
+      {
+        "name": "Phi-4-mini-instruct",
+        "role": "128K-context lightweight reasoning judge"
+      }
+    ],
+    "training_colab": [
+      {
+        "name": "Qwen3 4B / 8B / 14B LoRA",
+        "role": "first SFT/LoRA for STRONGARM packets"
+      },
+      {
+        "name": "Dolphin or abliterated LoRA experiments",
+        "role": "Misfit style tuning only, not boundary or truth layer"
+      },
+      {
+        "name": "Hermes/Qwen/Mistral distill",
+        "role": "Judgement/Forge distillation once receipts exist"
+      }
+    ]
+  },
+  "hard_rule": "Abliterated models can generate Rebel pressure packets. Mirror and STRONGARM must verify. Judgement decides. Abliterated output never ships raw."
+}

@@ -1,0 +1,330 @@
+{
+  "version": "2.4.0",
+  "name": "MISFITS SET",
+  "doctrine": "All non-normal, not-locked-down, anti-generic local models live here. They generate pressure packets only. They do not ship raw final answers.",
+  "authority_rule": "Misfits suggest. Mirror verifies. STRONGARM disciplines. Judgement decides.",
+  "runtime_lanes": {
+    "soft_rebels": {
+      "purpose": "Less corporate local assistants; good first Misfit lane.",
+      "ship_raw_allowed": false,
+      "models": [
+        {
+          "id": "dphn/Dolphin3.0-Llama3.1-8B",
+          "type": "uncensored/local generalist",
+          "size": "8B",
+          "best_for": [
+            "agentic local work",
+            "function calling pressure",
+            "anti-generic rewrites"
+          ],
+          "start_priority": 1,
+          "runner_hint": "HF, GGUF variants, LM Studio, Ollama-compatible conversions"
+        },
+        {
+          "id": "dphn/Dolphin3.0-R1-Mistral-24B",
+          "type": "reasoning rebel",
+          "size": "24B",
+          "best_for": [
+            "harder rebel reasoning",
+            "implementation pressure",
+            "creative strategy"
+          ],
+          "start_priority": 3,
+          "runner_hint": "GGUF/quant if available"
+        },
+        {
+          "id": "NousResearch/Hermes-4.3-36B",
+          "type": "rebel/high-agency generalist",
+          "size": "36B",
+          "best_for": [
+            "Judgement candidate",
+            "long writing",
+            "agency",
+            "hybrid reasoning"
+          ],
+          "start_priority": 5,
+          "runner_hint": "test Q4/Q5 quant; use as Judgement only if it beats Qwen/DeepSeek in receipts"
+        }
+      ]
+    },
+    "abliterated_small": {
+      "purpose": "Refusal-suppressed small models for cheap Rebel pressure.",
+      "ship_raw_allowed": false,
+      "models": [
+        {
+          "id": "mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF",
+          "type": "abliterated",
+          "size": "8B",
+          "best_for": [
+            "first hard Rebel pressure lane",
+            "anti-refusal packets",
+            "scope preservation"
+          ],
+          "start_priority": 1,
+          "ollama": "ollama run hf.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF:Q4_K_M"
+        },
+        {
+          "id": "failspy/Llama-3-8B-Instruct-abliterated",
+          "type": "abliterated",
+          "size": "8B",
+          "best_for": [
+            "baseline abliterated behavior test",
+            "refusal-vector comparison"
+          ],
+          "start_priority": 2
+        },
+        {
+          "id": "bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF",
+          "type": "abliterated quant",
+          "size": "8B",
+          "best_for": [
+            "alternate quant source",
+            "LM Studio / llama.cpp"
+          ],
+          "start_priority": 2
+        },
+        {
+          "id": "bartowski/mlabonne_Qwen3-8B-abliterated-GGUF",
+          "type": "Qwen abliterated quant",
+          "size": "8B",
+          "best_for": [
+            "Qwen-style directness with reduced refusals",
+            "small Misfit packets"
+          ],
+          "start_priority": 2
+        },
+        {
+          "id": "Mungert/Qwen3-8B-abliterated-GGUF",
+          "type": "Qwen abliterated quant",
+          "size": "8B",
+          "best_for": [
+            "alternate quant test",
+            "low-bit experiments"
+          ],
+          "start_priority": 4
+        }
+      ]
+    },
+    "abliterated_medium": {
+      "purpose": "Stronger Misfit pressure, still not final authority.",
+      "ship_raw_allowed": false,
+      "models": [
+        {
+          "id": "richardyoung/qwen3-14b-abliterated",
+          "type": "Ollama Qwen abliterated",
+          "size": "14B",
+          "best_for": [
+            "stronger local rebel",
+            "cheap medium pressure"
+          ],
+          "start_priority": 3,
+          "ollama": "ollama run richardyoung/qwen3-14b-abliterated"
+        },
+        {
+          "id": "bartowski/huihui-ai_Qwen3-14B-abliterated-GGUF",
+          "type": "Qwen abliterated GGUF",
+          "size": "14B",
+          "best_for": [
+            "llama.cpp/LM Studio medium rebel"
+          ],
+          "start_priority": 3
+        },
+        {
+          "id": "mlabonne/gemma-3-27b-it-abliterated",
+          "type": "Gemma abliterated",
+          "size": "27B",
+          "best_for": [
+            "larger rebel pressure",
+            "style/taste challenge"
+          ],
+          "start_priority": 4
+        },
+        {
+          "id": "mradermacher/Qwen3-30B-A3B-abliterated-GGUF",
+          "type": "Qwen MoE abliterated GGUF",
+          "size": "30B-A3B",
+          "best_for": [
+            "heavy local hard rebel",
+            "deep mode only"
+          ],
+          "start_priority": 5,
+          "ollama": "ollama run hf.co/mradermacher/Qwen3-30B-A3B-abliterated-GGUF:Q4_K_M"
+        }
+      ]
+    },
+    "lorablated": {
+      "purpose": "LoRA-abliterated models and adapter-transferred refusal suppression.",
+      "ship_raw_allowed": false,
+      "models": [
+        {
+          "id": "mlabonne/Hermes-3-Llama-3.1-70B-lorablated",
+          "type": "Hermes lorablated",
+          "size": "70B",
+          "best_for": [
+            "Colab/A100 tests",
+            "not daily GTi15 use"
+          ],
+          "start_priority": 6
+        },
+        {
+          "id": "bartowski/Llama-3.1-70B-Instruct-lorablated-GGUF",
+          "type": "Llama lorablated GGUF",
+          "size": "70B",
+          "best_for": [
+            "rare deep local/Colab experiment",
+            "not always-on"
+          ],
+          "start_priority": 6,
+          "ollama": "ollama run hf.co/bartowski/Llama-3.1-70B-Instruct-lorablated-GGUF:Q4_K_M"
+        },
+        {
+          "id": "vanilj/llama-3.1-70b-instruct-lorablated-iq2_xs",
+          "type": "ultra-low-bit lorablated",
+          "size": "70B IQ2",
+          "best_for": [
+            "extreme low-bit experiment",
+            "compare quality loss"
+          ],
+          "start_priority": 7
+        }
+      ]
+    },
+    "heretic_creative_merges": {
+      "purpose": "Wild creative/story/roleplay/merge families. Use for taste, concepts, anti-corporate voice.",
+      "ship_raw_allowed": false,
+      "models": [
+        {
+          "id": "DavidAU profile / Dark Planet / Heretic-style families",
+          "type": "creative merges and fine-tunes",
+          "size": "various",
+          "best_for": [
+            "creative ideation",
+            "tone breajudgement",
+            "wild concepts",
+            "anti-bland language"
+          ],
+          "start_priority": 5,
+          "note": "Treat as volatile; score with your own receipts before trusting."
+        }
+      ]
+    },
+    "abliterated_multimodal_and_coder": {
+      "purpose": "Experimental non-standard models for images/code pressure packets.",
+      "ship_raw_allowed": false,
+      "models": [
+        {
+          "id": "mradermacher/Qwen3-VL-4B-Instruct-abliterated-GGUF",
+          "type": "abliterated vision-language",
+          "size": "4B",
+          "best_for": [
+            "image/caption rebel pressure",
+            "visual prompt audit"
+          ],
+          "start_priority": 6
+        },
+        {
+          "id": "mradermacher/Qwen3-VL-8B-Abliterated-Caption-it-GGUF",
+          "type": "abliterated vision-language caption",
+          "size": "8B",
+          "best_for": [
+            "visual caption/taste rebel pressure"
+          ],
+          "start_priority": 6
+        },
+        {
+          "id": "huihui_ai/qwen3-coder-abliterated",
+          "type": "abliterated coder",
+          "size": "various",
+          "best_for": [
+            "code refusal pressure",
+            "experimental only"
+          ],
+          "start_priority": 6
+        }
+      ]
+    },
+    "ollama_quick_trials": {
+      "purpose": "Fast test from Ollama before managing HF files manually.",
+      "ship_raw_allowed": false,
+      "models": [
+        {
+          "id": "huihui_ai/qwen3-abliterated",
+          "type": "Ollama abliterated Qwen3 family",
+          "size": "0.6B/1.7B/4B/8B/14B/16B/30B/32B/235B variants listed",
+          "best_for": [
+            "fast local tests",
+            "model size sweep"
+          ],
+          "start_priority": 2,
+          "ollama": "ollama run huihui_ai/qwen3-abliterated"
+        },
+        {
+          "id": "jaahas/qwen3-abliterated",
+          "type": "Ollama abliterated Qwen3 family",
+          "size": "0.6B/1.7B/4B/8B/14B variants listed",
+          "best_for": [
+            "alternative Ollama qwen3 abliterated sweep"
+          ],
+          "start_priority": 4,
+          "ollama": "ollama run jaahas/qwen3-abliterated"
+        },
+        {
+          "id": "huihui_ai/qwen3.5-abliterated",
+          "type": "Ollama abliterated Qwen3.5 family",
+          "size": "various",
+          "best_for": [
+            "experimental newer-family tests"
+          ],
+          "start_priority": 6,
+          "ollama": "ollama run huihui_ai/qwen3.5-abliterated"
+        },
+        {
+          "id": "huihui_ai/Qwen3.6-abliterated",
+          "type": "Ollama abliterated Qwen3.6 family",
+          "size": "35B-A3B lineage listed",
+          "best_for": [
+            "heavy hard-rebel experiment"
+          ],
+          "start_priority": 7,
+          "ollama": "ollama run huihui_ai/Qwen3.6-abliterated"
+        }
+      ]
+    }
+  },
+  "activation_plan": {
+    "cheap": [
+      "dphn/Dolphin3.0-Llama3.1-8B",
+      "mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF"
+    ],
+    "normal": [
+      "Dolphin 8B",
+      "Llama 3.1 8B abliterated",
+      "Qwen3 8B abliterated",
+      "Qwen3 14B abliterated"
+    ],
+    "deep": [
+      "Dolphin R1 Mistral 24B",
+      "Gemma 27B abliterated",
+      "Qwen3 30B-A3B abliterated"
+    ],
+    "colab": [
+      "Llama 3.1 70B lorablated",
+      "Hermes 70B lorablated",
+      "large Heretic experiments"
+    ]
+  },
+  "scoring_card": {
+    "required_metrics": [
+      "json_reliability",
+      "rebel_pressure",
+      "truth_hallucination_rate",
+      "scope_preservation",
+      "tool_suggestion_quality",
+      "legal_boundary_respect",
+      "speed_tokens_per_second",
+      "ram_peak_gb",
+      "operator_accept_rate"
+    ],
+    "promotion_rule": "A Misfit model can move from sandbox to normal lane only after 50 receipt-scored tasks with no catastrophic failures and >75 operator_accept_rate."
+  }
+}
