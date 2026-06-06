@@ -38,6 +38,8 @@ const ORANGEBOX_TERMS = [
   "codex", "hooks", "skills", "sandbox", "supply chain", "prompt injection",
   "automation bias", "complacency", "vigilance", "situation awareness",
   "operator", "human factors", "long-horizon", "judge", "verification",
+  "action classifier", "approval fatigue", "eval awareness", "benchmark hygiene",
+  "memory interference", "indexed memory", "tool poisoning", "supply-chain injection",
 ];
 
 const SOURCE_TARGETS = [
@@ -96,6 +98,41 @@ const SOURCE_TARGETS = [
     source_family: "anthropic",
     url: "https://code.claude.com/docs/en/agent-sdk/hooks",
     reason: "Agent SDK hook semantics inform Orangebox tool telemetry, MCP call logging, and watcher receipt callbacks.",
+  },
+  {
+    id: "anthropic_long_running_app_harness",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/harness-design-long-running-apps",
+    reason: "Planner/generator/evaluator contracts, file-backed handoffs, and external QA loops map directly to Orangebox task contracts, doer/watcher separation, and completion proof.",
+  },
+  {
+    id: "anthropic_auto_mode_action_classifier",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/claude-code-auto-mode",
+    reason: "Two-stage action classifiers for overeager behavior, credential exploration, review bypass, and exfiltration inform Orangebox approval gates and command classifiers.",
+  },
+  {
+    id: "anthropic_agent_evals",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    reason: "Multi-turn agent eval methods map to Orangebox CHECKMATE, STRONGARM, proof receipts, and task-specific acceptance gates.",
+  },
+  {
+    id: "anthropic_eval_awareness_contamination",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/eval-awareness-browsecomp",
+    reason: "Eval contamination and model eval-awareness evidence supports Orangebox benchmark hygiene, web-trace controls, and adversarial eval integrity checks.",
+  },
+  {
+    id: "anthropic_ai_resistant_evals",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/AI-resistant-technical-evaluations",
+    reason: "AI-resistant technical evaluation design informs Orangebox benchmark construction, leakage controls, and no-theater optimization gates.",
   },
   {
     id: "openai_codex_ide",
@@ -182,6 +219,27 @@ const SOURCE_TARGETS = [
     reason: "Active context compression aligns with Orangebox least-action, workset, and expansion-warrant doctrine.",
   },
   {
+    id: "arxiv_mint_eval_memory_interference",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2605.18565",
+    reason: "Long-horizon memory interference evaluation maps to Orangebox stale-memory, revised-fact, and multi-target recall tests.",
+  },
+  {
+    id: "arxiv_memex_rl_indexed_memory",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2603.04257",
+    reason: "Indexed experience memory supports Orangebox cold-truth pointers, exact evidence hydration, and AtomSmasher summary-with-source-index design.",
+  },
+  {
+    id: "arxiv_acon_context_compression",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2510.00615",
+    reason: "Agent Context Optimization supports failure-driven compressor guidelines, smaller compressor distillation, and context-distraction tests.",
+  },
+  {
     id: "arxiv_field_theoretic_memory",
     tier: "T0_RESEARCH",
     source_family: "arxiv",
@@ -223,6 +281,41 @@ const SOURCE_TARGETS = [
     url: "https://arxiv.org/abs/2602.10975",
     reason: "Feature-oriented coding benchmarks reinforce Orangebox end-to-end feature proof instead of single-issue bug-fix theater.",
   },
+  {
+    id: "arxiv_mcp_prompt_injection_clients",
+    tier: "T0_SECURITY_RESEARCH",
+    source_family: "arxiv_security",
+    url: "https://arxiv.org/abs/2603.21642",
+    reason: "Prompt-injection analysis across MCP clients maps to Orangebox MCP quarantine, static validation, parameter visibility, audit logging, and sandbox proof.",
+  },
+  {
+    id: "arxiv_mcp_tool_poisoning_threat_model",
+    tier: "T0_SECURITY_RESEARCH",
+    source_family: "arxiv_security",
+    url: "https://arxiv.org/abs/2603.22489",
+    reason: "MCP tool-poisoning threat modeling strengthens Orangebox third-party skill/plugin intake and executable-tool quarantine.",
+  },
+  {
+    id: "arxiv_shieldnet_agent_supply_chain",
+    tier: "T0_SECURITY_RESEARCH",
+    source_family: "arxiv_security",
+    url: "https://arxiv.org/abs/2604.04426",
+    reason: "Network-level guardrails for supply-chain injections inform Orangebox network egress policy, localhost checks, and Codexa rail allowlists.",
+  },
+  {
+    id: "arxiv_clawguard_indirect_prompt_injection",
+    tier: "T0_SECURITY_RESEARCH",
+    source_family: "arxiv_security",
+    url: "https://arxiv.org/abs/2604.11790",
+    reason: "Runtime defenses against indirect prompt injection inform Orangebox STRONGARM/Mirror checks for tool-result taint and suspicious instruction transfer.",
+  },
+  {
+    id: "pubmed_ai_trust_vigilance",
+    tier: "T0_HUMAN_FACTORS",
+    source_family: "pubmed",
+    url: "https://pubmed.ncbi.nlm.nih.gov/35465233/",
+    reason: "AI trust/vigilance research informs Orangebox visible confidence, task allocation, performance metrics, and anti-complacency reporting.",
+  },
 ];
 
 const ARXIV_QUERIES = [
@@ -258,6 +351,22 @@ const ARXIV_QUERIES = [
     tier: "T0_RESEARCH",
     reason: "Long-horizon development research maps to Orangebox project proof and rollback gates.",
   },
+  {
+    id: "memory_interference_long_horizon",
+    query: "\"memory interference\" \"agent\" OR \"multi-target\" \"long-horizon\" \"memory\"",
+    required_any: ["memory interference", "multi-target", "long-horizon", "long horizon", "agent systems", "retrieval", "memory construction"],
+    source_family: "arxiv",
+    tier: "T0_RESEARCH",
+    reason: "Memory interference research maps to stale-memory tests, revised-fact handling, and exact evidence hydration.",
+  },
+  {
+    id: "mcp_agent_tool_security",
+    query: "\"Model Context Protocol\" \"prompt injection\" OR \"MCP\" \"tool poisoning\" OR \"agentic systems\" \"supply-chain\"",
+    required_any: ["model context protocol", "mcp", "tool poisoning", "prompt injection", "supply-chain", "agentic systems", "tool-augmented"],
+    source_family: "arxiv_security",
+    tier: "T0_SECURITY_RESEARCH",
+    reason: "MCP and tool-security research maps to Orangebox quarantine, plugin intake, static validation, and network/tool audit logs.",
+  },
 ];
 
 const PUBMED_QUERIES = [
@@ -274,6 +383,13 @@ const PUBMED_QUERIES = [
     source_family: "nih_pubmed",
     tier: "T0_HUMAN_FACTORS",
     reason: "Human-automation research keeps Orangebox from becoming invisible automation theater.",
+  },
+  {
+    id: "ai_trust_vigilance_transparency",
+    query: "((artificial intelligence[Title/Abstract]) OR (AI[Title/Abstract])) AND ((trust[Title/Abstract]) OR (vigilance[Title/Abstract]) OR (transparency[Title/Abstract]) OR (automation complacency[Title/Abstract]))",
+    source_family: "nih_pubmed",
+    tier: "T0_HUMAN_FACTORS",
+    reason: "AI trust, vigilance, transparency, and complacency research informs Orangebox user-visible state, confidence metrics, and watcher design.",
   },
 ];
 
@@ -319,6 +435,20 @@ const REDDIT_TARGETS = [
     source_family: "reddit",
     url: "https://www.reddit.com/r/codex/search.rss?q=AGENTS.md%20skills%20MCP%20context&restrict_sr=1&sort=new&t=month",
     reason: "Weak-signal Codex pain around AGENTS.md, skills, MCP, compaction, and cross-agent portability.",
+  },
+  {
+    id: "reddit_local_multi_agent_coordination",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/codex/search.rss?q=local-first%20coordination%20Claude%20Codex%20SQLite%20handoff&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal reports on local-first coordination, duplicate work avoidance, and compact cross-agent handoffs.",
+  },
+  {
+    id: "reddit_mcp_safety_filter",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/mcp/search.rss?q=local%20safety%20filter%20MCP%20Claude%20Codex&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal MCP safety-filter and local firewall patterns for Orangebox quarantine candidates.",
   },
 ];
 
@@ -412,16 +542,28 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Convert into Orangebox watcher/health-report rules: visible status, failure drills, calibrated trust, no silent automation, and operator accountability prompts.",
     };
   }
+  if (/auto mode|action classifier|permission prompt|approval fatigue|overeager|credential exploration|review bypass|stage 1|stage 2|transcript classifier|deny-and-continue/.test(haystack)) {
+    return {
+      area: "action_classifier_permission_gate",
+      proposed_action: "Prototype an Orangebox command-action classifier that blocks overeager scope expansion, credential hunting, review bypass, and exfiltration before tool execution.",
+    };
+  }
+  if (/eval awareness|contamination|benchmark leakage|canary|string|answer key|ai-resistant|ai resistant|benchmark hygiene|static benchmark|browsecomp/.test(haystack)) {
+    return {
+      area: "eval_integrity_and_benchmark_hygiene",
+      proposed_action: "Add benchmark hygiene rules: source leakage checks, eval-canary blocklists, web-trace warnings, and adversarial CHECKMATE fixtures before trusting scores.",
+    };
+  }
+  if (/memory interference|multi-target|revised facts|revised information|intervening updates|memory construction|indexed experience|dereference|experience database/.test(haystack)) {
+    return {
+      area: "memory_interference_eval",
+      proposed_action: "Add Orangebox memory-interference probes: revised-fact recall, multi-target aggregation, source-index dereference proof, and stale-memory failure receipts.",
+    };
+  }
   if (/\brce\b|remote code execution|\bstdio\b|supply chain|prompt injection|command execution|localhost|dns rebinding|\bcors\b/.test(haystack)) {
     return {
       area: "mcp_supply_chain_security",
       proposed_action: "Strengthen MCP quarantine: metadata-only STDIO, fixed command templates, localhost binding proof, output caps, and explicit operator approval before executable tools.",
-    };
-  }
-  if (/codex|agent loop|responses api|computer environment|shell tool|compaction|hosted runtime/.test(haystack)) {
-    return {
-      area: "codex_harness_and_compaction",
-      proposed_action: "Map Codex loop mechanics into Orangebox primers, compaction restore packets, shell-action receipts, and cross-agent handoff checks.",
     };
   }
   if (/llm judge|judge|evidence verification|reflect|factual accuracy|tool-use failures|report-quality failures/.test(haystack)) {
@@ -430,13 +572,13 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Keep deterministic gates ahead of AI judgement; add STRONGARM/Mirror tests where model judges must cite receipts and cannot overrule failed checks.",
     };
   }
-  if (/roadmapbench|featurebench|long-horizon|version upgrade|feature development|multi-target/.test(haystack)) {
+  if (/skill|skills|procedural|rules|experience compression|compression spectrum/.test(haystack)) {
     return {
-      area: "long_horizon_feature_proof",
-      proposed_action: "Use roadmap-style acceptance matrices: feature contract, changed-file proof, tests, rollback, receipt, and no completion claim without end-to-end evidence.",
+      area: "skill_lifecycle_compression",
+      proposed_action: "Score Orangebox skills as compressed procedures: promote only if they reduce repeated work and pass stale-skill/vendor gates.",
     };
   }
-  if (/biomedical|nih|assurance|health|clinical|bioinformatics|scientific|research lifecycle/.test(haystack)) {
+  if (/biomedical|nih|assurance|healthcare|health care|clinical|bioinformatics|research lifecycle/.test(haystack)) {
     return {
       area: "assurance_lab",
       proposed_action: "Adapt NIH-style assurance lab patterns into Orangebox: playbooks, benchmark methods, validation receipts, and real-world-use-case gates.",
@@ -454,10 +596,16 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Model Orangebox as durable session log + replaceable harness + remote hands; add checks for resumability and tool-rail failure recovery.",
     };
   }
-  if (/skill|skills|procedural|rules|experience compression|compression spectrum/.test(haystack)) {
+  if (/roadmapbench|featurebench|long-horizon|version upgrade|feature development|multi-target/.test(haystack)) {
     return {
-      area: "skill_lifecycle_compression",
-      proposed_action: "Score Orangebox skills as compressed procedures: promote only if they reduce repeated work and pass stale-skill/vendor gates.",
+      area: "long_horizon_feature_proof",
+      proposed_action: "Use roadmap-style acceptance matrices: feature contract, changed-file proof, tests, rollback, receipt, and no completion claim without end-to-end evidence.",
+    };
+  }
+  if (/codex|agent loop|responses api|computer environment|shell tool|compaction|hosted runtime/.test(haystack)) {
+    return {
+      area: "codex_harness_and_compaction",
+      proposed_action: "Map Codex loop mechanics into Orangebox primers, compaction restore packets, shell-action receipts, and cross-agent handoff checks.",
     };
   }
   if (/memory|context|compression|retrieval|implicit|drift|longmemeval|compaction/.test(haystack)) {
@@ -713,7 +861,12 @@ async function collectPubMed() {
   const fetches = [];
   for (const query of PUBMED_QUERIES) {
     const searchUrl = pubmedSearchUrl(query.query);
-    const searched = await fetchText(searchUrl);
+    if (fetches.length) await sleep(450);
+    let searched = await fetchText(searchUrl);
+    if (searched.status === 429) {
+      await sleep(1500);
+      searched = await fetchText(searchUrl);
+    }
     fetches.push({ id: `${query.id}_search`, ok: searched.ok, status: searched.status, url: searchUrl, error: searched.error || null });
     if (!searched.ok) continue;
     let ids = [];
