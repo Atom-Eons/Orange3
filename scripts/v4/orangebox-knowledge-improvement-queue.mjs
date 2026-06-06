@@ -134,8 +134,11 @@ function collectFromObject(findings, source, object, prefix = "") {
 }
 
 function classify(text) {
-  if (/ai box|codexa|8097|8098|ollama|rail/i.test(text)) return { area: "codexa_ai_box", action: "Run power optimizer, rail starter, and model doctor on Codexa." };
+  if (/sandbox|filesystem isolation|network isolation|credential|exfiltrat|permission boundary/i.test(text)) return { area: "sandbox_and_permission_law", action: "Convert into path/network policy fixtures for MCP servers, Codexa rails, and installer proof." };
+  if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/i.test(text)) return { area: "doer_watcher_session_spine", action: "Review durable session/harness candidate; promote as resumability, rail recovery, or watcher proof only." };
+  if (/skill lifecycle|agent skills|procedural skill|experience compression|compression spectrum|declarative rules/i.test(text)) return { area: "skill_lifecycle_compression", action: "Review skill compression candidate; promote only if it reduces repeated work and passes stale-skill/vendor gates." };
   if (/mcp|model context protocol|tool output|tool search|resources|prompt injection/i.test(text)) return { area: "mcp_quarantine_gateway", action: "Review MCP/source-scope candidate; promote only through quarantine gateway fixture and receipt." };
+  if (/ai box|codexa|8097|8098|ollama|rail/i.test(text)) return { area: "codexa_ai_box", action: "Run power optimizer, rail starter, and model doctor on Codexa." };
   if (/pubmed|nih|biomedical|bioinformatics|clinical|healthcare|assurance|scientific/i.test(text)) return { area: "research_assurance_lab", action: "Review assurance-lab candidate; translate only into playbook, benchmark, or proof-receipt work." };
   if (/hermes/i.test(text)) return { area: "hermes_orchestration", action: "Run Hermes install/doctor from OBOX2 pack after Codexa is stable." };
   if (/arxiv|agent memory|context compression|memory control|retrieval|compaction|context bloat/i.test(text)) return { area: "knowledge_engine_atomsmasher", action: "Review memory/control candidate; promote only as eval, benchmark, or AtomSmasher/Knowledge proof." };

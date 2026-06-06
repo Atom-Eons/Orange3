@@ -53,6 +53,34 @@ const SOURCE_TARGETS = [
     reason: "MCP scope, output limits, resources, plugins, and tool search shape the Orangebox MCP quarantine gateway.",
   },
   {
+    id: "anthropic_long_running_harnesses",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+    reason: "Long-running agent handoff, initializer state, progress files, and incremental proof loops shape Orangebox always-on work.",
+  },
+  {
+    id: "anthropic_managed_agents_brain_hands_session",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/managed-agents",
+    reason: "Brain/hands/session decoupling maps directly to Orangebox doer/watcher, Codexa rails, durable receipts, and recoverable sessions.",
+  },
+  {
+    id: "anthropic_claude_code_sandboxing",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/claude-code-sandboxing",
+    reason: "Sandboxed filesystem and network boundaries inform Orangebox MCP/tool quarantine and Codexa execution rails.",
+  },
+  {
+    id: "anthropic_agent_skills",
+    tier: "T0_VENDOR_ENGINEERING",
+    source_family: "anthropic",
+    url: "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills",
+    reason: "Agent Skills lifecycle and composability inform Orangebox primer/skill portability across Codex, Claude, Antigravity, and local tools.",
+  },
+  {
     id: "mcp_latest_spec",
     tier: "T0_STANDARD",
     source_family: "mcp",
@@ -93,6 +121,13 @@ const SOURCE_TARGETS = [
     source_family: "arxiv",
     url: "https://arxiv.org/abs/2602.21220",
     reason: "Field-theoretic memory is a candidate model for decay, coupling, and importance-aware memory dynamics.",
+  },
+  {
+    id: "arxiv_experience_compression_spectrum",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2604.15877",
+    reason: "Experience compression spectrum unifies memory, skills, and rules; directly informs AtomSmasher cartridge/AIR/commitment layering.",
   },
 ];
 
@@ -137,6 +172,20 @@ const REDDIT_TARGETS = [
     source_family: "reddit",
     url: "https://www.reddit.com/r/LocalLLaMA/search.rss?q=agent%20memory%20benchmark&restrict_sr=1&sort=new&t=month",
     reason: "Weak-signal local model and benchmark pain useful for Codexa/AI Box setup priorities.",
+  },
+  {
+    id: "reddit_local_agents_learn_over_time",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/LocalLLaMA/search.rss?q=agents%20learn%20over%20time%20memory&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal reports on whether local agents actually improve or only retrieve stale memory.",
+  },
+  {
+    id: "reddit_local_agent_setup_2026",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/LocalLLaMA/search.rss?q=local%20agent%20setup%202026%20ollama%20vllm&restrict_sr=1&sort=new&t=month",
+    reason: "Weak-signal practical local inference patterns for Codexa model/router installation priorities.",
   },
 ];
 
@@ -224,6 +273,24 @@ function mapCandidate(text, sourceFamily) {
     return {
       area: "mcp_quarantine_gateway",
       proposed_action: "Update MCP quarantine/test fixtures for scope, output limits, tool search, resources, and prompt-injection handling.",
+    };
+  }
+  if (/sandbox|filesystem isolation|network isolation|credential|exfiltrat|permission/.test(haystack)) {
+    return {
+      area: "sandbox_and_permission_law",
+      proposed_action: "Translate sandbox findings into Orangebox path/network policy fixtures for MCP servers, Codexa rails, and installer checks.",
+    };
+  }
+  if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/.test(haystack)) {
+    return {
+      area: "doer_watcher_session_spine",
+      proposed_action: "Model Orangebox as durable session log + replaceable harness + remote hands; add checks for resumability and tool-rail failure recovery.",
+    };
+  }
+  if (/skill|skills|procedural|rules|experience compression|compression spectrum/.test(haystack)) {
+    return {
+      area: "skill_lifecycle_compression",
+      proposed_action: "Score Orangebox skills as compressed procedures: promote only if they reduce repeated work and pass stale-skill/vendor gates.",
     };
   }
   if (/memory|context|compression|retrieval|implicit|drift|longmemeval|compaction/.test(haystack)) {
