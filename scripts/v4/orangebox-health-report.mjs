@@ -161,6 +161,7 @@ async function main() {
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
     codexa_alert: latestReceipt("orangebox-codexa-alert-"),
     mcp_doctor: latestReceipt("orangebox-mcp-doctor-"),
+    action_classifier: latestReceipt("orangebox-action-classifier-"),
     skill_lifecycle: latestReceipt("orangebox-skill-lifecycle-doctor-"),
     openclaw_retirement: latestReceipt("orangebox-openclaw-retirement-"),
   };
@@ -174,6 +175,7 @@ async function main() {
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
     codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
     mcp_doctor: readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(receiptPaths.mcp_doctor || ""),
+    action_classifier: readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(receiptPaths.action_classifier || ""),
     skill_lifecycle: readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(receiptPaths.skill_lifecycle || ""),
     openclaw_retirement: readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json")) || readJson(receiptPaths.openclaw_retirement || ""),
   };
@@ -209,6 +211,7 @@ async function main() {
   if (!devProbes.strongarm_gate.ok) warnings.push("STRONGARM gate is not reachable.");
   if (!openclawRetired) warnings.push("OpenClaw startup hook is still present or no retirement receipt exists.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) warnings.push("MCP quarantine/tool bridge doctor is not green.");
+  if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") warnings.push("Action classifier doctor is not green.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") warnings.push("Orangebox skill lifecycle doctor is not green.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
@@ -233,11 +236,13 @@ async function main() {
   if (latest.project_report?.full_project_green === false) nextActions.push("Review npm.cmd run project:report output before claiming full project completion.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
+  if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") nextActions.push("Run npm.cmd run action:doctor to verify the pre-tool action classifier.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") nextActions.push("Run npm.cmd run skills:lifecycle to verify Orangebox skill install and command mappings.");
 
   const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
+  const actionClassifierOk = latest.action_classifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleOk = latest.skill_lifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && skillLifecycleOk;
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -330,6 +335,14 @@ async function main() {
         passed: latest.mcp_doctor?.summary?.passed || 0,
         failed: latest.mcp_doctor?.summary?.failed ?? null,
         host_mcp_config_mutated: latest.mcp_doctor?.host_mcp_config_mutated ?? null,
+      },
+      action_classifier: {
+        path: path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"),
+        status: latest.action_classifier?.status || null,
+        cases_run: latest.action_classifier?.cases_run || 0,
+        allowed_count: latest.action_classifier?.allowed_count || 0,
+        staged_count: latest.action_classifier?.staged_count || 0,
+        blocked_count: latest.action_classifier?.blocked_count || 0,
       },
       skill_lifecycle: {
         path: path.join(dataRoot, "skills", "latest-skill-lifecycle.json"),

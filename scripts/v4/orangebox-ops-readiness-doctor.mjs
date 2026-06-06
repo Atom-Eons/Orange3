@@ -83,6 +83,8 @@ function main() {
   const codexaAlert = readJson(codexaAlertPath);
   const mcpDoctorPath = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
   const mcpDoctor = readJson(mcpDoctorPath);
+  const actionClassifierPath = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
+  const actionClassifier = readJson(actionClassifierPath);
   const skillLifecyclePath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
   const skillLifecycle = readJson(skillLifecyclePath);
   const antigravityRoot = path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "SKILL.md");
@@ -130,6 +132,17 @@ function main() {
       passed: mcpDoctor?.summary?.passed || 0,
       failed: mcpDoctor?.summary?.failed ?? null,
       note: "Proves MCP registry/tool-list/code-mode safety without package installs, paid APIs, or host MCP config mutation.",
+    },
+    action_classifier: {
+      ok: actionClassifier?.ok === true && actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN",
+      path: actionClassifierPath,
+      status: actionClassifier?.status || null,
+      cases_run: actionClassifier?.cases_run || 0,
+      allowed_count: actionClassifier?.allowed_count || 0,
+      staged_count: actionClassifier?.staged_count || 0,
+      blocked_count: actionClassifier?.blocked_count || 0,
+      failures: actionClassifier?.failures?.length ?? null,
+      note: "Proves pre-tool command classification for safe diagnostics, staged state changes, credential hunts, exfiltration, and review bypasses.",
     },
     skill_primer: {
       ok:

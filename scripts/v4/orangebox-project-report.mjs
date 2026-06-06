@@ -133,6 +133,7 @@ async function main() {
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
+  const actionClassifier = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(latestReceipt("orangebox-action-classifier-"));
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
@@ -166,6 +167,7 @@ async function main() {
     mcpDoctor?.install_attempted === false &&
     mcpDoctor?.host_mcp_config_mutated === false &&
     mcpDoctor?.paid_api_attempted === false;
+  const actionClassifierGreen = actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
@@ -191,6 +193,16 @@ async function main() {
       next: mcpQuarantineGreen
         ? "Keep all new MCPs as candidates until health, tools, scopes, output caps, receipts, and operator-confirmed write mode are proven."
         : "Run npm.cmd run mcp:doctor and fix the exact failed gate.",
+    },
+    {
+      area: "Action classifier permission gate",
+      status: status(actionClassifierGreen, exists(path.join(repoRoot, "scripts", "v4", "action-classifier.mjs"))),
+      reality: actionClassifierGreen
+        ? `Pre-tool command classifier is green: ${actionClassifier?.allowed_count || 0} allowed, ${actionClassifier?.staged_count || 0} staged, ${actionClassifier?.blocked_count || 0} blocked, ${actionClassifier?.cases_run || 0} fixtures. Command server imports the same classifier.`
+        : "Action classifier source exists, but its doctor is not green yet.",
+      next: actionClassifierGreen
+        ? "Keep expanding fixtures before new tool surfaces are allowed."
+        : "Run npm.cmd run action:doctor and fix any exact fixture mismatch.",
     },
     {
       area: "Skill lifecycle compression",
@@ -354,6 +366,7 @@ async function main() {
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
+        action_doctor: packageScript("action:doctor", packageJson),
         skills_lifecycle: packageScript("skills:lifecycle", packageJson),
       },
     },
@@ -412,6 +425,10 @@ async function main() {
       mcp_doctor: {
         path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
         status: mcpQuarantineGreen ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
+      },
+      action_classifier: {
+        path: path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"),
+        status: actionClassifier?.status || null,
       },
       skill_lifecycle: {
         path: path.join(dataRoot, "skills", "latest-skill-lifecycle.json"),

@@ -243,6 +243,7 @@ function backendPackageJson() {
       "codexa:alert": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt",
       "codexa:alert:popup": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt --popup",
       "mcp:doctor": "node ./scripts/v4/mcp-doctor.mjs --json --receipt",
+      "action:doctor": "node ./scripts/v4/action-classifier-doctor.mjs --json --receipt",
       "health:report": "node ./scripts/v4/orangebox-health-report.mjs --json --receipt",
       "project:report": "node ./scripts/v4/orangebox-project-report.mjs --json --receipt",
       "skills:lifecycle": "node ./scripts/v4/orangebox-skill-lifecycle-doctor.mjs --json --receipt",

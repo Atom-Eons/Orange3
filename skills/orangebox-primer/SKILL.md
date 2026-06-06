@@ -66,6 +66,8 @@ knowledge-improvements refresh learned improvement candidates without self-promo
 research-scout       fetch public research signals and park upgrade candidates
 codexa-alert         probe AI Box rails and write an explicit alert receipt
 codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
+mcp-doctor           verify MCP quarantine/tool bridge
+action-doctor        verify pre-tool action classifier and unsafe-command blocking
 obox2-pack            build Orangebox V2 Internal setup zip
 obox2-doctor          expand and verify the setup zip
 openclaw-retire-dry   preview OpenClaw startup retirement

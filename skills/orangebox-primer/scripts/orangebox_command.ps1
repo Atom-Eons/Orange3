@@ -108,6 +108,11 @@ $commands = [ordered]@{
     args = @("run", "mcp:doctor")
     description = "Verify MCP quarantine/tool bridge without installs, paid APIs, or host MCP config mutation."
   }
+  "action-doctor" = @{
+    kind = "npm"
+    args = @("run", "action:doctor")
+    description = "Verify the pre-tool action classifier blocks credential hunts, exfiltration, review bypasses, and unsafe commands."
+  }
   "skills-lifecycle" = @{
     kind = "npm"
     args = @("run", "skills:lifecycle")

@@ -10,6 +10,7 @@ import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { attachV4Routes } from "./v4/v4-server-routes.mjs";
 import { attachAtomSmasherRoutes } from "./v4/atomsmasher-api-routes.mjs";
+import { classifyShellAction } from "./v4/action-classifier.mjs";
 
 const execFileAsync = promisify(execFile);
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -6791,82 +6792,10 @@ function rawSecretFindings(value) {
 }
 
 function classifyCommandRisk(command = "", body = {}) {
-  const text = String(command || "");
-  const normalized = text.toLowerCase();
-  const cwd = String(body.cwd || "").replace(/\\/g, "/");
-  const projectScoped = autonomyPolicy.approvedWorkspacePrefixes.some((prefix) => cwd.toLowerCase().startsWith(prefix.toLowerCase()));
-  const destructivePatterns = [
-    /\bremove-item\b/i,
-    /\brm\s+-rf\b/i,
-    /\bdel\s+\/[fsq]/i,
-    /\brmdir\s+\/s/i,
-    /\bgit\s+push\b/i,
-    /\bnpm\s+publish\b/i,
-    /\bvercel\s+deploy\b/i,
-    /\bdocker\s+system\s+prune\b/i,
-    /\b(drop|truncate)\s+(table|database|schema)\b/i,
-    /\bset-netfirewall/i,
-    /\bnew-netfirewall/i,
-    /\bremove-netfirewall/i,
-    /\bstop-process\b/i,
-    /\bstop-service\b/i,
-    /\bunregister-scheduledtask\b/i,
-    /\bformat-volume\b/i,
-    /(^|[;&|]\s*)format(\.com|\.exe)?\s+[a-z]:/i
-  ];
-  const mutatingPatterns = [
-    /\bnpm\s+install\b/i,
-    /\bpip\s+install\b/i,
-    /\bgit\s+commit\b/i,
-    /\bgit\s+merge\b/i,
-    /\bdocker\s+(build|compose|run|pull)\b/i,
-    /\bstart-process\b/i,
-    /\bstart-scheduledtask\b/i,
-    /\bregister-scheduledtask\b/i,
-    /\bset-scheduledtask\b/i,
-    /\brestart-service\b/i,
-    /\bsetx\b/i,
-    /\bnew-item\b/i,
-    /\bcopy-item\b/i,
-    /\bmove-item\b/i,
-    /\bset-content\b/i,
-    /\badd-content\b/i
-  ];
-  const decisionPatterns = [
-    /\bgit\s+push\b/i,
-    /\bnpm\s+publish\b/i,
-    /\bvercel\s+deploy\b/i,
-    /\b(drop|truncate)\s+(table|database|schema)\b/i,
-    /\bset-netfirewall/i,
-    /\bnew-netfirewall/i,
-    /\bremove-netfirewall/i,
-    /\bsetx\b/i,
-    /\bregister-scheduledtask\b/i,
-    /\bset-scheduledtask\b/i,
-    /\bstart-scheduledtask\b/i,
-    /\binstall-service\b/i,
-    /\bnew-service\b/i,
-    /\bremove-item\b.*\s(-recurse|-force)/i,
-    /\brm\s+-rf\b/i,
-    /\bformat-volume\b/i,
-    /(^|[;&|]\s*)format(\.com|\.exe)?\s+[a-z]:/i
-  ];
-  const destructive = destructivePatterns.some((pattern) => pattern.test(text));
-  const mutating = destructive || mutatingPatterns.some((pattern) => pattern.test(text));
-  const decisionGate = decisionPatterns.some((pattern) => pattern.test(text));
-  const autonomousCoding = projectScoped && mutating && !decisionGate && body.autonomy === "autonomous_coding";
-  const approved = body.approval === "I_APPROVE_STATE_CHANGE" || body.internalApproved === true;
-  const internalScope = String(body.internalScope || "").toLowerCase();
-  const allowedInternal = body.internalApproved === true && internalScope.startsWith("orangebox-");
-  return {
-    class: destructive ? "DESTRUCTIVE" : mutating ? "MUTATING" : "READ_ONLY_OR_DIAGNOSTIC",
-    requiresApproval: decisionGate || (mutating && !autonomousCoding),
-    approved: approved || allowedInternal || autonomousCoding,
-    autonomy: autonomousCoding ? "AUTONOMOUS_CODING_ALLOWED" : decisionGate ? "DECISION_GATE_REQUIRED" : "STANDARD_GATE",
-    projectScoped,
-    matched: decisionGate ? "decision-gate-pattern" : destructive ? "destructive-pattern" : mutating ? "mutating-pattern" : "none",
-    normalizedPreview: clampText(normalized, 500)
-  };
+  return classifyShellAction(command, {
+    ...body,
+    approvedWorkspacePrefixes: autonomyPolicy.approvedWorkspacePrefixes,
+  });
 }
 
 function codexaResultText(result) {
