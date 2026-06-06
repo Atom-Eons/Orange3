@@ -167,6 +167,83 @@ function scanForbiddenText(extractDir) {
   return { ok: findings.length === 0, findings };
 }
 
+function requirePattern(checks, file, id, pattern, description) {
+  const text = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  const ok = pattern.test(text);
+  checks.push({
+    id,
+    file: path.basename(file),
+    ok,
+    description,
+  });
+}
+
+function validateOperationalContracts(extractDir) {
+  const checks = [];
+  const file = (name) => path.join(extractDir, name);
+
+  const powerOptimizer = file("CODEXA_POWER_OPTIMIZER.ps1");
+  requirePattern(checks, powerOptimizer, "power_disables_ac_sleep", /standby-timeout-ac['"]?\s*,\s*['"]0/i, "Power optimizer disables AC sleep.");
+  requirePattern(checks, powerOptimizer, "power_disables_ac_hibernate", /hibernate-timeout-ac['"]?\s*,\s*['"]0/i, "Power optimizer disables AC hibernate timeout.");
+  requirePattern(checks, powerOptimizer, "power_disables_ac_disk_idle", /disk-timeout-ac['"]?\s*,\s*['"]0/i, "Power optimizer disables AC disk idle timeout.");
+  requirePattern(checks, powerOptimizer, "power_disables_hybrid_sleep", /HYBRIDSLEEP['"]?\s*,\s*['"]0/i, "Power optimizer disables hybrid sleep.");
+  requirePattern(checks, powerOptimizer, "power_enables_wake_timers", /RTCWAKE['"]?\s*,\s*['"]1/i, "Power optimizer enables wake timers on AC.");
+  requirePattern(checks, powerOptimizer, "power_can_enable_rdp", /Enable-NetFirewallRule\s+-DisplayGroup\s+['"]Remote Desktop['"][\s\S]*fDenyTSConnections/i, "Power optimizer can enable RDP firewall and terminal-server access when requested.");
+  requirePattern(checks, powerOptimizer, "power_receipt_written", /obox2-power-optimizer-latest\.json/i, "Power optimizer writes a stable receipt.");
+
+  const powerDoctor = file("CODEXA_POWER_DOCTOR.ps1");
+  requirePattern(checks, powerDoctor, "power_doctor_checks_sleep", /STANDBYIDLE[\s\S]*HIBERNATEIDLE[\s\S]*DISKIDLE/i, "Power doctor inspects AC sleep, hibernate, and disk idle settings.");
+  requirePattern(checks, powerDoctor, "power_doctor_green_status", /OBOX2_CODEXA_POWER_DOCTOR_GREEN/i, "Power doctor has a green status contract.");
+  requirePattern(checks, powerDoctor, "power_doctor_warns_rail_task", /Command rail scheduled task is not registered yet/i, "Power doctor warns when the command rail scheduled task is missing.");
+
+  const railStarter = file("START_CODEXA_RAIL.ps1");
+  requirePattern(checks, railStarter, "rail_uses_command_port_8097", /CommandPort\s*=\s*8097/i, "Rail starter defaults the command rail to port 8097.");
+  requirePattern(checks, railStarter, "rail_uses_bridge_port_8098", /BridgePort\s*=\s*8098/i, "Rail starter defaults the bridge rail to port 8098.");
+  requirePattern(checks, railStarter, "rail_registers_startup_logon_tasks", /New-ScheduledTaskTrigger\s+-AtStartup[\s\S]*New-ScheduledTaskTrigger\s+-AtLogOn/i, "Rail starter registers startup and logon recovery triggers.");
+  requirePattern(checks, railStarter, "rail_runs_as_system_highest", /New-ScheduledTaskPrincipal[\s\S]*SYSTEM[\s\S]*RunLevel\s+Highest/i, "Rail starter registers always-on tasks as SYSTEM at highest run level.");
+  requirePattern(checks, railStarter, "rail_has_restart_policy", /RestartCount\s+3[\s\S]*RestartInterval\s+\(New-TimeSpan\s+-Minutes\s+1\)/i, "Rail starter sets restart policy for recovery.");
+  requirePattern(checks, railStarter, "rail_firewall_trusted_ips", /New-NetFirewallRule[\s\S]*RemoteAddress\s+\$trusted/i, "Rail starter restricts inbound firewall rules to trusted controller IPs.");
+  requirePattern(checks, railStarter, "rail_exports_controller_tokens", /SET_CONTROLLER_ORANGEBOX_TOKENS\.cmd[\s\S]*ORANGEBOX_AI_BOX_COMMAND_TOKEN/i, "Rail starter writes controller token export instructions.");
+  requirePattern(checks, railStarter, "rail_local_health_probe", /Probe\s+["']http:\/\/127\.0\.0\.1:\$CommandPort\/health["']/i, "Rail starter probes local command rail health before claiming ready.");
+
+  const startHere = file("START_HERE_OBOX2_INTERNAL.ps1");
+  requirePattern(checks, startHere, "start_here_requires_admin", /OBOX2_START_HERE_NEEDS_ADMIN/i, "Start-here launcher refuses non-admin installs.");
+  requirePattern(checks, startHere, "start_here_calls_power_optimizer", /CODEXA_POWER_OPTIMIZER\.ps1/i, "Start-here launcher runs the power optimizer.");
+  requirePattern(checks, startHere, "start_here_calls_power_doctor", /CODEXA_POWER_DOCTOR\.ps1/i, "Start-here launcher runs the power doctor.");
+  requirePattern(checks, startHere, "start_here_calls_rail_starter", /START_CODEXA_RAIL\.ps1/i, "Start-here launcher starts the rail.");
+  requirePattern(checks, startHere, "start_here_calls_model_doctor", /CODEXA_MODEL_DOCTOR\.ps1/i, "Start-here launcher runs model doctor.");
+  requirePattern(checks, startHere, "start_here_hermes_optional", /HERMES_AGENT_DOCTOR\.ps1' @\(\) \$false/i, "Start-here launcher treats Hermes doctor as optional.");
+  requirePattern(checks, startHere, "start_here_receipt_written", /obox2-start-here-latest\.json/i, "Start-here launcher writes a stable receipt.");
+
+  const modelInstaller = file("INSTALL_CODEXA_OBOX2_MODELS.ps1");
+  requirePattern(checks, modelInstaller, "model_installer_tiered", /ValidateSet\('core','extended','heavy','wildcard','all'\)/i, "Model installer supports tiered installs.");
+  requirePattern(checks, modelInstaller, "model_installer_ollama_pull", /ollama\s+pull\s+\$id/i, "Model installer pulls models through Ollama.");
+  requirePattern(checks, modelInstaller, "model_installer_missing_required", /missingRequired/i, "Model installer separates required model misses from optional wildcard misses.");
+  requirePattern(checks, modelInstaller, "model_installer_wildcard_note", /Abliterated\/custom wildcard tags may require manual import/i, "Model installer documents optional wildcard/manual import reality.");
+
+  const modelDoctor = file("CODEXA_MODEL_DOCTOR.ps1");
+  requirePattern(checks, modelDoctor, "model_doctor_ollama_tags", /127\.0\.0\.1:11434\/api\/tags/i, "Model doctor probes local Ollama tags.");
+  requirePattern(checks, modelDoctor, "model_doctor_missing_core", /missingCore/i, "Model doctor reports missing core models.");
+  requirePattern(checks, modelDoctor, "model_doctor_green_status", /OBOX2_CODEXA_MODEL_DOCTOR_GREEN/i, "Model doctor has a green status contract.");
+
+  const hermesInstall = file("INSTALL_HERMES_AGENT.ps1");
+  requirePattern(checks, hermesInstall, "hermes_install_checks_node", /node\s+--version[\s\S]*major/i, "Hermes installer checks Node before install.");
+  requirePattern(checks, hermesInstall, "hermes_install_optional_skip", /SkipInstall/i, "Hermes installer supports no-install doctor behavior.");
+  requirePattern(checks, hermesInstall, "hermes_install_orangebox_control_plane_note", /Orangebox remains the control plane/i, "Hermes installer preserves Orangebox authority.");
+
+  const readme = file("README_OBOX2_INTERNAL_SETUP.md");
+  requirePattern(checks, readme, "readme_names_start_here", /RUN_START_HERE_ON_CODEXA_AS_ADMIN\.cmd/i, "README points operator to the start-here launcher.");
+  requirePattern(checks, readme, "readme_warns_battery_laptop", /Do not apply it to a battery laptop/i, "README warns not to apply always-on behavior to battery laptops.");
+  requirePattern(checks, readme, "readme_wildcard_law", /Dolphin and abliterated models are pressure lanes only/i, "README preserves wildcard model authority limits.");
+
+  const failures = checks.filter((check) => !check.ok);
+  return {
+    ok: failures.length === 0,
+    checks,
+    failures,
+  };
+}
+
 async function main() {
   const latestPack = readJson(latestPackPath);
   const zipPath = latestPack?.zip_path || defaultZip;
@@ -205,6 +282,9 @@ async function main() {
   const forbidden = zipExists ? scanForbiddenText(extractDir) : { ok: false, findings: [] };
   if (!forbidden.ok) failures.push("Forbidden OpenClaw reference found in OBOX2 setup pack.");
 
+  const operationalContracts = missingFiles.length === 0 ? validateOperationalContracts(extractDir) : { ok: false, checks: [], failures: [] };
+  if (!operationalContracts.ok) failures.push("Operational contract validation failed.");
+
   const fileManifest = present.map((name) => {
     const file = path.join(extractDir, name);
     return { name, bytes: fs.statSync(file).size, sha256: sha256File(file) };
@@ -227,6 +307,7 @@ async function main() {
     cmd_launchers: cmdLaunchers,
     powershell_parse: psParse,
     forbidden_text_scan: forbidden,
+    operational_contracts: operationalContracts,
     failures,
     note: "This validates the package shape. It does not install Ollama models, Hermes, or Codexa services.",
   };

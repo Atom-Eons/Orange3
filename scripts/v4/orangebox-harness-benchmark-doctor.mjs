@@ -414,6 +414,53 @@ const tasks = [
         : okTask("local_model_router_claims", { installed, total, project_installed: project?.models?.installed_core_count });
     },
   },
+  {
+    id: "codexa_setup_contract_truth",
+    category: "codexa_recovery",
+    oracle: "OBOX2 setup package must prove always-on power, rail recovery, model install, wildcard discipline, and optional Hermes contracts before being handed to Codexa.",
+    budget: { timeout_ms: 1600, max_files_read: 2, max_tool_calls: 0 },
+    run(trace) {
+      const doctor = readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json"), trace);
+      const failures = [];
+      const contracts = doctor?.operational_contracts || {};
+      const checks = Array.isArray(contracts.checks) ? contracts.checks : [];
+      const ids = new Set(checks.map((check) => check.id));
+      const required = [
+        "power_disables_ac_sleep",
+        "power_disables_ac_hibernate",
+        "power_disables_ac_disk_idle",
+        "rail_registers_startup_logon_tasks",
+        "rail_runs_as_system_highest",
+        "rail_has_restart_policy",
+        "rail_firewall_trusted_ips",
+        "rail_local_health_probe",
+        "start_here_calls_power_optimizer",
+        "start_here_calls_rail_starter",
+        "model_installer_tiered",
+        "model_installer_missing_required",
+        "model_doctor_missing_core",
+        "hermes_install_orangebox_control_plane_note",
+        "readme_wildcard_law",
+      ];
+      if (doctor?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") failures.push(`OBOX2 doctor status not green: ${doctor?.status || "missing"}`);
+      if (contracts.ok !== true) failures.push("OBOX2 operational contracts are not green");
+      if (checks.length < 30) failures.push(`OBOX2 operational contract check count too low: ${checks.length}`);
+      const missing = required.filter((id) => !ids.has(id));
+      if (missing.length > 0) failures.push(`OBOX2 operational contracts missing required ids: ${missing.join(", ")}`);
+      return failures.length
+        ? failTask("codexa_setup_contract_truth", failures, {
+          status: doctor?.status || null,
+          contract_ok: contracts.ok === true,
+          check_count: checks.length,
+        })
+        : okTask("codexa_setup_contract_truth", {
+          status: doctor.status,
+          contract_ok: contracts.ok,
+          check_count: checks.length,
+          zip_path: doctor.zip_path,
+        });
+    },
+  },
 ];
 
 async function main() {
