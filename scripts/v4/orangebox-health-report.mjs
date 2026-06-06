@@ -155,6 +155,11 @@ function renderMarkdown(result) {
   for (const [name, probe] of Object.entries(result.dev.probes)) {
     lines.push(`- ${name}: ${mdBool(probe.ok)} (${probe.url})`);
   }
+  if (result.dev.terminal_profile) {
+    lines.push(`- PowerShell OB0X profile: ${mdBool(result.dev.terminal_profile.ok)}`);
+    lines.push(`- PowerShell policy: ${result.dev.terminal_profile.current_user_policy || "unknown"}`);
+    lines.push(`- OB0X commands: ${result.dev.terminal_profile.functions_present.join(", ") || "none"}`);
+  }
   lines.push(`- OpenClaw startup retired: ${mdBool(result.dev.openclaw_startup_retired.ok)}`);
   lines.push(`- Skill primer installs: ${result.dev.skill_primers.filter((item) => item.ok).length}/${result.dev.skill_primers.length}`);
   lines.push("");
@@ -200,6 +205,13 @@ function renderMarkdown(result) {
 }
 
 async function main() {
+  const profileBackupRoot = path.join(dataRoot, "profile-backups");
+  const powershellProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
+  const profilePolicyReceiptPath = latestReceipt("orangebox-powershell-profile-policy-", profileBackupRoot);
+  const profilePolicyReceipt = readJson(profilePolicyReceiptPath || "");
+  const profileText = exists(powershellProfilePath) ? fs.readFileSync(powershellProfilePath, "utf8") : "";
+  const functionsPresent = ["obox", "orangebox", "obox-off", "codex", "claude", "antigravity"]
+    .filter((name) => new RegExp(`function\\s+${name}\\b`, "i").test(profileText));
   const receiptPaths = {
     ops_readiness: latestReceipt("orangebox-ops-readiness-") || latestReceipt("orangebox-ops-readiness-", path.join(repoRoot, "receipts")),
     backend_install: latestReceipt("orangebox-backend-install-"),
@@ -257,12 +269,19 @@ async function main() {
 
   const startupOpenClaw = startupPath("OpenClaw Gateway (atomeons).cmd");
   const openclawRetired = !exists(startupOpenClaw) && latest.openclaw_retirement?.status === "OPENCLAW_STARTUP_RETIRED";
+  const terminalProfileOk =
+    exists(powershellProfilePath) &&
+    profilePolicyReceipt?.status === "ORANGEBOX_POWERSHELL_PROFILE_ENABLED" &&
+    profilePolicyReceipt?.current_user_policy_after === "RemoteSigned" &&
+    functionsPresent.includes("obox") &&
+    functionsPresent.includes("obox-off");
   const warnings = [];
   if (!devProbes.command_server.ok) warnings.push("Dev command server is not reachable.");
   if (!devProbes.api_server.ok) warnings.push("Dev API server is not reachable.");
   if (!devProbes.local_llama_health.ok) warnings.push("Local llama listener is not reachable.");
   if (!devProbes.strongarm_gate.ok) warnings.push("STRONGARM gate is not reachable.");
   if (!openclawRetired) warnings.push("OpenClaw startup hook is still present or no retirement receipt exists.");
+  if (!terminalProfileOk) warnings.push("PowerShell OB0X terminal profile is missing, blocked, or has no receipt.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) warnings.push("MCP quarantine/tool bridge doctor is not green.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") warnings.push("Action classifier doctor is not green.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") warnings.push("Orangebox skill lifecycle doctor is not green.");
@@ -329,6 +348,14 @@ async function main() {
         ok: openclawRetired,
         startup_path: startupOpenClaw,
         retirement_status: latest.openclaw_retirement?.status || null,
+      },
+      terminal_profile: {
+        ok: terminalProfileOk,
+        profile_path: powershellProfilePath,
+        receipt_path: profilePolicyReceiptPath,
+        current_user_policy: profilePolicyReceipt?.current_user_policy_after || null,
+        functions_present: functionsPresent,
+        rollback: profilePolicyReceipt?.rollback || [],
       },
       skill_primers: skillRootStatus(),
     },
