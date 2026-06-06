@@ -165,6 +165,7 @@ async function main() {
     { script: "checkmate:doctor", timeout: 60_000 },
     { script: "signal:hygiene", timeout: 60_000 },
     { script: "session:spine", timeout: 60_000 },
+    { script: "feature:proof", timeout: 90_000 },
     { script: "health:report", timeout: 90_000 },
     { script: "project:report", timeout: 90_000 },
     { script: "reality:watch", timeout: 90_000 },
@@ -190,6 +191,7 @@ async function main() {
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const sessionSpinePath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
+  const featureProofPath = path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const backendPath = latestReceipt("orangebox-backend-install-");
   const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
@@ -208,6 +210,7 @@ async function main() {
   const checkmate = readJson(checkmatePath);
   const signalHygiene = readJson(signalHygienePath);
   const sessionSpine = readJson(sessionSpinePath);
+  const featureProof = readJson(featureProofPath);
   const openclaw = readJson(openclawPath);
   const backend = readJson(backendPath || "");
   const opsReadiness = readJson(opsReadinessPath || "");
@@ -240,6 +243,7 @@ async function main() {
     gate("checkmate_eval_lane_green", checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN", { status: checkmate?.status || null, fixtures_total: checkmate?.fixtures?.length ?? null }),
     gate("operator_signal_hygiene_green", signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", { status: signalHygiene?.status || null, severity: signalHygiene?.signal_hygiene?.severity || null }),
     gate("doer_watcher_spine_green", sessionSpine?.ok === true && sessionSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN", { status: sessionSpine?.status || null, failures: sessionSpine?.failures?.length ?? null }),
+    gate("feature_acceptance_matrix_green", featureProof?.ok === true && featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN", { status: featureProof?.status || null, features_green: featureProof?.features_green ?? null, features_total: featureProof?.features_total ?? null }),
     gate("harness_benchmark_green", harness?.ok === true && harness?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN", { status: harness?.status || null, tasks_ok: harness?.tasks_ok ?? null, tasks_total: harness?.tasks_total ?? null }),
     gate("reality_watch_local_ops_truth", reality?.checks?.project_report?.local_ops_green === true || reality?.checks?.project_report?.ok === true, { status: reality?.status || null }),
     gate("reality_watcher_process_fresh", watcherFresh, { path: watcherHeartbeatPath, last_finished: watcherHeartbeat?.last_finished || null }),

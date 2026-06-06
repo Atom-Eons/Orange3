@@ -51,6 +51,7 @@ Add-Check "latest_tool_ergonomics_present" (Test-Path -LiteralPath (Join-Path $d
 Add-Check "latest_checkmate_eval_present" (Test-Path -LiteralPath (Join-Path $data "checkmate\latest-checkmate-eval-lane.json")) "latest-checkmate-eval-lane.json"
 Add-Check "latest_signal_hygiene_present" (Test-Path -LiteralPath (Join-Path $data "signal-hygiene\latest-operator-signal-hygiene.json")) "latest-operator-signal-hygiene.json"
 Add-Check "latest_doer_watcher_spine_present" (Test-Path -LiteralPath (Join-Path $data "doer-watcher\latest-doer-watcher-spine.json")) "latest-doer-watcher-spine.json"
+Add-Check "latest_feature_acceptance_matrix_present" (Test-Path -LiteralPath (Join-Path $data "feature-proof\latest-feature-acceptance-matrix.json")) "latest-feature-acceptance-matrix.json"
 Add-Check "source_of_truth_lock_present" (Test-Path -LiteralPath (Join-Path $data "orangebox-source-of-truth.json")) "orangebox-source-of-truth.json"
 Add-Check "mid_session_primer_present" (Test-Path -LiteralPath (Join-Path $data "primers\ORANGEBOX_MID_SESSION_PRIMER.md")) "ORANGEBOX_MID_SESSION_PRIMER.md"
 Add-Check "codexa_config_present" (Test-Path -LiteralPath (Join-Path $data "codexa-sync\latest-codexa-config.json")) "latest-codexa-config.json"
@@ -135,6 +136,18 @@ if (Test-Path -LiteralPath (Join-Path $data "doer-watcher\latest-doer-watcher-sp
   }
 }
 
+if (Test-Path -LiteralPath (Join-Path $data "feature-proof\latest-feature-acceptance-matrix.json")) {
+  try {
+    $feature = Get-Content -LiteralPath (Join-Path $data "feature-proof\latest-feature-acceptance-matrix.json") -Raw | ConvertFrom-Json
+    $result.latest.feature_acceptance_matrix_status = $feature.status
+    $result.latest.feature_acceptance_matrix_green = $feature.features_green
+    $result.latest.feature_acceptance_matrix_total = $feature.features_total
+    Add-Check "feature_acceptance_matrix_green" (([bool]$feature.ok) -and ($feature.status -eq "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN")) $feature.status
+  } catch {
+    Add-Check "latest_feature_acceptance_matrix_readable" $false $_.Exception.Message
+  }
+}
+
 if (Test-Path -LiteralPath (Join-Path $data "atomsmasher\tool-merge\latest-tool-merge.json")) {
   try {
     $tm = Get-Content -LiteralPath (Join-Path $data "atomsmasher\tool-merge\latest-tool-merge.json") -Raw | ConvertFrom-Json
@@ -163,7 +176,7 @@ if (Test-Path -LiteralPath (Join-Path $data "atomsmasher\latest-atomsmasher-doct
 if ($Refresh -and (Test-Path -LiteralPath $repo)) {
   Push-Location $repo
   try {
-    foreach ($cmd in @("restart:lock", "primer:mid", "codexa:sync-config -- --no-deploy", "aecode:format", "atomsmasher:proof", "atomsmasher:merge-tools", "system:doctor")) {
+    foreach ($cmd in @("restart:lock", "primer:mid", "codexa:sync-config -- --no-deploy", "aecode:format", "atomsmasher:proof", "atomsmasher:merge-tools", "feature:proof", "system:doctor")) {
       $started = Get-Date
       $parts = $cmd -split " "
       $scriptName = $parts[0]

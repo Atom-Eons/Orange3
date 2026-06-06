@@ -172,6 +172,7 @@ async function main() {
   const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
   const doerWatcherSpine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(latestReceipt("orangebox-doer-watcher-spine-"));
+  const featureProof = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json")) || readJson(latestReceipt("orangebox-feature-acceptance-matrix-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -228,6 +229,7 @@ async function main() {
   const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const signalHygieneGreen = signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
   const doerWatcherSpineGreen = doerWatcherSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
+  const featureProofGreen = featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -319,6 +321,16 @@ async function main() {
       next: doerWatcherSpineGreen
         ? "Keep this doctor in the local Ops proof chain before changing watcher, rail, command-server, or Codexa readiness behavior."
         : "Run npm.cmd run session:spine and fix the exact failed doer/watcher check.",
+    },
+    {
+      area: "Feature acceptance matrix",
+      status: status(featureProofGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-feature-acceptance-matrix-doctor.mjs"))),
+      reality: featureProofGreen
+        ? `${featureProof?.features_green || 0}/${featureProof?.features_total || 0} feature claims have status, evidence, proof commands, and rollback or recovery truth.`
+        : "Feature acceptance matrix source exists or is planned, but the current receipt is not green yet.",
+      next: featureProofGreen
+        ? "Keep feature:proof in the local Ops green chain before claiming new systems are done."
+        : "Run npm.cmd run feature:proof and fix the exact failed feature row.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -522,6 +534,7 @@ async function main() {
         checkmate_doctor: packageScript("checkmate:doctor", packageJson),
         signal_hygiene: packageScript("signal:hygiene", packageJson),
         session_spine: packageScript("session:spine", packageJson),
+        feature_proof: packageScript("feature:proof", packageJson),
         ops_green: packageScript("ops:green", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
@@ -672,6 +685,13 @@ async function main() {
         doer_command_server_ok: doerWatcherSpine?.doer?.command_server?.ok ?? null,
         watcher_process_age_ms: doerWatcherSpine?.watcher?.watcher_process?.age_ms ?? null,
         codexa_status: doerWatcherSpine?.one_reality?.codexa_status || null,
+      },
+      feature_proof: {
+        path: path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"),
+        status: featureProof?.status || null,
+        features_green: featureProof?.features_green ?? null,
+        features_total: featureProof?.features_total ?? null,
+        failures: featureProof?.failures?.length ?? null,
       },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },

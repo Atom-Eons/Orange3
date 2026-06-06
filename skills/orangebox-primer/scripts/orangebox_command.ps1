@@ -123,6 +123,11 @@ $commands = [ordered]@{
     args = @("run", "session:spine")
     description = "Verify doer surfaces, watcher freshness, and one-reality state without touching frontend."
   }
+  "feature-proof" = @{
+    kind = "npm"
+    args = @("run", "feature:proof")
+    description = "Verify every Orangebox feature claim has status, evidence, proof command, and rollback or recovery truth."
+  }
   "codexa-alert" = @{
     kind = "npm"
     args = @("run", "codexa:alert")

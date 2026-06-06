@@ -148,6 +148,7 @@ const requiredOpsScripts = [
   "checkmate:doctor",
   "signal:hygiene",
   "session:spine",
+  "feature:proof",
   "harness:benchmark",
   "codexa:alert",
   "codexa:smb-stage",
@@ -189,7 +190,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -217,6 +218,7 @@ const tasks = [
         ["tool_ergonomics", path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"), "ORANGEBOX_TOOL_ERGONOMICS_GREEN"],
         ["checkmate", path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), "CHECKMATE_EVAL_LANE_GREEN"],
         ["session_spine", path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json"), "ORANGEBOX_DOER_WATCHER_SPINE_GREEN"],
+        ["feature_proof", path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN"],
       ];
       if (!backendProofInProgress) {
         receiptSpecs.unshift(
@@ -353,6 +355,40 @@ const tasks = [
           doer_command_server_ok: spine.doer.command_server.ok,
           watcher_process_age_ms: spine.watcher.watcher_process.age_ms,
           codexa_status: spine.one_reality.codexa_status,
+        });
+    },
+  },
+  {
+    id: "feature_acceptance_matrix_truth",
+    category: "feature_proof",
+    oracle: "Every Orangebox feature claim must have explicit status, evidence, a proof command, and rollback or recovery truth.",
+    budget: { timeout_ms: 1600, max_files_read: 2, max_tool_calls: 0 },
+    run(trace) {
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const failures = [];
+      const matrix = Array.isArray(feature?.matrix) ? feature.matrix : [];
+      if (feature?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") failures.push(`Feature acceptance matrix not green: ${feature?.status || "missing"}`);
+      if (matrix.length < 15) failures.push(`Feature matrix too small: ${matrix.length}`);
+      if ((feature?.failures || []).length > 0) failures.push(`Feature matrix has ${feature.failures.length} failure(s)`);
+      if (matrix.some((row) => !row.proof_command || !String(row.proof_command).includes("npm.cmd run"))) failures.push("At least one feature row lacks an npm proof command");
+      if (matrix.some((row) => !row.rollback_path && !row.recovery_path)) failures.push("At least one feature row lacks rollback or recovery path");
+      if (matrix.some((row) => row.lane === "backend_ops" && row.frontend_touch_allowed !== false)) failures.push("At least one backend feature allows frontend touch");
+      if (!matrix.some((row) => row.id === "codexa_two_machine_runtime" && ["BLOCKED", "REAL"].includes(row.status))) failures.push("Codexa two-machine runtime row missing or invalid");
+      if (!matrix.some((row) => row.id === "visual_frontend_lane" && row.status === "SEPARATE_LANE")) failures.push("Visual/frontend separate-lane row missing");
+      if (!backendProofInProgress && project?.evidence?.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") failures.push("Project report does not mirror feature proof green status");
+      return failures.length
+        ? failTask("feature_acceptance_matrix_truth", failures, {
+          status: feature?.status || null,
+          features_total: feature?.features_total || 0,
+          features_green: feature?.features_green || 0,
+        })
+        : okTask("feature_acceptance_matrix_truth", {
+          status: feature.status,
+          features_total: feature.features_total,
+          features_green: feature.features_green,
+          counts: feature.counts,
+          matrix_hash: feature.matrix_hash,
         });
     },
   },

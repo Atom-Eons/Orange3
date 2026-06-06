@@ -81,6 +81,7 @@ const requiredCommands = [
   { name: "checkmate-eval", kind: "npm", script: "checkmate:doctor" },
   { name: "signal-hygiene", kind: "npm", script: "signal:hygiene" },
   { name: "session-spine", kind: "npm", script: "session:spine" },
+  { name: "feature-proof", kind: "npm", script: "feature:proof" },
   { name: "codexa-alert", kind: "npm", script: "codexa:alert" },
   { name: "codexa-alert-popup", kind: "npm", script: "codexa:alert:popup" },
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },

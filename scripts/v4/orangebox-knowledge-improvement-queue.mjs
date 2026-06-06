@@ -174,6 +174,25 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "long_horizon_feature_proof") {
+    const file = path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN"
+      && Number(proof?.features_total || 0) >= 15
+      && Number(proof?.features_green || 0) === Number(proof?.features_total || -1)
+      && proof?.constraints?.frontend_touched === false
+      && Array.isArray(proof?.failures)
+      && proof.failures.length === 0;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.features_green}/${proof.features_total} feature claims have evidence, proof commands, and rollback/recovery truth`,
+      }
+      : null;
+  }
   return null;
 }
 
@@ -419,7 +438,7 @@ const executionProfiles = {
   },
   long_horizon_feature_proof: {
     priority: 80,
-    proof_command: "npm.cmd run project:report && npm.cmd run harness:benchmark",
+    proof_command: "npm.cmd run feature:proof && npm.cmd run project:report && npm.cmd run harness:benchmark",
     acceptance_gate: "Feature claims include acceptance matrix, receipt, tests, rollback path, and honest unfinished/not-real state.",
   },
   codex_harness_and_compaction: {

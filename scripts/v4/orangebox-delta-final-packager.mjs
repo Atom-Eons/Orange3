@@ -241,6 +241,7 @@ function backendPackageJson() {
       "checkmate:doctor": "node ./scripts/v4/checkmate-eval-lane-doctor.mjs --json --receipt",
       "signal:hygiene": "node ./scripts/v4/orangebox-operator-signal-hygiene-doctor.mjs --json --receipt",
       "session:spine": "node ./scripts/v4/orangebox-doer-watcher-session-spine-doctor.mjs --json --receipt",
+      "feature:proof": "node ./scripts/v4/orangebox-feature-acceptance-matrix-doctor.mjs --json --receipt",
       "openclaw:retire": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1 -Apply -StopProcesses -Popup",
       "openclaw:retire:dry": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1",
       "primer:sync": "node ./scripts/v4/orangebox-primer-skill-sync.mjs --json --receipt",

@@ -107,6 +107,8 @@ function main() {
   const signalHygiene = readJson(signalHygienePath);
   const doerWatcherPath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
   const doerWatcher = readJson(doerWatcherPath);
+  const featureProofPath = path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json");
+  const featureProof = readJson(featureProofPath);
   const terminalProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
   const terminalProfileText = exists(terminalProfilePath) ? fs.readFileSync(terminalProfilePath, "utf8") : "";
   const terminalProfileReceiptPath = newestFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
@@ -230,6 +232,15 @@ function main() {
       status: doerWatcher?.status || null,
       failures: doerWatcher?.failures?.length ?? null,
       note: "Proves active doer surfaces, watcher freshness, and one-reality local/Codexa state.",
+    },
+    feature_acceptance_matrix: {
+      ok: featureProof?.ok === true && featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN",
+      path: featureProofPath,
+      status: featureProof?.status || null,
+      features_green: featureProof?.features_green ?? null,
+      features_total: featureProof?.features_total ?? null,
+      failures: featureProof?.failures?.length ?? null,
+      note: "Proves feature claims have explicit status, evidence, proof command, and rollback or recovery truth.",
     },
     terminal_obox_profile: {
       ok:
