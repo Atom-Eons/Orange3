@@ -146,6 +146,12 @@ async function main() {
   const mcpReal = exists(path.join(repoRoot, "scripts", "orangebox-mcp-server.mjs"))
     && exists(path.join(repoRoot, "scripts", "orangebox-command-server.mjs"));
   const aiBoxRailReachable = reality?.checks?.probes?.ai_box_command_8097?.ok === true;
+  const codexaReceiptsReachable = codexaAlert?.receipts_reachable === true;
+  const codexaRemoteControlAvailable = codexaAlert?.remote_control_available === true;
+  const codexaRemoteExecutionAvailable = codexaAlert?.remote_execution_available === true;
+  const codexaSmbVisible = codexaAlert?.smb_port_visible === true;
+  const codexaRailRecoveryPack = codexaAlert?.recovery_artifacts?.rail_recovery_pack || null;
+  const codexaObox2Pack = codexaAlert?.recovery_artifacts?.obox2_setup_pack || null;
   const openclawRetired = openclawRetire?.status === "OPENCLAW_STARTUP_RETIRED";
   const packageGreen = obox2Doctor?.status === "OBOX2_PACKAGE_VERIFIED_GREEN";
   const knowledgeImprovementsReady =
@@ -199,8 +205,18 @@ async function main() {
     {
       area: "N150 to AI Box MCP/command bridge",
       status: status(mcpReal && aiBoxRailReachable, mcpReal),
-      reality: mcpReal ? "MCP server and command-server AI Box routes exist; AI Box command rail is currently not reachable." : "No MCP/command bridge source found.",
-      next: "Start Codexa rail 8097 on AI Box, then rerun health report.",
+      reality: mcpReal
+        ? [
+          "MCP server and command-server AI Box routes exist.",
+          aiBoxRailReachable ? "AI Box command rail 8097 is reachable." : "AI Box command rail 8097 is not reachable.",
+          codexaReceiptsReachable ? "Receipt dashboard 8099 is reachable." : "Receipt dashboard 8099 is not reachable.",
+          codexaRemoteControlAvailable ? "RDP/WinRM remote control is reachable." : "RDP/WinRM remote control is not reachable.",
+          codexaSmbVisible ? "SMB port is visible, but staging is not execution." : "SMB staging is not visible.",
+        ].join(" ")
+        : "No MCP/command bridge source found.",
+      next: codexaRailRecoveryPack?.exists
+        ? `Start Codexa rail 8097 on AI Box using OBOX2 or the rail recovery zip at ${codexaRailRecoveryPack.path}, then rerun health report.`
+        : "Generate npm.cmd run codexa:rail-pack, start Codexa rail 8097 on AI Box, then rerun health report.",
     },
     {
       area: "Codexa visible alerting",
@@ -358,9 +374,18 @@ async function main() {
     not_real_yet: notRealYet,
     recommended_next_actions: [
       "Retire OpenClaw startup if not already retired.",
-      "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
-      "On Codexa, run the OBOX2 power optimizer/doctor before rail/model setup so the AI Box cannot quietly sleep mid-run.",
-      "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
+    "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
+    "On Codexa, run the OBOX2 power optimizer/doctor before rail/model setup so the AI Box cannot quietly sleep mid-run.",
+    codexaRailRecoveryPack?.exists
+      ? `Use the small rail recovery zip when needed: ${codexaRailRecoveryPack.path}.`
+      : "Run npm.cmd run codexa:rail-pack so the small Codexa rail recovery zip exists.",
+    codexaObox2Pack?.exists
+      ? `Full OBOX2 setup pack is ready: ${codexaObox2Pack.path}.`
+      : "Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor so the full OBOX2 setup zip exists.",
+    codexaSmbVisible && !codexaRemoteExecutionAvailable
+      ? "Treat SMB as staging-only; do not claim remote repair until RDP, WinRM, or 8097 command rail is reachable."
+      : "Use the proven remote execution path when it appears in health:report.",
+    "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
       "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
       "Use npm.cmd run knowledge:improvements to refresh receipt-learning candidates before deciding backend upgrades.",
@@ -380,6 +405,10 @@ async function main() {
       knowledge_improvements: { path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), status: knowledgeImprovements?.status || null },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
+      codexa_recovery: {
+        path: codexaRailRecoveryPack?.path || null,
+        status: codexaRailRecoveryPack?.exists ? "CODEXA_RAIL_RECOVERY_PACK_READY" : "CODEXA_RAIL_RECOVERY_PACK_MISSING",
+      },
       mcp_doctor: {
         path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
         status: mcpQuarantineGreen ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
