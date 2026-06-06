@@ -121,6 +121,9 @@ function renderMarkdown(result) {
     if (value.contract_ok !== undefined) details.push(`contracts=${value.contract_ok ? "GREEN" : "NOT GREEN"}`);
     if (value.contract_checks !== undefined) details.push(`contract_checks=${value.contract_checks}`);
     if (value.contract_failed !== undefined) details.push(`contract_failed=${value.contract_failed}`);
+    if (value.execution_backlog_count !== undefined) details.push(`execution_backlog=${value.execution_backlog_count}`);
+    if (value.top_execution_area) details.push(`top=${value.top_execution_area}`);
+    if (value.top_execution_score !== undefined) details.push(`score=${value.top_execution_score}`);
     lines.push(`- ${name}: ${value.status || "unknown"}${details.length ? ` [${details.join(", ")}]` : ""} ${value.path ? `(${value.path})` : ""}`);
   }
   lines.push("");
@@ -194,6 +197,17 @@ async function main() {
   const knowledgeImprovementsReady =
     knowledgeImprovements?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" &&
     knowledgeImprovements?.not_autonomous === true;
+  const knowledgeExecutionBacklog = Array.isArray(knowledgeImprovements?.execution_backlog)
+    ? knowledgeImprovements.execution_backlog
+    : [];
+  const topKnowledgeExecution = knowledgeImprovements?.top_execution_candidate || knowledgeExecutionBacklog[0] || null;
+  const knowledgeBacklogReady =
+    knowledgeImprovementsReady &&
+    knowledgeExecutionBacklog.length > 0 &&
+    topKnowledgeExecution?.operator_approval_required === true &&
+    topKnowledgeExecution?.auto_promote === false &&
+    topKnowledgeExecution?.scope === "backend_ops_only" &&
+    topKnowledgeExecution?.frontend_touch_allowed === false;
   const researchScoutReady =
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_READY" ||
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_DEGRADED";
@@ -326,12 +340,14 @@ async function main() {
     },
     {
       area: "Knowledge Engine",
-      status: status(knowledgeImprovementsReady, exists(path.join(repoRoot, "scripts", "orangebox-knowledge-v2.mjs"))),
+      status: status(knowledgeBacklogReady, knowledgeImprovementsReady || exists(path.join(repoRoot, "scripts", "orangebox-knowledge-v2.mjs"))),
       reality: knowledgeImprovementsReady
-        ? `Knowledge storage/search, receipts, primers, and ${knowledgeImprovements?.candidate_count || 0} learned improvement candidates are real. Autonomous self-promotion is intentionally not real.`
+        ? `Knowledge storage/search, receipts, primers, ${knowledgeImprovements?.candidate_count || 0} learned improvement candidates, and ${knowledgeExecutionBacklog.length} execution-ranked backend backlog item(s) are real. Top item: ${topKnowledgeExecution?.area || "none"}. Autonomous self-promotion is intentionally not real.`
         : "Knowledge storage, receipts, primers, and search exist. Learned improvement candidates are not proven yet, and autonomous self-promotion is intentionally not real.",
-      next: knowledgeImprovementsReady
-        ? "Promote candidates only through task contract, operator approval, doctor receipt, and rollback path."
+      next: knowledgeBacklogReady
+        ? `Promote only with operator approval, then prove with: ${topKnowledgeExecution.proof_command}`
+        : knowledgeImprovementsReady
+          ? "Refresh execution backlog proof; candidates must include proof commands, backend-only scope, and no self-promotion."
         : "Run npm.cmd run knowledge:improvements, then rerun project/readiness proof.",
     },
     {
@@ -498,7 +514,9 @@ async function main() {
       "Install core Codexa models first; hold heavy models until core proof is green.",
       "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
       "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
-      "Use npm.cmd run knowledge:improvements to refresh receipt-learning candidates before deciding backend upgrades.",
+      topKnowledgeExecution
+        ? `Top Knowledge Engine backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}) -> ${topKnowledgeExecution.proof_command}`
+        : "Use npm.cmd run knowledge:improvements to refresh receipt-learning candidates before deciding backend upgrades.",
     ],
     evidence: {
       full_green: { path: path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"), status: fullGreen?.summary?.status || fullGreen?.status || null },
@@ -519,7 +537,14 @@ async function main() {
         contract_failed_ids: obox2Contracts.failed_ids,
       },
       soul: { path: path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"), status: soulDoctor?.status || null },
-      knowledge_improvements: { path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), status: knowledgeImprovements?.status || null },
+      knowledge_improvements: {
+        path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"),
+        status: knowledgeImprovements?.status || null,
+        candidate_count: knowledgeImprovements?.candidate_count || 0,
+        execution_backlog_count: knowledgeExecutionBacklog.length,
+        top_execution_area: topKnowledgeExecution?.area || null,
+        top_execution_score: topKnowledgeExecution?.execution_score ?? null,
+      },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
       harness_benchmark: {
         path: path.join(dataRoot, "harness", "latest-harness-benchmark.json"),

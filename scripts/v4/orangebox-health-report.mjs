@@ -210,6 +210,9 @@ function renderMarkdown(result) {
     if (item.contract_ok !== undefined) details.push(`contracts=${mdBool(item.contract_ok)}`);
     if (item.contract_checks !== undefined) details.push(`contract_checks=${item.contract_checks}`);
     if (item.contract_failed !== undefined) details.push(`contract_failed=${item.contract_failed}`);
+    if (item.execution_backlog_count !== undefined) details.push(`execution_backlog=${item.execution_backlog_count}`);
+    if (item.top_execution_area) details.push(`top=${item.top_execution_area}`);
+    if (item.top_execution_score !== undefined) details.push(`score=${item.top_execution_score}`);
     lines.push(`- ${name}: ${item.status || "unknown"}${details.length ? ` [${details.join(", ")}]` : ""} ${item.path ? `(${item.path})` : ""}`);
   }
   lines.push("");
@@ -287,6 +290,17 @@ async function main() {
     rail_recovery_dir: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack", "RUN_ON_CODEXA_AS_ADMIN.cmd")),
   };
   const obox2Contracts = operationalContractSummary(latest.obox2_package);
+  const knowledgeExecutionBacklog = Array.isArray(latest.knowledge_improvements?.execution_backlog)
+    ? latest.knowledge_improvements.execution_backlog
+    : [];
+  const topKnowledgeExecution = latest.knowledge_improvements?.top_execution_candidate || knowledgeExecutionBacklog[0] || null;
+  const knowledgeBacklogReady =
+    latest.knowledge_improvements?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" &&
+    knowledgeExecutionBacklog.length > 0 &&
+    topKnowledgeExecution?.operator_approval_required === true &&
+    topKnowledgeExecution?.auto_promote === false &&
+    topKnowledgeExecution?.scope === "backend_ops_only" &&
+    topKnowledgeExecution?.frontend_touch_allowed === false;
 
   const startupOpenClaw = startupPath("OpenClaw Gateway (atomeons).cmd");
   const openclawRetired = !exists(startupOpenClaw) && latest.openclaw_retirement?.status === "OPENCLAW_STARTUP_RETIRED";
@@ -317,6 +331,7 @@ async function main() {
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") warnings.push("Orangebox offline harness benchmark is not green.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
+  else if (!knowledgeBacklogReady) warnings.push("Knowledge Engine improvement candidates are refreshed, but execution-ranked backend backlog proof is not green.");
   if (latest.project_report?.full_project_green === false) warnings.push(`Project report has ${latest.project_report?.gap_count || 0} open gap(s); do not call full Orangebox green.`);
 
   const nextActions = [];
@@ -332,6 +347,8 @@ async function main() {
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") nextActions.push("Run npm.cmd run harness:benchmark to prove offline oracle tasks before claiming tool/routing optimization.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
+  else if (!knowledgeBacklogReady) nextActions.push("Rerun npm.cmd run knowledge:improvements after the queue script upgrade so learned candidates include backend-only execution proof.");
+  else if (topKnowledgeExecution) nextActions.push(`Top learned backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}); prove with ${topKnowledgeExecution.proof_command}.`);
   if (latest.project_report?.full_project_green === false) nextActions.push("Review npm.cmd run project:report output before claiming full project completion.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
@@ -442,6 +459,9 @@ async function main() {
         path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"),
         status: latest.knowledge_improvements?.status || null,
         candidate_count: latest.knowledge_improvements?.candidate_count || 0,
+        execution_backlog_count: knowledgeExecutionBacklog.length,
+        top_execution_area: topKnowledgeExecution?.area || null,
+        top_execution_score: topKnowledgeExecution?.execution_score ?? null,
       },
     codexa_alert: {
       path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"),

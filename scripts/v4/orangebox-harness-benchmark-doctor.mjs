@@ -377,6 +377,42 @@ const tasks = [
     },
   },
   {
+    id: "knowledge_execution_backlog_truth",
+    category: "knowledge_evidence",
+    oracle: "Learned research/receipt candidates are ranked into backend-only execution work with proof commands, approval gates, and no self-promotion.",
+    budget: { timeout_ms: 1600, max_files_read: 1, max_tool_calls: 0 },
+    run(trace) {
+      const improvements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), trace);
+      const backlog = Array.isArray(improvements?.execution_backlog) ? improvements.execution_backlog : [];
+      const top = improvements?.top_execution_candidate || backlog[0] || {};
+      const failures = [];
+      if (improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") failures.push(`Knowledge improvement queue not ready: ${improvements?.status || "missing"}`);
+      if (backlog.length < 1) failures.push("Knowledge improvement queue has no execution_backlog");
+      if (!Number.isFinite(top.execution_score) || top.execution_score <= 0) failures.push(`Top execution score invalid: ${top.execution_score ?? "missing"}`);
+      if (!top.area || top.area === "general_ops") failures.push(`Top execution area is not specific enough: ${top.area || "missing"}`);
+      if (top.operator_approval_required !== true) failures.push("Top backlog item must require operator approval");
+      if (top.auto_promote !== false) failures.push("Top backlog item must explicitly disable auto_promote");
+      if (top.scope !== "backend_ops_only") failures.push(`Top backlog item scope must be backend_ops_only, got ${top.scope || "missing"}`);
+      if (top.frontend_touch_allowed !== false) failures.push("Top backlog item must forbid frontend touch");
+      if (!String(top.proof_command || "").includes("npm.cmd run")) failures.push("Top backlog item lacks an executable npm proof command");
+      if (!top.acceptance_gate || String(top.acceptance_gate).length < 20) failures.push("Top backlog item lacks a concrete acceptance gate");
+      if (backlog.some((item) => item.auto_promote !== false)) failures.push("At least one backlog item does not explicitly disable auto_promote");
+      if (backlog.some((item) => item.frontend_touch_allowed !== false || item.scope !== "backend_ops_only")) failures.push("At least one backlog item violates backend-only scope");
+      return failures.length
+        ? failTask("knowledge_execution_backlog_truth", failures, {
+          backlog_count: backlog.length,
+          top_area: top.area || null,
+          top_score: top.execution_score ?? null,
+        })
+        : okTask("knowledge_execution_backlog_truth", {
+          backlog_count: backlog.length,
+          top_area: top.area,
+          top_score: top.execution_score,
+          proof_command: top.proof_command,
+        });
+    },
+  },
+  {
     id: "structured_verdict_lane_truth",
     category: "structured_verdicts",
     oracle: "STRONGARM and Misfits are proven as local pressure gates/datasets, without claiming unperformed model training.",

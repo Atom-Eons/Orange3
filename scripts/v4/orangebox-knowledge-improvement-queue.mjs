@@ -215,6 +215,192 @@ function candidateFromGroup(area, items) {
   };
 }
 
+const executionProfiles = {
+  action_classifier_permission_gate: {
+    priority: 98,
+    proof_command: "npm.cmd run action:doctor && npm.cmd run harness:benchmark",
+    acceptance_gate: "New command-action classifier fixtures pass, dangerous scope expansion is blocked before tool execution, and the harness receipt stays green.",
+  },
+  mcp_supply_chain_security: {
+    priority: 97,
+    proof_command: "npm.cmd run mcp:doctor && npm.cmd run harness:benchmark",
+    acceptance_gate: "MCP candidate stays quarantined, metadata/tool schemas are bounded, output caps hold, no host config mutation occurs, and receipts prove the gate.",
+  },
+  mcp_quarantine_gateway: {
+    priority: 96,
+    proof_command: "npm.cmd run mcp:doctor && npm.cmd run harness:benchmark",
+    acceptance_gate: "MCP source-scope, localhost, stdio, command-template, and receipt checks pass without enabling a new external server by default.",
+  },
+  tool_ergonomics_eval_lane: {
+    priority: 93,
+    proof_command: "npm.cmd run harness:benchmark",
+    acceptance_gate: "Tool-name, output-shape, transcript-repair, and budget fixtures pass before any tool description or command surface is promoted.",
+  },
+  eval_integrity_and_benchmark_hygiene: {
+    priority: 92,
+    proof_command: "npm.cmd run harness:benchmark",
+    acceptance_gate: "CHECKMATE/eval hygiene fixtures prove no source leakage, canary misses, benchmark-key exposure, or unsupported score inflation.",
+  },
+  checkmate_eval_lane: {
+    priority: 90,
+    proof_command: "npm.cmd run harness:benchmark",
+    acceptance_gate: "Local eval fixture proves the proposed routing/model change before the model lane changes.",
+  },
+  judge_reliability_and_strongarm: {
+    priority: 89,
+    proof_command: "npm.cmd run strongarm:doctor && npm.cmd run gremlin:doctor && npm.cmd run harness:benchmark",
+    acceptance_gate: "STRONGARM/Misfits packets cite evidence, cannot override failed deterministic gates, and keep training claims honest.",
+  },
+  memory_interference_eval: {
+    priority: 87,
+    proof_command: "npm.cmd run atomsmasher:doctor && npm.cmd run harness:benchmark",
+    acceptance_gate: "Memory-interference fixture proves revised facts, stale recall, source dereference, and repeated hydration behavior without raw-history flooding.",
+  },
+  knowledge_engine_atomsmasher: {
+    priority: 86,
+    proof_command: "npm.cmd run atomsmasher:doctor && npm.cmd run knowledge:improvements && npm.cmd run harness:benchmark",
+    acceptance_gate: "AtomSmasher/Knowledge changes emit receipts, preserve source truth, and improve sparse work without autonomous self-promotion.",
+  },
+  operator_signal_hygiene: {
+    priority: 85,
+    proof_command: "npm.cmd run health:report && npm.cmd run harness:benchmark",
+    acceptance_gate: "Warnings remain machine-readable, popup cadence is fatigue-aware, severity labels are calibrated, and local/full-system green stays distinct.",
+  },
+  operator_situation_awareness: {
+    priority: 84,
+    proof_command: "npm.cmd run health:report && npm.cmd run project:report && npm.cmd run harness:benchmark",
+    acceptance_gate: "Reports keep the operator and local watcher in one reality: reachable, unreachable, partial, and blocked states are explicit.",
+  },
+  skill_lifecycle_compression: {
+    priority: 82,
+    proof_command: "npm.cmd run skills:lifecycle && npm.cmd run harness:benchmark",
+    acceptance_gate: "Skill candidates reduce repeated work, stale skills stay out of active roots, and every skill command maps to a real package proof.",
+  },
+  doer_watcher_session_spine: {
+    priority: 81,
+    proof_command: "npm.cmd run reality:watch && npm.cmd run health:report && npm.cmd run harness:benchmark",
+    acceptance_gate: "Doer/watcher receipts prove process truth, stale service detection, and resume context without burning paid model calls.",
+  },
+  long_horizon_feature_proof: {
+    priority: 80,
+    proof_command: "npm.cmd run project:report && npm.cmd run harness:benchmark",
+    acceptance_gate: "Feature claims include acceptance matrix, receipt, tests, rollback path, and honest unfinished/not-real state.",
+  },
+  codex_harness_and_compaction: {
+    priority: 79,
+    proof_command: "npm.cmd run chatbackup:restore && npm.cmd run harness:benchmark",
+    acceptance_gate: "Cold-start/restore packets preserve project law, scope, and proof state without requiring hidden chat memory.",
+  },
+  sandbox_and_permission_law: {
+    priority: 78,
+    proof_command: "npm.cmd run action:doctor && npm.cmd run mcp:doctor && npm.cmd run harness:benchmark",
+    acceptance_gate: "Path, network, credential, and command boundaries are fixture-tested before new execution surfaces are allowed.",
+  },
+  codexa_power: {
+    priority: 77,
+    proof_command: "npm.cmd run obox2:doctor && npm.cmd run health:report",
+    acceptance_gate: "OBOX2 package proves always-on AC power, startup tasks, rail restart policy, and operator-visible Codexa status before AI Box work is claimed.",
+    blocked_by: ["Codexa setup must be run on the AI Box or through a proven remote execution rail."],
+  },
+  codexa_ai_box: {
+    priority: 76,
+    proof_command: "npm.cmd run obox2:doctor && npm.cmd run codexa:alert && npm.cmd run health:report",
+    acceptance_gate: "Codexa command rail, Ollama, receipts, and recovery artifacts are probed; local Ops remains green but full two-machine green stays gated until reachable.",
+    blocked_by: ["Codexa command rail/Ollama are not reachable from this cockpit yet."],
+  },
+  local_model_lane_eval: {
+    priority: 74,
+    proof_command: "npm.cmd run trilane:doctor && npm.cmd run strongarm:doctor && npm.cmd run gremlin:doctor",
+    acceptance_gate: "Local model lane claims are based on installed model inventory and packet evals, not aspirational config.",
+    blocked_by: ["Codexa/Ollama model inventory is not fully proven yet."],
+  },
+  codexa_model_serving: {
+    priority: 72,
+    proof_command: "npm.cmd run trilane:doctor && npm.cmd run health:report",
+    acceptance_gate: "Serving-stack changes wait until core Ollama proof is green and model doctor records throughput/availability truth.",
+    blocked_by: ["Codexa core Ollama proof must be green before serving-stack upgrades."],
+  },
+  hermes_orchestration: {
+    priority: 70,
+    proof_command: "npm.cmd run obox2:doctor && npm.cmd run project:report",
+    acceptance_gate: "Hermes is installed/verified through OBOX2 contracts before it is treated as a live orchestration layer.",
+    blocked_by: ["Hermes is setup-contract ready but not proven installed/running on Codexa."],
+  },
+  research_assurance_lab: {
+    priority: 68,
+    proof_command: "npm.cmd run research:scout && npm.cmd run knowledge:improvements",
+    acceptance_gate: "Research source becomes a playbook, benchmark, or receipt-backed proof task, not broad unsourced architecture drift.",
+  },
+  knowledge_engine: {
+    priority: 66,
+    proof_command: "npm.cmd run knowledge:improvements && npm.cmd run harness:benchmark",
+    acceptance_gate: "Knowledge candidates stay queued for operator approval and receive execution-ranked proof metadata.",
+  },
+  windows_process_lock: {
+    priority: 65,
+    proof_command: "npm.cmd run restart:lock && npm.cmd run final:verify",
+    acceptance_gate: "Windows process-lock handling proves scoped stop/retry/rollback behavior without killing unrelated processes.",
+  },
+  legacy_cleanup: {
+    priority: 64,
+    proof_command: "npm.cmd run openclaw:retire && npm.cmd run health:report",
+    acceptance_gate: "Legacy startup hooks are removed with backup receipt and are not restored without operator approval.",
+  },
+  general_ops: {
+    priority: 45,
+    proof_command: "npm.cmd run project:report && npm.cmd run harness:benchmark",
+    acceptance_gate: "General Ops evidence is restated as a scoped task contract before any code change.",
+  },
+};
+
+function executionProfile(area) {
+  return executionProfiles[area] || executionProfiles.general_ops;
+}
+
+function clampScore(value) {
+  return Math.max(1, Math.min(100, Math.round(value)));
+}
+
+function executionBacklogFromCandidates(candidates) {
+  const items = candidates.map((candidate) => {
+    const profile = executionProfile(candidate.area);
+    const learnedFrom = Array.isArray(candidate.learned_from) ? candidate.learned_from : [];
+    const evidenceCount = learnedFrom.length;
+    const researchSignals = learnedFrom.filter((item) => /research-scout|external-research/i.test(String(item.source || ""))).length;
+    const score = clampScore(
+      profile.priority
+      + Number(candidate.confidence || 0) * 8
+      + Math.min(6, evidenceCount)
+      + Math.min(5, researchSignals * 2)
+      - Math.min(12, (profile.blocked_by || []).length * 6),
+    );
+    return {
+      id: `${candidate.id}_exec`,
+      area: candidate.area,
+      title: candidate.title,
+      status: (profile.blocked_by || []).length ? "approval_ready_but_blocked" : "approval_ready",
+      execution_score: score,
+      confidence: candidate.confidence,
+      evidence_count: evidenceCount,
+      research_signal_count: researchSignals,
+      why_now: `Evidence cluster ${candidate.id} has confidence ${candidate.confidence} and ${evidenceCount} source signal(s); ranked by backend Ops impact, proofability, and current blockers.`,
+      implementation_candidate: candidate.proposed_next_action,
+      proof_command: profile.proof_command,
+      acceptance_gate: profile.acceptance_gate,
+      blocked_by: profile.blocked_by || [],
+      scope: "backend_ops_only",
+      frontend_touch_allowed: false,
+      operator_approval_required: true,
+      auto_promote: false,
+      rollback_path: "Revert the scoped patch/receipt-producing change and rerun the same proof command before promotion.",
+      promotion_gate: candidate.promotion_gate,
+    };
+  });
+  return items
+    .sort((a, b) => b.execution_score - a.execution_score || b.confidence - a.confidence)
+    .map((item, index) => ({ rank: index + 1, ...item }));
+}
+
 async function main() {
   const findings = [];
   const reportFiles = [
@@ -247,6 +433,7 @@ async function main() {
   const candidates = [...groups.entries()]
     .map(([area, items]) => candidateFromGroup(area, items))
     .sort((a, b) => b.confidence - a.confidence);
+  const executionBacklog = executionBacklogFromCandidates(candidates).slice(0, 12);
 
   const result = {
     ok: true,
@@ -260,6 +447,12 @@ async function main() {
     finding_count: findings.length,
     candidate_count: candidates.length,
     candidates,
+    execution_backlog_count: executionBacklog.length,
+    execution_backlog: executionBacklog,
+    top_execution_candidate: executionBacklog[0] || null,
+    next_backend_action: executionBacklog[0]
+      ? `${executionBacklog[0].title} -> ${executionBacklog[0].proof_command}`
+      : "No backend execution candidate is currently ranked.",
     not_autonomous: true,
   };
 
