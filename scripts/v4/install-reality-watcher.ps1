@@ -1,6 +1,7 @@
 param(
   [int]$IntervalSeconds = 120,
-  [int]$ReceiptEveryCycles = 30
+  [int]$ReceiptEveryCycles = 30,
+  [int]$ResearchEveryCycles = 720
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,18 +21,21 @@ if (-not (Test-Path -LiteralPath $watcher)) {
 }
 
 function Stop-ExistingWatcher($ScriptPath) {
+  $scriptName = Split-Path -Leaf $ScriptPath
   Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
     Where-Object {
       $_.ProcessId -ne $PID -and
       $_.CommandLine -and
-      $_.CommandLine.Contains($ScriptPath)
+      ($_.CommandLine.Contains($ScriptPath) -or $_.CommandLine.Contains($scriptName))
     } |
     ForEach-Object {
       try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {}
     }
 }
 
-$argument = "-NoProfile -ExecutionPolicy Bypass -File `"$watcher`" -IntervalSeconds $IntervalSeconds -ReceiptEveryCycles $ReceiptEveryCycles"
+Stop-ExistingWatcher $watcher
+
+$argument = "-NoProfile -ExecutionPolicy Bypass -File `"$watcher`" -IntervalSeconds $IntervalSeconds -ReceiptEveryCycles $ReceiptEveryCycles -ResearchEveryCycles $ResearchEveryCycles"
 $action = New-ScheduledTaskAction -Execute $powershell -Argument $argument -WorkingDirectory $repo
 $trigger = New-ScheduledTaskTrigger -AtLogOn
 $settings = New-ScheduledTaskSettingsSet `
@@ -90,6 +94,7 @@ try {
   startup_shortcut = $shortcutPath
   interval_seconds = $IntervalSeconds
   receipt_every_cycles = $ReceiptEveryCycles
+  research_every_cycles = $ResearchEveryCycles
   watcher = $watcher
   powershell = $powershell
   note = "Always-on local deterministic watcher. It checks receipts, heartbeats, and local rails; it does not use paid model/API calls."
