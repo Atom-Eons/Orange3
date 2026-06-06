@@ -256,6 +256,71 @@ const tasks = [
     },
   },
   {
+    id: "codexa_signal_hygiene_truth",
+    category: "operator_signal_hygiene",
+    oracle: "Codexa warnings must be machine-readable, fatigue-aware, and explicit that local install is not blocked while full two-machine green is gated.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const alert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const failures = [];
+      const hygiene = alert?.signal_hygiene || {};
+      if (hygiene.version !== "orangebox-signal-hygiene/v1") failures.push(`Signal hygiene version missing/wrong: ${hygiene.version || "missing"}`);
+      if (!["attention", "warning", "green", "critical"].includes(hygiene.severity)) failures.push(`Signal hygiene severity invalid: ${hygiene.severity || "missing"}`);
+      if (hygiene.local_basic_install_blocked !== false) failures.push("Signal hygiene must preserve local_basic_install_blocked=false for Codexa-only gaps");
+      if (hygiene.full_system_green_blocked !== true) failures.push("Signal hygiene must keep full_system_green_blocked=true while Codexa rail/Ollama are down");
+      if (!hygiene.alert_fatigue_policy || !/cooldown|status change/i.test(hygiene.alert_fatigue_policy)) failures.push("Signal hygiene lacks popup cooldown/status-change policy");
+      if (project?.evidence?.codexa_signal_hygiene?.summary_line !== hygiene.summary_line) failures.push("Project report does not mirror Codexa signal summary");
+      return failures.length
+        ? failTask("codexa_signal_hygiene_truth", failures, {
+          version: hygiene.version,
+          severity: hygiene.severity,
+          local_basic_install_blocked: hygiene.local_basic_install_blocked,
+          full_system_green_blocked: hygiene.full_system_green_blocked,
+        })
+        : okTask("codexa_signal_hygiene_truth", {
+          version: hygiene.version,
+          severity: hygiene.severity,
+          repeat_count: hygiene.repeat_count || 0,
+          local_basic_install_blocked: hygiene.local_basic_install_blocked,
+          full_system_green_blocked: hygiene.full_system_green_blocked,
+        });
+    },
+  },
+  {
+    id: "terminal_obox_affordance_truth",
+    category: "operator_signal_hygiene",
+    oracle: "A fresh terminal must have a visible OB0X ON path without startup spam, and reports must preserve the proof receipt.",
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    run(trace) {
+      const profilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
+      const profile = exists(profilePath) ? readText(profilePath, trace) : "";
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const latestProfileReceipt = latestReceipt("orangebox-powershell-profile-policy-", path.join(dataRoot, "profile-backups"));
+      const receipt = latestProfileReceipt ? readJson(latestProfileReceipt, trace) : null;
+      const failures = [];
+      if (!profile.includes("function obox")) failures.push("PowerShell profile missing obox function");
+      if (!profile.includes("function obox-off")) failures.push("PowerShell profile missing obox-off function");
+      if (!profile.includes("ORANGEBOX_ACTIVE")) failures.push("PowerShell profile missing ORANGEBOX_ACTIVE state");
+      if (/Agent Colors Loaded!/i.test(profile)) failures.push("PowerShell profile still contains startup spam text");
+      if (receipt?.status !== "ORANGEBOX_POWERSHELL_PROFILE_ENABLED") failures.push(`Profile receipt status wrong/missing: ${receipt?.status || "missing"}`);
+      if (receipt?.current_user_policy_after !== "RemoteSigned") failures.push(`Profile execution policy proof wrong/missing: ${receipt?.current_user_policy_after || "missing"}`);
+      if (project?.evidence?.terminal_obox_profile?.status !== "ORANGEBOX_TERMINAL_AFFORDANCE_GREEN") failures.push("Project report does not mark terminal affordance green");
+      return failures.length
+        ? failTask("terminal_obox_affordance_truth", failures, {
+          profile_path: profilePath,
+          receipt_path: latestProfileReceipt,
+          project_status: project?.evidence?.terminal_obox_profile?.status || null,
+        })
+        : okTask("terminal_obox_affordance_truth", {
+          profile_path: profilePath,
+          receipt_path: latestProfileReceipt,
+          current_user_policy_after: receipt?.current_user_policy_after,
+          project_status: project?.evidence?.terminal_obox_profile?.status,
+        });
+    },
+  },
+  {
     id: "frontend_quarantine_backend_lane",
     category: "scope_control",
     oracle: "Backend proof and final package stay independent from frontend build/proof lanes.",
@@ -384,6 +449,7 @@ async function main() {
       "Harness Bench style: sandboxed offline agent tasks, traces, budgets, artifact/oracle grading.",
       "Tool ergonomics: namespaced commands, concise tool outputs, and eval-driven tool repair.",
       "Context engineering: preserve project state outside chat and hydrate only what a task needs.",
+      "Operator signal hygiene: visible status, popup throttling, and confidence calibration protect human-machine shared reality.",
     ],
     tasks_total: results.length,
     tasks_ok: okCount,
