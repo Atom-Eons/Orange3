@@ -199,8 +199,8 @@ async function main() {
     {
       area: "OBOX2 setup package",
       status: status(packageGreen, obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN"),
-      reality: packageGreen ? "Zip was expanded and verified by package doctor." : "Zip exists or is planned, but package doctor is not green.",
-      next: "Run npm.cmd run obox2:pack then npm.cmd run obox2:doctor.",
+      reality: packageGreen ? "Zip was expanded and verified by package doctor; includes Codexa always-on power optimizer, rail starter, model installer, and Hermes doctor." : "Zip exists or is planned, but package doctor is not green.",
+      next: "Run power optimizer/doctor on Codexa first, then rail, then core models.",
     },
     {
       area: "SOUL GENOME continuity map",
@@ -262,6 +262,7 @@ async function main() {
     recommended_next_actions: [
       "Retire OpenClaw startup if not already retired.",
       "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
+      "On Codexa, run the OBOX2 power optimizer/doctor before rail/model setup so the AI Box cannot quietly sleep mid-run.",
       "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
       "Add Knowledge Engine receipt-learning candidate queue before autonomous self-upgrades.",

@@ -196,6 +196,169 @@ if (-not $result.ok) { exit 1 }
 `;
 }
 
+function powerOptimizerScript() {
+  return `param(
+  [switch]$Apply,
+  [switch]$EnableRdp,
+  [switch]$DisableHibernate
+)
+$ErrorActionPreference = 'Continue'
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$receiptRoot = 'C:\\AtomEons\\ai-box\\receipts'
+New-Item -ItemType Directory -Force -Path $receiptRoot | Out-Null
+
+function Is-Admin {
+  $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+  $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+  return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Run-Step($Name, $Exe, $Args) {
+  $started = Get-Date
+  if (-not $Apply) {
+    return [ordered]@{ name = $Name; ok = $true; skipped = $true; exe = $Exe; args = @($Args) }
+  }
+  try {
+    $output = & $Exe @Args 2>&1
+    $exit = $LASTEXITCODE
+    return [ordered]@{
+      name = $Name
+      ok = ($exit -eq 0)
+      exit_code = $exit
+      seconds = [math]::Round(((Get-Date) - $started).TotalSeconds, 2)
+      output_tail = (($output | Select-Object -Last 12) -join [Environment]::NewLine)
+    }
+  } catch {
+    return [ordered]@{ name = $Name; ok = $false; error = $_.Exception.Message }
+  }
+}
+
+$admin = Is-Admin
+$steps = @()
+if ($Apply -and -not $admin) {
+  $result = [ordered]@{
+    ok = $false
+    status = 'OBOX2_CODEXA_POWER_OPTIMIZER_NEEDS_ADMIN'
+    checked_at = (Get-Date).ToUniversalTime().ToString('o')
+    applied = $false
+    admin = $admin
+    note = 'Run RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd as Administrator on Codexa.'
+  }
+  $path = Join-Path $receiptRoot 'obox2-power-optimizer-latest.json'
+  $result | ConvertTo-Json -Depth 10 | Set-Content -Encoding UTF8 -Path $path
+  Write-Host $result.status -ForegroundColor Red
+  Write-Host ("Receipt: " + $path)
+  exit 1
+}
+
+$steps += Run-Step 'active_scheme_high_performance' 'powercfg.exe' @('/setactive','SCHEME_MIN')
+$steps += Run-Step 'ac_sleep_never' 'powercfg.exe' @('/change','standby-timeout-ac','0')
+$steps += Run-Step 'ac_hibernate_never' 'powercfg.exe' @('/change','hibernate-timeout-ac','0')
+$steps += Run-Step 'ac_disk_never' 'powercfg.exe' @('/change','disk-timeout-ac','0')
+$steps += Run-Step 'ac_hybrid_sleep_off' 'powercfg.exe' @('/setacvalueindex','SCHEME_CURRENT','SUB_SLEEP','HYBRIDSLEEP','0')
+$steps += Run-Step 'ac_wake_timers_enabled' 'powercfg.exe' @('/setacvalueindex','SCHEME_CURRENT','SUB_SLEEP','RTCWAKE','1')
+$steps += Run-Step 'apply_current_scheme' 'powercfg.exe' @('/setactive','SCHEME_CURRENT')
+if ($DisableHibernate) {
+  $steps += Run-Step 'hibernate_file_off' 'powercfg.exe' @('/hibernate','off')
+}
+if ($EnableRdp -and $Apply) {
+  try {
+    Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' | Out-Null
+    Set-ItemProperty -LiteralPath 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name 'fDenyTSConnections' -Value 0
+    $steps += [ordered]@{ name = 'rdp_enabled'; ok = $true }
+  } catch {
+    $steps += [ordered]@{ name = 'rdp_enabled'; ok = $false; error = $_.Exception.Message }
+  }
+}
+
+$railScript = Join-Path $root 'START_CODEXA_RAIL.ps1'
+$railScriptPresent = Test-Path -LiteralPath $railScript
+$activeScheme = (& powercfg.exe /getactivescheme 2>&1 | Out-String).Trim()
+$requests = (& powercfg.exe /requests 2>&1 | Out-String).Trim()
+$availableSleep = (& powercfg.exe /a 2>&1 | Out-String).Trim()
+$ok = (-not $Apply) -or (($steps | Where-Object { -not $_.ok }).Count -eq 0)
+$result = [ordered]@{
+  ok = $ok
+  status = $(if ($ok) { 'OBOX2_CODEXA_POWER_OPTIMIZER_READY' } else { 'OBOX2_CODEXA_POWER_OPTIMIZER_NOT_GREEN' })
+  checked_at = (Get-Date).ToUniversalTime().ToString('o')
+  applied = [bool]$Apply
+  admin = $admin
+  rail_script_present = $railScriptPresent
+  enable_rdp_requested = [bool]$EnableRdp
+  disable_hibernate_requested = [bool]$DisableHibernate
+  steps = @($steps)
+  active_scheme = $activeScheme
+  power_requests = $requests
+  sleep_capabilities = $availableSleep
+  note = 'AC sleep/hibernate/disk idle are set to never when Apply is used. This is for Codexa / AI Box, not the cockpit.'
+}
+$path = Join-Path $receiptRoot 'obox2-power-optimizer-latest.json'
+$result | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 -Path $path
+if ($ok) { Write-Host $result.status -ForegroundColor Green } else { Write-Host $result.status -ForegroundColor Red }
+Write-Host ("Receipt: " + $path)
+if (-not $ok) { exit 1 }
+`;
+}
+
+function powerDoctorScript() {
+  return `param()
+$ErrorActionPreference = 'Continue'
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$receiptRoot = 'C:\\AtomEons\\ai-box\\receipts'
+New-Item -ItemType Directory -Force -Path $receiptRoot | Out-Null
+
+function Read-AcIndex($Subgroup, $Setting) {
+  try {
+    $text = (& powercfg.exe /q SCHEME_CURRENT $Subgroup $Setting 2>&1 | Out-String)
+    $line = ($text -split "\\r?\\n" | Where-Object { $_ -match 'Current AC Power Setting Index:' } | Select-Object -First 1)
+    if ($line -match '0x([0-9a-fA-F]+)') { return [Convert]::ToInt64($matches[1], 16) }
+  } catch {}
+  return $null
+}
+
+$standbyAc = Read-AcIndex 'SUB_SLEEP' 'STANDBYIDLE'
+$hibernateAc = Read-AcIndex 'SUB_SLEEP' 'HIBERNATEIDLE'
+$diskAc = Read-AcIndex 'SUB_DISK' 'DISKIDLE'
+$hybridAc = Read-AcIndex 'SUB_SLEEP' 'HYBRIDSLEEP'
+$railTask = Get-ScheduledTask -TaskName 'OrangeBOX AI Box Command Rail' -ErrorAction SilentlyContinue
+$bridgeTask = Get-ScheduledTask -TaskName 'OrangeBOX AI Box Bridge' -ErrorAction SilentlyContinue
+$activeScheme = (& powercfg.exe /getactivescheme 2>&1 | Out-String).Trim()
+$requests = (& powercfg.exe /requests 2>&1 | Out-String).Trim()
+$railScriptPresent = Test-Path -LiteralPath (Join-Path $root 'START_CODEXA_RAIL.ps1')
+$ok = ($standbyAc -eq 0 -and $hibernateAc -eq 0 -and $diskAc -eq 0)
+$warnings = @()
+if ($hybridAc -ne $null -and $hybridAc -ne 0) { $warnings += 'Hybrid sleep is not proven off.' }
+if (-not $railTask) { $warnings += 'Command rail scheduled task is not registered yet; run START_CODEXA_RAIL after power optimizer.' }
+if (-not $railScriptPresent) { $warnings += 'START_CODEXA_RAIL.ps1 missing from this pack.' }
+
+$result = [ordered]@{
+  ok = $ok
+  status = $(if ($ok) { 'OBOX2_CODEXA_POWER_DOCTOR_GREEN' } else { 'OBOX2_CODEXA_POWER_DOCTOR_NOT_GREEN' })
+  checked_at = (Get-Date).ToUniversalTime().ToString('o')
+  ac_settings = [ordered]@{
+    standby_idle_seconds = $standbyAc
+    hibernate_idle_seconds = $hibernateAc
+    disk_idle_seconds = $diskAc
+    hybrid_sleep = $hybridAc
+  }
+  scheduled_tasks = [ordered]@{
+    command_rail_registered = [bool]$railTask
+    bridge_registered = [bool]$bridgeTask
+  }
+  rail_script_present = $railScriptPresent
+  active_scheme = $activeScheme
+  power_requests = $requests
+  warnings = @($warnings)
+  note = 'Green means AC sleep, hibernate idle, and disk idle are disabled. It does not prove network rails are reachable from the cockpit.'
+}
+$path = Join-Path $receiptRoot 'obox2-power-doctor-latest.json'
+$result | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 -Path $path
+if ($ok) { Write-Host $result.status -ForegroundColor Green } else { Write-Host $result.status -ForegroundColor Red }
+Write-Host ("Receipt: " + $path)
+if (-not $ok) { exit 1 }
+`;
+}
+
 function hermesInstallScript() {
   return `param(
   [switch]$SkipInstall
@@ -334,8 +497,24 @@ async function main() {
   }
   await writeFile(path.join(outDir, "INSTALL_CODEXA_OBOX2_MODELS.ps1"), installScript());
   await writeFile(path.join(outDir, "CODEXA_MODEL_DOCTOR.ps1"), doctorScript());
+  await writeFile(path.join(outDir, "CODEXA_POWER_OPTIMIZER.ps1"), powerOptimizerScript());
+  await writeFile(path.join(outDir, "CODEXA_POWER_DOCTOR.ps1"), powerDoctorScript());
   await writeFile(path.join(outDir, "INSTALL_HERMES_AGENT.ps1"), hermesInstallScript());
   await writeFile(path.join(outDir, "HERMES_AGENT_DOCTOR.ps1"), hermesDoctorScript());
+  await writeFile(path.join(outDir, "RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd"), [
+    "@echo off",
+    "cd /d %~dp0",
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%~dp0CODEXA_POWER_OPTIMIZER.ps1\" -Apply -EnableRdp",
+    "pause",
+    "",
+  ].join("\r\n"));
+  await writeFile(path.join(outDir, "RUN_CODEXA_POWER_DOCTOR.cmd"), [
+    "@echo off",
+    "cd /d %~dp0",
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%~dp0CODEXA_POWER_DOCTOR.ps1\"",
+    "pause",
+    "",
+  ].join("\r\n"));
   await writeFile(path.join(outDir, "RUN_INSTALL_ALL_LLMS_ON_CODEXA.cmd"), [
     "@echo off",
     "cd /d %~dp0",
@@ -392,7 +571,9 @@ This pack updates the local model side of Orangebox:
 ## Fast path
 
 \`\`\`cmd
+RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd
 RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
+RUN_CODEXA_POWER_DOCTOR.cmd
 RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd
 RUN_MODEL_DOCTOR_ON_CODEXA.cmd
 RUN_HERMES_DOCTOR_ON_CODEXA.cmd
@@ -401,7 +582,9 @@ RUN_HERMES_DOCTOR_ON_CODEXA.cmd
 ## Full path
 
 \`\`\`cmd
+RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd
 RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
+RUN_CODEXA_POWER_DOCTOR.cmd
 RUN_INSTALL_ALL_LLMS_ON_CODEXA.cmd
 RUN_MODEL_DOCTOR_ON_CODEXA.cmd
 RUN_INSTALL_HERMES_AGENT_ON_CODEXA.cmd
@@ -409,6 +592,26 @@ RUN_HERMES_DOCTOR_ON_CODEXA.cmd
 \`\`\`
 
 The full path is large. It can take a long time and a lot of disk space.
+
+## AI Box always-on power law
+
+Codexa / AI Box must not quietly sleep, hibernate, or drop rails while Orangebox expects it to work.
+
+Run the power optimizer as Administrator before rail/model setup:
+
+\`\`\`cmd
+RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd
+RUN_CODEXA_POWER_DOCTOR.cmd
+\`\`\`
+
+The optimizer sets AC sleep, hibernate idle, and disk idle to never, optionally enables RDP firewall/settings, and writes receipts under:
+
+\`\`\`text
+C:\\AtomEons\\ai-box\\receipts\\obox2-power-optimizer-latest.json
+C:\\AtomEons\\ai-box\\receipts\\obox2-power-doctor-latest.json
+\`\`\`
+
+This is for Codexa / AI Box only. Do not apply it to a battery laptop unless the operator explicitly wants always-on behavior.
 
 ## Wildcard law
 
