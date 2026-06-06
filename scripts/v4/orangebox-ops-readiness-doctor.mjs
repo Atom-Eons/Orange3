@@ -83,6 +83,8 @@ function main() {
   const codexaAlert = readJson(codexaAlertPath);
   const mcpDoctorPath = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
   const mcpDoctor = readJson(mcpDoctorPath);
+  const skillLifecyclePath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
+  const skillLifecycle = readJson(skillLifecyclePath);
   const antigravityRoot = path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "SKILL.md");
   const antigravityText = exists(antigravityRoot) ? fs.readFileSync(antigravityRoot, "utf8") : "";
 
@@ -153,6 +155,15 @@ function main() {
     antigravity_redirect: {
       ok: antigravityText.includes("orangebox-primer") && antigravityText.includes("Backend-only"),
       path: antigravityRoot,
+    },
+    skill_lifecycle: {
+      ok: skillLifecycle?.ok === true && skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN",
+      path: skillLifecyclePath,
+      status: skillLifecycle?.status || null,
+      command_count: skillLifecycle?.command_count || 0,
+      stale_count: skillLifecycle?.stale_count ?? null,
+      command_failures: skillLifecycle?.command_failures?.length ?? null,
+      note: "Proves Orangebox skills are installed, non-stale, command-mapped, and receipt-visible.",
     },
     chatbackup_listener: {
       ok: heartbeatFresh,

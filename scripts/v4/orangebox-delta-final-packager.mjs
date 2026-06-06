@@ -245,6 +245,7 @@ function backendPackageJson() {
       "mcp:doctor": "node ./scripts/v4/mcp-doctor.mjs --json --receipt",
       "health:report": "node ./scripts/v4/orangebox-health-report.mjs --json --receipt",
       "project:report": "node ./scripts/v4/orangebox-project-report.mjs --json --receipt",
+      "skills:lifecycle": "node ./scripts/v4/orangebox-skill-lifecycle-doctor.mjs --json --receipt",
       "chatbackup:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/install-chat-mirror-task.ps1",
       "chatbackup:status": "node ./scripts/v4/chatbackup-status.mjs --json --receipt",
       "ops:services": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/orangebox-ops-service-manager.ps1",

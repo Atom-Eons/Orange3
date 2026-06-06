@@ -128,6 +128,7 @@ async function main() {
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
+  const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -154,6 +155,7 @@ async function main() {
     mcpDoctor?.install_attempted === false &&
     mcpDoctor?.host_mcp_config_mutated === false &&
     mcpDoctor?.paid_api_attempted === false;
+  const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -178,6 +180,16 @@ async function main() {
       next: mcpQuarantineGreen
         ? "Keep all new MCPs as candidates until health, tools, scopes, output caps, receipts, and operator-confirmed write mode are proven."
         : "Run npm.cmd run mcp:doctor and fix the exact failed gate.",
+    },
+    {
+      area: "Skill lifecycle compression",
+      status: status(skillLifecycleGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-skill-lifecycle-doctor.mjs"))),
+      reality: skillLifecycleGreen
+        ? `Orangebox primer skill is installed across app roots, stale skills are absent, and ${skillLifecycle?.command_count || 0} real skill commands map to existing proof scripts.`
+        : "Skill lifecycle source exists, but install roots or command mappings are not proven green.",
+      next: skillLifecycleGreen
+        ? "Promote new skills only when they reduce repeated work, have command/proof mappings, and pass stale-skill gates."
+        : "Run npm.cmd run skills:lifecycle and fix the exact failed root or command mapping.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -304,6 +316,7 @@ async function main() {
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
+        skills_lifecycle: packageScript("skills:lifecycle", packageJson),
       },
     },
     models: {
@@ -348,6 +361,10 @@ async function main() {
       mcp_doctor: {
         path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
         status: mcpQuarantineGreen ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
+      },
+      skill_lifecycle: {
+        path: path.join(dataRoot, "skills", "latest-skill-lifecycle.json"),
+        status: skillLifecycle?.status || null,
       },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },

@@ -108,6 +108,11 @@ $commands = [ordered]@{
     args = @("run", "mcp:doctor")
     description = "Verify MCP quarantine/tool bridge without installs, paid APIs, or host MCP config mutation."
   }
+  "skills-lifecycle" = @{
+    kind = "npm"
+    args = @("run", "skills:lifecycle")
+    description = "Verify Orangebox skills are installed, non-stale, command-mapped, and receipt-visible."
+  }
   "obox2-pack" = @{
     kind = "npm"
     args = @("run", "obox2:pack")
