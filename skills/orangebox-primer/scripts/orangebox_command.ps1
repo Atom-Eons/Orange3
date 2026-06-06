@@ -93,6 +93,11 @@ $commands = [ordered]@{
     args = @("run", "research:scout")
     description = "Fetch low-bandwidth public research signals and park upgrade candidates."
   }
+  "harness-benchmark" = @{
+    kind = "npm"
+    args = @("run", "harness:benchmark")
+    description = "Run offline oracle tasks for Orangebox tool, routing, receipt, and proof harness quality."
+  }
   "codexa-alert" = @{
     kind = "npm"
     args = @("run", "codexa:alert")

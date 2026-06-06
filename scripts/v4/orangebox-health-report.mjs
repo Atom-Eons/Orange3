@@ -158,6 +158,7 @@ async function main() {
     reality_watch: latestReceipt("orangebox-reality-watch-"),
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
     research_scout: latestReceipt("orangebox-external-research-scout-"),
+    harness_benchmark: latestReceipt("orangebox-harness-benchmark-"),
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
     codexa_alert: latestReceipt("orangebox-codexa-alert-"),
     codexa_smb_stage: latestReceipt("orangebox-codexa-smb-stage-"),
@@ -173,6 +174,7 @@ async function main() {
     reality_watch: readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json")) || readJson(receiptPaths.reality_watch || ""),
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
     research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
+    harness_benchmark: readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json")) || readJson(receiptPaths.harness_benchmark || ""),
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
     codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
     codexa_smb_stage: readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json")) || readJson(receiptPaths.codexa_smb_stage || ""),
@@ -223,6 +225,7 @@ async function main() {
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
   if (!recoveryArtifacts.rail_recovery_pack?.exists && (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok)) warnings.push("Codexa rail recovery zip is not generated.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
+  if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") warnings.push("Orangebox offline harness benchmark is not green.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
   if (latest.project_report?.full_project_green === false) warnings.push(`Project report has ${latest.project_report?.gap_count || 0} open gap(s); do not call full Orangebox green.`);
 
@@ -237,6 +240,7 @@ async function main() {
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
+  if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") nextActions.push("Run npm.cmd run harness:benchmark to prove offline oracle tasks before claiming tool/routing optimization.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
   if (latest.project_report?.full_project_green === false) nextActions.push("Review npm.cmd run project:report output before claiming full project completion.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
@@ -247,7 +251,8 @@ async function main() {
   const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
   const actionClassifierOk = latest.action_classifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleOk = latest.skill_lifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk;
+  const harnessBenchmarkOk = latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && harnessBenchmarkOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -318,6 +323,13 @@ async function main() {
         path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"),
         status: latest.research_scout?.status || null,
         candidate_count: latest.research_scout?.candidate_count || 0,
+      },
+      harness_benchmark: {
+        path: path.join(dataRoot, "harness", "latest-harness-benchmark.json"),
+        status: latest.harness_benchmark?.status || null,
+        tasks_total: latest.harness_benchmark?.tasks_total || 0,
+        tasks_ok: latest.harness_benchmark?.tasks_ok || 0,
+        score: latest.harness_benchmark?.score ?? null,
       },
       knowledge_improvements: {
         path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"),

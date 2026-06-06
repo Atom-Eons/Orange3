@@ -64,6 +64,7 @@ trilane-doctor        verify model registry and router policy
 soul-doctor           verify SOUL GENOME continuity map
 knowledge-improvements refresh learned improvement candidates without self-promotion
 research-scout       fetch public research signals and park upgrade candidates
+harness-benchmark    run offline oracle tasks for tool/routing/proof harness quality
 codexa-alert         probe AI Box rails and write an explicit alert receipt
 codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
 codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default

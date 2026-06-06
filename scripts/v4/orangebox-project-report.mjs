@@ -131,6 +131,7 @@ async function main() {
   const soulDoctor = readJson(path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"));
   const knowledgeImprovements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
+  const harnessBenchmark = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
@@ -162,6 +163,7 @@ async function main() {
   const researchScoutReady =
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_READY" ||
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_DEGRADED";
+  const harnessBenchmarkGreen = harnessBenchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
   const mcpQuarantineGreen =
     mcpDoctor?.ok === true &&
     mcpDoctor?.summary?.failed === 0 &&
@@ -292,6 +294,16 @@ async function main() {
         : "Run npm.cmd run research:scout, then rerun project/readiness proof.",
     },
     {
+      area: "Offline harness benchmark",
+      status: status(harnessBenchmarkGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-harness-benchmark-doctor.mjs"))),
+      reality: harnessBenchmarkGreen
+        ? `${harnessBenchmark.tasks_ok}/${harnessBenchmark.tasks_total} offline oracle tasks pass with budget and trace capture. Score ${harnessBenchmark.score}.`
+        : "Harness benchmark source exists or is planned, but current oracle receipt is not green.",
+      next: harnessBenchmarkGreen
+        ? "Use this as the baseline before claiming model, tool, routing, or proof-harness improvements."
+        : "Run npm.cmd run harness:benchmark and fix the exact failed oracle task.",
+    },
+    {
       area: "AtomSmasher compression pack",
       status: status(atomSmasher?.summary?.status === "ATOMSMASHER_ORANGEBOX_INTEGRATION_GREEN"),
       reality: `${atomSmasher?.summary?.features_ok || 0}/${atomSmasher?.summary?.features_registered || 0} features green; schema ${atomSmasher?.summary?.schema_version || "unknown"}.`,
@@ -384,6 +396,7 @@ async function main() {
         project_report: packageScript("project:report", packageJson),
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
+        harness_benchmark: packageScript("harness:benchmark", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         action_doctor: packageScript("action:doctor", packageJson),
@@ -424,6 +437,7 @@ async function main() {
     "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
       "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
+      "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
       "Use npm.cmd run knowledge:improvements to refresh receipt-learning candidates before deciding backend upgrades.",
     ],
     evidence: {
@@ -440,6 +454,13 @@ async function main() {
       soul: { path: path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"), status: soulDoctor?.status || null },
       knowledge_improvements: { path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), status: knowledgeImprovements?.status || null },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
+      harness_benchmark: {
+        path: path.join(dataRoot, "harness", "latest-harness-benchmark.json"),
+        status: harnessBenchmark?.status || null,
+        tasks_total: harnessBenchmark?.tasks_total || 0,
+        tasks_ok: harnessBenchmark?.tasks_ok || 0,
+        score: harnessBenchmark?.score ?? null,
+      },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
       codexa_recovery: {
         path: codexaRailRecoveryPack?.path || null,

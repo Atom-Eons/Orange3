@@ -236,6 +236,7 @@ function backendPackageJson() {
       "soul:doctor": "node ./scripts/v4/soul-genome-doctor.mjs --json --receipt",
       "knowledge:improvements": "node ./scripts/v4/orangebox-knowledge-improvement-queue.mjs --json --receipt",
       "research:scout": "node ./scripts/v4/orangebox-external-research-scout.mjs --json --receipt",
+      "harness:benchmark": "node ./scripts/v4/orangebox-harness-benchmark-doctor.mjs --json --receipt",
       "openclaw:retire": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1 -Apply -StopProcesses -Popup",
       "openclaw:retire:dry": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1",
       "primer:sync": "node ./scripts/v4/orangebox-primer-skill-sync.mjs --json --receipt",

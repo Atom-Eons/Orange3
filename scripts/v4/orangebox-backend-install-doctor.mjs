@@ -303,6 +303,7 @@ async function main() {
     soul_doctor: packageJson.scripts?.["soul:doctor"],
     knowledge_improvements: packageJson.scripts?.["knowledge:improvements"],
     research_scout: packageJson.scripts?.["research:scout"],
+    harness_benchmark: packageJson.scripts?.["harness:benchmark"],
     codexa_alert: packageJson.scripts?.["codexa:alert"],
     codexa_smb_stage: packageJson.scripts?.["codexa:smb-stage"],
     mcp_doctor: packageJson.scripts?.["mcp:doctor"],
@@ -370,6 +371,7 @@ async function main() {
     ["mcp:doctor", npmBin, ["run", "mcp:doctor"], { timeout: 120_000 }],
     ["action:doctor", npmBin, ["run", "action:doctor"], { timeout: 60_000 }],
     ["skills:lifecycle", npmBin, ["run", "skills:lifecycle"], { timeout: 60_000 }],
+    ["harness:benchmark", npmBin, ["run", "harness:benchmark"], { timeout: 60_000, env: { ORANGEBOX_BACKEND_PROOF_IN_PROGRESS: "1" } }],
   ];
 
   for (const [name, command, commandArgs, options] of commandPlan) {

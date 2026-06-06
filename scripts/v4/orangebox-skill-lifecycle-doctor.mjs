@@ -75,6 +75,7 @@ const requiredCommands = [
   { name: "soul-doctor", kind: "npm", script: "soul:doctor" },
   { name: "knowledge-improvements", kind: "npm", script: "knowledge:improvements" },
   { name: "research-scout", kind: "npm", script: "research:scout" },
+  { name: "harness-benchmark", kind: "npm", script: "harness:benchmark" },
   { name: "codexa-alert", kind: "npm", script: "codexa:alert" },
   { name: "codexa-alert-popup", kind: "npm", script: "codexa:alert:popup" },
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },
