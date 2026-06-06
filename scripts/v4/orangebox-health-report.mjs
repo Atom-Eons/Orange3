@@ -135,6 +135,8 @@ async function main() {
     backend_install: latestReceipt("orangebox-backend-install-"),
     reality_watch: latestReceipt("orangebox-reality-watch-"),
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
+    research_scout: latestReceipt("orangebox-external-research-scout-"),
+    knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
     openclaw_retirement: latestReceipt("orangebox-openclaw-retirement-"),
   };
   const latest = {
@@ -142,6 +144,8 @@ async function main() {
     backend_install: readJson(receiptPaths.backend_install || ""),
     reality_watch: readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json")) || readJson(receiptPaths.reality_watch || ""),
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
+    research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
+    knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
     openclaw_retirement: readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json")) || readJson(receiptPaths.openclaw_retirement || ""),
   };
 
@@ -173,12 +177,16 @@ async function main() {
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
+  if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
+  if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
 
   const nextActions = [];
   if (!openclawRetired) nextActions.push("Run npm.cmd run openclaw:retire from the Orangebox repo.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) nextActions.push("On AI Box/Codexa, run RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd from the OBOX2 setup pack.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
+  if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
+  if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
 
   const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
@@ -227,6 +235,16 @@ async function main() {
       backend_install: { path: receiptPaths.backend_install, status: latest.backend_install?.status || null },
       reality_watch: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: latest.reality_watch?.status || null },
       obox2_package: { path: path.join(dataRoot, "obox2", "latest-package-doctor.json"), status: latest.obox2_package?.status || null },
+      research_scout: {
+        path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"),
+        status: latest.research_scout?.status || null,
+        candidate_count: latest.research_scout?.candidate_count || 0,
+      },
+      knowledge_improvements: {
+        path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"),
+        status: latest.knowledge_improvements?.status || null,
+        candidate_count: latest.knowledge_improvements?.candidate_count || 0,
+      },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: latest.openclaw_retirement?.status || null },
     },
     warnings,

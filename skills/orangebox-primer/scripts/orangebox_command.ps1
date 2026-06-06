@@ -83,6 +83,16 @@ $commands = [ordered]@{
     args = @("run", "soul:doctor")
     description = "Verify SOUL GENOME continuity map."
   }
+  "knowledge-improvements" = @{
+    kind = "npm"
+    args = @("run", "knowledge:improvements")
+    description = "Refresh Knowledge Engine learned improvement candidates without self-promotion."
+  }
+  "research-scout" = @{
+    kind = "npm"
+    args = @("run", "research:scout")
+    description = "Fetch low-bandwidth public research signals and park upgrade candidates."
+  }
   "obox2-pack" = @{
     kind = "npm"
     args = @("run", "obox2:pack")

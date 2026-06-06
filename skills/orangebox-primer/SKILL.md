@@ -62,6 +62,8 @@ strongarm-doctor      verify STRONGARM pressure gate
 gremlin-doctor        verify Misfits/Gremlin dataset and trainer handoff
 trilane-doctor        verify model registry and router policy
 soul-doctor           verify SOUL GENOME continuity map
+knowledge-improvements refresh learned improvement candidates without self-promotion
+research-scout       fetch public research signals and park upgrade candidates
 obox2-pack            build Orangebox V2 Internal setup zip
 obox2-doctor          expand and verify the setup zip
 openclaw-retire-dry   preview OpenClaw startup retirement

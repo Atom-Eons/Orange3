@@ -66,6 +66,8 @@ function main() {
   const obox2Doctor = readJson(obox2DoctorPath);
   const soulGenomePath = path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json");
   const soulGenome = readJson(soulGenomePath);
+  const knowledgeImprovementsPath = path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json");
+  const knowledgeImprovements = readJson(knowledgeImprovementsPath);
   const openclawRetirementPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const openclawRetirement = readJson(openclawRetirementPath);
   const opsServicesPath = path.join(dataRoot, "services", "latest-ops-services.json");
@@ -228,6 +230,17 @@ function main() {
       status: soulGenome?.status || null,
       decision: soulGenome?.decision || null,
       layer_count: soulGenome?.layers?.length || 0,
+    },
+    knowledge_improvement_queue: {
+      ok:
+        knowledgeImprovements?.ok === true &&
+        knowledgeImprovements?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" &&
+        knowledgeImprovements?.not_autonomous === true,
+      path: knowledgeImprovementsPath,
+      status: knowledgeImprovements?.status || null,
+      candidate_count: knowledgeImprovements?.candidate_count || 0,
+      doctrine: knowledgeImprovements?.doctrine || null,
+      note: "Knowledge Engine can queue learned improvement candidates, but cannot self-promote changes.",
     },
     openclaw_startup_retired: {
       ok: openclawRetirement?.status === "OPENCLAW_STARTUP_RETIRED",

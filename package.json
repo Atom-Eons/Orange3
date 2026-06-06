@@ -35,6 +35,8 @@
     "knowledge:v1": "node ./scripts/orangebox-knowledge.mjs",
     "knowledge:v2": "node ./scripts/orangebox-knowledge-v2.mjs",
     "knowledge:repo": "node ./scripts/orangebox-knowledge-v2.mjs --root .",
+    "knowledge:improvements": "node ./scripts/v4/orangebox-knowledge-improvement-queue.mjs --json --receipt",
+    "research:scout": "node ./scripts/v4/orangebox-external-research-scout.mjs --json --receipt",
     "department-learning": "node ./scripts/orangebox-department-learning.mjs",
     "provider-watch": "node ./scripts/orangebox-provider-watch.mjs",
     "provider-watch:repo": "node ./scripts/orangebox-provider-watch.mjs --root .",

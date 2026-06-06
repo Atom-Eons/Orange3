@@ -124,6 +124,8 @@ async function main() {
   const obox2Pack = readJson(path.join(dataRoot, "obox2", "latest-internal-setup-pack.json"));
   const obox2Doctor = readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json"));
   const soulDoctor = readJson(path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"));
+  const knowledgeImprovements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
+  const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -134,6 +136,12 @@ async function main() {
   const aiBoxRailReachable = reality?.checks?.probes?.ai_box_command_8097?.ok === true;
   const openclawRetired = openclawRetire?.status === "OPENCLAW_STARTUP_RETIRED";
   const packageGreen = obox2Doctor?.status === "OBOX2_PACKAGE_VERIFIED_GREEN";
+  const knowledgeImprovementsReady =
+    knowledgeImprovements?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" &&
+    knowledgeImprovements?.not_autonomous === true;
+  const researchScoutReady =
+    researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_READY" ||
+    researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_DEGRADED";
 
   const scope = [
     {
@@ -162,9 +170,23 @@ async function main() {
     },
     {
       area: "Knowledge Engine",
-      status: status(false, exists(path.join(repoRoot, "scripts", "orangebox-knowledge-v2.mjs"))),
-      reality: "Knowledge storage, receipts, primers, and search exist. Autonomous learned upgrades are not promoted by themselves yet.",
-      next: "Add receipt-learning candidate queue and promotion gate before self-upgrades.",
+      status: status(knowledgeImprovementsReady, exists(path.join(repoRoot, "scripts", "orangebox-knowledge-v2.mjs"))),
+      reality: knowledgeImprovementsReady
+        ? `Knowledge storage/search, receipts, primers, and ${knowledgeImprovements?.candidate_count || 0} learned improvement candidates are real. Autonomous self-promotion is intentionally not real.`
+        : "Knowledge storage, receipts, primers, and search exist. Learned improvement candidates are not proven yet, and autonomous self-promotion is intentionally not real.",
+      next: knowledgeImprovementsReady
+        ? "Promote candidates only through task contract, operator approval, doctor receipt, and rollback path."
+        : "Run npm.cmd run knowledge:improvements, then rerun project/readiness proof.",
+    },
+    {
+      area: "External research scout",
+      status: status(researchScoutReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-external-research-scout.mjs"))),
+      reality: researchScoutReady
+        ? `Low-bandwidth public research scout is real with ${researchScout?.candidate_count || 0} candidates. It uses evidence tiers and promotes nothing automatically.`
+        : "Research scout script exists or is planned, but no current scout receipt is green yet.",
+      next: researchScoutReady
+        ? "Run npm.cmd run research:scout on cadence, then npm.cmd run knowledge:improvements to queue approved-fit upgrade candidates."
+        : "Run npm.cmd run research:scout, then rerun project/readiness proof.",
     },
     {
       area: "AtomSmasher compression pack",
@@ -265,7 +287,8 @@ async function main() {
       "On Codexa, run the OBOX2 power optimizer/doctor before rail/model setup so the AI Box cannot quietly sleep mid-run.",
       "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
-      "Add Knowledge Engine receipt-learning candidate queue before autonomous self-upgrades.",
+      "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
+      "Use npm.cmd run knowledge:improvements to refresh receipt-learning candidates before deciding backend upgrades.",
     ],
     evidence: {
       full_green: { path: path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"), status: fullGreen?.summary?.status || fullGreen?.status || null },
@@ -277,6 +300,8 @@ async function main() {
       obox2_pack: { path: path.join(dataRoot, "obox2", "latest-internal-setup-pack.json"), status: obox2Pack?.status || null },
       obox2_doctor: { path: path.join(dataRoot, "obox2", "latest-package-doctor.json"), status: obox2Doctor?.status || null },
       soul: { path: path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"), status: soulDoctor?.status || null },
+      knowledge_improvements: { path: path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), status: knowledgeImprovements?.status || null },
+      research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },
     },

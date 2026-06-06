@@ -194,6 +194,8 @@ function backendPackageJson() {
       "obox2:pack": "node ./scripts/v4/obox2-internal-setup-pack.mjs --json --receipt",
       "obox2:doctor": "node ./scripts/v4/obox2-package-doctor.mjs --json --receipt",
       "soul:doctor": "node ./scripts/v4/soul-genome-doctor.mjs --json --receipt",
+      "knowledge:improvements": "node ./scripts/v4/orangebox-knowledge-improvement-queue.mjs --json --receipt",
+      "research:scout": "node ./scripts/v4/orangebox-external-research-scout.mjs --json --receipt",
       "openclaw:retire": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1 -Apply -StopProcesses -Popup",
       "openclaw:retire:dry": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1",
       "primer:sync": "node ./scripts/v4/orangebox-primer-skill-sync.mjs --json --receipt",

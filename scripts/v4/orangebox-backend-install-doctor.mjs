@@ -301,6 +301,8 @@ async function main() {
     gremlin_doctor: packageJson.scripts?.["gremlin:doctor"],
     trilane_doctor: packageJson.scripts?.["trilane:doctor"],
     soul_doctor: packageJson.scripts?.["soul:doctor"],
+    knowledge_improvements: packageJson.scripts?.["knowledge:improvements"],
+    research_scout: packageJson.scripts?.["research:scout"],
     ops_readiness: packageJson.scripts?.["ops:readiness"],
   };
   const backendScriptText = Object.values(backendScripts).join("\n");
@@ -357,6 +359,7 @@ async function main() {
     ["gremlin:doctor", npmBin, ["run", "gremlin:doctor"], { timeout: 240_000 }],
     ["trilane:doctor", npmBin, ["run", "trilane:doctor"], { timeout: 120_000 }],
     ["soul:doctor", npmBin, ["run", "soul:doctor"], { timeout: 120_000 }],
+    ["knowledge:improvements", npmBin, ["run", "knowledge:improvements"], { timeout: 120_000 }],
   ];
 
   for (const [name, command, commandArgs, options] of commandPlan) {
