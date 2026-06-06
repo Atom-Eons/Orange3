@@ -60,6 +60,12 @@ npm.cmd run system:doctor
 npm.cmd run creations:doctor
 npm.cmd run atomsmasher:doctor
 npm.cmd run atomsmasher:merge-tools
+npm.cmd run harness:benchmark
+npm.cmd run reality:watch
+npm.cmd run health:report
+npm.cmd run project:report
+npm.cmd run backend:proof
+npm.cmd run final:verify
 npm.cmd run aecode:schemas
 npm.cmd run aecode:compile
 npm.cmd run aecode:mission-run
@@ -69,3 +75,5 @@ npm.cmd run system:full-green
 ```
 
 Use the smallest command that proves the current claim.
+
+`backend:proof` and `final:verify` prove the local Ops/backend package. `system:full-green` proves the broader two-machine/full-system lane and should stay red if Codexa, Ollama, Hermes, or other remote/heavy lanes are unproven.

@@ -192,6 +192,9 @@ When local repo access exists, prefer current receipts and docs over memory:
 
 ```text
 C:\AtomEons\orangebox-delta\receipts\
+C:\Users\a\OrangeBox-Data\reports\health\latest-health-report.json
+C:\Users\a\OrangeBox-Data\reports\project\latest-project-report.json
+C:\Users\a\OrangeBox-Data\harness\latest-harness-benchmark.json
 C:\Users\a\OrangeBox-Data\gauntlet\latest-orangebox-full-green.json
 C:\Users\a\OrangeBox-Data\orangebox-source-of-truth.json
 C:\Users\a\OrangeBox-Data\restart\latest-restart-lock.json
@@ -250,7 +253,10 @@ A claim that Orangebox is green needs a receipt. Preferred proof levels:
 - backend tool merge: `npm.cmd run atomsmasher:merge-tools`
 - MCP/tool bridge: `npm.cmd run mcp:doctor`
 - skill lifecycle: `npm.cmd run skills:lifecycle`
-- full backend: `npm.cmd run system:full-green`
-- backend-only install/proof: `npm.cmd run backend:install` then `npm.cmd run backend:proof`
+- local Ops backend install/proof: `npm.cmd run backend:proof`
+- final backend package proof: `npm.cmd run final:verify`
+- full two-machine/system proof: `npm.cmd run system:full-green`
+
+`system:full-green` is the broad gate. It may remain red when Codexa/AI Box rails, Ollama, Hermes, or wider two-device lanes are not proven. Do not confuse that with the local Ops backend, which is judged by `backend:proof`, `final:verify`, `health:report`, and `project:report`.
 
 Do not call something done unless the proof path is named.

@@ -15,8 +15,8 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 
 ## Tool Surface
 
-- Package scripts scanned: 127
-- Eligible backend tools: 94
+- Package scripts scanned: 132
+- Eligible backend tools: 99
 - Excluded visual/product tools: 20
 - Sleeping other tools: 13
 
@@ -24,12 +24,15 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 
 - `backend:install` -> proof_receipt, coverage_receipt, immune_scan, source_order_fence
 - `backend:proof` -> proof_receipt, coverage_receipt, immune_scan, source_order_fence
+- `mcp:doctor` -> proof_receipt, coverage_receipt
+- `action:doctor` -> proof_receipt, coverage_receipt
 - `knowledge` -> commitment_atom
 - `knowledge:v1` -> commitment_atom
 - `knowledge:v2` -> commitment_atom
 - `knowledge:repo` -> commitment_atom
 - `knowledge:improvements` -> commitment_atom
 - `research:scout` -> commitment_atom
+- `harness:benchmark` -> proof_receipt, coverage_receipt
 - `provider-watch` -> routing_engine, runtime_profile, agent_lease
 - `provider-watch:repo` -> routing_engine, runtime_profile, agent_lease
 - `awareness:update` -> routing_engine, runtime_profile, agent_lease
@@ -39,16 +42,13 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 - `innovation:activate` -> proof_receipt, coverage_receipt
 - `ten:finish` -> proof_receipt, coverage_receipt
 - `clc:doctor` -> proof_receipt, coverage_receipt
-- `temporal:doctor` -> proof_receipt, coverage_receipt
-- `glyphspeak:doctor` -> proof_receipt, coverage_receipt
-- `four:doctor` -> proof_receipt, coverage_receipt
 
 ## AtomSmasher Proof
 
 - Feature registry: 620
 - Schema version: 10
 - Compile route: cache_answer
-- Saved tokens proxy: 11438
+- Saved tokens proxy: 9534
 - Security scan: clean
 
 ## Outputs

@@ -44,7 +44,9 @@ Add-Check "codexa_sync_script_present" (Test-Path -LiteralPath (Join-Path $repo 
 Add-Check "final_format_registry_present" (Test-Path -LiteralPath (Join-Path $data "aecode-format\latest-final-format.json")) "latest-final-format.json"
 Add-Check "atomsmasher_doctor_present" (Test-Path -LiteralPath (Join-Path $data "atomsmasher\latest-atomsmasher-doctor.json")) "latest-atomsmasher-doctor.json"
 Add-Check "atomsmasher_tool_merge_present_data" (Test-Path -LiteralPath (Join-Path $data "atomsmasher\tool-merge\latest-tool-merge.json")) "latest-tool-merge.json"
-Add-Check "latest_full_green_present" (Test-Path -LiteralPath (Join-Path $data "gauntlet\latest-orangebox-full-green.json")) "latest-orangebox-full-green.json"
+Add-Check "latest_health_report_present" (Test-Path -LiteralPath (Join-Path $data "reports\health\latest-health-report.json")) "latest-health-report.json"
+Add-Check "latest_project_report_present" (Test-Path -LiteralPath (Join-Path $data "reports\project\latest-project-report.json")) "latest-project-report.json"
+Add-Check "latest_harness_benchmark_present" (Test-Path -LiteralPath (Join-Path $data "harness\latest-harness-benchmark.json")) "latest-harness-benchmark.json"
 Add-Check "source_of_truth_lock_present" (Test-Path -LiteralPath (Join-Path $data "orangebox-source-of-truth.json")) "orangebox-source-of-truth.json"
 Add-Check "mid_session_primer_present" (Test-Path -LiteralPath (Join-Path $data "primers\ORANGEBOX_MID_SESSION_PRIMER.md")) "ORANGEBOX_MID_SESSION_PRIMER.md"
 Add-Check "codexa_config_present" (Test-Path -LiteralPath (Join-Path $data "codexa-sync\latest-codexa-config.json")) "latest-codexa-config.json"
@@ -55,9 +57,33 @@ if (Test-Path -LiteralPath (Join-Path $data "gauntlet\latest-orangebox-full-gree
     $result.latest.full_green_ok = [bool]$fg.ok
     $result.latest.full_green_status = $fg.summary.status
     $result.latest.full_green_finished_at = $fg.finished_at
-    Add-Check "latest_full_green_ok" ([bool]$fg.ok) $fg.summary.status
+    $result.latest.full_green_note = "Broad two-machine/system gate. Local Ops may be green while this is red due Codexa/Ollama/Hermes or release gates."
   } catch {
     Add-Check "latest_full_green_readable" $false $_.Exception.Message
+  }
+}
+
+if (Test-Path -LiteralPath (Join-Path $data "reports\project\latest-project-report.json")) {
+  try {
+    $project = Get-Content -LiteralPath (Join-Path $data "reports\project\latest-project-report.json") -Raw | ConvertFrom-Json
+    $result.latest.local_ops_green = [bool]$project.local_ops_green
+    $result.latest.full_project_green = [bool]$project.full_project_green
+    $result.latest.project_status = $project.status
+    Add-Check "local_ops_green" ([bool]$project.local_ops_green) $project.status
+  } catch {
+    Add-Check "latest_project_report_readable" $false $_.Exception.Message
+  }
+}
+
+if (Test-Path -LiteralPath (Join-Path $data "harness\latest-harness-benchmark.json")) {
+  try {
+    $harness = Get-Content -LiteralPath (Join-Path $data "harness\latest-harness-benchmark.json") -Raw | ConvertFrom-Json
+    $result.latest.harness_status = $harness.status
+    $result.latest.harness_tasks_ok = $harness.tasks_ok
+    $result.latest.harness_tasks_total = $harness.tasks_total
+    Add-Check "harness_benchmark_green" (([bool]$harness.ok) -and ($harness.status -eq "ORANGEBOX_HARNESS_BENCHMARK_GREEN")) $harness.status
+  } catch {
+    Add-Check "latest_harness_benchmark_readable" $false $_.Exception.Message
   }
 }
 

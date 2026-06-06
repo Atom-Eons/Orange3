@@ -1,7 +1,7 @@
 {
   "aecode_source_version": "0.1",
   "mission_id": "orangebox-main-system-v0",
-  "generated_at": "2026-05-28T20:02:49.622Z",
+  "generated_at": "2026-06-06T16:37:01.729Z",
   "axiom": {
     "product_constitution": "Turn Orangebox into a receipt-backed local-first AI build organism without mutating current visuals.",
     "authority": {
@@ -78,7 +78,7 @@
     "rollback_required": true
   },
   "integrity": {
-    "sha256": "a221a545cd07dbfa8e856eaf7d52a60512ac8edf45eacddf9c442b42fc244dc0",
+    "sha256": "daa09859c2118deb5216a3bf384d44c4804acd068ed60b1497e6f0ae4fbfa301",
     "deterministic_key_ordering": true
   }
 }

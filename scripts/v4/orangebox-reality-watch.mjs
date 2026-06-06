@@ -70,6 +70,8 @@ async function main() {
   const chatHeartbeat = readJson(chatHeartbeatPath);
   const fullGreenPath = path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json");
   const fullGreen = readJson(fullGreenPath) || readJson(latestReceipt("orangebox-gauntlet-orangebox-full-green-") || "");
+  const projectReportPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
+  const projectReport = readJson(projectReportPath);
   const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
   const opsReadiness = readJson(opsReadinessPath || "");
   const atomsmasherIntakePath = path.join(dataRoot, "incoming", "atomsmasher-module-intake.json");
@@ -111,6 +113,7 @@ async function main() {
 
   const chatFresh = chatHeartbeat?.ok === true && ageMs(chatHeartbeat.last_finished) !== null && ageMs(chatHeartbeat.last_finished) < 10 * 60 * 1000;
   const fullGreenOk = fullGreen?.ok === true || fullGreen?.summary?.status === "ORANGEBOX_FULL_GREEN_LOCAL_RUNTIME" || fullGreen?.status === "ORANGEBOX_FULL_GREEN_LOCAL_RUNTIME";
+  const localOpsGreen = projectReport?.local_ops_green === true;
   const opsGreen = opsReadiness?.ok === true || opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
   const atomsmasherGreen = atomsmasherDoctor?.ok === true && atomsmasherDoctor?.summary?.status === "ATOMSMASHER_ORANGEBOX_INTEGRATION_GREEN";
   const atomsmasherToolMergeGreen = atomsmasherToolMerge?.ok === true && atomsmasherToolMerge?.status === "ATOMSMASHER_TOOL_MERGE_GREEN";
@@ -128,7 +131,11 @@ async function main() {
   const openclawRetired = openclawRetirement?.status === "OPENCLAW_STARTUP_RETIRED" && !exists(openclawStartupPath);
   const warnings = [];
   if (!chatFresh) warnings.push("ChatBackup heartbeat is stale or missing.");
-  if (!fullGreenOk) warnings.push("Latest full-green proof is missing or not green.");
+  if (!fullGreenOk) {
+    warnings.push(localOpsGreen
+      ? "Broad two-machine/system full-green is not green; local Ops remains green. Check project report for Codexa/Ollama/Hermes gaps."
+      : "Latest full-green proof is missing or not green.");
+  }
   if (!opsGreen) warnings.push("Latest Ops readiness receipt is missing or not green.");
   if (!probes.local_llama_health.ok) warnings.push("Local llama listener is not reachable.");
   if (!atomsmasherGreen) warnings.push("AtomSmasher full-scope backend integration proof is missing or not green.");
@@ -192,6 +199,15 @@ async function main() {
         path: fullGreenPath,
         receipt_path: latestReceipt("orangebox-gauntlet-orangebox-full-green-"),
         status: fullGreen?.summary?.status || fullGreen?.status || null,
+        note: "Broad two-machine/system gate. Local Ops can be green while this is red.",
+      },
+      project_report: {
+        ok: Boolean(projectReport?.status),
+        path: projectReportPath,
+        status: projectReport?.status || null,
+        local_ops_green: projectReport?.local_ops_green ?? null,
+        full_project_green: projectReport?.full_project_green ?? null,
+        gap_count: projectReport?.gap_count ?? null,
       },
       ops_readiness: {
         ok: opsGreen,
