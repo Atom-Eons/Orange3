@@ -44,6 +44,18 @@ function latestReceipt(prefix, root = receiptDir) {
   return files[0]?.full || null;
 }
 
+function latestDataFile(root, prefix, suffix = ".json") {
+  if (!exists(root)) return null;
+  const files = fs.readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.startsWith(prefix) && entry.name.endsWith(suffix))
+    .map((entry) => {
+      const full = path.join(root, entry.name);
+      return { full, mtimeMs: fs.statSync(full).mtimeMs };
+    })
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+  return files[0]?.full || null;
+}
+
 async function writeJson(file, value) {
   await fsp.mkdir(path.dirname(file), { recursive: true });
   await fsp.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -145,6 +157,10 @@ async function main() {
   const backendInstall = readJson(backendInstallPath);
   const opsReadiness = readJson(opsReadinessPath);
   const aecodeFormat = readJson(path.join(dataRoot, "aecode-format", "latest-final-format.json"));
+  const terminalProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
+  const terminalProfileText = exists(terminalProfilePath) ? fs.readFileSync(terminalProfilePath, "utf8") : "";
+  const terminalProfileReceiptPath = latestDataFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
+  const terminalProfileReceipt = readJson(terminalProfileReceiptPath);
 
   const mcpReal = exists(path.join(repoRoot, "scripts", "orangebox-mcp-server.mjs"))
     && exists(path.join(repoRoot, "scripts", "orangebox-command-server.mjs"));
@@ -175,6 +191,13 @@ async function main() {
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
+  const terminalProfileGreen =
+    exists(terminalProfilePath) &&
+    terminalProfileText.includes("function obox") &&
+    terminalProfileText.includes("function obox-off") &&
+    terminalProfileText.includes("ORANGEBOX_ACTIVE") &&
+    terminalProfileReceipt?.status === "ORANGEBOX_POWERSHELL_PROFILE_ENABLED" &&
+    terminalProfileReceipt?.current_user_policy_after === "RemoteSigned";
 
   const scope = [
     {
@@ -237,11 +260,21 @@ async function main() {
       area: "Codexa visible alerting",
       status: status(Boolean(codexaAlert?.status), exists(path.join(repoRoot, "scripts", "v4", "orangebox-codexa-alert-doctor.mjs"))),
       reality: codexaAlert?.status
-        ? `Codexa alert doctor is real. Current status: ${codexaAlert.status}. It writes receipts and can show throttled Windows popups.`
+        ? `Codexa alert doctor is real. Current status: ${codexaAlert.status}. Signal hygiene: ${codexaAlert.signal_hygiene?.summary_line || "legacy/unknown"}. It writes receipts and can show throttled Windows popups.`
         : "Codexa alert script exists or is planned, but no alert receipt is current yet.",
       next: codexaAlert?.status
         ? "Keep alerting explicit until Codexa rails and Ollama are green."
         : "Run npm.cmd run codexa:alert:popup, then rerun project/readiness proof.",
+    },
+    {
+      area: "OB0X terminal affordance",
+      status: status(terminalProfileGreen, exists(terminalProfilePath)),
+      reality: terminalProfileGreen
+        ? "PowerShell profile has obox/obox-off, ORANGEBOX_ACTIVE env state, RemoteSigned CurrentUser policy proof, and no startup spam."
+        : "Terminal profile exists or is planned, but OB0X ON affordance is not fully proven by receipt.",
+      next: terminalProfileGreen
+        ? "Use `obox` to enter Orangebox Ops mode in a fresh shell; use `obox-off` when leaving."
+        : "Run the terminal profile doctor/fix path, then rerun project:report and ops:readiness.",
     },
     {
       area: "Codexa SMB staging",
@@ -467,6 +500,19 @@ async function main() {
         status: readJson(path.join(dataRoot, "ops-green", "latest-local-ops-green.json"))?.status || null,
       },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
+      codexa_signal_hygiene: {
+        path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"),
+        status: codexaAlert?.signal_hygiene?.severity || null,
+        summary_line: codexaAlert?.signal_hygiene?.summary_line || null,
+        local_basic_install_blocked: codexaAlert?.signal_hygiene?.local_basic_install_blocked ?? null,
+        full_system_green_blocked: codexaAlert?.signal_hygiene?.full_system_green_blocked ?? null,
+      },
+      terminal_obox_profile: {
+        path: terminalProfilePath,
+        receipt_path: terminalProfileReceiptPath,
+        status: terminalProfileGreen ? "ORANGEBOX_TERMINAL_AFFORDANCE_GREEN" : "ORANGEBOX_TERMINAL_AFFORDANCE_NOT_GREEN",
+        current_user_policy_after: terminalProfileReceipt?.current_user_policy_after || null,
+      },
       codexa_recovery: {
         path: codexaRailRecoveryPack?.path || null,
         status: codexaRailRecoveryPack?.exists ? "CODEXA_RAIL_RECOVERY_PACK_READY" : "CODEXA_RAIL_RECOVERY_PACK_MISSING",

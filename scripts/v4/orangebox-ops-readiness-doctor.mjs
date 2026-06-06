@@ -38,6 +38,18 @@ function newestDir(root) {
   return dirs[0]?.full || null;
 }
 
+function newestFile(root, prefix, suffix = ".json") {
+  if (!exists(root)) return null;
+  const files = fs.readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.startsWith(prefix) && entry.name.endsWith(suffix))
+    .map((entry) => {
+      const full = path.join(root, entry.name);
+      return { full, mtimeMs: fs.statSync(full).mtimeMs };
+    })
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+  return files[0]?.full || null;
+}
+
 function main() {
   const heartbeatPath = path.join(dataRoot, "chat-mirror", "listener-heartbeat.json");
   const heartbeat = readJson(heartbeatPath);
@@ -87,6 +99,10 @@ function main() {
   const actionClassifier = readJson(actionClassifierPath);
   const skillLifecyclePath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
   const skillLifecycle = readJson(skillLifecyclePath);
+  const terminalProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
+  const terminalProfileText = exists(terminalProfilePath) ? fs.readFileSync(terminalProfilePath, "utf8") : "";
+  const terminalProfileReceiptPath = newestFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
+  const terminalProfileReceipt = readJson(terminalProfileReceiptPath);
   const antigravityRoot = path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "SKILL.md");
   const antigravityText = exists(antigravityRoot) ? fs.readFileSync(antigravityRoot, "utf8") : "";
 
@@ -177,6 +193,25 @@ function main() {
       stale_count: skillLifecycle?.stale_count ?? null,
       command_failures: skillLifecycle?.command_failures?.length ?? null,
       note: "Proves Orangebox skills are installed, non-stale, command-mapped, and receipt-visible.",
+    },
+    terminal_obox_profile: {
+      ok:
+        exists(terminalProfilePath) &&
+        terminalProfileText.includes("function obox") &&
+        terminalProfileText.includes("function obox-off") &&
+        terminalProfileText.includes("ORANGEBOX_ACTIVE") &&
+        terminalProfileReceipt?.status === "ORANGEBOX_POWERSHELL_PROFILE_ENABLED" &&
+        terminalProfileReceipt?.current_user_policy_after === "RemoteSigned",
+      path: terminalProfilePath,
+      receipt_path: terminalProfileReceiptPath,
+      status: terminalProfileReceipt?.status || null,
+      current_user_policy_after: terminalProfileReceipt?.current_user_policy_after || null,
+      functions_present: {
+        obox: terminalProfileText.includes("function obox"),
+        obox_off: terminalProfileText.includes("function obox-off"),
+        orangebox_active_env: terminalProfileText.includes("ORANGEBOX_ACTIVE"),
+      },
+      note: "Proves the local terminal has an OB0X ON affordance so operator sessions are visually distinguishable from ordinary chat/shell work.",
     },
     chatbackup_listener: {
       ok: heartbeatFresh,
