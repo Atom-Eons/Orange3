@@ -103,6 +103,8 @@ function main() {
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
   const checkmate = readJson(checkmatePath);
+  const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
+  const signalHygiene = readJson(signalHygienePath);
   const terminalProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
   const terminalProfileText = exists(terminalProfilePath) ? fs.readFileSync(terminalProfilePath, "utf8") : "";
   const terminalProfileReceiptPath = newestFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
@@ -212,6 +214,13 @@ function main() {
       status: checkmate?.status || null,
       fixture_count: checkmate?.fixtures?.length || 0,
       note: "Proves prompt/model/routing/tool/score changes require CHECKMATE eval fixtures before promotion.",
+    },
+    operator_signal_hygiene: {
+      ok: signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",
+      path: signalHygienePath,
+      status: signalHygiene?.status || null,
+      severity: signalHygiene?.signal_hygiene?.severity || null,
+      note: "Proves alert cadence, severity labels, confidence calibration, and local/full-system separation.",
     },
     terminal_obox_profile: {
       ok:

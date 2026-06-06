@@ -79,6 +79,7 @@ const requiredCommands = [
   { name: "harness-benchmark", kind: "npm", script: "harness:benchmark" },
   { name: "tool-ergonomics", kind: "npm", script: "tool:ergonomics" },
   { name: "checkmate-eval", kind: "npm", script: "checkmate:doctor" },
+  { name: "signal-hygiene", kind: "npm", script: "signal:hygiene" },
   { name: "codexa-alert", kind: "npm", script: "codexa:alert" },
   { name: "codexa-alert-popup", kind: "npm", script: "codexa:alert:popup" },
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },

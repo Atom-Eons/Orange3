@@ -163,11 +163,12 @@ async function main() {
     { script: "skills:lifecycle", timeout: 90_000 },
     { script: "tool:ergonomics", timeout: 60_000 },
     { script: "checkmate:doctor", timeout: 60_000 },
-    { script: "harness:benchmark", timeout: 90_000 },
-    { script: "ops:readiness", timeout: 180_000 },
+    { script: "signal:hygiene", timeout: 60_000 },
     { script: "health:report", timeout: 90_000 },
     { script: "project:report", timeout: 90_000 },
     { script: "reality:watch", timeout: 90_000 },
+    { script: "harness:benchmark", timeout: 90_000 },
+    { script: "ops:readiness", timeout: 180_000 },
   ];
   const commands = [];
   if (!noRefresh) {
@@ -186,6 +187,7 @@ async function main() {
   const skillsPath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
   const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
+  const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const backendPath = latestReceipt("orangebox-backend-install-");
   const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
@@ -202,6 +204,7 @@ async function main() {
   const skills = readJson(skillsPath);
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmate = readJson(checkmatePath);
+  const signalHygiene = readJson(signalHygienePath);
   const openclaw = readJson(openclawPath);
   const backend = readJson(backendPath || "");
   const opsReadiness = readJson(opsReadinessPath || "");
@@ -232,6 +235,7 @@ async function main() {
     gate("skill_lifecycle_green", skills?.ok === true && skills?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN", { status: skills?.status || null, command_count: skills?.command_count ?? null }),
     gate("tool_ergonomics_green", toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { status: toolErgonomics?.status || null, command_count: toolErgonomics?.command_surface?.command_count ?? null }),
     gate("checkmate_eval_lane_green", checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN", { status: checkmate?.status || null, fixtures_total: checkmate?.fixtures?.length ?? null }),
+    gate("operator_signal_hygiene_green", signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", { status: signalHygiene?.status || null, severity: signalHygiene?.signal_hygiene?.severity || null }),
     gate("harness_benchmark_green", harness?.ok === true && harness?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN", { status: harness?.status || null, tasks_ok: harness?.tasks_ok ?? null, tasks_total: harness?.tasks_total ?? null }),
     gate("reality_watch_local_ops_truth", reality?.checks?.project_report?.local_ops_green === true || reality?.checks?.project_report?.ok === true, { status: reality?.status || null }),
     gate("reality_watcher_process_fresh", watcherFresh, { path: watcherHeartbeatPath, last_finished: watcherHeartbeat?.last_finished || null }),
@@ -267,6 +271,7 @@ async function main() {
       harness_benchmark: harnessPath,
       tool_ergonomics: toolErgonomicsPath,
       checkmate_eval_lane: checkmatePath,
+      signal_hygiene: signalHygienePath,
       backend_install: backendPath,
       ops_readiness: opsReadinessPath,
       final_verify: finalVerifyPath || (exists(finalManifestPath) ? finalManifestPath : null),

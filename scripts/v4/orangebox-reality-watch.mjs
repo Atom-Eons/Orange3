@@ -136,6 +136,8 @@ async function main() {
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
   const checkmate = readJson(checkmatePath);
+  const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
+  const signalHygiene = readJson(signalHygienePath);
   const codexaAlertPath = path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json");
   const codexaAlert = readJson(codexaAlertPath);
   const openclawRetirementPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
@@ -170,6 +172,7 @@ async function main() {
   const harnessBenchmarkGreen = harnessBenchmark?.ok === true && harnessBenchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
   const toolErgonomicsGreen = toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
   const checkmateGreen = checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN";
+  const signalHygieneGreen = signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
   const openclawRetired = openclawRetirement?.status === "OPENCLAW_STARTUP_RETIRED" && !exists(openclawStartupPath);
   const warnings = [];
   if (!chatFresh) warnings.push("ChatBackup heartbeat is stale or missing.");
@@ -191,6 +194,8 @@ async function main() {
   if (!knowledgeImprovementsReady) warnings.push("Knowledge Engine improvement candidate queue is missing or not green.");
   if (!harnessBenchmarkGreen) warnings.push("Offline harness benchmark proof is missing or not green.");
   if (!toolErgonomicsGreen) warnings.push("Tool ergonomics proof is missing or not green.");
+  if (!checkmateGreen) warnings.push("CHECKMATE eval lane proof is missing or not green.");
+  if (!signalHygieneGreen) warnings.push("Operator signal hygiene proof is missing or not green.");
   if (!codexaAlert?.status) warnings.push("Codexa/AI Box visible alert receipt is missing.");
   if (!openclawRetired) warnings.push("OpenClaw startup retirement is missing, stale, or the startup hook still exists.");
   if (!probes.ai_box_command_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
@@ -230,6 +235,8 @@ async function main() {
         "command/tool surface proof; validates distinct names, concise descriptions, bounded outputs, receipt-backed scripts, and backend-only constraints.",
       checkmate_eval_lane:
         "CHECKMATE eval proof; requires fixtures and canaries before prompt, model, routing, benchmark, or tool changes.",
+      operator_signal_hygiene:
+        "operator shared-reality proof; validates alert cadence, severity labels, confidence calibration, and local/full-system separation.",
       codexa_alert:
         "explicit AI Box/Codexa link alert; warns the operator when local Basic Install is green but Codexa rails/models are not usable.",
       openclaw_retirement: "legacy OpenClaw startup is retired surgically; rollback is the backup path in OrangeBox-Data.",
@@ -364,6 +371,14 @@ async function main() {
         status: checkmate?.status || null,
         fixtures_total: checkmate?.fixtures?.length || 0,
         failures: checkmate?.failures?.length ?? null,
+      },
+      operator_signal_hygiene: {
+        ok: signalHygieneGreen,
+        path: signalHygienePath,
+        status: signalHygiene?.status || null,
+        severity: signalHygiene?.signal_hygiene?.severity || null,
+        confidence_calibration: signalHygiene?.confidence_calibration || null,
+        failures: signalHygiene?.failures?.length ?? null,
       },
       codexa_alert: {
         ok: Boolean(codexaAlert?.status),

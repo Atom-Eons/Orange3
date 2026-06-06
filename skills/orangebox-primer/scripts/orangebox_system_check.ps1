@@ -49,6 +49,7 @@ Add-Check "latest_project_report_present" (Test-Path -LiteralPath (Join-Path $da
 Add-Check "latest_harness_benchmark_present" (Test-Path -LiteralPath (Join-Path $data "harness\latest-harness-benchmark.json")) "latest-harness-benchmark.json"
 Add-Check "latest_tool_ergonomics_present" (Test-Path -LiteralPath (Join-Path $data "tool-ergonomics\latest-tool-ergonomics.json")) "latest-tool-ergonomics.json"
 Add-Check "latest_checkmate_eval_present" (Test-Path -LiteralPath (Join-Path $data "checkmate\latest-checkmate-eval-lane.json")) "latest-checkmate-eval-lane.json"
+Add-Check "latest_signal_hygiene_present" (Test-Path -LiteralPath (Join-Path $data "signal-hygiene\latest-operator-signal-hygiene.json")) "latest-operator-signal-hygiene.json"
 Add-Check "source_of_truth_lock_present" (Test-Path -LiteralPath (Join-Path $data "orangebox-source-of-truth.json")) "orangebox-source-of-truth.json"
 Add-Check "mid_session_primer_present" (Test-Path -LiteralPath (Join-Path $data "primers\ORANGEBOX_MID_SESSION_PRIMER.md")) "ORANGEBOX_MID_SESSION_PRIMER.md"
 Add-Check "codexa_config_present" (Test-Path -LiteralPath (Join-Path $data "codexa-sync\latest-codexa-config.json")) "latest-codexa-config.json"
@@ -108,6 +109,17 @@ if (Test-Path -LiteralPath (Join-Path $data "checkmate\latest-checkmate-eval-lan
     Add-Check "checkmate_eval_green" (([bool]$checkmate.ok) -and ($checkmate.status -eq "CHECKMATE_EVAL_LANE_GREEN")) $checkmate.status
   } catch {
     Add-Check "latest_checkmate_eval_readable" $false $_.Exception.Message
+  }
+}
+
+if (Test-Path -LiteralPath (Join-Path $data "signal-hygiene\latest-operator-signal-hygiene.json")) {
+  try {
+    $signal = Get-Content -LiteralPath (Join-Path $data "signal-hygiene\latest-operator-signal-hygiene.json") -Raw | ConvertFrom-Json
+    $result.latest.signal_hygiene_status = $signal.status
+    $result.latest.signal_hygiene_severity = $signal.signal_hygiene.severity
+    Add-Check "signal_hygiene_green" (([bool]$signal.ok) -and ($signal.status -eq "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN")) $signal.status
+  } catch {
+    Add-Check "latest_signal_hygiene_readable" $false $_.Exception.Message
   }
 }
 

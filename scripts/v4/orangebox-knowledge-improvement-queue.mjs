@@ -133,6 +133,26 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "operator_signal_hygiene") {
+    const file = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.popup_created_by_this_doctor === false
+      && proof?.signal_hygiene?.version === "orangebox-signal-hygiene/v1"
+      && proof?.confidence_calibration?.local_ops
+      && Array.isArray(proof?.failures)
+      && proof.failures.length === 0;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `severity=${proof.signal_hygiene.severity}; confidence=${proof.confidence_calibration.local_ops}; checks=${proof.checks.length}`,
+      }
+      : null;
+  }
   return null;
 }
 

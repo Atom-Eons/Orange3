@@ -146,6 +146,7 @@ const requiredOpsScripts = [
   "knowledge:improvements",
   "tool:ergonomics",
   "checkmate:doctor",
+  "signal:hygiene",
   "harness:benchmark",
   "codexa:alert",
   "codexa:smb-stage",
@@ -292,6 +293,33 @@ const tasks = [
           repeat_count: hygiene.repeat_count || 0,
           local_basic_install_blocked: hygiene.local_basic_install_blocked,
           full_system_green_blocked: hygiene.full_system_green_blocked,
+        });
+    },
+  },
+  {
+    id: "operator_signal_hygiene_receipt_truth",
+    category: "operator_signal_hygiene",
+    oracle: "Operator signal hygiene must have its own receipt that verifies cadence, severity labels, confidence calibration, and local/full green separation.",
+    budget: { timeout_ms: 1600, max_files_read: 2, max_tool_calls: 0 },
+    run(trace) {
+      const signal = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json"), trace);
+      const failures = [];
+      if (signal?.status !== "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN") failures.push(`Signal hygiene receipt not green: ${signal?.status || "missing"}`);
+      if (signal?.constraints?.frontend_touched !== false) failures.push("Signal hygiene doctor must not touch frontend");
+      if (signal?.constraints?.popup_created_by_this_doctor !== false) failures.push("Signal hygiene doctor must not create popups");
+      if (!signal?.confidence_calibration?.local_ops) failures.push("Signal hygiene lacks confidence calibration");
+      if (!Array.isArray(signal?.checks) || signal.checks.length < 6) failures.push("Signal hygiene check count too low");
+      if (Array.isArray(signal?.failures) && signal.failures.length > 0) failures.push(`Signal hygiene failures: ${signal.failures.join(", ")}`);
+      return failures.length
+        ? failTask("operator_signal_hygiene_receipt_truth", failures, {
+          status: signal?.status || null,
+          constraints: signal?.constraints || null,
+        })
+        : okTask("operator_signal_hygiene_receipt_truth", {
+          status: signal.status,
+          checks: signal.checks.length,
+          proof_hash: signal.proof_hash,
+          confidence_calibration: signal.confidence_calibration,
         });
     },
   },

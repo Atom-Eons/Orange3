@@ -239,6 +239,7 @@ function backendPackageJson() {
       "harness:benchmark": "node ./scripts/v4/orangebox-harness-benchmark-doctor.mjs --json --receipt",
       "tool:ergonomics": "node ./scripts/v4/orangebox-tool-ergonomics-doctor.mjs --json --receipt",
       "checkmate:doctor": "node ./scripts/v4/checkmate-eval-lane-doctor.mjs --json --receipt",
+      "signal:hygiene": "node ./scripts/v4/orangebox-operator-signal-hygiene-doctor.mjs --json --receipt",
       "openclaw:retire": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1 -Apply -StopProcesses -Popup",
       "openclaw:retire:dry": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/retire-openclaw-startup.ps1",
       "primer:sync": "node ./scripts/v4/orangebox-primer-skill-sync.mjs --json --receipt",

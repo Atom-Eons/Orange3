@@ -113,6 +113,11 @@ $commands = [ordered]@{
     args = @("run", "checkmate:doctor")
     description = "Verify CHECKMATE eval gates before prompt, model, routing, score, or tool changes."
   }
+  "signal-hygiene" = @{
+    kind = "npm"
+    args = @("run", "signal:hygiene")
+    description = "Verify Orangebox alert cadence, severity labels, confidence calibration, and local/full-system split."
+  }
   "codexa-alert" = @{
     kind = "npm"
     args = @("run", "codexa:alert")
