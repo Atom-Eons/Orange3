@@ -15,6 +15,7 @@ const userRoot = process.env.USERPROFILE || os.homedir();
 const dataRoot = process.env.ORANGEBOX_DATA_ROOT || path.join(userRoot, "OrangeBox-Data");
 const receiptDir = path.join(repoRoot, "receipts");
 const reportRoot = path.join(dataRoot, "reports", "health");
+const downloadsRoot = path.join(userRoot, "Downloads");
 
 function stamp(date = new Date()) {
   return date.toISOString().replace(/[-:]/g, "").replace(/\..+$/, "Z");
@@ -29,6 +30,15 @@ function readJson(file) {
     return JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
   } catch {
     return null;
+  }
+}
+
+function fileSummary(file) {
+  try {
+    const stat = fs.statSync(file);
+    return { path: file, exists: true, bytes: stat.size, modified_at: stat.mtime.toISOString() };
+  } catch {
+    return { path: file, exists: false, bytes: 0, modified_at: null };
   }
 }
 
@@ -112,6 +122,17 @@ function renderMarkdown(result) {
   for (const [name, probe] of Object.entries(result.ai_box.probes)) {
     lines.push(`- ${name}: ${mdBool(probe.ok)} (${probe.url})`);
   }
+  if (result.ai_box.link_alert?.status) {
+    lines.push("");
+    lines.push("## AI Box Access / Recovery");
+    lines.push(`- Link alert: ${result.ai_box.link_alert.status}`);
+    lines.push(`- Remote control available: ${mdBool(result.ai_box.link_alert.remote_control_available)}`);
+    lines.push(`- Remote execution available: ${mdBool(result.ai_box.link_alert.remote_execution_available)}`);
+    lines.push(`- SMB port visible: ${mdBool(result.ai_box.link_alert.smb_port_visible)}`);
+    for (const [name, artifact] of Object.entries(result.ai_box.recovery_artifacts || {})) {
+      lines.push(`- ${name}: ${mdBool(artifact.exists)} (${artifact.path})`);
+    }
+  }
   lines.push("");
   lines.push("## Current Proof Receipts");
   for (const [name, item] of Object.entries(result.receipts)) {
@@ -173,6 +194,11 @@ async function main() {
     lan_command_rail_8097: await probe("http://10.0.0.4:8097/health", 1200),
     lan_ollama_11434: await probe("http://10.0.0.4:11434/api/tags", 1200),
   };
+  const recoveryArtifacts = latest.codexa_alert?.recovery_artifacts || {
+    obox2_setup_pack: fileSummary(path.join(downloadsRoot, "Orangebox_V2_Internal_Setup_Pack.zip")),
+    rail_recovery_pack: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack-WINDOWS-NATIVE.zip")),
+    rail_recovery_dir: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack", "RUN_ON_CODEXA_AS_ADMIN.cmd")),
+  };
 
   const startupOpenClaw = startupPath("OpenClaw Gateway (atomeons).cmd");
   const openclawRetired = !exists(startupOpenClaw) && latest.openclaw_retirement?.status === "OPENCLAW_STARTUP_RETIRED";
@@ -186,7 +212,10 @@ async function main() {
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") warnings.push("Orangebox skill lifecycle doctor is not green.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
+  if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
+  if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) warnings.push("AI Box SMB port is visible, but no remote execution path is proven.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
+  if (!recoveryArtifacts.rail_recovery_pack?.exists && (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok)) warnings.push("Codexa rail recovery zip is not generated.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
   if (latest.project_report?.full_project_green === false) warnings.push(`Project report has ${latest.project_report?.gap_count || 0} open gap(s); do not call full Orangebox green.`);
@@ -194,6 +223,9 @@ async function main() {
   const nextActions = [];
   if (!openclawRetired) nextActions.push("Run npm.cmd run openclaw:retire from the Orangebox repo.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) nextActions.push("On AI Box/Codexa, run RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd from the OBOX2 setup pack.");
+  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && !recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push("Run npm.cmd run codexa:rail-pack to generate a small Windows-native rail recovery zip.");
+  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push(`Use the rail recovery zip at ${recoveryArtifacts.rail_recovery_pack.path} when the full OBOX2 pack is too heavy.`);
+  if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) nextActions.push("Treat SMB as staging-only until RDP, WinRM, or the 8097 command rail is reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
@@ -246,6 +278,20 @@ async function main() {
         ollama: 11434,
       },
       probes: aiBoxProbes,
+      link_alert: latest.codexa_alert ? {
+        status: latest.codexa_alert.status || null,
+        message: latest.codexa_alert.message || null,
+        command_rail_reachable: latest.codexa_alert.command_rail_reachable ?? null,
+        wiki_bridge_reachable: latest.codexa_alert.wiki_bridge_reachable ?? null,
+        receipts_reachable: latest.codexa_alert.receipts_reachable ?? null,
+        ollama_reachable: latest.codexa_alert.ollama_reachable ?? null,
+        remote_control_available: latest.codexa_alert.remote_control_available ?? null,
+        remote_execution_available: latest.codexa_alert.remote_execution_available ?? null,
+        smb_port_visible: latest.codexa_alert.smb_port_visible ?? null,
+        alert_hash: latest.codexa_alert.alert_hash || null,
+        last_notified_at: latest.codexa_alert.last_notified_at || null,
+      } : null,
+      recovery_artifacts: recoveryArtifacts,
     },
     receipts: {
       ops_readiness: { path: receiptPaths.ops_readiness, status: latest.ops_readiness?.status || latest.ops_readiness?.checks?.ops_readiness?.status || null },
@@ -272,6 +318,9 @@ async function main() {
         path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"),
         status: latest.codexa_alert?.status || null,
         popup_notified: latest.codexa_alert?.popup?.notified || false,
+        remote_control_available: latest.codexa_alert?.remote_control_available ?? null,
+        remote_execution_available: latest.codexa_alert?.remote_execution_available ?? null,
+        smb_port_visible: latest.codexa_alert?.smb_port_visible ?? null,
         message: latest.codexa_alert?.message || null,
       },
       mcp_doctor: {

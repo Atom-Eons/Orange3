@@ -33,6 +33,7 @@ const dataRoot = process.env.ORANGEBOX_DATA_ROOT || path.join(userRoot, "OrangeB
 const receiptDir = path.join(repoRoot, "receipts");
 const alertRoot = path.join(dataRoot, "alerts", "codexa-link");
 const statePath = path.join(alertRoot, "codexa-alert-state.json");
+const downloadsRoot = path.join(userRoot, "Downloads");
 const directIp = process.env.ORANGEBOX_CODEXA_DIRECT_IP || process.env.ORANGEBOX_AI_BOX_DIRECT_IP || "10.0.99.1";
 const lanIp = process.env.ORANGEBOX_CODEXA_IP || process.env.ORANGEBOX_AI_BOX_IP || "10.0.0.4";
 const cooldownMinutes = Number(process.env.ORANGEBOX_CODEXA_ALERT_COOLDOWN_MINUTES || 30);
@@ -56,6 +57,15 @@ async function writeJson(file, value) {
 
 function shortHash(value) {
   return crypto.createHash("sha256").update(String(value)).digest("hex").slice(0, 16);
+}
+
+function fileSummary(file) {
+  try {
+    const stat = fs.statSync(file);
+    return { path: file, exists: true, bytes: stat.size, modified_at: stat.mtime.toISOString() };
+  } catch {
+    return { path: file, exists: false, bytes: 0, modified_at: null };
+  }
 }
 
 async function probe(url, timeoutMs = 1400) {
@@ -172,6 +182,11 @@ async function main() {
   const rdpOk = remote_control.direct_rdp_3389.ok || remote_control.lan_rdp_3389.ok;
   const winrmOk = remote_control.direct_winrm_5985.ok || remote_control.lan_winrm_5985.ok;
   const smbPortOpen = remote_control.direct_smb_445.ok || remote_control.lan_smb_445.ok;
+  const recoveryArtifacts = {
+    obox2_setup_pack: fileSummary(path.join(downloadsRoot, "Orangebox_V2_Internal_Setup_Pack.zip")),
+    rail_recovery_pack: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack-WINDOWS-NATIVE.zip")),
+    rail_recovery_dir: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack", "RUN_ON_CODEXA_AS_ADMIN.cmd")),
+  };
   const status = commandOk && ollamaOk
     ? "CODEXA_READY"
     : receiptsOk
@@ -187,10 +202,13 @@ async function main() {
 
   const nextActions = [];
   if (!commandOk) nextActions.push("On Codexa/AI Box, run RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd from the OBOX2 setup pack.");
+  if (!commandOk && !recoveryArtifacts.rail_recovery_pack.exists) nextActions.push("Run npm.cmd run codexa:rail-pack on this cockpit to generate the small Windows-native rail recovery zip.");
+  if (!commandOk && recoveryArtifacts.rail_recovery_pack.exists) nextActions.push(`Rail recovery zip is ready at ${recoveryArtifacts.rail_recovery_pack.path}; copy it to Codexa and run RUN_ON_CODEXA_AS_ADMIN.cmd as Administrator if the larger OBOX2 pack is inconvenient.`);
+  if (!commandOk && recoveryArtifacts.obox2_setup_pack.exists) nextActions.push(`Full OBOX2 setup pack is ready at ${recoveryArtifacts.obox2_setup_pack.path}.`);
   if (!ollamaOk) nextActions.push("After rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd and RUN_MODEL_DOCTOR_ON_CODEXA.cmd.");
   if (receiptsOk && !commandOk) nextActions.push("Receipts/dashboard rail is alive; focus on the 8097 command rail service before model pulls.");
   if (!commandOk && !rdpOk && !winrmOk) nextActions.push("RDP and WinRM are not reachable from this cockpit; Codexa cannot be repaired remotely from here until one access path is opened.");
-  if (!commandOk && smbPortOpen && !winrmOk) nextActions.push("SMB port is visible on the LAN, but that only stages files; it does not prove remote execution permission.");
+  if (!commandOk && smbPortOpen && !winrmOk) nextActions.push("SMB port is visible on the LAN, but no remote execution path is proven. Do not call a repair complete until the 8097 rail answers.");
   if (ok) nextActions.push("Run npm.cmd run trilane:doctor and the Codexa model doctor before promoting heavy-lane routing.");
 
   const result = {
@@ -210,6 +228,7 @@ async function main() {
     remote_control_available: rdpOk || winrmOk,
     remote_execution_available: winrmOk,
     smb_port_visible: smbPortOpen,
+    recovery_artifacts: recoveryArtifacts,
     popup: {
       requested: wantsPopup,
       forced: forcePopup,

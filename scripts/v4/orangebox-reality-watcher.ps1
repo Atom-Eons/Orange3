@@ -135,9 +135,32 @@ while ($true) {
   }
   try {
     if (Test-Path -LiteralPath $alertScript) {
-      & $node $alertScript --json --popup 2>&1 | Out-Null
+      $alertOutput = & $node $alertScript --json --popup 2>&1
+      $alertText = ($alertOutput | Out-String).Trim()
+      try {
+        $codexaAlert = $alertText | ConvertFrom-Json
+      } catch {
+        $codexaAlert = $null
+      }
     }
   } catch {}
+  $codexaAlertSummary = $null
+  if ($codexaAlert) {
+    $codexaAlertSummary = [ordered]@{
+      status = $codexaAlert.status
+      message = $codexaAlert.message
+      command_rail_reachable = $codexaAlert.command_rail_reachable
+      wiki_bridge_reachable = $codexaAlert.wiki_bridge_reachable
+      receipts_reachable = $codexaAlert.receipts_reachable
+      ollama_reachable = $codexaAlert.ollama_reachable
+      remote_control_available = $codexaAlert.remote_control_available
+      remote_execution_available = $codexaAlert.remote_execution_available
+      smb_port_visible = $codexaAlert.smb_port_visible
+      popup_notified = $codexaAlert.popup.notified
+      alert_hash = $codexaAlert.alert_hash
+      receipt_path = $codexaAlert.receipt_path
+    }
+  }
   try {
     if (($ResearchEveryCycles -gt 0) -and (($cycle % $ResearchEveryCycles) -eq 0) -and (Test-Path -LiteralPath $researchScript)) {
       & $node $researchScript --json --receipt 2>&1 | Out-Null
@@ -164,6 +187,7 @@ while ($true) {
     last_log = $logPath
     repo = $repo
     watch_root = $watchRoot
+    codexa_alert = $codexaAlertSummary
   } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $heartbeat -Encoding UTF8
   Start-Sleep -Seconds $IntervalSeconds
 }
