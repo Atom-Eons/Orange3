@@ -69,6 +69,11 @@ function renderMarkdown(result) {
   lines.push("");
   lines.push(`Generated: ${result.generated_at}`);
   lines.push(`Project status: **${result.status}**`);
+  lines.push(`Report OK: **${result.report_ok}**`);
+  lines.push(`Full project green: **${result.full_project_green}**`);
+  lines.push(`Local Ops green: **${result.local_ops_green}**`);
+  lines.push(`Two-machine green: **${result.two_machine_green}**`);
+  lines.push(`Gap count: **${result.gap_count}**`);
   lines.push(`Repo: \`${result.repo_root}\``);
   lines.push("");
   lines.push("## System Definition");
@@ -298,11 +303,28 @@ async function main() {
   const notRealYet = scope
     .filter((item) => item.status === "PARTIAL" || item.status === "NOT_REAL_YET")
     .map((item) => `${item.area}: ${item.reality} Next: ${item.next}`);
+  const statusCounts = scope.reduce((counts, item) => {
+    counts[item.status] = (counts[item.status] || 0) + 1;
+    return counts;
+  }, {});
+  const fullProjectGreen = notRealYet.length === 0;
+  const twoMachineGreen = Boolean(aiBoxRailReachable);
+  const reportStatus = fullProjectGreen
+    ? "ORANGEBOX_PROJECT_SCOPE_GREEN"
+    : "ORANGEBOX_PROJECT_SCOPE_REPORTED_WITH_GAPS";
 
   const result = {
-    ok: scope.every((item) => item.status === "REAL" || item.status === "SEPARATE_LANE" || item.area === "Knowledge Engine" || item.area === "Hermes outer orchestration" || item.area === "N150 to AI Box MCP/command bridge"),
+    ok: fullProjectGreen,
+    report_ok: true,
+    full_project_green: fullProjectGreen,
+    local_ops_green: localOpsBackendGreen,
+    two_machine_green: twoMachineGreen,
+    gap_count: notRealYet.length,
+    partial_count: statusCounts.PARTIAL || 0,
+    not_real_count: statusCounts.NOT_REAL_YET || 0,
+    status_counts: statusCounts,
     version: "orangebox-project-report/v1",
-    status: "ORANGEBOX_PROJECT_SCOPE_REPORTED",
+    status: reportStatus,
     generated_at: new Date().toISOString(),
     repo_root: repoRoot,
     data_root: dataRoot,

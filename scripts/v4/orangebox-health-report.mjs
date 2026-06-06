@@ -133,6 +133,7 @@ async function main() {
   const receiptPaths = {
     ops_readiness: latestReceipt("orangebox-ops-readiness-") || latestReceipt("orangebox-ops-readiness-", path.join(repoRoot, "receipts")),
     backend_install: latestReceipt("orangebox-backend-install-"),
+    project_report: latestReceipt("orangebox-project-report-"),
     reality_watch: latestReceipt("orangebox-reality-watch-"),
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
     research_scout: latestReceipt("orangebox-external-research-scout-"),
@@ -145,6 +146,7 @@ async function main() {
   const latest = {
     ops_readiness: readJson(receiptPaths.ops_readiness || path.join(dataRoot, "watcher", "latest-reality-watch.json")),
     backend_install: readJson(receiptPaths.backend_install || ""),
+    project_report: readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json")) || readJson(receiptPaths.project_report || ""),
     reality_watch: readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json")) || readJson(receiptPaths.reality_watch || ""),
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
     research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
@@ -187,6 +189,7 @@ async function main() {
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
+  if (latest.project_report?.full_project_green === false) warnings.push(`Project report has ${latest.project_report?.gap_count || 0} open gap(s); do not call full Orangebox green.`);
 
   const nextActions = [];
   if (!openclawRetired) nextActions.push("Run npm.cmd run openclaw:retire from the Orangebox repo.");
@@ -195,6 +198,7 @@ async function main() {
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
+  if (latest.project_report?.full_project_green === false) nextActions.push("Review npm.cmd run project:report output before claiming full project completion.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") nextActions.push("Run npm.cmd run skills:lifecycle to verify Orangebox skill install and command mappings.");
@@ -246,6 +250,12 @@ async function main() {
     receipts: {
       ops_readiness: { path: receiptPaths.ops_readiness, status: latest.ops_readiness?.status || latest.ops_readiness?.checks?.ops_readiness?.status || null },
       backend_install: { path: receiptPaths.backend_install, status: latest.backend_install?.status || null },
+      project_report: {
+        path: path.join(dataRoot, "reports", "project", "latest-project-report.json"),
+        status: latest.project_report?.status || null,
+        full_project_green: latest.project_report?.full_project_green ?? null,
+        gap_count: latest.project_report?.gap_count ?? null,
+      },
       reality_watch: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: latest.reality_watch?.status || null },
       obox2_package: { path: path.join(dataRoot, "obox2", "latest-package-doctor.json"), status: latest.obox2_package?.status || null },
       research_scout: {
