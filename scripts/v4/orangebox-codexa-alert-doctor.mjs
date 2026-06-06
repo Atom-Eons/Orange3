@@ -201,11 +201,11 @@ async function main() {
   const popup = notify ? await showPopup(`Orangebox Codexa Alert: ${status}`, message) : { ok: false, mode: "not_requested_or_throttled" };
 
   const nextActions = [];
-  if (!commandOk) nextActions.push("On Codexa/AI Box, run RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd from the OBOX2 setup pack.");
+  if (!commandOk) nextActions.push("On Codexa/AI Box, unzip the OBOX2 setup pack and run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd as Administrator. It applies always-on power, starts the rail, runs doctors, and writes C:\\AtomEons\\ai-box\\receipts\\obox2-start-here-latest.json.");
   if (!commandOk && !recoveryArtifacts.rail_recovery_pack.exists) nextActions.push("Run npm.cmd run codexa:rail-pack on this cockpit to generate the small Windows-native rail recovery zip.");
   if (!commandOk && recoveryArtifacts.rail_recovery_pack.exists) nextActions.push(`Rail recovery zip is ready at ${recoveryArtifacts.rail_recovery_pack.path}; copy it to Codexa and run RUN_ON_CODEXA_AS_ADMIN.cmd as Administrator if the larger OBOX2 pack is inconvenient.`);
-  if (!commandOk && recoveryArtifacts.obox2_setup_pack.exists) nextActions.push(`Full OBOX2 setup pack is ready at ${recoveryArtifacts.obox2_setup_pack.path}.`);
-  if (!ollamaOk) nextActions.push("After rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd and RUN_MODEL_DOCTOR_ON_CODEXA.cmd.");
+  if (!commandOk && recoveryArtifacts.obox2_setup_pack.exists) nextActions.push(`Full OBOX2 setup pack is ready at ${recoveryArtifacts.obox2_setup_pack.path}. Manual fallback: RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd.`);
+  if (!ollamaOk) nextActions.push("After rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd and RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (receiptsOk && !commandOk) nextActions.push("Receipts/dashboard rail is alive; focus on the 8097 command rail service before model pulls.");
   if (!commandOk && !rdpOk && !winrmOk) nextActions.push("RDP and WinRM are not reachable from this cockpit; Codexa cannot be repaired remotely from here until one access path is opened.");
   if (!commandOk && smbPortOpen && !winrmOk) nextActions.push("SMB port is visible on the LAN, but no remote execution path is proven. Do not call a repair complete until the 8097 rail answers.");

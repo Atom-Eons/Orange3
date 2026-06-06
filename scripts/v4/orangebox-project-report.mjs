@@ -305,8 +305,8 @@ async function main() {
     {
       area: "OBOX2 setup package",
       status: status(packageGreen, obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN"),
-      reality: packageGreen ? "Zip was expanded and verified by package doctor; includes Codexa always-on power optimizer, rail starter, model installer, and Hermes doctor." : "Zip exists or is planned, but package doctor is not green.",
-      next: "Run power optimizer/doctor on Codexa first, then rail, then core models.",
+      reality: packageGreen ? "Zip was expanded and verified by package doctor; includes start-here launcher, Codexa always-on power optimizer, rail starter, model installer, and Hermes doctor." : "Zip exists or is planned, but package doctor is not green.",
+      next: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa first. Then use core/all model installers only after the rail and power proof are green.",
     },
     {
       area: "SOUL GENOME continuity map",
@@ -388,12 +388,12 @@ async function main() {
     recommended_next_actions: [
       "Retire OpenClaw startup if not already retired.",
     "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
-    "On Codexa, run the OBOX2 power optimizer/doctor before rail/model setup so the AI Box cannot quietly sleep mid-run.",
+    "On Codexa, run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd from the OBOX2 setup pack so power, rail, and doctors all produce one receipt-backed truth path.",
     codexaRailRecoveryPack?.exists
       ? `Use the small rail recovery zip when needed: ${codexaRailRecoveryPack.path}.`
       : "Run npm.cmd run codexa:rail-pack so the small Codexa rail recovery zip exists.",
     codexaObox2Pack?.exists
-      ? `Full OBOX2 setup pack is ready: ${codexaObox2Pack.path}.`
+      ? `Full OBOX2 setup pack is ready: ${codexaObox2Pack.path}. Preferred first click: RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd.`
       : "Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor so the full OBOX2 setup zip exists.",
     codexaSmbVisible && !codexaRemoteExecutionAvailable
       ? "Treat SMB as staging-only; do not claim remote repair until RDP, WinRM, or 8097 command rail is reachable."

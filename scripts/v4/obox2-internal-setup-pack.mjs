@@ -359,6 +359,143 @@ if (-not $ok) { exit 1 }
 `;
 }
 
+function startHereScript() {
+  return `param(
+  [ValidateSet('fast','core','all','doctor-only')]
+  [string]$Mode = 'fast',
+  [switch]$EnableRdp
+)
+$ErrorActionPreference = 'Continue'
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$receiptRoot = 'C:\\AtomEons\\ai-box\\receipts'
+New-Item -ItemType Directory -Force -Path $receiptRoot | Out-Null
+
+function Write-Orange($Text) { Write-Host $Text -ForegroundColor DarkYellow }
+function Write-Green($Text) { Write-Host $Text -ForegroundColor Green }
+function Write-RedLine($Text) { Write-Host $Text -ForegroundColor Red }
+function Write-Muted($Text) { Write-Host $Text -ForegroundColor DarkGray }
+
+function Is-Admin {
+  $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+  $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+  return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Invoke-PackStep($Name, $ScriptName, $Arguments, [bool]$Required = $true) {
+  $scriptPath = Join-Path $root $ScriptName
+  $started = Get-Date
+  if (-not (Test-Path -LiteralPath $scriptPath)) {
+    return [ordered]@{
+      name = $Name
+      script = $ScriptName
+      ok = (-not $Required)
+      status = $(if ($Required) { 'MISSING' } else { 'SKIPPED_MISSING_OPTIONAL' })
+      required = $Required
+      seconds = 0
+      output_tail = ''
+    }
+  }
+  Write-Orange ("Running " + $Name)
+  $argList = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$scriptPath) + @($Arguments)
+  $output = & powershell.exe @argList 2>&1
+  $exit = $LASTEXITCODE
+  $tail = (($output | Select-Object -Last 35) -join [Environment]::NewLine)
+  $ok = ($exit -eq 0)
+  if ($ok) { Write-Green ($Name + ' GREEN') } else { Write-RedLine ($Name + ' NOT GREEN') }
+  return [ordered]@{
+    name = $Name
+    script = $ScriptName
+    ok = $ok
+    status = $(if ($ok) { 'GREEN' } else { 'NOT_GREEN' })
+    required = $Required
+    exit_code = $exit
+    seconds = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
+    output_tail = $tail
+  }
+}
+
+Clear-Host
+Write-Orange '============================================================'
+Write-Orange '  ORANGEBOX VERSION 1 / OBOX2 INTERNAL - CODEXA START HERE'
+Write-Orange '============================================================'
+Write-Muted  ('Mode: ' + $Mode)
+Write-Muted  'This verifies always-on power, command rails, local models, and optional Hermes.'
+Write-Muted  'Green means receipt-backed. Not green means do not route heavy work to Codexa yet.'
+Write-Host ''
+
+$admin = Is-Admin
+$steps = @()
+if (-not $admin) {
+  $result = [ordered]@{
+    ok = $false
+    status = 'OBOX2_START_HERE_NEEDS_ADMIN'
+    checked_at = (Get-Date).ToUniversalTime().ToString('o')
+    admin = $admin
+    mode = $Mode
+    steps = @()
+    next_action = 'Right-click RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd and choose Run as administrator.'
+  }
+  $path = Join-Path $receiptRoot 'obox2-start-here-latest.json'
+  $result | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 -Path $path
+  Write-RedLine $result.status
+  Write-Host ("Receipt: " + $path)
+  exit 1
+}
+
+$powerArgs = @('-Apply','-DisableHibernate')
+if ($EnableRdp) { $powerArgs += '-EnableRdp' }
+
+if ($Mode -eq 'doctor-only') {
+  $steps += Invoke-PackStep 'power doctor' 'CODEXA_POWER_DOCTOR.ps1' @()
+  $steps += Invoke-PackStep 'model doctor' 'CODEXA_MODEL_DOCTOR.ps1' @()
+  $steps += Invoke-PackStep 'Hermes doctor' 'HERMES_AGENT_DOCTOR.ps1' @() $false
+} else {
+  $steps += Invoke-PackStep 'always-on power optimizer' 'CODEXA_POWER_OPTIMIZER.ps1' $powerArgs
+  $steps += Invoke-PackStep 'power doctor' 'CODEXA_POWER_DOCTOR.ps1' @()
+  $railArgs = @()
+  if ($EnableRdp) { $railArgs += '-EnableRdp' }
+  $steps += Invoke-PackStep 'command rail starter' 'START_CODEXA_RAIL.ps1' $railArgs
+  if ($Mode -eq 'core') {
+    $steps += Invoke-PackStep 'core model installer' 'INSTALL_CODEXA_OBOX2_MODELS.ps1' @('-Tier','core')
+  } elseif ($Mode -eq 'all') {
+    $steps += Invoke-PackStep 'all model installer' 'INSTALL_CODEXA_OBOX2_MODELS.ps1' @('-Tier','all')
+    $steps += Invoke-PackStep 'Hermes installer' 'INSTALL_HERMES_AGENT.ps1' @() $false
+  }
+  $steps += Invoke-PackStep 'model doctor' 'CODEXA_MODEL_DOCTOR.ps1' @()
+  $steps += Invoke-PackStep 'Hermes doctor' 'HERMES_AGENT_DOCTOR.ps1' @() $false
+}
+
+$requiredFailures = @($steps | Where-Object { $_.required -and -not $_.ok })
+$optionalFailures = @($steps | Where-Object { -not $_.required -and -not $_.ok })
+$ok = ($requiredFailures.Count -eq 0)
+$result = [ordered]@{
+  ok = $ok
+  status = $(if ($ok) { 'OBOX2_START_HERE_GREEN' } else { 'OBOX2_START_HERE_NOT_GREEN' })
+  checked_at = (Get-Date).ToUniversalTime().ToString('o')
+  admin = $admin
+  host = $env:COMPUTERNAME
+  mode = $Mode
+  enable_rdp_requested = [bool]$EnableRdp
+  steps = @($steps)
+  required_failures = @($requiredFailures | ForEach-Object { $_.name })
+  optional_failures = @($optionalFailures | ForEach-Object { $_.name })
+  next_action = $(if ($ok) { 'Back on Cockpit, run npm.cmd run codexa:alert and npm.cmd run health:report.' } else { 'Fix the first required failure in steps, then rerun this start-here launcher.' })
+  doctrine = 'Power proves always-on. Rail proves reachability. Model doctor proves local lanes. Receipts prove reality.'
+}
+$path = Join-Path $receiptRoot 'obox2-start-here-latest.json'
+$result | ConvertTo-Json -Depth 30 | Set-Content -Encoding UTF8 -Path $path
+Write-Host ''
+if ($ok) {
+  Write-Green $result.status
+} else {
+  Write-RedLine $result.status
+}
+Write-Muted ("Receipt: " + $path)
+Write-Muted $result.next_action
+if (-not $ok) { exit 1 }
+`;
+}
+
 function hermesInstallScript() {
   return `param(
   [switch]$SkipInstall
@@ -499,8 +636,18 @@ async function main() {
   await writeFile(path.join(outDir, "CODEXA_MODEL_DOCTOR.ps1"), doctorScript());
   await writeFile(path.join(outDir, "CODEXA_POWER_OPTIMIZER.ps1"), powerOptimizerScript());
   await writeFile(path.join(outDir, "CODEXA_POWER_DOCTOR.ps1"), powerDoctorScript());
+  await writeFile(path.join(outDir, "START_HERE_OBOX2_INTERNAL.ps1"), startHereScript());
   await writeFile(path.join(outDir, "INSTALL_HERMES_AGENT.ps1"), hermesInstallScript());
   await writeFile(path.join(outDir, "HERMES_AGENT_DOCTOR.ps1"), hermesDoctorScript());
+  await writeFile(path.join(outDir, "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd"), [
+    "@echo off",
+    "cd /d %~dp0",
+    "title Orangebox Version 1 - Codexa Start Here",
+    "color 0E",
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%~dp0START_HERE_OBOX2_INTERNAL.ps1\" -Mode fast -EnableRdp",
+    "pause",
+    "",
+  ].join("\r\n"));
   await writeFile(path.join(outDir, "RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd"), [
     "@echo off",
     "cd /d %~dp0",
@@ -569,6 +716,21 @@ This pack updates the local model side of Orangebox:
 - model doctor receipts under \`C:\\AtomEons\\ai-box\\receipts\`
 
 ## Fast path
+
+Best first click:
+
+\`\`\`cmd
+RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd
+\`\`\`
+
+That runs always-on power setup, power doctor, rail starter, model doctor, and Hermes doctor if present.
+It writes:
+
+\`\`\`text
+C:\\AtomEons\\ai-box\\receipts\\obox2-start-here-latest.json
+\`\`\`
+
+Manual fast path:
 
 \`\`\`cmd
 RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd

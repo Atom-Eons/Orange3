@@ -225,11 +225,11 @@ async function main() {
 
   const nextActions = [];
   if (!openclawRetired) nextActions.push("Run npm.cmd run openclaw:retire from the Orangebox repo.");
-  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) nextActions.push("On AI Box/Codexa, run RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd from the OBOX2 setup pack.");
+  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) nextActions.push("On AI Box/Codexa, unzip the OBOX2 setup pack and run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd as Administrator. Manual fallback: RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && !recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push("Run npm.cmd run codexa:rail-pack to generate a small Windows-native rail recovery zip.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push(`Use the rail recovery zip at ${recoveryArtifacts.rail_recovery_pack.path} when the full OBOX2 pack is too heavy.`);
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) nextActions.push("Treat SMB as staging-only until RDP, WinRM, or the 8097 command rail is reachable.");
-  if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd.");
+  if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
