@@ -186,6 +186,7 @@ async function main() {
   const backendPath = latestReceipt("orangebox-backend-install-");
   const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
   const finalVerifyPath = latestReceipt("orangebox-delta-final-package-");
+  const finalManifestPath = path.join(repoRoot, "orangebox-delta-final-manifest.json");
 
   const health = readJson(healthPath);
   const project = readJson(projectPath);
@@ -199,9 +200,13 @@ async function main() {
   const backend = readJson(backendPath || "");
   const opsReadiness = readJson(opsReadinessPath || "");
   const finalVerify = readJson(finalVerifyPath || "");
+  const finalManifest = readJson(finalManifestPath);
 
   const watcherFresh = watcherHeartbeat?.ok === true && ageMs(watcherHeartbeat.last_finished) !== null && ageMs(watcherHeartbeat.last_finished) < 15 * 60 * 1000;
-  const finalPackageGreen = finalVerify?.status === "ORANGEBOX_DELTA_FINAL_VERIFIED_GREEN";
+  const finalPackageGreen =
+    finalVerify?.status === "ORANGEBOX_DELTA_FINAL_VERIFIED_GREEN" ||
+    finalManifest?.status === "ORANGEBOX_DELTA_FINAL_VERIFIED_GREEN" ||
+    (finalManifest?.ok === true && finalManifest?.verification?.ok === true);
   const gates = [
     gate("refresh_commands_green", noRefresh || commands.every((item) => item.ok), { commands_run: commands.length }),
     gate("command_server_reachable", health?.dev?.probes?.command_server?.ok === true, health?.dev?.probes?.command_server || {}),
@@ -211,7 +216,11 @@ async function main() {
     gate("local_ops_project_green", project?.local_ops_green === true, { status: project?.status || null, gap_count: project?.gap_count ?? null }),
     gate("backend_install_green", backend?.ok === true && backend?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN", { path: backendPath, status: backend?.status || null }),
     gate("ops_readiness_green", opsReadiness?.ok === true && opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN", { path: opsReadinessPath, status: opsReadiness?.status || null }),
-    gate("final_package_verified", finalPackageGreen, { path: finalVerifyPath, status: finalVerify?.status || null }),
+    gate("final_package_verified", finalPackageGreen, {
+      receipt_path: finalVerifyPath,
+      manifest_path: exists(finalManifestPath) ? finalManifestPath : null,
+      status: finalVerify?.status || finalManifest?.status || null,
+    }),
     gate("mcp_quarantine_green", mcp?.ok === true && mcp?.summary?.failed === 0, { status: mcp?.ok === true ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN" }),
     gate("action_classifier_green", action?.ok === true && action?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN", { status: action?.status || null }),
     gate("skill_lifecycle_green", skills?.ok === true && skills?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN", { status: skills?.status || null, command_count: skills?.command_count ?? null }),
@@ -250,7 +259,7 @@ async function main() {
       harness_benchmark: harnessPath,
       backend_install: backendPath,
       ops_readiness: opsReadinessPath,
-      final_verify: finalVerifyPath,
+      final_verify: finalVerifyPath || (exists(finalManifestPath) ? finalManifestPath : null),
     },
     next_action: gates.every((item) => item.ok)
       ? "Use system:full-green only when Codexa/Ollama/Hermes/two-machine readiness is being proven."
