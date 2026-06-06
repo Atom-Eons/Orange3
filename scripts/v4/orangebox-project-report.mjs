@@ -169,6 +169,7 @@ async function main() {
   const actionClassifier = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(latestReceipt("orangebox-action-classifier-"));
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
+  const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -222,6 +223,7 @@ async function main() {
   const actionClassifierGreen = actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const toolErgonomicsGreen = toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
+  const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -283,6 +285,16 @@ async function main() {
       next: toolErgonomicsGreen
         ? "Run this doctor before adding, renaming, or promoting Orangebox commands/tools."
         : "Run npm.cmd run tool:ergonomics and fix the exact failed command/tool surface check.",
+    },
+    {
+      area: "CHECKMATE eval lane",
+      status: status(checkmateEvalGreen, exists(path.join(repoRoot, "scripts", "v4", "checkmate-eval-lane-doctor.mjs"))),
+      reality: checkmateEvalGreen
+        ? `CHECKMATE is green: ${checkmateEval?.fixtures?.length || 0} fixtures gate prompt, model, routing, benchmark, and tool changes before promotion.`
+        : "CHECKMATE eval lane source exists or is planned, but the current receipt is not green yet.",
+      next: checkmateEvalGreen
+        ? "Run this doctor before prompt, model, routing, benchmark, or tool-surface promotions."
+        : "Run npm.cmd run checkmate:doctor and fix the exact failed eval gate.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -483,6 +495,7 @@ async function main() {
         obox2_doctor: packageScript("obox2:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
         tool_ergonomics: packageScript("tool:ergonomics", packageJson),
+        checkmate_doctor: packageScript("checkmate:doctor", packageJson),
         ops_green: packageScript("ops:green", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
@@ -612,6 +625,12 @@ async function main() {
         status: toolErgonomics?.status || null,
         command_count: toolErgonomics?.command_surface?.command_count || 0,
         failures: toolErgonomics?.failures?.length ?? null,
+      },
+      checkmate_eval_lane: {
+        path: path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"),
+        status: checkmateEval?.status || null,
+        fixture_count: checkmateEval?.fixtures?.length || 0,
+        failures: checkmateEval?.failures?.length ?? null,
       },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },

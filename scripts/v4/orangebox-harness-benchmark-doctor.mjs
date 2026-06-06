@@ -145,6 +145,7 @@ const requiredOpsScripts = [
   "research:scout",
   "knowledge:improvements",
   "tool:ergonomics",
+  "checkmate:doctor",
   "harness:benchmark",
   "codexa:alert",
   "codexa:smb-stage",
@@ -212,6 +213,7 @@ const tasks = [
         ["action", path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"), "ORANGEBOX_ACTION_CLASSIFIER_GREEN"],
         ["skills", path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), "ORANGEBOX_SKILL_LIFECYCLE_GREEN"],
         ["tool_ergonomics", path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"), "ORANGEBOX_TOOL_ERGONOMICS_GREEN"],
+        ["checkmate", path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), "CHECKMATE_EVAL_LANE_GREEN"],
       ];
       if (!backendProofInProgress) {
         receiptSpecs.unshift(
@@ -399,6 +401,42 @@ const tasks = [
     },
   },
   {
+    id: "checkmate_eval_lane_truth",
+    category: "eval_integrity",
+    oracle: "Prompt, model, routing, benchmark, and tool-surface changes must have CHECKMATE eval fixtures before promotion.",
+    budget: { timeout_ms: 1600, max_files_read: 2, max_tool_calls: 0 },
+    run(trace) {
+      const checkmate = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), trace);
+      const failures = [];
+      const constraints = checkmate?.constraints || {};
+      const gates = checkmate?.gates || {};
+      const changeTypes = new Set((checkmate?.fixtures || []).map((fixture) => fixture.change_type));
+      const required = ["prompt_change", "model_lane_change", "routing_policy_change", "tool_surface_change", "benchmark_or_score_change"];
+      if (checkmate?.status !== "CHECKMATE_EVAL_LANE_GREEN") failures.push(`CHECKMATE eval lane not green: ${checkmate?.status || "missing"}`);
+      if ((checkmate?.fixtures || []).length < 5) failures.push(`CHECKMATE fixture count too low: ${(checkmate?.fixtures || []).length}`);
+      for (const type of required) {
+        if (!changeTypes.has(type)) failures.push(`CHECKMATE missing fixture type ${type}`);
+      }
+      if (gates.deterministic_oracle_first !== true) failures.push("CHECKMATE gate deterministic_oracle_first missing");
+      if (gates.receipt_required !== true) failures.push("CHECKMATE gate receipt_required missing");
+      if (gates.operator_approval_required !== true) failures.push("CHECKMATE gate operator_approval_required missing");
+      if (constraints.frontend_touched !== false) failures.push("CHECKMATE must prove frontend_touched=false");
+      if (constraints.prompt_model_or_routing_changed !== false) failures.push("CHECKMATE doctor must not mutate prompts/models/routing");
+      return failures.length
+        ? failTask("checkmate_eval_lane_truth", failures, {
+          status: checkmate?.status || null,
+          fixtures_total: (checkmate?.fixtures || []).length,
+          constraints,
+        })
+        : okTask("checkmate_eval_lane_truth", {
+          status: checkmate.status,
+          fixtures_total: checkmate.fixtures.length,
+          fixture_hash: checkmate.fixture_hash || null,
+          constraints,
+        });
+    },
+  },
+  {
     id: "research_to_approval_queue",
     category: "knowledge_evidence",
     oracle: "External research can create candidates, but Knowledge Engine keeps them in an approval queue instead of self-promoting.",
@@ -571,6 +609,7 @@ async function main() {
     research_basis: [
       "Harness Bench style: sandboxed offline agent tasks, traces, budgets, artifact/oracle grading.",
       "Tool ergonomics: namespaced commands, concise tool outputs, and eval-driven tool repair.",
+      "CHECKMATE eval lane: fixtures and canaries before prompt, model, routing, benchmark, or tool changes.",
       "Context engineering: preserve project state outside chat and hydrate only what a task needs.",
       "Operator signal hygiene: visible status, popup throttling, and confidence calibration protect human-machine shared reality.",
     ],

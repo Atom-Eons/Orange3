@@ -134,6 +134,8 @@ async function main() {
   const harnessBenchmark = readJson(harnessBenchmarkPath);
   const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const toolErgonomics = readJson(toolErgonomicsPath);
+  const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
+  const checkmate = readJson(checkmatePath);
   const codexaAlertPath = path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json");
   const codexaAlert = readJson(codexaAlertPath);
   const openclawRetirementPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
@@ -167,6 +169,7 @@ async function main() {
     knowledgeImprovements?.not_autonomous === true;
   const harnessBenchmarkGreen = harnessBenchmark?.ok === true && harnessBenchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
   const toolErgonomicsGreen = toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
+  const checkmateGreen = checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const openclawRetired = openclawRetirement?.status === "OPENCLAW_STARTUP_RETIRED" && !exists(openclawStartupPath);
   const warnings = [];
   if (!chatFresh) warnings.push("ChatBackup heartbeat is stale or missing.");
@@ -225,6 +228,8 @@ async function main() {
         "offline oracle tasks with budgets, traces, and receipts; validates tool/routing/proof harness claims before promotion.",
       tool_ergonomics:
         "command/tool surface proof; validates distinct names, concise descriptions, bounded outputs, receipt-backed scripts, and backend-only constraints.",
+      checkmate_eval_lane:
+        "CHECKMATE eval proof; requires fixtures and canaries before prompt, model, routing, benchmark, or tool changes.",
       codexa_alert:
         "explicit AI Box/Codexa link alert; warns the operator when local Basic Install is green but Codexa rails/models are not usable.",
       openclaw_retirement: "legacy OpenClaw startup is retired surgically; rollback is the backup path in OrangeBox-Data.",
@@ -352,6 +357,13 @@ async function main() {
         status: toolErgonomics?.status || null,
         command_count: toolErgonomics?.command_surface?.command_count || 0,
         failures: toolErgonomics?.failures?.length ?? null,
+      },
+      checkmate_eval_lane: {
+        ok: checkmateGreen,
+        path: checkmatePath,
+        status: checkmate?.status || null,
+        fixtures_total: checkmate?.fixtures?.length || 0,
+        failures: checkmate?.failures?.length ?? null,
       },
       codexa_alert: {
         ok: Boolean(codexaAlert?.status),

@@ -48,6 +48,7 @@ Add-Check "latest_health_report_present" (Test-Path -LiteralPath (Join-Path $dat
 Add-Check "latest_project_report_present" (Test-Path -LiteralPath (Join-Path $data "reports\project\latest-project-report.json")) "latest-project-report.json"
 Add-Check "latest_harness_benchmark_present" (Test-Path -LiteralPath (Join-Path $data "harness\latest-harness-benchmark.json")) "latest-harness-benchmark.json"
 Add-Check "latest_tool_ergonomics_present" (Test-Path -LiteralPath (Join-Path $data "tool-ergonomics\latest-tool-ergonomics.json")) "latest-tool-ergonomics.json"
+Add-Check "latest_checkmate_eval_present" (Test-Path -LiteralPath (Join-Path $data "checkmate\latest-checkmate-eval-lane.json")) "latest-checkmate-eval-lane.json"
 Add-Check "source_of_truth_lock_present" (Test-Path -LiteralPath (Join-Path $data "orangebox-source-of-truth.json")) "orangebox-source-of-truth.json"
 Add-Check "mid_session_primer_present" (Test-Path -LiteralPath (Join-Path $data "primers\ORANGEBOX_MID_SESSION_PRIMER.md")) "ORANGEBOX_MID_SESSION_PRIMER.md"
 Add-Check "codexa_config_present" (Test-Path -LiteralPath (Join-Path $data "codexa-sync\latest-codexa-config.json")) "latest-codexa-config.json"
@@ -96,6 +97,17 @@ if (Test-Path -LiteralPath (Join-Path $data "tool-ergonomics\latest-tool-ergonom
     Add-Check "tool_ergonomics_green" (([bool]$tool.ok) -and ($tool.status -eq "ORANGEBOX_TOOL_ERGONOMICS_GREEN")) $tool.status
   } catch {
     Add-Check "latest_tool_ergonomics_readable" $false $_.Exception.Message
+  }
+}
+
+if (Test-Path -LiteralPath (Join-Path $data "checkmate\latest-checkmate-eval-lane.json")) {
+  try {
+    $checkmate = Get-Content -LiteralPath (Join-Path $data "checkmate\latest-checkmate-eval-lane.json") -Raw | ConvertFrom-Json
+    $result.latest.checkmate_eval_status = $checkmate.status
+    $result.latest.checkmate_eval_fixtures = $checkmate.fixtures.Count
+    Add-Check "checkmate_eval_green" (([bool]$checkmate.ok) -and ($checkmate.status -eq "CHECKMATE_EVAL_LANE_GREEN")) $checkmate.status
+  } catch {
+    Add-Check "latest_checkmate_eval_readable" $false $_.Exception.Message
   }
 }
 

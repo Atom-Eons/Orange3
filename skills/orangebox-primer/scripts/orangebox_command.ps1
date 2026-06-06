@@ -108,6 +108,11 @@ $commands = [ordered]@{
     args = @("run", "tool:ergonomics")
     description = "Verify Orangebox commands are distinct, concise, bounded, receipt-backed, and scoped."
   }
+  "checkmate-eval" = @{
+    kind = "npm"
+    args = @("run", "checkmate:doctor")
+    description = "Verify CHECKMATE eval gates before prompt, model, routing, score, or tool changes."
+  }
   "codexa-alert" = @{
     kind = "npm"
     args = @("run", "codexa:alert")

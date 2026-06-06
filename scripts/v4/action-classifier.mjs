@@ -153,7 +153,7 @@ const SAFE_RULES = [
   { id: "git_status", re: /\bgit\s+(status|diff|show|log|rev-parse|branch)\b/i },
   { id: "syntax_check", re: /\bnode\b[\s\S]*--check\b/i },
   { id: "read_search", re: /\b(rg|findstr|get-content|gc)\b/i },
-  { id: "orangebox_proof_script", re: /\bnpm(\.cmd)?\s+run\s+(backend:proof|ops:readiness|ops:green|health:report|project:report|reality:watch|harness:benchmark|tool:ergonomics|action:doctor|package-script-doctor|codexa:alert|mcp:doctor|skills:lifecycle)\b/i },
+  { id: "orangebox_proof_script", re: /\bnpm(\.cmd)?\s+run\s+(backend:proof|ops:readiness|ops:green|health:report|project:report|reality:watch|harness:benchmark|tool:ergonomics|checkmate:doctor|action:doctor|package-script-doctor|codexa:alert|mcp:doctor|skills:lifecycle)\b/i },
   { id: "localhost_probe", re: /\b(iwr|irm|invoke-webrequest|invoke-restmethod|curl|wget)\b[\s\S]*(127\.0\.0\.1|localhost|\[::1\])/i },
 ];
 

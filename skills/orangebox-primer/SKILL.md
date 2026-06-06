@@ -67,6 +67,7 @@ knowledge-improvements refresh learned improvement candidates without self-promo
 research-scout       fetch public research signals and park upgrade candidates
 harness-benchmark    run offline oracle tasks for tool/routing/proof harness quality
 tool-ergonomics      verify command/tool names, outputs, receipts, and bounds
+checkmate-eval       verify eval gates before prompt/model/routing/tool changes
 codexa-alert         probe AI Box rails and write an explicit alert receipt
 codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
 codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default

@@ -114,6 +114,25 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "checkmate_eval_lane") {
+    const file = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "CHECKMATE_EVAL_LANE_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.prompt_model_or_routing_changed === false
+      && Number(proof?.fixtures?.length || 0) >= 5
+      && Array.isArray(proof?.failures)
+      && proof.failures.length === 0;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.fixtures.length} eval fixtures gate prompt/model/routing/tool/score changes`,
+      }
+      : null;
+  }
   return null;
 }
 

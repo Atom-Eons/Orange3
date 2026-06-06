@@ -305,6 +305,7 @@ async function main() {
     research_scout: packageJson.scripts?.["research:scout"],
     harness_benchmark: packageJson.scripts?.["harness:benchmark"],
     tool_ergonomics: packageJson.scripts?.["tool:ergonomics"],
+    checkmate_doctor: packageJson.scripts?.["checkmate:doctor"],
     codexa_alert: packageJson.scripts?.["codexa:alert"],
     codexa_smb_stage: packageJson.scripts?.["codexa:smb-stage"],
     mcp_doctor: packageJson.scripts?.["mcp:doctor"],
@@ -373,6 +374,7 @@ async function main() {
     ["action:doctor", npmBin, ["run", "action:doctor"], { timeout: 60_000 }],
     ["skills:lifecycle", npmBin, ["run", "skills:lifecycle"], { timeout: 60_000 }],
     ["tool:ergonomics", npmBin, ["run", "tool:ergonomics"], { timeout: 60_000 }],
+    ["checkmate:doctor", npmBin, ["run", "checkmate:doctor"], { timeout: 60_000 }],
     ["harness:benchmark", npmBin, ["run", "harness:benchmark"], { timeout: 60_000, env: { ORANGEBOX_BACKEND_PROOF_IN_PROGRESS: "1" } }],
   ];
 

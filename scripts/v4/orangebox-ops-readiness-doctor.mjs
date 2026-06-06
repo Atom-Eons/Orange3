@@ -101,6 +101,8 @@ function main() {
   const skillLifecycle = readJson(skillLifecyclePath);
   const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const toolErgonomics = readJson(toolErgonomicsPath);
+  const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
+  const checkmate = readJson(checkmatePath);
   const terminalProfilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
   const terminalProfileText = exists(terminalProfilePath) ? fs.readFileSync(terminalProfilePath, "utf8") : "";
   const terminalProfileReceiptPath = newestFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
@@ -203,6 +205,13 @@ function main() {
       command_count: toolErgonomics?.command_surface?.command_count || 0,
       failures: toolErgonomics?.failures?.length ?? null,
       note: "Proves Orangebox commands/tools are distinct, concise, bounded, receipt-backed, and backend-only before promotion.",
+    },
+    checkmate_eval_lane: {
+      ok: checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN",
+      path: checkmatePath,
+      status: checkmate?.status || null,
+      fixture_count: checkmate?.fixtures?.length || 0,
+      note: "Proves prompt/model/routing/tool/score changes require CHECKMATE eval fixtures before promotion.",
     },
     terminal_obox_profile: {
       ok:

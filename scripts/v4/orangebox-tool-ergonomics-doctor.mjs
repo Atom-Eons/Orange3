@@ -30,6 +30,7 @@ const requiredProofScripts = [
   "action:doctor",
   "skills:lifecycle",
   "tool:ergonomics",
+  "checkmate:doctor",
   "harness:benchmark",
   "health:report",
   "project:report",
@@ -47,6 +48,7 @@ const requiredSkillCommands = [
   "research-scout",
   "harness-benchmark",
   "tool-ergonomics",
+  "checkmate-eval",
   "mcp-doctor",
   "action-doctor",
   "skills-lifecycle",
@@ -223,6 +225,7 @@ async function main() {
     receiptSummary("mcp", path.join(dataRoot, "mcp", "latest-mcp-doctor.json"), (value) => value?.ok === true && value?.summary?.failed === 0 ? "MCP_QUARANTINE_GREEN" : null),
     receiptSummary("action", path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"), (value) => value?.status || null),
     receiptSummary("skills", path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), (value) => value?.status || null),
+    receiptSummary("checkmate", path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), (value) => value?.status || null),
     receiptSummary("harness", path.join(dataRoot, "harness", "latest-harness-benchmark.json"), (value) => value?.status || null),
   ];
   const latestHarness = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
