@@ -1,0 +1,18 @@
+{
+  "user_request": "Make me the complete easiest implementation plan for STRONGARM, a local model that audits my five-stack AI brain so it stops under-answering.",
+  "draft_answer": "Build STRONGARM as a one-file local sidecar first. Use Ollama with qwen3:0.6b and JSON schema output. The sidecar exposes POST /verdict and POST /rewrite_prompt. Each five-stack model sends its draft answer to STRONGARM. STRONGARM returns PASS, REWRITE, ESCALATE, or BLOCK with scores and rewrite orders. Store every audit in receipts/. Do not fine-tune until at least 500 real receipts exist. The v0 command set is: doctor, pull, judge, interactive, server, and demo. The control rule is simple: PASS ships, REWRITE loops once, ESCALATE calls tools or stronger model, BLOCK returns the strongest lawful alternative.",
+  "available_tools": [
+    "ollama",
+    "python",
+    "sqlite",
+    "git",
+    "web"
+  ],
+  "hard_constraints": [
+    "local-first",
+    "legal only",
+    "easy as possible",
+    "full effort"
+  ],
+  "project_context": "STRONGARM is a local Misfit/Rebel critic that produces verdict JSON and rewrite prompts."
+}

@@ -1,0 +1,4 @@
+STRONGARM v0.3 private project scaffold.
+
+Use, modify, and extend inside your own system.
+Do not represent this scaffold as a finished safety, legal, or compliance product without independent review.

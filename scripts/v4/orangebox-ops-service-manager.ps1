@@ -2,6 +2,7 @@ param(
   [int]$CommandPort = 8787,
   [int]$ApiPort = 8797,
   [int]$LlamaPort = 8080,
+  [int]$StrongarmPort = 8094,
   [switch]$NoStart
 )
 
@@ -86,7 +87,7 @@ function Wait-ForUrl($Url, [int]$TimeoutSec = 60) {
 function Ensure-LoopService($Id, $ScriptPath, $Arguments, $ShortcutName) {
   $fullArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptPath`" $Arguments"
   $shortcut = Ensure-Shortcut $ShortcutName $powershell $fullArgs $repo
-  $stopped = Stop-MatchingProcesses $ScriptPath
+  $stopped = Stop-MatchingProcesses (Split-Path -Leaf $ScriptPath)
   $startedPid = Start-Hidden $fullArgs $repo
   return [ordered]@{
     ok = (-not $NoStart) -and ($startedPid -ne $null)
@@ -123,6 +124,21 @@ $watchScript = Join-Path $repo "scripts\v4\orangebox-reality-watcher.ps1"
 $backendScript = Join-Path $toolBin "orangebox-delta-backend.ps1"
 $apiScript = Join-Path $toolBin "orangebox-delta-api.ps1"
 $llamaScript = Join-Path $toolBin "orangebox-llama-listener.ps1"
+$strongarmScript = Join-Path $toolBin "orangebox-strongarm.ps1"
+
+$strongarmLauncher = @"
+param(
+  [int]`$Port = 8094
+)
+`$ErrorActionPreference = "Stop"
+`$repo = `$env:ORANGEBOX_REPO_ROOT
+if (-not `$repo) { `$repo = "$repo" }
+`$root = Join-Path `$repo "integrations\strongarm_easy_v0_4"
+Set-Location -LiteralPath `$root
+python .\strongarm.py server --host 127.0.0.1 --port `$Port
+"@
+New-Item -ItemType Directory -Force -Path $toolBin | Out-Null
+Set-Content -LiteralPath $strongarmScript -Value $strongarmLauncher -Encoding UTF8
 
 $services = [ordered]@{}
 $services.chatbackup_listener = Ensure-LoopService `
@@ -169,11 +185,28 @@ if (Test-Path -LiteralPath $llamaScript) {
   }
 }
 
+if (Test-Path -LiteralPath (Join-Path $repo "integrations\strongarm_easy_v0_4\strongarm.py")) {
+  $services.strongarm_gate = Ensure-PortService `
+    "strongarm_gate" `
+    "http://127.0.0.1:$StrongarmPort/health" `
+    $strongarmScript `
+    "-Port $StrongarmPort" `
+    "Orangebox STRONGARM Gate.lnk" `
+    60
+} else {
+  $services.strongarm_gate = [ordered]@{
+    ok = $false
+    id = "strongarm_gate"
+    error = "Missing integration: $(Join-Path $repo "integrations\strongarm_easy_v0_4\strongarm.py")"
+  }
+}
+
 Start-Sleep -Seconds 2
 $finalProbes = [ordered]@{
   command_server = Test-Http "http://127.0.0.1:$CommandPort/api/status?fast=1" 3
   api_server = Test-Http "http://127.0.0.1:$ApiPort/api/health" 3
   local_llama_listener = Test-Http "http://127.0.0.1:$LlamaPort/health" 3
+  strongarm_gate = Test-Http "http://127.0.0.1:$StrongarmPort/health" 3
 }
 
 $ok = $true

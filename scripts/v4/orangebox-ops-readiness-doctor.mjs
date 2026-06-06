@@ -54,6 +54,8 @@ function main() {
   const atomSmasherDoctor = readJson(atomSmasherDoctorPath);
   const atomSmasherToolMergePath = path.join(dataRoot, "atomsmasher", "tool-merge", "latest-tool-merge.json");
   const atomSmasherToolMerge = readJson(atomSmasherToolMergePath);
+  const strongarmDoctorPath = path.join(dataRoot, "strongarm", "latest-strongarm-doctor.json");
+  const strongarmDoctor = readJson(strongarmDoctorPath);
   const opsServicesPath = path.join(dataRoot, "services", "latest-ops-services.json");
   const opsServices = readJson(opsServicesPath);
   const midSessionPrimerPath = path.join(dataRoot, "primers", "ORANGEBOX_MID_SESSION_PRIMER.md");
@@ -133,14 +135,17 @@ function main() {
         opsServices?.services?.command_server?.ok === true &&
         opsServices?.services?.api_server?.ok === true &&
         opsServices?.services?.local_llama_listener?.ok === true &&
+        opsServices?.services?.strongarm_gate?.ok === true &&
         opsServices?.final_probes?.command_server?.ok === true &&
         opsServices?.final_probes?.api_server?.ok === true &&
-        opsServices?.final_probes?.local_llama_listener?.ok === true,
+        opsServices?.final_probes?.local_llama_listener?.ok === true &&
+        opsServices?.final_probes?.strongarm_gate?.ok === true,
       path: opsServicesPath,
       status: opsServices?.status || null,
       command_server: opsServices?.final_probes?.command_server || null,
       api_server: opsServices?.final_probes?.api_server || null,
       local_llama_listener: opsServices?.final_probes?.local_llama_listener || null,
+      strongarm_gate: opsServices?.final_probes?.strongarm_gate || null,
     },
     chat_archive_export: {
       ok: Boolean(chatArchiveDir) && exists(path.join(chatArchiveDir || "", "chat-duplicate.md")) && exists(path.join(chatArchiveDir || "", "chat-screenplay.md")),
@@ -167,6 +172,13 @@ function main() {
       status: atomSmasherToolMerge?.status || null,
       eligible_backend_tools: atomSmasherToolMerge?.manifest?.totals?.eligible_backend_tools || 0,
       excluded_visual_or_product_lane: atomSmasherToolMerge?.manifest?.totals?.excluded_visual_or_product_lane || 0,
+    },
+    strongarm_gate: {
+      ok: strongarmDoctor?.ok === true && strongarmDoctor?.status === "STRONGARM_ORANGEBOX_GATE_GREEN",
+      path: strongarmDoctorPath,
+      status: strongarmDoctor?.status || null,
+      integration_root: strongarmDoctor?.integration_root || path.join(repoRoot, "integrations", "strongarm_easy_v0_4"),
+      default_mode: strongarmDoctor?.project_gate_policy?.default_mode || null,
     },
     bookmaker_deferred: {
       ok: !exists(path.join(repoRoot, "scripts", "v4", "bookmaker-documentarian.mjs")),

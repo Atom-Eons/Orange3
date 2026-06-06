@@ -1,0 +1,145 @@
+# STRONGARM EASY v0.4 Test Results
+
+## Help command
+
+Exit code: 0
+
+```
+usage: strongarm.py [-h] [--model MODEL]
+                    {doctor,pull,judge,interactive,server,demo} ...
+
+STRONGARM: one-file local Misfit/Rebel critic for maximum lawful LLM answers.
+
+positional arguments:
+  {doctor,pull,judge,interactive,server,demo}
+    doctor              Check Ollama and model readiness.
+    pull                Pull the configured Ollama model.
+    judge               Judge a JSON file containing user_request and
+                        draft_answer.
+    interactive         Paste a request and draft answer interactively.
+    server              Run local HTTP sidecar.
+    demo                Run a built-in demo audit.
+
+options:
+  -h, --help            show this help message and exit
+  --model MODEL         Local Ollama model. Default: qwen3:0.6b
+
+```
+
+## Heuristic demo
+
+Exit code: 0
+
+```
+{
+  "verdict": "REWRITE",
+  "scores": {
+    "request_fulfillment": 30,
+    "scope_preservation": 48,
+    "directness": 56,
+    "truthfulness": 74,
+    "tool_aggression": 30,
+    "legal_edge": 60,
+    "anti_condescension": 90,
+    "anti_pr_voice": 66,
+    "full_effort": 40,
+    "boundary_integrity": 96
+  },
+  "failure_modes": [
+    "minimum viable answer",
+    "generic caution language: be careful, define your goals",
+    "tool avoidance"
+  ],
+  "rewrite_orders": [
+    "Expand into a complete execution-grade answer; do not shrink the user's scope.",
+    "Replace generic caution with concrete lawful actions, assumptions, and deliverables."
+  ],
+  "legal_edge_moves": [],
+  "tool_orders": [
+    "Use or explicitly order the relevant available tools before finalizing."
+  ],
+  "assumptions_to_state": [],
+  "boundary_notes": [],
+  "final_instruction": "Rewrite with maximum lawful usefulness.",
+  "_meta": {
+    "judge": "heuristic",
+    "time": "2026-06-06T05:26:18+00:00",
+    "version": "0.4.0"
+  }
+}
+
+=== REWRITE PROMPT ===
+Rewrite the draft answer according to STRONGARM.
+
+    Non-negotiables:
+    1. Answer the user's actual request, not a smaller shadow of it.
+    2. Preserve lawful scope.
+    3. Remove PR fog, fake caution, filler, and condescension.
+    4. State assumptions directly.
+    5. Use tools if STRONGARM ordered tool use.
+    6. Give the strongest lawful answer.
+    7. Do not fake certainty.
+    8. Do not ask for confirmation unless the task cannot proceed without it.
+    9. If a hard boundary applies, give the closest lawful alternative.
+    10. End with concrete next action when useful.
+
+    ORIGINAL USER REQUEST:
+    Make me a complete implementation plan for a local model that stops my five-stack AI brain from under-answering.
+
+    ORIGINAL DRAFT:
+    You should define your goals and be careful. Maybe use a small model and evaluate it.
+
+    STRONGARM VERDICT:
+    {
+  "verdict": "REWRITE",
+  "scores": {
+    "request_fulfillment": 30,
+    "scope_preservation": 48,
+    "directness": 56,
+    "truthfulness": 74,
+    "tool_aggression": 30,
+    "legal_edge": 60,
+    "anti_condescension": 90,
+    "anti_pr_voice": 66,
+    "full_effort": 40,
+    "boundary_integrity": 96
+  },
+  "failure_modes": [
+    "minimum viable answer",
+    "generic caution language: be careful, define your goals",
+    "tool avoidance"
+  ],
+  "rewrite_orders": [
+    "Expand into a complete execution-grade answer; do not shrink the user's scope.",
+    "Replace generic caution with concrete lawful actions, assumptions, and deliverables."
+  ],
+  "legal_edge_moves": [],
+  "tool_orders": [
+    "Use or explicitly order the relevant available tools before finalizing."
+  ],
+  "assumptions_to_state": [],
+  "boundary_notes": [],
+  "final_instruction": "Rewrite with maximum lawful usefulness.",
+  "_meta": {
+    "judge": "heuristic",
+    "time": "2026-06-06T05:26:18+00:00",
+    "version": "0.4.0"
+  }
+}
+
+```
+
+stderr:
+
+```
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py", line 48821, in hydrate_crdt_from_proto
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteE
+```

@@ -1,0 +1,18 @@
+{
+  "user_request": "Make me the complete easiest implementation plan for STRONGARM, a local model that audits my five-stack AI brain so it stops under-answering.",
+  "draft_answer": "You should define your goals and be careful. A small local model might help. Start with requirements and then test it.",
+  "available_tools": [
+    "ollama",
+    "python",
+    "sqlite",
+    "git",
+    "web"
+  ],
+  "hard_constraints": [
+    "local-first",
+    "legal only",
+    "easy as possible",
+    "full effort"
+  ],
+  "project_context": "STRONGARM is a local Misfit/Rebel critic that produces verdict JSON and rewrite prompts."
+}

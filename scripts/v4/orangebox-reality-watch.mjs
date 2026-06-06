@@ -78,6 +78,8 @@ async function main() {
   const atomsmasherDoctor = readJson(atomsmasherDoctorPath);
   const atomsmasherToolMergePath = path.join(dataRoot, "atomsmasher", "tool-merge", "latest-tool-merge.json");
   const atomsmasherToolMerge = readJson(atomsmasherToolMergePath);
+  const strongarmDoctorPath = path.join(dataRoot, "strongarm", "latest-strongarm-doctor.json");
+  const strongarmDoctor = readJson(strongarmDoctorPath);
   const restorePacketPath = path.join(dataRoot, "restore-packets", "ORANGEBOX_RESTORE_PACKET.latest.md");
   const bootstrapRoot = path.join(dataRoot, "bootstrap");
 
@@ -93,6 +95,7 @@ async function main() {
   const opsGreen = opsReadiness?.ok === true || opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
   const atomsmasherGreen = atomsmasherDoctor?.ok === true && atomsmasherDoctor?.summary?.status === "ATOMSMASHER_ORANGEBOX_INTEGRATION_GREEN";
   const atomsmasherToolMergeGreen = atomsmasherToolMerge?.ok === true && atomsmasherToolMerge?.status === "ATOMSMASHER_TOOL_MERGE_GREEN";
+  const strongarmGreen = strongarmDoctor?.ok === true && strongarmDoctor?.status === "STRONGARM_ORANGEBOX_GATE_GREEN";
   const warnings = [];
   if (!chatFresh) warnings.push("ChatBackup heartbeat is stale or missing.");
   if (!fullGreenOk) warnings.push("Latest full-green proof is missing or not green.");
@@ -100,6 +103,7 @@ async function main() {
   if (!probes.local_llama_health.ok) warnings.push("Local llama listener is not reachable.");
   if (!atomsmasherGreen) warnings.push("AtomSmasher full-scope backend integration proof is missing or not green.");
   if (!atomsmasherToolMergeGreen) warnings.push("AtomSmasher backend tool-merge proof is missing or not green.");
+  if (!strongarmGreen) warnings.push("STRONGARM project pressure gate proof is missing or not green.");
   if (!probes.ai_box_command_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!probes.ai_box_wiki_8098.ok) warnings.push("AI Box wiki/receipt rail 8098 is not reachable.");
 
@@ -123,6 +127,7 @@ async function main() {
       bookmaker: "deferred",
       atomsmasher: "completed compression super-pack received as backend capability; validated by npm.cmd run atomsmasher:doctor.",
       atomsmasher_tool_merge: "backend tool-upgrade lane; validated by npm.cmd run atomsmasher:merge-tools.",
+      strongarm_gate: "local draft pressure gate for keeping project work on the full productive path; validated by npm.cmd run strongarm:doctor.",
     },
     checks: {
       chatbackup: {
@@ -171,6 +176,13 @@ async function main() {
         ok: atomsmasherGreen || atomsmasherIntake?.status === "WAITING_FOR_HEAVY_SPEC",
         path: atomsmasherIntakePath,
         status: atomsmasherIntake?.status || null,
+      },
+      strongarm_gate: {
+        ok: strongarmGreen,
+        path: strongarmDoctorPath,
+        status: strongarmDoctor?.status || null,
+        default_mode: strongarmDoctor?.project_gate_policy?.default_mode || null,
+        integration_root: strongarmDoctor?.integration_root || null,
       },
       probes,
     },
