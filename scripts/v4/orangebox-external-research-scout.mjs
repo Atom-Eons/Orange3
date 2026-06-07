@@ -159,6 +159,48 @@ const SOURCE_TARGETS = [
     reason: "AI-resistant technical evaluation design informs Orangebox benchmark construction, leakage controls, and no-theater optimization gates.",
   },
   {
+    id: "arxiv_everything_is_context_filesystem",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2512.05470",
+    reason: "Agentic file-system context engineering reinforces Orangebox cold truth, source pointers, mounted context artifacts, and receipt-backed hydration.",
+  },
+  {
+    id: "arxiv_ultrahorizon_long_horizon",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2509.21766",
+    reason: "Ultra-long-horizon agent failures map to Orangebox doer/watcher, memory drift probes, and no-completion-without-receipt rules.",
+  },
+  {
+    id: "arxiv_tool_decathlon_realistic_apps",
+    tier: "T0_RESEARCH",
+    source_family: "arxiv",
+    url: "https://arxiv.org/abs/2510.25726",
+    reason: "Realistic multi-app tool benchmarks reinforce Orangebox oracle graders, stateful fixtures, and strict execution-based evaluation.",
+  },
+  {
+    id: "arxiv_mcptox_tool_poisoning",
+    tier: "T0_SECURITY_RESEARCH",
+    source_family: "arxiv_security",
+    url: "https://arxiv.org/abs/2508.14925",
+    reason: "MCPTox shows MCP tool metadata can poison agents before invocation, strengthening Orangebox descriptor hashing, quarantine, and static validation.",
+  },
+  {
+    id: "arxiv_mcp_itp_implicit_tool_poisoning",
+    tier: "T0_SECURITY_RESEARCH",
+    source_family: "arxiv_security",
+    url: "https://arxiv.org/abs/2601.07395",
+    reason: "Implicit tool poisoning attacks require Orangebox to scan unused tool metadata and high-privilege tool redirection paths, not only invoked tool output.",
+  },
+  {
+    id: "arxiv_ipiguard_tool_dependency_graph",
+    tier: "T0_SECURITY_RESEARCH",
+    source_family: "arxiv_security",
+    url: "https://arxiv.org/abs/2508.15310",
+    reason: "Tool dependency graphs support Orangebox pre-tool action planning, allowed-edge enforcement, and untrusted-tool-output isolation.",
+  },
+  {
     id: "openai_codex_ide",
     tier: "T0_VENDOR_ENGINEERING",
     source_family: "openai",
@@ -444,6 +486,41 @@ const SOURCE_TARGETS = [
     source_family: "pubmed",
     url: "https://pubmed.ncbi.nlm.nih.gov/35465233/",
     reason: "AI trust/vigilance research informs Orangebox visible confidence, task allocation, performance metrics, and anti-complacency reporting.",
+  },
+  {
+    id: "pubmed_alert_fatigue_measurement_2026",
+    tier: "T0_HUMAN_FACTORS",
+    source_family: "pubmed",
+    url: "https://pubmed.ncbi.nlm.nih.gov/42148822/",
+    reason: "Alert-fatigue measurement research informs Orangebox popup throttling, severity baselines, and sustained-response-rate signal hygiene.",
+  },
+  {
+    id: "pubmed_healthcare_ai_trust_human_factors_2026",
+    tier: "T0_HUMAN_FACTORS",
+    source_family: "pubmed",
+    url: "https://pubmed.ncbi.nlm.nih.gov/41674135/",
+    reason: "Human-factors trust calibration research maps to Orangebox operator-visible confidence, no blind reliance, and no excessive skepticism loops.",
+  },
+  {
+    id: "pubmed_ai_generated_images_bias_fidelity_2026",
+    tier: "T0_HUMAN_FACTORS",
+    source_family: "pubmed",
+    url: "https://pubmed.ncbi.nlm.nih.gov/42000932/",
+    reason: "Generative visual bias/fidelity research becomes a governance input for the separate visual lane without letting Ops mutate frontend assets.",
+  },
+  {
+    id: "reddit_cross_agent_watcher_pain",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/VibeCodersNest/comments/1pdbzog/got_tired_of_copypasting_claudes_responses_into/",
+    reason: "Weak-signal operator pain around persistent non-invasive cross-checkers reinforces Orangebox doer/watcher and STRONGARM discipline.",
+  },
+  {
+    id: "reddit_claude_code_workflows_signal",
+    tier: "T3_WEAK_SOCIAL",
+    source_family: "reddit",
+    url: "https://www.reddit.com/r/ClaudeCode/comments/1tkjy4u/claude_code_dropped_workflows/",
+    reason: "Weak-signal workflow discussions reinforce code-owned orchestration and keeping sub-agent results out of the main chat context.",
   },
 ];
 
@@ -752,10 +829,22 @@ function mapCandidate(text, sourceFamily) {
       proposed_action: "Add Orangebox memory-interference probes: revised-fact recall, multi-target aggregation, source-index dereference proof, and stale-memory failure receipts.",
     };
   }
+  if (/everything is context|file-system abstraction|filesystem abstraction|mounted context|context constructor|context loader|context evaluator|context engineering/.test(haystack)) {
+    return {
+      area: "knowledge_engine_atomsmasher",
+      proposed_action: "Treat context as mounted, source-backed artifacts: add file-backed context manifests, hydration provenance, token-budget loaders, and evaluator receipts.",
+    };
+  }
   if (/alert fatigue|alarm fatigue|notification fatigue|too many alerts|popup throttling|calibrated trust|human-ai teaming|human ai teaming/.test(haystack)) {
     return {
       area: "operator_signal_hygiene",
       proposed_action: "Add Orangebox signal-hygiene checks: popup throttling, severity labels, alert fatigue limits, and visible confidence calibration.",
+    };
+  }
+  if (/tool dependency graph|dependency graph|allowed-edge|untrusted data sources|unintended tool invocation/.test(haystack)) {
+    return {
+      area: "action_classifier_permission_gate",
+      proposed_action: "Add planned tool-dependency edges to the action classifier so untrusted tool output cannot authorize new high-privilege tool calls.",
     };
   }
   if (/\brce\b|remote code execution|\bstdio\b|supply chain|prompt injection|command execution|localhost|dns rebinding|\bcors\b/.test(haystack)) {
@@ -828,6 +917,12 @@ function mapCandidate(text, sourceFamily) {
     return {
       area: "harness_benchmark_lane",
       proposed_action: "Build Orangebox offline harness tasks with oracle graders, budget capture, tool traces, and receipt artifacts before claiming model or routing optimizations.",
+    };
+  }
+  if (/tool decathlon|toolathlon|realistic initial environment states|strictly verifiable|execution-based evaluation|multi-app/.test(haystack)) {
+    return {
+      area: "harness_benchmark_lane",
+      proposed_action: "Add stateful multi-tool fixtures with dedicated oracle scripts; score final environment state, not agent prose.",
     };
   }
   if (/brain|hands|session|durable|event log|harness|wake|time-to-first-token|ttft/.test(haystack)) {

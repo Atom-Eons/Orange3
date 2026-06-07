@@ -37,12 +37,14 @@ const requiredProofScripts = [
   "session:spine",
   "feature:proof",
   "harness:benchmark",
+  "research:radar",
   "assurance:doctor",
   "health:report",
   "project:report",
   "ops:readiness",
   "ops:green",
   "model:lane-eval",
+  "model:inventory",
 ];
 
 const requiredSkillCommands = [
@@ -53,6 +55,7 @@ const requiredSkillCommands = [
   "ops-green",
   "reality-watch",
   "research-scout",
+  "research-radar",
   "assurance-doctor",
   "harness-benchmark",
   "tool-ergonomics",
@@ -66,6 +69,7 @@ const requiredSkillCommands = [
   "action-doctor",
   "skills-lifecycle",
   "model-lane-eval",
+  "model-inventory",
   "codexa-alert",
   "codexa-smb-stage",
   "obox2-pack",

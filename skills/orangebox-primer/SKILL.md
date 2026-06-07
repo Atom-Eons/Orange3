@@ -63,9 +63,11 @@ strongarm-doctor      verify STRONGARM pressure gate
 gremlin-doctor        verify Misfits/Gremlin dataset and trainer handoff
 trilane-doctor        verify model registry and router policy
 model-lane-eval      verify local model role lanes and wildcard discipline
+model-inventory      report registered, installed, reachable, cloud, core, heavy, and wildcard model truth
 soul-doctor           verify SOUL GENOME continuity map
 knowledge-improvements refresh learned improvement candidates without self-promotion
 research-scout       fetch public research signals and park upgrade candidates
+research-radar       synthesize current research into approval-ready upgrade candidates
 assurance-doctor     verify research upgrades become scoped gates, receipts, and playbooks
 harness-benchmark    run offline oracle tasks for tool/routing/proof harness quality
 tool-ergonomics      verify command/tool names, outputs, receipts, and bounds

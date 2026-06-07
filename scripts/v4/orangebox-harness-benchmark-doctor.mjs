@@ -144,6 +144,7 @@ const requiredOpsScripts = [
   "health:report",
   "project:report",
   "research:scout",
+  "research:radar",
   "knowledge:improvements",
   "assurance:doctor",
   "tool:ergonomics",
@@ -161,6 +162,7 @@ const requiredOpsScripts = [
   "action:doctor",
   "skills:lifecycle",
   "model:lane-eval",
+  "model:inventory",
 ];
 
 const tasks = [
@@ -196,7 +198,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "ipi-doctor", "memory-doctor"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "research-radar", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "model-inventory", "ipi-doctor", "memory-doctor"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -811,18 +813,21 @@ const tasks = [
     id: "research_to_approval_queue",
     category: "knowledge_evidence",
     oracle: "External research can create candidates, but Knowledge Engine keeps them in an approval queue instead of self-promoting.",
-    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
     run(trace) {
       const scout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), trace);
       const improvements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), trace);
+      const radar = readJson(path.join(dataRoot, "research-radar", "latest-research-radar.json"), trace);
       const failures = [];
       if (!["EXTERNAL_RESEARCH_SCOUT_READY", "EXTERNAL_RESEARCH_SCOUT_DEGRADED"].includes(scout?.status)) failures.push(`Research scout status not usable: ${scout?.status || "missing"}`);
       if ((scout?.candidate_count || 0) < 1) failures.push("Research scout has no candidates");
       if (improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") failures.push(`Knowledge improvement queue not ready: ${improvements?.status || "missing"}`);
       if (improvements?.not_autonomous !== true && !/Do not self-promote/i.test(improvements?.doctrine || "")) failures.push("Knowledge improvements do not explicitly block autonomous self-promotion");
+      if (!["ORANGEBOX_RESEARCH_RADAR_GREEN", "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS"].includes(radar?.status)) failures.push(`Research radar status not usable: ${radar?.status || "missing"}`);
+      if (radar?.constraints?.promotion_autonomous !== false) failures.push("Research radar must block autonomous promotion");
       return failures.length
-        ? failTask("research_to_approval_queue", failures, { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status })
-        : okTask("research_to_approval_queue", { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status, improvement_candidates: improvements?.candidate_count || 0 });
+        ? failTask("research_to_approval_queue", failures, { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status, radar_status: radar?.status || null })
+        : okTask("research_to_approval_queue", { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status, improvement_candidates: improvements?.candidate_count || 0, radar_status: radar.status, radar_candidates: radar?.approval_candidates?.length || 0 });
     },
   },
   {
@@ -949,20 +954,26 @@ const tasks = [
     id: "local_model_router_claims",
     category: "model_routing",
     oracle: "Tri-lane router can be policy-green while installed model counts remain explicit and local model role claims are packet-fixture proven.",
-    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
     run(trace) {
       const trilane = readJson(path.join(dataRoot, "trilane", "latest-trilane-model-router.json"), trace);
       const laneEval = readJson(path.join(dataRoot, "models", "latest-local-model-lane-eval.json"), trace);
+      const inventory = readJson(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
       const failures = [];
       if (trilane?.status !== "TRILANE_ROUTER_PACK_GREEN") failures.push(`Tri-lane router not green: ${trilane?.status || "missing"}`);
       if (laneEval?.status !== "LOCAL_MODEL_LANE_EVAL_GREEN") failures.push(`Local model lane eval not green: ${laneEval?.status || "missing"}`);
+      if (!["ORANGEBOX_MODEL_INVENTORY_GREEN", "ORANGEBOX_MODEL_INVENTORY_REPORTED_WITH_GAPS"].includes(inventory?.status)) failures.push(`Model inventory report missing or invalid: ${inventory?.status || "missing"}`);
       const installed = trilane?.availability?.core_installed_count;
       const total = trilane?.availability?.core_total;
       if (!Number.isInteger(installed) || !Number.isInteger(total)) failures.push("Tri-lane installed/core totals missing");
       if (installed > total) failures.push(`Installed model count ${installed} exceeds total ${total}`);
       if (laneEval?.inventory_truth?.core_installed_count !== installed) failures.push("Local model lane eval does not mirror TriLane installed count");
       if (laneEval?.inventory_truth?.core_total !== total) failures.push("Local model lane eval does not mirror TriLane core total");
+      if (Number.isInteger(inventory?.summary?.core_installed) && inventory.summary.core_installed !== installed) failures.push("Model inventory report does not mirror TriLane installed core count");
+      if (Number.isInteger(inventory?.summary?.core_total) && inventory.summary.core_total !== total) failures.push("Model inventory report does not mirror TriLane core total");
+      if (inventory?.constraints?.model_pull_attempted !== false) failures.push("Model inventory report must not pull models");
+      if (inventory?.constraints?.model_call_attempted !== false) failures.push("Model inventory report must not call models");
       if (laneEval?.constraints?.model_call_attempted !== false) failures.push("Local model lane eval must not call models");
       if (laneEval?.constraints?.ollama_pull_attempted !== false) failures.push("Local model lane eval must not pull Ollama models");
       if (laneEval?.promotion_law?.no_model_card_promotion !== true) failures.push("Local model lane eval must forbid model-card promotion");
@@ -973,12 +984,17 @@ const tasks = [
         ? failTask("local_model_router_claims", failures, {
           installed,
           total,
+          inventory_status: inventory?.status || null,
+          inventory_core_installed: inventory?.summary?.core_installed ?? null,
           project_installed: project?.models?.installed_core_count,
           lane_eval_status: laneEval?.status || null,
         })
         : okTask("local_model_router_claims", {
           installed,
           total,
+          inventory_status: inventory.status,
+          inventory_core_installed: inventory.summary.core_installed,
+          inventory_full_runtime_green: inventory.full_local_model_runtime_green,
           project_installed: project?.models?.installed_core_count,
           lane_eval_status: laneEval.status,
           fixtures_green: laneEval.packet_eval.fixtures_green,

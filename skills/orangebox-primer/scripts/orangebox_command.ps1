@@ -88,6 +88,11 @@ $commands = [ordered]@{
     args = @("run", "model:lane-eval")
     description = "Verify local model role lanes, wildcard discipline, packet gates, and honest installed inventory."
   }
+  "model-inventory" = @{
+    kind = "npm"
+    args = @("run", "model:inventory")
+    description = "Report registered, installed, reachable, cloud, core, heavy, and wildcard model truth."
+  }
   "soul-doctor" = @{
     kind = "npm"
     args = @("run", "soul:doctor")
@@ -102,6 +107,11 @@ $commands = [ordered]@{
     kind = "npm"
     args = @("run", "research:scout")
     description = "Fetch low-bandwidth public research signals and park upgrade candidates."
+  }
+  "research-radar" = @{
+    kind = "npm"
+    args = @("run", "research:radar")
+    description = "Run scout, improvement queue, and assurance into one approval-ready research radar."
   }
   "assurance-doctor" = @{
     kind = "npm"

@@ -158,11 +158,13 @@ async function main() {
   const gremlin = readJson(path.join(dataRoot, "misfits", "latest-gremlin-misfits-doctor.json"));
   const triLane = readJson(path.join(dataRoot, "trilane", "latest-trilane-model-router.json"));
   const localModelLane = readJson(path.join(dataRoot, "models", "latest-local-model-lane-eval.json"));
+  const modelInventory = readJson(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"));
   const obox2Pack = readJson(path.join(dataRoot, "obox2", "latest-internal-setup-pack.json"));
   const obox2Doctor = readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json"));
   const soulDoctor = readJson(path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"));
   const knowledgeImprovements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
+  const researchRadar = readJson(path.join(dataRoot, "research-radar", "latest-research-radar.json"));
   const assuranceLab = readJson(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"));
   const harnessBenchmark = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
@@ -220,6 +222,9 @@ async function main() {
   const researchScoutReady =
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_READY" ||
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_DEGRADED";
+  const researchRadarReady =
+    researchRadar?.status === "ORANGEBOX_RESEARCH_RADAR_GREEN" ||
+    researchRadar?.status === "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS";
   const assuranceLabGreen = assuranceLab?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN";
   const harnessBenchmarkGreen = harnessBenchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
   const mcpQuarantineGreen =
@@ -258,6 +263,12 @@ async function main() {
     localModelLane?.promotion_law?.no_model_card_promotion === true &&
     localModelLane?.promotion_law?.wildcard_never_final_authority === true &&
     localModelLane?.packet_eval?.fixtures_green === localModelLane?.packet_eval?.fixtures_total;
+  const modelInventoryReported =
+    modelInventory?.status === "ORANGEBOX_MODEL_INVENTORY_GREEN" ||
+    modelInventory?.status === "ORANGEBOX_MODEL_INVENTORY_REPORTED_WITH_GAPS";
+  const modelInventoryGreen =
+    modelInventory?.status === "ORANGEBOX_MODEL_INVENTORY_GREEN" &&
+    modelInventory?.full_local_model_runtime_green === true;
   const signalHygieneGreen = signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
   const doerWatcherSpineGreen = doerWatcherSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
   const featureProofGreen = featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
@@ -473,13 +484,15 @@ async function main() {
     },
     {
       area: "External research scout",
-      status: status(researchScoutReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-external-research-scout.mjs"))),
-      reality: researchScoutReady
-        ? `Low-bandwidth public research scout is real with ${researchScout?.candidate_count || 0} candidates. It uses evidence tiers and promotes nothing automatically.`
-        : "Research scout script exists or is planned, but no current scout receipt is green yet.",
-      next: researchScoutReady
-        ? "Run npm.cmd run research:scout on cadence, then npm.cmd run knowledge:improvements to queue approved-fit upgrade candidates."
-        : "Run npm.cmd run research:scout, then rerun project/readiness proof.",
+      status: status(researchRadarReady, researchScoutReady || exists(path.join(repoRoot, "scripts", "v4", "orangebox-external-research-scout.mjs"))),
+      reality: researchRadarReady
+        ? `Research radar is real with ${researchRadar?.approval_candidates?.length || 0} approval candidate(s); scout has ${researchScout?.candidate_count || 0} candidates. It promotes nothing automatically.`
+        : researchScoutReady
+          ? `Research scout is real with ${researchScout?.candidate_count || 0} candidates, but the combined radar has not been refreshed yet.`
+          : "Research scout/radar source exists or is planned, but no current scout/radar receipt is green yet.",
+      next: researchRadarReady
+        ? "Run npm.cmd run research:radar on cadence, then approve only scoped backend candidates."
+        : "Run npm.cmd run research:radar, then rerun project/readiness proof.",
     },
     {
       area: "Research Assurance Lab",
@@ -540,6 +553,18 @@ async function main() {
       next: localModelLaneGreen
         ? "Use model:lane-eval before promoting STRONGARM, Misfits, Mirror, Judgement, wildcard, or local model routing changes."
         : "Run npm.cmd run model:lane-eval and fix the exact failed role fixture.",
+    },
+    {
+      area: "Model inventory truth report",
+      status: status(modelInventoryGreen, modelInventoryReported),
+      reality: modelInventoryReported
+        ? `Model inventory report is current: required models observed ${modelInventory?.summary?.required_installed ?? 0}/${modelInventory?.summary?.required_total ?? 0}; core models observed ${modelInventory?.summary?.core_installed ?? 0}/${modelInventory?.summary?.core_total ?? 0}; full runtime green=${Boolean(modelInventory?.full_local_model_runtime_green)}.`
+        : "Model inventory report is missing, so installed/planned model claims are scattered across TriLane and local lane receipts.",
+      next: modelInventoryGreen
+        ? "Run model packet latency/json-validity evals before changing router weights."
+        : modelInventoryReported
+          ? "Install missing Codexa models, rerun trilane:doctor, model:lane-eval, and model:inventory, then rerun project:report."
+          : "Run npm.cmd run model:inventory and rerun project:report.",
     },
     {
       area: "OBOX2 setup package",
@@ -610,6 +635,7 @@ async function main() {
         project_report: packageScript("project:report", packageJson),
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
+        research_radar: packageScript("research:radar", packageJson),
         assurance_doctor: packageScript("assurance:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
         tool_ergonomics: packageScript("tool:ergonomics", packageJson),
@@ -625,6 +651,7 @@ async function main() {
         action_doctor: packageScript("action:doctor", packageJson),
         skills_lifecycle: packageScript("skills:lifecycle", packageJson),
         model_lane_eval: packageScript("model:lane-eval", packageJson),
+        model_inventory: packageScript("model:inventory", packageJson),
       },
     },
     models: {
@@ -635,6 +662,10 @@ async function main() {
       installed_core_count: triLane?.availability?.core_installed_count || 0,
       installed_core_total: triLane?.availability?.core_total || 0,
       local_model_lane_eval_status: localModelLane?.status || null,
+      model_inventory_status: modelInventory?.status || null,
+      model_inventory_full_runtime_green: modelInventory?.full_local_model_runtime_green ?? null,
+      model_inventory_required_installed: modelInventory?.summary?.required_installed ?? null,
+      model_inventory_required_total: modelInventory?.summary?.required_total ?? null,
       local_model_lane_eval_fixtures: {
         green: localModelLane?.packet_eval?.fixtures_green || 0,
         total: localModelLane?.packet_eval?.fixtures_total || 0,
@@ -669,7 +700,12 @@ async function main() {
         : "Run npm.cmd run codexa:smb-stage whenever SMB staging is proposed, then trust only its receipt.",
       "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
-      "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
+      modelInventoryReported
+        ? "Use npm.cmd run model:inventory as the operator-facing source of truth for planned vs installed models."
+        : "Run npm.cmd run model:inventory before answering model inventory questions.",
+      researchRadarReady
+        ? "Run npm.cmd run research:radar periodically; approve only candidates that fit Orangebox Ops scope and have proof gates."
+        : "Run npm.cmd run research:radar to refresh current public research, learned candidates, and assurance gates in one report.",
       assuranceLabGreen
         ? "Assurance Lab proof is green; use npm.cmd run assurance:doctor before promoting research-derived upgrades."
         : "Run npm.cmd run assurance:doctor so research-derived upgrade ideas are converted into scoped gates, receipts, and rollback proof.",
@@ -696,6 +732,15 @@ async function main() {
         core_installed_count: localModelLane?.inventory_truth?.core_installed_count ?? null,
         core_total: localModelLane?.inventory_truth?.core_total ?? null,
       },
+      model_inventory: {
+        path: path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"),
+        status: modelInventory?.status || null,
+        required_installed: modelInventory?.summary?.required_installed ?? null,
+        required_total: modelInventory?.summary?.required_total ?? null,
+        core_installed: modelInventory?.summary?.core_installed ?? null,
+        core_total: modelInventory?.summary?.core_total ?? null,
+        full_local_model_runtime_green: modelInventory?.full_local_model_runtime_green ?? null,
+      },
       obox2_pack: { path: path.join(dataRoot, "obox2", "latest-internal-setup-pack.json"), status: obox2Pack?.status || null },
       obox2_doctor: {
         path: path.join(dataRoot, "obox2", "latest-package-doctor.json"),
@@ -715,6 +760,12 @@ async function main() {
         top_execution_score: topKnowledgeExecution?.execution_score ?? null,
       },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
+      research_radar: {
+        path: path.join(dataRoot, "research-radar", "latest-research-radar.json"),
+        status: researchRadar?.status || null,
+        approval_candidates: researchRadar?.approval_candidates?.length || 0,
+        promotion_autonomous: researchRadar?.constraints?.promotion_autonomous ?? null,
+      },
       assurance_lab: {
         path: path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"),
         status: assuranceLab?.status || null,

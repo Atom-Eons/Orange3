@@ -373,13 +373,24 @@ async function main() {
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
-      proof_command: "npm.cmd run research:scout && npm.cmd run knowledge:improvements",
-      acceptance_gate: "Knowledge queue is ready, not_autonomous=true, and backlog items require operator approval.",
-      rollback_path: "Discard candidate receipt changes; do not promote without a scoped proof doctor.",
+      proof_command: "npm.cmd run research:radar && npm.cmd run knowledge:improvements",
+      acceptance_gate: "Research radar and knowledge queue are ready, not_autonomous=true, and backlog items require operator approval.",
+      rollback_path: "Discard candidate/radar receipt changes; do not promote without a scoped proof doctor.",
       evidence: [
         evidence(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY", {
           accept: (parsed, status) => status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" && parsed?.not_autonomous === true,
           detail: (parsed) => ({ candidate_count: parsed?.candidate_count ?? null, top_area: parsed?.top_execution_candidate?.area || null }),
+        }),
+        evidence(path.join(dataRoot, "research-radar", "latest-research-radar.json"), null, {
+          accept: (parsed, status) => (
+            status === "ORANGEBOX_RESEARCH_RADAR_GREEN" ||
+            status === "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS"
+          ) && parsed?.constraints?.promotion_autonomous === false,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            approval_candidates: parsed?.approval_candidates?.length || 0,
+            promotion_autonomous: parsed?.constraints?.promotion_autonomous ?? null,
+          }),
         }),
       ],
       operator_approval_required: true,
@@ -468,6 +479,37 @@ async function main() {
         }),
       ],
       operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "model_inventory_truth",
+      claim: "Orangebox separates registered/planned model lanes from actually observed cockpit and Codexa models.",
+      lane: "backend_ops",
+      status: "PARTIAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run model:inventory",
+      acceptance_gate: "Model inventory report is valid, never pulls or calls models, and refuses full local model runtime green until required models are observed.",
+      recovery_path: "Install the OBOX2 model setup pack on Codexa, restore Ollama reachability, then rerun model:inventory, trilane:doctor, model:lane-eval, health:report, and project:report.",
+      evidence: [
+        evidence(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"), null, {
+          accept: (parsed, status) => (
+            status === "ORANGEBOX_MODEL_INVENTORY_GREEN" ||
+            status === "ORANGEBOX_MODEL_INVENTORY_REPORTED_WITH_GAPS"
+          )
+            && parsed?.constraints?.model_pull_attempted === false
+            && parsed?.constraints?.model_call_attempted === false
+            && Number(parsed?.summary?.required_total || 0) >= 10
+            && Number(parsed?.summary?.core_total || 0) >= 5,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            required_installed: parsed?.summary?.required_installed ?? null,
+            required_total: parsed?.summary?.required_total ?? null,
+            core_installed: parsed?.summary?.core_installed ?? null,
+            core_total: parsed?.summary?.core_total ?? null,
+            full_local_model_runtime_green: parsed?.full_local_model_runtime_green ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: true,
     }),
     matrixRow({
       id: "trilane_policy",

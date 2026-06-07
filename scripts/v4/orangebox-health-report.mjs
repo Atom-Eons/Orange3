@@ -242,6 +242,7 @@ async function main() {
     reality_watch: latestReceipt("orangebox-reality-watch-"),
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
     research_scout: latestReceipt("orangebox-external-research-scout-"),
+    research_radar: latestReceipt("orangebox-research-radar-"),
     assurance_lab: latestReceipt("orangebox-assurance-lab-"),
     harness_benchmark: latestReceipt("orangebox-harness-benchmark-"),
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
@@ -254,6 +255,7 @@ async function main() {
     skill_lifecycle: latestReceipt("orangebox-skill-lifecycle-doctor-"),
     tool_ergonomics: latestReceipt("orangebox-tool-ergonomics-"),
     checkmate_eval_lane: latestReceipt("checkmate-eval-lane-"),
+    model_inventory: latestReceipt("orangebox-model-inventory-report-"),
     signal_hygiene: latestReceipt("orangebox-operator-signal-hygiene-"),
     doer_watcher_spine: latestReceipt("orangebox-doer-watcher-spine-"),
     feature_proof: latestReceipt("orangebox-feature-acceptance-matrix-"),
@@ -266,6 +268,7 @@ async function main() {
     reality_watch: readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json")) || readJson(receiptPaths.reality_watch || ""),
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
     research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
+    research_radar: readJson(path.join(dataRoot, "research-radar", "latest-research-radar.json")) || readJson(receiptPaths.research_radar || ""),
     assurance_lab: readJson(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json")) || readJson(receiptPaths.assurance_lab || ""),
     harness_benchmark: readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json")) || readJson(receiptPaths.harness_benchmark || ""),
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
@@ -278,6 +281,7 @@ async function main() {
     skill_lifecycle: readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(receiptPaths.skill_lifecycle || ""),
     tool_ergonomics: readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(receiptPaths.tool_ergonomics || ""),
     checkmate_eval_lane: readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(receiptPaths.checkmate_eval_lane || ""),
+    model_inventory: readJson(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json")) || readJson(receiptPaths.model_inventory || ""),
     signal_hygiene: readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(receiptPaths.signal_hygiene || ""),
     doer_watcher_spine: readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(receiptPaths.doer_watcher_spine || ""),
     feature_proof: readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json")) || readJson(receiptPaths.feature_proof || ""),
@@ -348,6 +352,8 @@ async function main() {
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") warnings.push("Orangebox skill lifecycle doctor is not green.");
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") warnings.push("Orangebox tool ergonomics doctor is not green.");
   if (latest.checkmate_eval_lane?.status !== "CHECKMATE_EVAL_LANE_GREEN") warnings.push("CHECKMATE eval lane doctor is not green.");
+  if (!["ORANGEBOX_MODEL_INVENTORY_GREEN", "ORANGEBOX_MODEL_INVENTORY_REPORTED_WITH_GAPS"].includes(latest.model_inventory?.status)) warnings.push("Model inventory report is not refreshed.");
+  if (latest.model_inventory?.status === "ORANGEBOX_MODEL_INVENTORY_REPORTED_WITH_GAPS") warnings.push("Model inventory has gaps; do not claim full local model runtime green.");
   if (latest.signal_hygiene?.status !== "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN") warnings.push("Operator signal hygiene doctor is not green.");
   if (latest.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") warnings.push("Doer/watcher session spine doctor is not green.");
   if (latest.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") warnings.push("Feature acceptance matrix doctor is not green.");
@@ -360,6 +366,7 @@ async function main() {
   if (!obox2Contracts.ok || obox2Contracts.check_count < 30) warnings.push(`OBOX2 setup contract proof is not green enough (${obox2Contracts.check_count} checks, ${obox2Contracts.failed_count} failed).`);
   if (!recoveryArtifacts.rail_recovery_pack?.exists && (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok)) warnings.push("Codexa rail recovery zip is not generated.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
+  if (!["ORANGEBOX_RESEARCH_RADAR_GREEN", "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS"].includes(latest.research_radar?.status)) warnings.push("Research radar is not refreshed; approval-ready upgrade synthesis may be stale.");
   if (latest.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") warnings.push("Research Assurance Lab doctor is not green.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") warnings.push("Orangebox offline harness benchmark is not green.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
@@ -377,6 +384,7 @@ async function main() {
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN" || !obox2Contracts.ok || obox2Contracts.check_count < 30) nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor; do not treat the Codexa setup pack as proven until setup contracts are green.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
+  if (!["ORANGEBOX_RESEARCH_RADAR_GREEN", "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS"].includes(latest.research_radar?.status)) nextActions.push("Run npm.cmd run research:radar to fetch public signals, refresh learned candidates, run assurance, and write one approval report.");
   if (latest.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") nextActions.push("Run npm.cmd run assurance:doctor so research-derived upgrades become scoped playbooks, gates, receipts, and rollback proof.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") nextActions.push("Run npm.cmd run harness:benchmark to prove offline oracle tasks before claiming tool/routing optimization.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
@@ -392,6 +400,8 @@ async function main() {
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") nextActions.push("Run npm.cmd run skills:lifecycle to verify Orangebox skill install and command mappings.");
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") nextActions.push("Run npm.cmd run tool:ergonomics to verify command/tool names, bounded outputs, and receipt-backed proof scripts.");
   if (latest.checkmate_eval_lane?.status !== "CHECKMATE_EVAL_LANE_GREEN") nextActions.push("Run npm.cmd run checkmate:doctor to verify eval gates before prompt/model/routing/tool changes.");
+  if (!["ORANGEBOX_MODEL_INVENTORY_GREEN", "ORANGEBOX_MODEL_INVENTORY_REPORTED_WITH_GAPS"].includes(latest.model_inventory?.status)) nextActions.push("Run npm.cmd run model:inventory to produce the installed/planned model truth report.");
+  if (latest.model_inventory?.status === "ORANGEBOX_MODEL_INVENTORY_REPORTED_WITH_GAPS") nextActions.push("After installing Codexa models, rerun npm.cmd run trilane:doctor && npm.cmd run model:lane-eval && npm.cmd run model:inventory.");
   if (latest.signal_hygiene?.status !== "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN") nextActions.push("Run npm.cmd run signal:hygiene to verify alert cadence, severity labels, and confidence calibration.");
   if (latest.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") nextActions.push("Run npm.cmd run session:spine to verify doer surfaces, watcher freshness, and one-reality state.");
   if (latest.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") nextActions.push("Run npm.cmd run feature:proof to verify all feature claims have evidence, proof commands, and rollback or recovery truth.");
@@ -500,6 +510,12 @@ async function main() {
         status: latest.research_scout?.status || null,
         candidate_count: latest.research_scout?.candidate_count || 0,
       },
+      research_radar: {
+        path: path.join(dataRoot, "research-radar", "latest-research-radar.json"),
+        status: latest.research_radar?.status || null,
+        approval_candidates: latest.research_radar?.approval_candidates?.length || 0,
+        promotion_autonomous: latest.research_radar?.constraints?.promotion_autonomous ?? null,
+      },
       assurance_lab: {
         path: path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"),
         status: latest.assurance_lab?.status || null,
@@ -595,6 +611,15 @@ async function main() {
         status: latest.checkmate_eval_lane?.status || null,
         fixture_count: latest.checkmate_eval_lane?.fixtures?.length || 0,
         failures: latest.checkmate_eval_lane?.failures?.length ?? null,
+      },
+      model_inventory: {
+        path: path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"),
+        status: latest.model_inventory?.status || null,
+        required_installed: latest.model_inventory?.summary?.required_installed ?? null,
+        required_total: latest.model_inventory?.summary?.required_total ?? null,
+        core_installed: latest.model_inventory?.summary?.core_installed ?? null,
+        core_total: latest.model_inventory?.summary?.core_total ?? null,
+        full_local_model_runtime_green: latest.model_inventory?.full_local_model_runtime_green ?? null,
       },
       signal_hygiene: {
         path: path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json"),
