@@ -98,6 +98,11 @@ $commands = [ordered]@{
     args = @("run", "research:scout")
     description = "Fetch low-bandwidth public research signals and park upgrade candidates."
   }
+  "assurance-doctor" = @{
+    kind = "npm"
+    args = @("run", "assurance:doctor")
+    description = "Verify research-derived upgrades become scoped backend gates, receipts, and playbooks."
+  }
   "harness-benchmark" = @{
     kind = "npm"
     args = @("run", "harness:benchmark")

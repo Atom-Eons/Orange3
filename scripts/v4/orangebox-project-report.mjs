@@ -162,6 +162,7 @@ async function main() {
   const soulDoctor = readJson(path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"));
   const knowledgeImprovements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"));
   const researchScout = readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json"));
+  const assuranceLab = readJson(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"));
   const harnessBenchmark = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
@@ -216,6 +217,7 @@ async function main() {
   const researchScoutReady =
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_READY" ||
     researchScout?.status === "EXTERNAL_RESEARCH_SCOUT_DEGRADED";
+  const assuranceLabGreen = assuranceLab?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN";
   const harnessBenchmarkGreen = harnessBenchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
   const mcpQuarantineGreen =
     mcpDoctor?.ok === true &&
@@ -421,6 +423,16 @@ async function main() {
         : "Run npm.cmd run research:scout, then rerun project/readiness proof.",
     },
     {
+      area: "Research Assurance Lab",
+      status: status(assuranceLabGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-assurance-lab-doctor.mjs"))),
+      reality: assuranceLabGreen
+        ? `Assurance Lab is green: ${assuranceLab?.summary?.source_count || 0} sources, ${assuranceLab?.summary?.checks_green || 0}/${assuranceLab?.summary?.checks_total || 0} checks, no auto-promotion, backend-only constraints held.`
+        : "Assurance Lab source exists or is planned, but the current receipt is not green yet.",
+      next: assuranceLabGreen
+        ? "Run assurance:doctor before promoting research-derived Orangebox upgrades."
+        : "Run npm.cmd run assurance:doctor, then rerun feature:proof, project:report, and harness:benchmark.",
+    },
+    {
       area: "Offline harness benchmark",
       status: status(harnessBenchmarkGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-harness-benchmark-doctor.mjs"))),
       reality: harnessBenchmarkGreen
@@ -529,6 +541,7 @@ async function main() {
         project_report: packageScript("project:report", packageJson),
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
+        assurance_doctor: packageScript("assurance:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
         tool_ergonomics: packageScript("tool:ergonomics", packageJson),
         checkmate_doctor: packageScript("checkmate:doctor", packageJson),
@@ -580,6 +593,9 @@ async function main() {
       "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
       "Install core Codexa models first; hold heavy models until core proof is green.",
       "Run npm.cmd run research:scout periodically, then approve only candidates that fit Orangebox Ops scope.",
+      assuranceLabGreen
+        ? "Assurance Lab proof is green; use npm.cmd run assurance:doctor before promoting research-derived upgrades."
+        : "Run npm.cmd run assurance:doctor so research-derived upgrade ideas are converted into scoped gates, receipts, and rollback proof.",
       "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
       topKnowledgeExecution
         ? `Top Knowledge Engine backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}) -> ${topKnowledgeExecution.proof_command}`
@@ -613,6 +629,14 @@ async function main() {
         top_execution_score: topKnowledgeExecution?.execution_score ?? null,
       },
       research_scout: { path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"), status: researchScout?.status || null },
+      assurance_lab: {
+        path: path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"),
+        status: assuranceLab?.status || null,
+        source_count: assuranceLab?.summary?.source_count || 0,
+        checks_green: assuranceLab?.summary?.checks_green ?? null,
+        checks_total: assuranceLab?.summary?.checks_total ?? null,
+        proof_hash: assuranceLab?.proof_hash || null,
+      },
       harness_benchmark: {
         path: path.join(dataRoot, "harness", "latest-harness-benchmark.json"),
         status: harnessBenchmark?.status || null,

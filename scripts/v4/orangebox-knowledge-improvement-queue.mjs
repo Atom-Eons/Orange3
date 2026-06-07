@@ -247,6 +247,25 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "research_assurance_lab") {
+    const file = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.paid_api_attempted === false
+      && proof?.constraints?.autonomous_promotion_attempted === false
+      && Number(proof?.summary?.source_count || 0) >= 3
+      && Number(proof?.summary?.checks_green || 0) === Number(proof?.summary?.checks_total || -1);
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.summary.source_count} assurance sources; ${proof.summary.checks_green}/${proof.summary.checks_total} checks; proof=${proof.proof_hash}`,
+      }
+      : null;
+  }
   return null;
 }
 
@@ -570,8 +589,8 @@ const executionProfiles = {
   },
   research_assurance_lab: {
     priority: 68,
-    proof_command: "npm.cmd run research:scout && npm.cmd run knowledge:improvements",
-    acceptance_gate: "Research source becomes a playbook, benchmark, or receipt-backed proof task, not broad unsourced architecture drift.",
+    proof_command: "npm.cmd run assurance:doctor && npm.cmd run feature:proof && npm.cmd run harness:benchmark",
+    acceptance_gate: "Research source becomes a scoped assurance playbook, benchmark gate, receipt-backed proof task, and no-auto-promotion record, not broad unsourced architecture drift.",
   },
   knowledge_engine: {
     priority: 66,

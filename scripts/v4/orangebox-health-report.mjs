@@ -242,6 +242,7 @@ async function main() {
     reality_watch: latestReceipt("orangebox-reality-watch-"),
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
     research_scout: latestReceipt("orangebox-external-research-scout-"),
+    assurance_lab: latestReceipt("orangebox-assurance-lab-"),
     harness_benchmark: latestReceipt("orangebox-harness-benchmark-"),
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
     codexa_alert: latestReceipt("orangebox-codexa-alert-"),
@@ -263,6 +264,7 @@ async function main() {
     reality_watch: readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json")) || readJson(receiptPaths.reality_watch || ""),
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
     research_scout: readJson(path.join(dataRoot, "research-scout", "latest-external-research-scout.json")) || readJson(receiptPaths.research_scout || ""),
+    assurance_lab: readJson(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json")) || readJson(receiptPaths.assurance_lab || ""),
     harness_benchmark: readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json")) || readJson(receiptPaths.harness_benchmark || ""),
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
     codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
@@ -347,6 +349,7 @@ async function main() {
   if (!obox2Contracts.ok || obox2Contracts.check_count < 30) warnings.push(`OBOX2 setup contract proof is not green enough (${obox2Contracts.check_count} checks, ${obox2Contracts.failed_count} failed).`);
   if (!recoveryArtifacts.rail_recovery_pack?.exists && (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok)) warnings.push("Codexa rail recovery zip is not generated.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
+  if (latest.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") warnings.push("Research Assurance Lab doctor is not green.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") warnings.push("Orangebox offline harness benchmark is not green.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
   else if (!knowledgeBacklogReady) warnings.push("Knowledge Engine improvement candidates are refreshed, but execution-ranked backend backlog proof is not green.");
@@ -363,6 +366,7 @@ async function main() {
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN" || !obox2Contracts.ok || obox2Contracts.check_count < 30) nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor; do not treat the Codexa setup pack as proven until setup contracts are green.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
+  if (latest.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") nextActions.push("Run npm.cmd run assurance:doctor so research-derived upgrades become scoped playbooks, gates, receipts, and rollback proof.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") nextActions.push("Run npm.cmd run harness:benchmark to prove offline oracle tasks before claiming tool/routing optimization.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
   else if (!knowledgeBacklogReady) nextActions.push("Rerun npm.cmd run knowledge:improvements after the queue script upgrade so learned candidates include backend-only execution proof.");
@@ -386,8 +390,9 @@ async function main() {
   const signalHygieneOk = latest.signal_hygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
   const doerWatcherSpineOk = latest.doer_watcher_spine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
   const featureProofOk = latest.feature_proof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
+  const assuranceLabOk = latest.assurance_lab?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN";
   const harnessBenchmarkOk = latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && featureProofOk;
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && featureProofOk && assuranceLabOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -478,6 +483,14 @@ async function main() {
         path: path.join(dataRoot, "research-scout", "latest-external-research-scout.json"),
         status: latest.research_scout?.status || null,
         candidate_count: latest.research_scout?.candidate_count || 0,
+      },
+      assurance_lab: {
+        path: path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"),
+        status: latest.assurance_lab?.status || null,
+        source_count: latest.assurance_lab?.summary?.source_count || 0,
+        checks_green: latest.assurance_lab?.summary?.checks_green ?? null,
+        checks_total: latest.assurance_lab?.summary?.checks_total ?? null,
+        proof_hash: latest.assurance_lab?.proof_hash || null,
       },
       harness_benchmark: {
         path: path.join(dataRoot, "harness", "latest-harness-benchmark.json"),

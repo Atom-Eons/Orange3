@@ -163,6 +163,7 @@ async function main() {
     { script: "skills:lifecycle", timeout: 90_000 },
     { script: "tool:ergonomics", timeout: 60_000 },
     { script: "checkmate:doctor", timeout: 60_000 },
+    { script: "assurance:doctor", timeout: 60_000 },
     { script: "signal:hygiene", timeout: 60_000 },
     { script: "session:spine", timeout: 60_000 },
     { script: "feature:proof", timeout: 90_000 },
@@ -189,6 +190,7 @@ async function main() {
   const skillsPath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
   const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
+  const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const sessionSpinePath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
   const featureProofPath = path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json");
@@ -208,6 +210,7 @@ async function main() {
   const skills = readJson(skillsPath);
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmate = readJson(checkmatePath);
+  const assurance = readJson(assurancePath);
   const signalHygiene = readJson(signalHygienePath);
   const sessionSpine = readJson(sessionSpinePath);
   const featureProof = readJson(featureProofPath);
@@ -241,6 +244,7 @@ async function main() {
     gate("skill_lifecycle_green", skills?.ok === true && skills?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN", { status: skills?.status || null, command_count: skills?.command_count ?? null }),
     gate("tool_ergonomics_green", toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { status: toolErgonomics?.status || null, command_count: toolErgonomics?.command_surface?.command_count ?? null }),
     gate("checkmate_eval_lane_green", checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN", { status: checkmate?.status || null, fixtures_total: checkmate?.fixtures?.length ?? null }),
+    gate("assurance_lab_green", assurance?.ok === true && assurance?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN", { status: assurance?.status || null, source_count: assurance?.summary?.source_count ?? null }),
     gate("operator_signal_hygiene_green", signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", { status: signalHygiene?.status || null, severity: signalHygiene?.signal_hygiene?.severity || null }),
     gate("doer_watcher_spine_green", sessionSpine?.ok === true && sessionSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN", { status: sessionSpine?.status || null, failures: sessionSpine?.failures?.length ?? null }),
     gate("feature_acceptance_matrix_green", featureProof?.ok === true && featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN", { status: featureProof?.status || null, features_green: featureProof?.features_green ?? null, features_total: featureProof?.features_total ?? null }),
@@ -279,6 +283,7 @@ async function main() {
       harness_benchmark: harnessPath,
       tool_ergonomics: toolErgonomicsPath,
       checkmate_eval_lane: checkmatePath,
+      assurance_lab: assurancePath,
       signal_hygiene: signalHygienePath,
       doer_watcher_spine: sessionSpinePath,
       backend_install: backendPath,

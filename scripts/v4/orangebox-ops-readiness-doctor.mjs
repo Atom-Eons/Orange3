@@ -103,6 +103,8 @@ function main() {
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
   const checkmate = readJson(checkmatePath);
+  const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
+  const assurance = readJson(assurancePath);
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const signalHygiene = readJson(signalHygienePath);
   const doerWatcherPath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
@@ -218,6 +220,15 @@ function main() {
       status: checkmate?.status || null,
       fixture_count: checkmate?.fixtures?.length || 0,
       note: "Proves prompt/model/routing/tool/score changes require CHECKMATE eval fixtures before promotion.",
+    },
+    research_assurance_lab: {
+      ok: assurance?.ok === true && assurance?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN",
+      path: assurancePath,
+      status: assurance?.status || null,
+      source_count: assurance?.summary?.source_count || 0,
+      checks_green: assurance?.summary?.checks_green ?? null,
+      checks_total: assurance?.summary?.checks_total ?? null,
+      note: "Proves research-derived upgrade ideas become scoped backend playbooks, gates, receipts, and rollback proof before promotion.",
     },
     operator_signal_hygiene: {
       ok: signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",

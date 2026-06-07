@@ -76,6 +76,7 @@ const requiredCommands = [
   { name: "soul-doctor", kind: "npm", script: "soul:doctor" },
   { name: "knowledge-improvements", kind: "npm", script: "knowledge:improvements" },
   { name: "research-scout", kind: "npm", script: "research:scout" },
+  { name: "assurance-doctor", kind: "npm", script: "assurance:doctor" },
   { name: "harness-benchmark", kind: "npm", script: "harness:benchmark" },
   { name: "tool-ergonomics", kind: "npm", script: "tool:ergonomics" },
   { name: "checkmate-eval", kind: "npm", script: "checkmate:doctor" },

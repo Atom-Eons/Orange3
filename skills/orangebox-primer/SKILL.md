@@ -65,6 +65,7 @@ trilane-doctor        verify model registry and router policy
 soul-doctor           verify SOUL GENOME continuity map
 knowledge-improvements refresh learned improvement candidates without self-promotion
 research-scout       fetch public research signals and park upgrade candidates
+assurance-doctor     verify research upgrades become scoped gates, receipts, and playbooks
 harness-benchmark    run offline oracle tasks for tool/routing/proof harness quality
 tool-ergonomics      verify command/tool names, outputs, receipts, and bounds
 checkmate-eval       verify eval gates before prompt/model/routing/tool changes

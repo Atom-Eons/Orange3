@@ -144,6 +144,7 @@ const requiredOpsScripts = [
   "project:report",
   "research:scout",
   "knowledge:improvements",
+  "assurance:doctor",
   "tool:ergonomics",
   "checkmate:doctor",
   "signal:hygiene",
@@ -191,7 +192,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -549,6 +550,39 @@ const tasks = [
       return failures.length
         ? failTask("research_to_approval_queue", failures, { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status })
         : okTask("research_to_approval_queue", { research_status: scout?.status, research_candidates: scout?.candidate_count, improvement_status: improvements?.status, improvement_candidates: improvements?.candidate_count || 0 });
+    },
+  },
+  {
+    id: "assurance_lab_truth",
+    category: "knowledge_evidence",
+    oracle: "Research-derived system ideas must become scoped backend playbooks, gates, and receipts before promotion.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const assurance = readJson(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const failures = [];
+      if (assurance?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") failures.push(`Assurance Lab not green: ${assurance?.status || "missing"}`);
+      if ((assurance?.summary?.source_count || 0) < 3) failures.push(`Assurance source count too low: ${assurance?.summary?.source_count || 0}`);
+      if (!Array.isArray(assurance?.playbook?.gates) || assurance.playbook.gates.length < 6) failures.push("Assurance playbook gate count too low");
+      if (!assurance?.playbook?.gates?.some((gate) => gate.id === "no_auto_promotion")) failures.push("Assurance playbook lacks no_auto_promotion gate");
+      if (assurance?.constraints?.frontend_touched !== false) failures.push("Assurance Lab must prove frontend_touched=false");
+      if (assurance?.constraints?.paid_api_attempted !== false) failures.push("Assurance Lab must prove paid_api_attempted=false");
+      if (assurance?.constraints?.autonomous_promotion_attempted !== false) failures.push("Assurance Lab must prove autonomous_promotion_attempted=false");
+      if (!packageJson?.scripts?.["assurance:doctor"]) failures.push("Package script assurance:doctor missing");
+      if (!backendProofInProgress && project?.evidence?.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") failures.push("Project report does not mirror Assurance Lab green status");
+      return failures.length
+        ? failTask("assurance_lab_truth", failures, {
+          status: assurance?.status || null,
+          source_count: assurance?.summary?.source_count || 0,
+          constraints: assurance?.constraints || null,
+        })
+        : okTask("assurance_lab_truth", {
+          status: assurance.status,
+          source_count: assurance.summary.source_count,
+          gate_count: assurance.playbook.gates.length,
+          proof_hash: assurance.proof_hash,
+        });
     },
   },
   {

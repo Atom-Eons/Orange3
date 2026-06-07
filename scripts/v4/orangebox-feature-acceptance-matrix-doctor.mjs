@@ -268,6 +268,30 @@ async function main() {
       operator_approval_required: true,
     }),
     matrixRow({
+      id: "research_assurance_lab",
+      claim: "Research-derived Orangebox upgrades are filtered through assurance playbooks, deterministic gates, receipts, rollback, and operator approval before promotion.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run assurance:doctor",
+      acceptance_gate: "Assurance Lab receipt is green, source tiering exists, no-auto-promotion is explicit, and frontend/API/install mutations are false.",
+      rollback_path: "Revert assurance doctor/command/report wiring, discard assurance-lab receipts, and rerun assurance:doctor, feature:proof, project:report, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"), "ORANGEBOX_ASSURANCE_LAB_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_ASSURANCE_LAB_GREEN" &&
+            parsed?.constraints?.frontend_touched === false &&
+            parsed?.constraints?.paid_api_attempted === false &&
+            parsed?.constraints?.autonomous_promotion_attempted === false,
+          detail: (parsed) => ({
+            source_count: parsed?.summary?.source_count ?? null,
+            checks_green: parsed?.summary?.checks_green ?? null,
+            checks_total: parsed?.summary?.checks_total ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: true,
+    }),
+    matrixRow({
       id: "offline_harness",
       claim: "Backend proof changes have offline oracle tasks before optimization claims.",
       lane: "backend_ops",

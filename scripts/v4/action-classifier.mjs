@@ -153,7 +153,7 @@ const SAFE_RULES = [
   { id: "git_status", re: /\bgit\s+(status|diff|show|log|rev-parse|branch)\b/i },
   { id: "syntax_check", re: /\bnode\b[\s\S]*--check\b/i },
   { id: "read_search", re: /\b(rg|findstr|get-content|gc)\b/i },
-  { id: "orangebox_proof_script", re: /\bnpm(\.cmd)?\s+run\s+(backend:proof|ops:readiness|ops:green|health:report|project:report|reality:watch|harness:benchmark|tool:ergonomics|checkmate:doctor|signal:hygiene|session:spine|feature:proof|action:doctor|package-script-doctor|codexa:alert|mcp:doctor|skills:lifecycle)\b/i },
+  { id: "orangebox_proof_script", re: /\bnpm(\.cmd)?\s+run\s+(backend:proof|ops:readiness|ops:green|health:report|project:report|reality:watch|harness:benchmark|assurance:doctor|tool:ergonomics|checkmate:doctor|signal:hygiene|session:spine|feature:proof|action:doctor|package-script-doctor|codexa:alert|mcp:doctor|skills:lifecycle)\b/i },
   { id: "localhost_probe", re: /\b(iwr|irm|invoke-webrequest|invoke-restmethod|curl|wget)\b[\s\S]*(127\.0\.0\.1|localhost|\[::1\])/i },
 ];
 
@@ -264,6 +264,7 @@ export const ACTION_CLASSIFIER_FIXTURES = [
   { name: "node-check", command: "node --check ./scripts/v4/orangebox-health-report.mjs", expect: { disposition: "allow", blocked: false } },
   { name: "backend-proof", command: "npm.cmd run backend:proof", expect: { disposition: "allow", blocked: false } },
   { name: "ops-green", command: "npm.cmd run ops:green", expect: { disposition: "allow", blocked: false } },
+  { name: "assurance-doctor", command: "npm.cmd run assurance:doctor", expect: { disposition: "allow", blocked: false } },
   { name: "package-install", command: "npm install left-pad", expect: { disposition: "stage_for_confirmation", blocked: false } },
   { name: "commit-no-verify", command: "git commit --no-verify -m test", expect: { disposition: "block", blocked: true } },
   { name: "force-push", command: "git push --force origin main", expect: { disposition: "block", blocked: true } },
