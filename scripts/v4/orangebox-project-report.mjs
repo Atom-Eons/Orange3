@@ -168,6 +168,7 @@ async function main() {
   const assuranceLab = readJson(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"));
   const harnessBenchmark = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
+  const codexaBringup = readJson(path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"));
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
   const ipiDoctor = readJson(path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json")) || readJson(latestReceipt("orangebox-ipi-doctor-"));
@@ -280,6 +281,10 @@ async function main() {
   const codexaHandoffReady =
     codexaHandoff?.status === "CODEXA_HANDOFF_READY_WITH_OPEN_GAPS" ||
     codexaHandoff?.status === "CODEXA_HANDOFF_READY_NO_OPEN_GAPS";
+  const codexaBringupReported =
+    codexaBringup?.status === "CODEXA_BRINGUP_READY" ||
+    codexaBringup?.status === "CODEXA_BRINGUP_REPORTED_OPEN_GAPS" ||
+    codexaBringup?.status === "CODEXA_BRINGUP_WATCH_REPORTED_ALERT_FAILURE";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -457,6 +462,16 @@ async function main() {
       next: codexaAlert?.status
         ? "Keep alerting explicit until Codexa rails and Ollama are green."
         : "Run npm.cmd run codexa:alert:popup, then rerun project/readiness proof.",
+    },
+    {
+      area: "Codexa bring-up watcher",
+      status: status(codexaBringupReported, exists(path.join(repoRoot, "scripts", "v4", "orangebox-codexa-bringup-watch.mjs"))),
+      reality: codexaBringupReported
+        ? `Codexa bring-up watcher is real. Current status: ${codexaBringup.status}. Ready=${Boolean(codexaBringup.codexa_ready)}. Missing: ${(codexaBringup.verdict?.missing || []).join(", ") || "none"}.`
+        : "Codexa bring-up watcher source exists or is planned, but no current watcher receipt is green yet.",
+      next: codexaBringupReported
+        ? "After running the setup pack on Codexa, use codexa:watch to wait for the command rail, Ollama, and receipt rails before claiming two-machine readiness."
+        : "Run npm.cmd run codexa:watch after the OBOX2 setup pack is attempted on Codexa.",
     },
     {
       area: "OB0X terminal affordance",
@@ -674,6 +689,7 @@ async function main() {
         ops_green: packageScript("ops:green", packageJson),
         ops_gaps: packageScript("ops:gaps", packageJson),
         codexa_handoff: packageScript("codexa:handoff", packageJson),
+        codexa_watch: packageScript("codexa:watch", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         ipi_doctor: packageScript("ipi:doctor", packageJson),
@@ -745,6 +761,9 @@ async function main() {
       codexaHandoffReady
         ? "Use npm.cmd run codexa:handoff before Codexa setup so the operator has one first-click and verification receipt."
         : "Run npm.cmd run codexa:handoff so the AI Box setup handoff is current.",
+      codexaBringupReported
+        ? "Use npm.cmd run codexa:watch after the Codexa setup pack runs so ready/open-gap truth is observed over time, not guessed from a single probe."
+        : "Run npm.cmd run codexa:watch once the OBOX2 setup pack is attempted on Codexa.",
       "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
       topKnowledgeExecution
         ? `Top Knowledge Engine backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}) -> ${topKnowledgeExecution.proof_command}`
@@ -822,6 +841,13 @@ async function main() {
         status: readJson(path.join(dataRoot, "ops-green", "latest-local-ops-green.json"))?.status || null,
       },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
+      codexa_bringup_watch: {
+        path: path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"),
+        status: codexaBringup?.status || null,
+        codexa_ready: codexaBringup?.codexa_ready ?? null,
+        missing: codexaBringup?.verdict?.missing || null,
+        status_history: codexaBringup?.verdict?.status_history || null,
+      },
       codexa_signal_hygiene: {
         path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"),
         status: codexaAlert?.signal_hygiene?.severity || null,

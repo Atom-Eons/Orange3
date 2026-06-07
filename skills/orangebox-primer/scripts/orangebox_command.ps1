@@ -173,6 +173,16 @@ $commands = [ordered]@{
     args = @("run", "codexa:alert:popup")
     description = "Probe Codexa/AI Box rails and show a throttled Windows popup if attention is required."
   }
+  "codexa-watch" = @{
+    kind = "npm"
+    args = @("run", "codexa:watch")
+    description = "After Codexa setup, run a bounded bring-up watch and write the ready/open-gaps receipt."
+  }
+  "codexa-watch-popup" = @{
+    kind = "npm"
+    args = @("run", "codexa:watch:popup")
+    description = "Run the Codexa bring-up watch and allow the first alert popup if attention is required."
+  }
   "codexa-smb-stage" = @{
     kind = "npm"
     args = @("run", "codexa:smb-stage")

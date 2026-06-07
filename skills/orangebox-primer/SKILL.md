@@ -80,6 +80,8 @@ final-verify         refresh and verify Orangebox Delta Final backend package
 final-zip            build and verify the Orangebox Delta Final Downloads zip
 codexa-alert         probe AI Box rails and write an explicit alert receipt
 codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
+codexa-watch         bounded post-setup watch for Codexa ready/open-gaps proof
+codexa-watch-popup   bounded Codexa watch with first alert popup allowed
 codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default
 codexa-handoff       write the exact Codexa first-click setup handoff and verify order
 mcp-doctor           verify MCP quarantine/tool bridge

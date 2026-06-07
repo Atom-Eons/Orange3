@@ -91,6 +91,8 @@ const requiredCommands = [
   { name: "final-zip", kind: "npm", script: "final:zip" },
   { name: "codexa-alert", kind: "npm", script: "codexa:alert" },
   { name: "codexa-alert-popup", kind: "npm", script: "codexa:alert:popup" },
+  { name: "codexa-watch", kind: "npm", script: "codexa:watch" },
+  { name: "codexa-watch-popup", kind: "npm", script: "codexa:watch:popup" },
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },
   { name: "codexa-handoff", kind: "npm", script: "codexa:handoff" },
   { name: "mcp-doctor", kind: "npm", script: "mcp:doctor" },

@@ -535,6 +535,39 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "codexa_bringup_watch",
+      claim: "After the Codexa setup pack is run, Orangebox can watch the real rails and report ready/open-gaps without fake full-green.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run codexa:watch",
+      acceptance_gate: "Codexa bring-up watcher writes a receipt, preserves no-remote-mutation constraints, records status history, and separates report success from two-machine readiness.",
+      recovery_path: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa, then rerun codexa:watch, codexa:alert, model:inventory, ops:gaps, and ops:green.",
+      evidence: [
+        evidence(path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"), null, {
+          accept: (parsed, status) => [
+            "CODEXA_BRINGUP_READY",
+            "CODEXA_BRINGUP_REPORTED_OPEN_GAPS",
+            "CODEXA_BRINGUP_WATCH_REPORTED_ALERT_FAILURE",
+          ].includes(status)
+            && parsed?.ok === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.remote_codexa_mutation_attempted === false
+            && parsed?.constraints?.install_attempted === false
+            && Array.isArray(parsed?.history)
+            && parsed.history.length >= 1
+            && Boolean(parsed?.false_green_guard),
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            codexa_ready: parsed?.codexa_ready ?? null,
+            missing: parsed?.verdict?.missing || [],
+            status_history: parsed?.verdict?.status_history || [],
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "model_inventory_truth",
       claim: "Orangebox separates registered/planned model lanes from actually observed cockpit and Codexa models.",
       lane: "backend_ops",

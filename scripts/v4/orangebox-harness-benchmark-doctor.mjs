@@ -157,6 +157,7 @@ const requiredOpsScripts = [
   "harness:benchmark",
   "chatbackup:restore",
   "codexa:alert",
+  "codexa:watch",
   "codexa:smb-stage",
   "mcp:doctor",
   "ipi:doctor",
@@ -200,7 +201,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "research-radar", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "model-inventory", "ipi-doctor", "memory-doctor"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "research-radar", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-watch", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "model-inventory", "ipi-doctor", "memory-doctor"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -1057,6 +1058,32 @@ const tasks = [
           status: handoff.status,
           open_gap_count: handoff.open_gap_count,
           first_click: handoff.codexa_run_order?.[0]?.command || null,
+        });
+    },
+  },
+  {
+    id: "codexa_bringup_watch_truth",
+    category: "codexa_recovery",
+    oracle: "A Codexa bring-up watcher is valid only when it records a bounded status history, refuses remote mutation, and separates report success from two-machine readiness.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const watcher = readJson(path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const failures = [];
+      if (!["CODEXA_BRINGUP_READY", "CODEXA_BRINGUP_REPORTED_OPEN_GAPS", "CODEXA_BRINGUP_WATCH_REPORTED_ALERT_FAILURE"].includes(watcher?.status)) failures.push(`Codexa bring-up watcher status invalid: ${watcher?.status || "missing"}`);
+      if (watcher?.constraints?.frontend_touched !== false) failures.push("Codexa bring-up watcher must not touch frontend");
+      if (watcher?.constraints?.remote_codexa_mutation_attempted !== false) failures.push("Codexa bring-up watcher must not mutate Codexa");
+      if (watcher?.constraints?.install_attempted !== false) failures.push("Codexa bring-up watcher must not install anything");
+      if (!Array.isArray(watcher?.history) || watcher.history.length < 1) failures.push("Codexa bring-up watcher missing status history");
+      if (!watcher?.false_green_guard) failures.push("Codexa bring-up watcher missing false-green guard");
+      if (watcher?.codexa_ready !== true && project?.full_project_green === true) failures.push("Project report claims full green while watcher says Codexa is not ready");
+      return failures.length
+        ? failTask("codexa_bringup_watch_truth", failures, { status: watcher?.status || null })
+        : okTask("codexa_bringup_watch_truth", {
+          status: watcher.status,
+          codexa_ready: watcher.codexa_ready,
+          missing: watcher.verdict?.missing || [],
+          status_history: watcher.verdict?.status_history || [],
         });
     },
   },
