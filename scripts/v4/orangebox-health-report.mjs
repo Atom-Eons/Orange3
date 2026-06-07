@@ -238,6 +238,7 @@ async function main() {
   const receiptPaths = {
     ops_readiness: latestReceipt("orangebox-ops-readiness-") || latestReceipt("orangebox-ops-readiness-", path.join(repoRoot, "receipts")),
     backend_install: latestReceipt("orangebox-backend-install-"),
+    ops_gap_ledger: latestReceipt("orangebox-ops-gap-ledger-"),
     project_report: latestReceipt("orangebox-project-report-"),
     reality_watch: latestReceipt("orangebox-reality-watch-"),
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
@@ -264,6 +265,7 @@ async function main() {
   const latest = {
     ops_readiness: readJson(receiptPaths.ops_readiness || path.join(dataRoot, "watcher", "latest-reality-watch.json")),
     backend_install: readJson(receiptPaths.backend_install || ""),
+    ops_gap_ledger: readJson(path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json")) || readJson(receiptPaths.ops_gap_ledger || ""),
     project_report: readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json")) || readJson(receiptPaths.project_report || ""),
     reality_watch: readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json")) || readJson(receiptPaths.reality_watch || ""),
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
@@ -357,6 +359,7 @@ async function main() {
   if (latest.signal_hygiene?.status !== "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN") warnings.push("Operator signal hygiene doctor is not green.");
   if (latest.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") warnings.push("Doer/watcher session spine doctor is not green.");
   if (latest.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") warnings.push("Feature acceptance matrix doctor is not green.");
+  if (!["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(latest.ops_gap_ledger?.status)) warnings.push("Ops gap ledger is not refreshed; partial system state may be harder to act on.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
   if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
@@ -372,6 +375,7 @@ async function main() {
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") warnings.push("Knowledge Engine improvement candidates are not refreshed.");
   else if (!knowledgeBacklogReady) warnings.push("Knowledge Engine improvement candidates are refreshed, but execution-ranked backend backlog proof is not green.");
   if (latest.project_report?.full_project_green === false) warnings.push(`Project report has ${latest.project_report?.gap_count || 0} open gap(s); do not call full Orangebox green.`);
+  if (latest.ops_gap_ledger?.gap_count > 0) warnings.push(`Ops gap ledger has ${latest.ops_gap_ledger.gap_count} named open gap(s); work highest-severity first.`);
 
   const nextActions = [];
   if (!openclawRetired) nextActions.push("Run npm.cmd run openclaw:retire from the Orangebox repo.");
@@ -387,6 +391,7 @@ async function main() {
   if (!["ORANGEBOX_RESEARCH_RADAR_GREEN", "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS"].includes(latest.research_radar?.status)) nextActions.push("Run npm.cmd run research:radar to fetch public signals, refresh learned candidates, run assurance, and write one approval report.");
   if (latest.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") nextActions.push("Run npm.cmd run assurance:doctor so research-derived upgrades become scoped playbooks, gates, receipts, and rollback proof.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") nextActions.push("Run npm.cmd run harness:benchmark to prove offline oracle tasks before claiming tool/routing optimization.");
+  if (!["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(latest.ops_gap_ledger?.status)) nextActions.push("Run npm.cmd run ops:gaps so remaining partials become named blockers with proof commands.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
   else if (!knowledgeBacklogReady) nextActions.push("Rerun npm.cmd run knowledge:improvements after the queue script upgrade so learned candidates include backend-only execution proof.");
   else if (topKnowledgeExecution) nextActions.push(`Top learned backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}); prove with ${topKnowledgeExecution.proof_command}.`);
@@ -490,6 +495,12 @@ async function main() {
     receipts: {
       ops_readiness: { path: receiptPaths.ops_readiness, status: latest.ops_readiness?.status || latest.ops_readiness?.checks?.ops_readiness?.status || null },
       backend_install: { path: receiptPaths.backend_install, status: latest.backend_install?.status || null },
+      ops_gap_ledger: {
+        path: path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json"),
+        status: latest.ops_gap_ledger?.status || null,
+        gap_count: latest.ops_gap_ledger?.gap_count ?? null,
+        critical_gap_count: latest.ops_gap_ledger?.critical_gap_count ?? null,
+      },
       project_report: {
         path: path.join(dataRoot, "reports", "project", "latest-project-report.json"),
         status: latest.project_report?.status || null,

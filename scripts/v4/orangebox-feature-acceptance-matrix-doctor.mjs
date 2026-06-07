@@ -481,6 +481,30 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "ops_gap_ledger",
+      claim: "Orangebox has a one-reality gap ledger that names every open Ops blocker with evidence, proof commands, and safe next actions.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run ops:gaps",
+      acceptance_gate: "Ops gap ledger is valid, does not mutate frontend/Codexa, and refuses full-system green while blocking gaps remain.",
+      rollback_path: "Revert ops gap ledger command/doctor wiring and rerun ops:gaps, feature:proof, project:report, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json"), null, {
+          accept: (parsed, status) => ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(status)
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.remote_codexa_mutation_attempted === false
+            && parsed?.ok === true,
+          detail: (parsed) => ({
+            gap_count: parsed?.gap_count ?? null,
+            critical_gap_count: parsed?.critical_gap_count ?? null,
+            full_system_green_claim_allowed: parsed?.full_system_green_claim_allowed ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "model_inventory_truth",
       claim: "Orangebox separates registered/planned model lanes from actually observed cockpit and Codexa models.",
       lane: "backend_ops",

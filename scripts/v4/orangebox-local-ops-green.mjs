@@ -169,6 +169,7 @@ async function main() {
     { script: "assurance:doctor", timeout: 60_000 },
     { script: "signal:hygiene", timeout: 60_000 },
     { script: "session:spine", timeout: 60_000 },
+    { script: "ops:gaps", timeout: 60_000 },
     { script: "feature:proof", timeout: 90_000 },
     { script: "ops:readiness", timeout: 180_000 },
     { script: "health:report", timeout: 90_000 },
@@ -199,6 +200,7 @@ async function main() {
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const sessionSpinePath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
+  const opsGapLedgerPath = path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json");
   const featureProofPath = path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const backendPath = latestReceipt("orangebox-backend-install-");
@@ -222,6 +224,7 @@ async function main() {
   const assurance = readJson(assurancePath);
   const signalHygiene = readJson(signalHygienePath);
   const sessionSpine = readJson(sessionSpinePath);
+  const opsGapLedger = readJson(opsGapLedgerPath);
   const featureProof = readJson(featureProofPath);
   const openclaw = readJson(openclawPath);
   const backend = readJson(backendPath || "");
@@ -276,6 +279,12 @@ async function main() {
     gate("assurance_lab_green", assurance?.ok === true && assurance?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN", { status: assurance?.status || null, source_count: assurance?.summary?.source_count ?? null }),
     gate("operator_signal_hygiene_green", signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", { status: signalHygiene?.status || null, severity: signalHygiene?.signal_hygiene?.severity || null }),
     gate("doer_watcher_spine_green", sessionSpine?.ok === true && sessionSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN", { status: sessionSpine?.status || null, failures: sessionSpine?.failures?.length ?? null }),
+    gate("ops_gap_ledger_current", opsGapLedger?.ok === true && ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(opsGapLedger?.status), {
+      status: opsGapLedger?.status || null,
+      gap_count: opsGapLedger?.gap_count ?? null,
+      critical_gap_count: opsGapLedger?.critical_gap_count ?? null,
+      full_system_green_claim_allowed: opsGapLedger?.full_system_green_claim_allowed ?? null,
+    }),
     gate("feature_acceptance_matrix_green", featureProof?.ok === true && featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN", { status: featureProof?.status || null, features_green: featureProof?.features_green ?? null, features_total: featureProof?.features_total ?? null }),
     gate("harness_benchmark_green", harness?.ok === true && harness?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN", { status: harness?.status || null, tasks_ok: harness?.tasks_ok ?? null, tasks_total: harness?.tasks_total ?? null }),
     gate("reality_watch_local_ops_truth", reality?.checks?.project_report?.local_ops_green === true || reality?.checks?.project_report?.ok === true, { status: reality?.status || null }),
@@ -318,6 +327,7 @@ async function main() {
       assurance_lab: assurancePath,
       signal_hygiene: signalHygienePath,
       doer_watcher_spine: sessionSpinePath,
+      ops_gap_ledger: opsGapLedgerPath,
       backend_install: backendPath,
       ops_readiness: opsReadinessPath,
       final_verify: finalVerifyPath || (exists(finalManifestPath) ? finalManifestPath : null),

@@ -69,6 +69,7 @@ const requiredCommands = [
   { name: "project-report", kind: "npm", script: "project:report" },
   { name: "ops-readiness", kind: "npm", script: "ops:readiness" },
   { name: "ops-green", kind: "npm", script: "ops:green" },
+  { name: "ops-gaps", kind: "npm", script: "ops:gaps" },
   { name: "reality-watch", kind: "npm", script: "reality:watch" },
   { name: "strongarm-doctor", kind: "npm", script: "strongarm:doctor" },
   { name: "gremlin-doctor", kind: "npm", script: "gremlin:doctor" },

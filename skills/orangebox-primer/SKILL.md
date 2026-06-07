@@ -58,6 +58,7 @@ health-report         generate full dev + AI Box health report
 project-report        generate full Orangebox project scope/reality report
 ops-readiness         verify Ops rails and installed features
 ops-green             prove local Orangebox Ops green without requiring Codexa
+ops-gaps              write the one-reality gap ledger with evidence and proof commands
 reality-watch         report actual reachable rails and warnings
 strongarm-doctor      verify STRONGARM pressure gate
 gremlin-doctor        verify Misfits/Gremlin dataset and trainer handoff

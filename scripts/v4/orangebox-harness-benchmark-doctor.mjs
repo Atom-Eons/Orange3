@@ -143,6 +143,7 @@ const requiredOpsScripts = [
   "final:zip",
   "health:report",
   "project:report",
+  "ops:gaps",
   "research:scout",
   "research:radar",
   "knowledge:improvements",
@@ -999,6 +1000,37 @@ const tasks = [
           lane_eval_status: laneEval.status,
           fixtures_green: laneEval.packet_eval.fixtures_green,
           fixtures_total: laneEval.packet_eval.fixtures_total,
+        });
+    },
+  },
+  {
+    id: "ops_gap_ledger_truth",
+    category: "operator_reality",
+    oracle: "Open Ops gaps are acceptable only when every gap has evidence, a blocker, a safe next action, and proof commands; false full-green is forbidden.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const ledger = readJson(path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const failures = [];
+      if (!["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(ledger?.status)) failures.push(`Ops gap ledger not valid: ${ledger?.status || "missing"}`);
+      if (ledger?.constraints?.frontend_touched !== false) failures.push("Ops gap ledger must not touch frontend");
+      if (ledger?.constraints?.remote_codexa_mutation_attempted !== false) failures.push("Ops gap ledger must not mutate Codexa");
+      if (!Array.isArray(ledger?.gaps)) failures.push("Ops gap ledger gaps array missing");
+      for (const gap of ledger?.gaps || []) {
+        if (!gap.id) failures.push("Gap missing id");
+        if (!gap.current_evidence) failures.push(`Gap ${gap.id || "unknown"} missing current evidence`);
+        if (!gap.blocker) failures.push(`Gap ${gap.id || "unknown"} missing blocker`);
+        if (!gap.safe_next_action) failures.push(`Gap ${gap.id || "unknown"} missing safe next action`);
+        if (!Array.isArray(gap.proof_commands) || gap.proof_commands.length === 0) failures.push(`Gap ${gap.id || "unknown"} missing proof commands`);
+      }
+      if (project?.full_project_green === false && ledger?.full_system_green_claim_allowed === true) failures.push("Ledger allows full-system green while project report is not green");
+      return failures.length
+        ? failTask("ops_gap_ledger_truth", failures, { status: ledger?.status || null, gap_count: ledger?.gap_count ?? null })
+        : okTask("ops_gap_ledger_truth", {
+          status: ledger.status,
+          gap_count: ledger.gap_count,
+          critical_gap_count: ledger.critical_gap_count,
+          full_system_green_claim_allowed: ledger.full_system_green_claim_allowed,
         });
     },
   },

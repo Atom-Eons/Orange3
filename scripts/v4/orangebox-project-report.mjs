@@ -179,6 +179,7 @@ async function main() {
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
   const doerWatcherSpine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(latestReceipt("orangebox-doer-watcher-spine-"));
   const featureProof = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json")) || readJson(latestReceipt("orangebox-feature-acceptance-matrix-"));
+  const opsGapLedger = readJson(path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json")) || readJson(latestReceipt("orangebox-ops-gap-ledger-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -272,6 +273,9 @@ async function main() {
   const signalHygieneGreen = signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
   const doerWatcherSpineGreen = doerWatcherSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
   const featureProofGreen = featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
+  const opsGapLedgerReady =
+    opsGapLedger?.status === "ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS" ||
+    opsGapLedger?.status === "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -403,6 +407,16 @@ async function main() {
       next: featureProofGreen
         ? "Keep feature:proof in the local Ops green chain before claiming new systems are done."
         : "Run npm.cmd run feature:proof and fix the exact failed feature row.",
+    },
+    {
+      area: "Ops gap ledger",
+      status: status(opsGapLedgerReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-ops-gap-ledger.mjs"))),
+      reality: opsGapLedgerReady
+        ? `Ops gap ledger is current with ${opsGapLedger?.gap_count ?? 0} named gap(s), ${opsGapLedger?.critical_gap_count ?? 0} critical, and full-system green allowed=${Boolean(opsGapLedger?.full_system_green_claim_allowed)}.`
+        : "Ops gap ledger source exists or is planned, but no current gap ledger receipt is green yet.",
+      next: opsGapLedgerReady
+        ? "Work the highest-severity gap first and rerun ops:gaps before making full-system claims."
+        : "Run npm.cmd run ops:gaps, then rerun project/readiness proof.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -644,6 +658,7 @@ async function main() {
         session_spine: packageScript("session:spine", packageJson),
         feature_proof: packageScript("feature:proof", packageJson),
         ops_green: packageScript("ops:green", packageJson),
+        ops_gaps: packageScript("ops:gaps", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         ipi_doctor: packageScript("ipi:doctor", packageJson),
@@ -709,6 +724,9 @@ async function main() {
       assuranceLabGreen
         ? "Assurance Lab proof is green; use npm.cmd run assurance:doctor before promoting research-derived upgrades."
         : "Run npm.cmd run assurance:doctor so research-derived upgrade ideas are converted into scoped gates, receipts, and rollback proof.",
+      opsGapLedgerReady
+        ? "Use npm.cmd run ops:gaps before status answers so every remaining blocker has evidence, proof commands, and safe next action."
+        : "Run npm.cmd run ops:gaps so remaining partials become named blockers with proof commands.",
       "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
       topKnowledgeExecution
         ? `Top Knowledge Engine backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}) -> ${topKnowledgeExecution.proof_command}`
@@ -882,6 +900,13 @@ async function main() {
         features_green: featureProof?.features_green ?? null,
         features_total: featureProof?.features_total ?? null,
         failures: featureProof?.failures?.length ?? null,
+      },
+      ops_gap_ledger: {
+        path: path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json"),
+        status: opsGapLedger?.status || null,
+        gap_count: opsGapLedger?.gap_count ?? null,
+        critical_gap_count: opsGapLedger?.critical_gap_count ?? null,
+        full_system_green_claim_allowed: opsGapLedger?.full_system_green_claim_allowed ?? null,
       },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },

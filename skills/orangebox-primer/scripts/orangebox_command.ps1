@@ -63,6 +63,11 @@ $commands = [ordered]@{
     args = @("run", "ops:green")
     description = "Refresh and prove local Orangebox Ops green without requiring Codexa/two-machine rails."
   }
+  "ops-gaps" = @{
+    kind = "npm"
+    args = @("run", "ops:gaps")
+    description = "Write the one-reality gap ledger with evidence, blockers, proof commands, and safe next actions."
+  }
   "reality-watch" = @{
     kind = "npm"
     args = @("run", "reality:watch")

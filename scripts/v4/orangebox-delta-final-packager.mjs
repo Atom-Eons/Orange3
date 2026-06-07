@@ -269,6 +269,7 @@ function backendPackageJson() {
       "ops:readiness": "node ./scripts/v4/orangebox-ops-readiness-doctor.mjs --json --receipt",
       "ops:green": "node ./scripts/v4/orangebox-local-ops-green.mjs --json --receipt",
       "ops:green:deep": "node ./scripts/v4/orangebox-local-ops-green.mjs --deep --json --receipt",
+      "ops:gaps": "node ./scripts/v4/orangebox-ops-gap-ledger.mjs --json --receipt",
       "install:doctor": "node ./scripts/obx.mjs install doctor --json --receipt",
       "package-script-doctor": "node ./scripts/v4/package-script-doctor.mjs --json --receipt",
       "pack:portable": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt",

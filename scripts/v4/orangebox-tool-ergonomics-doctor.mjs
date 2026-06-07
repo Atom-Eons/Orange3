@@ -43,6 +43,7 @@ const requiredProofScripts = [
   "project:report",
   "ops:readiness",
   "ops:green",
+  "ops:gaps",
   "model:lane-eval",
   "model:inventory",
 ];
@@ -53,6 +54,7 @@ const requiredSkillCommands = [
   "project-report",
   "ops-readiness",
   "ops-green",
+  "ops-gaps",
   "reality-watch",
   "research-scout",
   "research-radar",
