@@ -127,9 +127,10 @@ function renderMarkdown(result) {
   lines.push("");
   lines.push("1. Put the zip on Codexa if it is not already there.");
   lines.push("2. Unzip it.");
-  lines.push("3. Right-click `RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd` and run as Administrator.");
-  lines.push("4. Wait for it to print/write receipts under `C:\\AtomEons\\ai-box\\receipts`.");
-  lines.push("5. If backend install fails but power/rail are fine, run `RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd` from the same unzipped pack.");
+  lines.push("3. If you need a no-memory reminder, open `RUN_THIS_FIRST_ON_CODEXA.txt` inside the unzipped pack.");
+  lines.push("4. Right-click `RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd` and run as Administrator.");
+  lines.push("5. Wait for it to print/write receipts under `C:\\AtomEons\\ai-box\\receipts`.");
+  lines.push("6. If backend install fails but power/rail are fine, run `RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd` from the same unzipped pack.");
   lines.push("");
   lines.push("## Codexa Run Order");
   lines.push("");
@@ -182,6 +183,8 @@ async function main() {
     "RUN_START_CODEXA_RAIL_AS_ADMIN.cmd",
     "RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd",
     "RUN_MODEL_DOCTOR_ON_CODEXA.cmd",
+    "RUN_THIS_FIRST_ON_CODEXA.txt",
+    "CODEXA_RUN_ORDER.json",
   ];
   const presentFiles = new Set(obox2Doctor?.present_files || []);
   const missingLaunchers = requiredLaunchers.filter((name) => !presentFiles.has(name));
@@ -255,6 +258,7 @@ async function main() {
     { id: "required_launchers_present", ok: missingLaunchers.length === 0, missing: missingLaunchers },
     { id: "gap_ledger_valid", ok: ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(gapLedger?.status) },
     { id: "first_click_named", ok: codexaRunOrder[0].command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd" },
+    { id: "run_order_files_present", ok: presentFiles.has("RUN_THIS_FIRST_ON_CODEXA.txt") && presentFiles.has("CODEXA_RUN_ORDER.json") },
     { id: "cockpit_verify_commands_present", ok: cockpitVerifyCommands.length >= 5 && cockpitVerifyCommands.includes("npm.cmd run ops:gaps") },
     { id: "no_false_full_green", ok: gapLedger?.full_system_green_claim_allowed !== true || openGaps.length === 0 },
   ];

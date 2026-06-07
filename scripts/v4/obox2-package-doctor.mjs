@@ -55,6 +55,8 @@ const requiredFiles = [
   "RUN_MODEL_DOCTOR_ON_CODEXA.cmd",
   "RUN_INSTALL_HERMES_AGENT_ON_CODEXA.cmd",
   "RUN_HERMES_DOCTOR_ON_CODEXA.cmd",
+  "RUN_THIS_FIRST_ON_CODEXA.txt",
+  "CODEXA_RUN_ORDER.json",
   "README_OBOX2_INTERNAL_SETUP.md",
   "TRILANE_CONCEPT_SOURCE.txt",
   "SOUL_GENOME_CONCEPT_SOURCE.txt",
@@ -123,6 +125,7 @@ function validateJsonConfig(extractDir) {
   const routingPolicy = readJson(path.join(extractDir, "ROUTING_POLICY.json"));
   const soulGenome = readJson(path.join(extractDir, "SOUL_GENOME.json"));
   const backendPackage = readJson(path.join(extractDir, "FINAL_BACKEND_PACKAGE.json"));
+  const runOrder = readJson(path.join(extractDir, "CODEXA_RUN_ORDER.json"));
   const backendPayload = path.join(extractDir, "Orangebox_Delta_Final_BACKEND_PACKAGE.zip");
   const backendHash = fs.existsSync(backendPayload) ? sha256File(backendPayload) : null;
   const localModels = modelRegistry?.local_models || [];
@@ -141,6 +144,11 @@ function validateJsonConfig(extractDir) {
       backendPackage?.frontend_included === false &&
       backendPackage?.frontend_required_for_backend === false &&
       backendPackage?.sha256 === backendHash &&
+      runOrder?.version === "orangebox-codexa-run-order/v1" &&
+      runOrder?.first_click === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd" &&
+      runOrder?.backend_payload?.sha256 === backendHash &&
+      runOrder?.backend_payload?.frontend_required_for_backend === false &&
+      (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run ops:green") &&
       localModels.length >= 10 &&
       missingDefaults.length === 0 &&
       wildcardLaw.some((line) => /Wildcard models may not be final/i.test(line)),
@@ -157,6 +165,13 @@ function validateJsonConfig(extractDir) {
       source_commit: backendPackage?.source_commit || null,
       frontend_included: backendPackage?.frontend_included ?? null,
       frontend_required_for_backend: backendPackage?.frontend_required_for_backend ?? null,
+    },
+    run_order: {
+      ok: runOrder?.first_click === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+      version: runOrder?.version || null,
+      first_click: runOrder?.first_click || null,
+      steps: Array.isArray(runOrder?.run_order) ? runOrder.run_order.length : 0,
+      cockpit_verify_commands: Array.isArray(runOrder?.cockpit_verify_commands) ? runOrder.cockpit_verify_commands.length : 0,
     },
     wildcard_law_count: wildcardLaw.length,
   };
@@ -269,10 +284,21 @@ function validateOperationalContracts(extractDir) {
 
   const readme = file("README_OBOX2_INTERNAL_SETUP.md");
   requirePattern(checks, readme, "readme_names_start_here", /RUN_START_HERE_ON_CODEXA_AS_ADMIN\.cmd/i, "README points operator to the start-here launcher.");
+  requirePattern(checks, readme, "readme_names_run_this_first", /RUN_THIS_FIRST_ON_CODEXA\.txt/i, "README points operator to the no-memory first-run note.");
   requirePattern(checks, readme, "readme_names_backend_installer", /RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN\.cmd/i, "README names the backend payload installer.");
   requirePattern(checks, readme, "readme_backend_payload_law", /Backend payload law/i, "README explains the backend payload law.");
   requirePattern(checks, readme, "readme_warns_battery_laptop", /Do not apply it to a battery laptop/i, "README warns not to apply always-on behavior to battery laptops.");
   requirePattern(checks, readme, "readme_wildcard_law", /Dolphin and abliterated models are pressure lanes only/i, "README preserves wildcard model authority limits.");
+
+  const runThisFirst = file("RUN_THIS_FIRST_ON_CODEXA.txt");
+  requirePattern(checks, runThisFirst, "run_this_first_names_start_here", /RUN_START_HERE_ON_CODEXA_AS_ADMIN\.cmd/i, "Top-level text note names the first-click launcher.");
+  requirePattern(checks, runThisFirst, "run_this_first_warns_markdown_not_runnable", /DO NOT RUN THE MARKDOWN FILE/i, "Top-level text note warns the handoff markdown is not runnable.");
+  requirePattern(checks, runThisFirst, "run_this_first_receipts_truth", /Codexa is green only after cockpit probes and Codexa receipts prove it/i, "Top-level text note preserves receipt/probe truth.");
+
+  const runOrder = file("CODEXA_RUN_ORDER.json");
+  requirePattern(checks, runOrder, "run_order_json_first_click", /"first_click"\s*:\s*"RUN_START_HERE_ON_CODEXA_AS_ADMIN\.cmd"/i, "Run-order JSON names the first-click launcher.");
+  requirePattern(checks, runOrder, "run_order_json_cockpit_verify", /npm\.cmd run ops:green/i, "Run-order JSON includes cockpit verification commands.");
+  requirePattern(checks, runOrder, "run_order_json_false_green_guard", /false_green_guard/i, "Run-order JSON preserves false-green guard.");
 
   const failures = checks.filter((check) => !check.ok);
   return {

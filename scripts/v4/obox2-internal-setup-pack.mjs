@@ -880,6 +880,118 @@ async function main() {
     "",
   ].join("\r\n"));
 
+  const codexaRunOrder = {
+    version: "orangebox-codexa-run-order/v1",
+    public_name: "Orangebox Version 1",
+    purpose: "Authoritative first-click and fallback order for Codexa / AI Box setup.",
+    doctrine: "The setup pack is runnable proof-path material. Codexa is not green until receipts and cockpit probes prove it.",
+    generated_at: new Date().toISOString(),
+    first_click: "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+    external_guide: "ORANGEBOX_CODEXA_HANDOFF.md is the cockpit-side guide; it is not a runnable Codexa command.",
+    backend_payload: {
+      payload_name: backendPayloadName,
+      metadata_name: "FINAL_BACKEND_PACKAGE.json",
+      installer: "RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd",
+      source_commit: finalDownload.source_commit,
+      sha256: finalDownload.sha256,
+      frontend_included: Boolean(finalDownload.frontend_included),
+      frontend_required_for_backend: Boolean(finalDownload.frontend_required_for_backend),
+    },
+    run_order: [
+      {
+        order: 1,
+        command: "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+        required: true,
+        why: "One-click always-on power setup, backend payload install, rail starter, and doctors.",
+        expected_receipts: [
+          "C:\\AtomEons\\ai-box\\receipts\\obox2-backend-install-latest.json",
+          "C:\\AtomEons\\ai-box\\receipts\\obox2-start-here-latest.json",
+        ],
+      },
+      {
+        order: 2,
+        command: "RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd",
+        required: false,
+        why: "Fallback when backend install needs to be repeated directly from the embedded payload.",
+        expected_receipts: ["C:\\AtomEons\\ai-box\\receipts\\obox2-backend-install-latest.json"],
+      },
+      {
+        order: 3,
+        command: "RUN_CODEXA_POWER_DOCTOR.cmd",
+        required: false,
+        why: "Verify Codexa will not sleep or hibernate away from Orangebox.",
+        expected_receipts: ["C:\\AtomEons\\ai-box\\receipts\\obox2-power-doctor-latest.json"],
+      },
+      {
+        order: 4,
+        command: "RUN_START_CODEXA_RAIL_AS_ADMIN.cmd",
+        required: false,
+        why: "Recover command rail 8097 and bridge rail 8098 if start-here did not leave them reachable.",
+        expected_receipts: ["C:\\AtomEons\\ai-box\\receipts\\orangebox-command-rail-latest.json"],
+      },
+      {
+        order: 5,
+        command: "RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd",
+        required: false,
+        why: "Install core Ollama model tier before heavy/all model tiers.",
+        expected_receipts: ["C:\\AtomEons\\ai-box\\receipts\\obox2-model-install-latest.json"],
+      },
+      {
+        order: 6,
+        command: "RUN_MODEL_DOCTOR_ON_CODEXA.cmd",
+        required: false,
+        why: "Write exact model inventory proof after pulls or repairs.",
+        expected_receipts: ["C:\\AtomEons\\ai-box\\receipts\\obox2-model-doctor-latest.json"],
+      },
+      {
+        order: 7,
+        command: "RUN_HERMES_DOCTOR_ON_CODEXA.cmd",
+        required: false,
+        optional: true,
+        why: "Verify optional Hermes outer orchestration after core rail/model proof.",
+        expected_receipts: ["C:\\AtomEons\\ai-box\\receipts\\hermes-agent-doctor-latest.json"],
+      },
+    ],
+    cockpit_verify_commands: [
+      "npm.cmd run codexa:alert:popup",
+      "npm.cmd run model:inventory",
+      "npm.cmd run trilane:doctor",
+      "npm.cmd run model:lane-eval",
+      "npm.cmd run ops:gaps",
+      "npm.cmd run ops:green",
+    ],
+    false_green_guard: "Do not route heavy work to Codexa until command rail, Ollama, model inventory, and Ops gap receipts are green.",
+  };
+  await writeJson(path.join(outDir, "CODEXA_RUN_ORDER.json"), codexaRunOrder);
+  await writeFile(path.join(outDir, "RUN_THIS_FIRST_ON_CODEXA.txt"), [
+    "ORANGEBOX VERSION 1 - CODEXA / AI BOX SETUP",
+    "",
+    "FIRST CLICK:",
+    "  RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+    "",
+    "WHAT THIS DOES:",
+    "  1. Sets Codexa always-on power policy.",
+    "  2. Installs the embedded verified backend payload.",
+    "  3. Starts/re-registers command rails.",
+    "  4. Runs model/Hermes doctors.",
+    "  5. Writes receipts under C:\\AtomEons\\ai-box\\receipts.",
+    "",
+    "DO NOT RUN THE MARKDOWN FILE.",
+    "  ORANGEBOX_CODEXA_HANDOFF.md is the cockpit-side guide, not the Codexa command.",
+    "",
+    "FALLBACKS IF START-HERE FAILS:",
+    "  RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd",
+    "  RUN_CODEXA_POWER_DOCTOR.cmd",
+    "  RUN_START_CODEXA_RAIL_AS_ADMIN.cmd",
+    "  RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd",
+    "  RUN_MODEL_DOCTOR_ON_CODEXA.cmd",
+    "",
+    "GREEN TRUTH:",
+    "  The pack being verified is not the same as Codexa being fixed.",
+    "  Codexa is green only after cockpit probes and Codexa receipts prove it.",
+    "",
+  ].join("\r\n"));
+
   await writeFile(path.join(outDir, "README_OBOX2_INTERNAL_SETUP.md"), `# Orangebox V2 Internal Setup Pack
 
 Run this pack on Codexa / AI Box.
@@ -899,6 +1011,8 @@ This pack updates the local model side of Orangebox:
 - model doctor receipts under \`C:\\AtomEons\\ai-box\\receipts\`
 
 ## Fast path
+
+Open \`RUN_THIS_FIRST_ON_CODEXA.txt\` if you need the shortest no-memory reminder.
 
 Best first click:
 
