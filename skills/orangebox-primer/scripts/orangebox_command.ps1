@@ -83,6 +83,11 @@ $commands = [ordered]@{
     args = @("run", "trilane:doctor")
     description = "Verify local model registry, role map, and routing policy."
   }
+  "model-lane-eval" = @{
+    kind = "npm"
+    args = @("run", "model:lane-eval")
+    description = "Verify local model role lanes, wildcard discipline, packet gates, and honest installed inventory."
+  }
   "soul-doctor" = @{
     kind = "npm"
     args = @("run", "soul:doctor")

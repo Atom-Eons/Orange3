@@ -40,6 +40,7 @@ const requiredProofScripts = [
   "project:report",
   "ops:readiness",
   "ops:green",
+  "model:lane-eval",
 ];
 
 const requiredSkillCommands = [
@@ -60,6 +61,7 @@ const requiredSkillCommands = [
   "mcp-doctor",
   "action-doctor",
   "skills-lifecycle",
+  "model-lane-eval",
   "codexa-alert",
   "codexa-smb-stage",
   "obox2-pack",

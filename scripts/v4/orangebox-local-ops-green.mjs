@@ -161,6 +161,7 @@ async function main() {
     { script: "mcp:doctor", timeout: 60_000 },
     { script: "action:doctor", timeout: 60_000 },
     { script: "skills:lifecycle", timeout: 90_000 },
+    { script: "model:lane-eval", timeout: 60_000 },
     { script: "tool:ergonomics", timeout: 60_000 },
     { script: "checkmate:doctor", timeout: 60_000 },
     { script: "assurance:doctor", timeout: 60_000 },
@@ -188,6 +189,7 @@ async function main() {
   const mcpPath = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
   const actionPath = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
   const skillsPath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
+  const localModelLanePath = path.join(dataRoot, "models", "latest-local-model-lane-eval.json");
   const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
@@ -208,6 +210,7 @@ async function main() {
   const mcp = readJson(mcpPath);
   const action = readJson(actionPath);
   const skills = readJson(skillsPath);
+  const localModelLane = readJson(localModelLanePath);
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmate = readJson(checkmatePath);
   const assurance = readJson(assurancePath);
@@ -242,6 +245,14 @@ async function main() {
     gate("mcp_quarantine_green", mcp?.ok === true && mcp?.summary?.failed === 0, { status: mcp?.ok === true ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN" }),
     gate("action_classifier_green", action?.ok === true && action?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN", { status: action?.status || null }),
     gate("skill_lifecycle_green", skills?.ok === true && skills?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN", { status: skills?.status || null, command_count: skills?.command_count ?? null }),
+    gate("local_model_lane_eval_green", localModelLane?.ok === true && localModelLane?.status === "LOCAL_MODEL_LANE_EVAL_GREEN", {
+      status: localModelLane?.status || null,
+      fixtures_green: localModelLane?.packet_eval?.fixtures_green ?? null,
+      fixtures_total: localModelLane?.packet_eval?.fixtures_total ?? null,
+      core_installed_count: localModelLane?.inventory_truth?.core_installed_count ?? null,
+      core_total: localModelLane?.inventory_truth?.core_total ?? null,
+      full_local_model_runtime_green: localModelLane?.inventory_truth?.full_local_model_runtime_green ?? null,
+    }),
     gate("tool_ergonomics_green", toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { status: toolErgonomics?.status || null, command_count: toolErgonomics?.command_surface?.command_count ?? null }),
     gate("checkmate_eval_lane_green", checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN", { status: checkmate?.status || null, fixtures_total: checkmate?.fixtures?.length ?? null }),
     gate("assurance_lab_green", assurance?.ok === true && assurance?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN", { status: assurance?.status || null, source_count: assurance?.summary?.source_count ?? null }),
@@ -281,6 +292,7 @@ async function main() {
       project_report: projectPath,
       reality_watch: realityPath,
       harness_benchmark: harnessPath,
+      local_model_lane_eval: localModelLanePath,
       tool_ergonomics: toolErgonomicsPath,
       checkmate_eval_lane: checkmatePath,
       assurance_lab: assurancePath,

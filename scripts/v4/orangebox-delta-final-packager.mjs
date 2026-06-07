@@ -231,6 +231,7 @@ function backendPackageJson() {
       "gremlin:doctor": "node ./scripts/v4/gremlin-misfits-doctor.mjs --json --receipt",
       "misfits:doctor": "node ./scripts/v4/gremlin-misfits-doctor.mjs --json --receipt",
       "trilane:doctor": "node ./scripts/v4/trilane-model-router-doctor.mjs --json --receipt",
+      "model:lane-eval": "node ./scripts/v4/local-model-lane-eval-doctor.mjs --json --receipt",
       "obox2:pack": "node ./scripts/v4/obox2-internal-setup-pack.mjs --json --receipt",
       "obox2:doctor": "node ./scripts/v4/obox2-package-doctor.mjs --json --receipt",
       "soul:doctor": "node ./scripts/v4/soul-genome-doctor.mjs --json --receipt",

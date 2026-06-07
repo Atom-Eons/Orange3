@@ -276,6 +276,27 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "local_model_lane_eval") {
+    const file = path.join(dataRoot, "models", "latest-local-model-lane-eval.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "LOCAL_MODEL_LANE_EVAL_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.paid_api_attempted === false
+      && proof?.constraints?.ollama_pull_attempted === false
+      && proof?.constraints?.model_call_attempted === false
+      && proof?.promotion_law?.no_model_card_promotion === true
+      && proof?.promotion_law?.wildcard_never_final_authority === true
+      && Number(proof?.packet_eval?.fixtures_green || 0) === Number(proof?.packet_eval?.fixtures_total || -1);
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.packet_eval.fixtures_green}/${proof.packet_eval.fixtures_total} packet role fixtures; core installed ${proof.inventory_truth.core_installed_count}/${proof.inventory_truth.core_total}`,
+      }
+      : null;
+  }
   return null;
 }
 
@@ -580,10 +601,9 @@ const executionProfiles = {
     blocked_by: ["Codexa command rail/Ollama are not reachable from this cockpit yet."],
   },
   local_model_lane_eval: {
-    priority: 74,
-    proof_command: "npm.cmd run trilane:doctor && npm.cmd run strongarm:doctor && npm.cmd run gremlin:doctor",
-    acceptance_gate: "Local model lane claims are based on installed model inventory and packet evals, not aspirational config.",
-    blocked_by: ["Codexa/Ollama model inventory is not fully proven yet."],
+    priority: 88,
+    proof_command: "npm.cmd run trilane:doctor && npm.cmd run model:lane-eval && npm.cmd run harness:benchmark",
+    acceptance_gate: "Local model lane claims are based on registry policy, packet role fixtures, STRONGARM/Misfits receipts, and honest installed inventory, not model-card claims.",
   },
   codexa_model_serving: {
     priority: 72,

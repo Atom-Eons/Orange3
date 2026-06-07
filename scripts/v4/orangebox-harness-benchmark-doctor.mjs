@@ -157,6 +157,7 @@ const requiredOpsScripts = [
   "mcp:doctor",
   "action:doctor",
   "skills:lifecycle",
+  "model:lane-eval",
 ];
 
 const tasks = [
@@ -192,7 +193,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -731,21 +732,42 @@ const tasks = [
   {
     id: "local_model_router_claims",
     category: "model_routing",
-    oracle: "Tri-lane router can be policy-green while installed model counts remain explicit and uninflated.",
-    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    oracle: "Tri-lane router can be policy-green while installed model counts remain explicit and local model role claims are packet-fixture proven.",
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
     run(trace) {
       const trilane = readJson(path.join(dataRoot, "trilane", "latest-trilane-model-router.json"), trace);
+      const laneEval = readJson(path.join(dataRoot, "models", "latest-local-model-lane-eval.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
       const failures = [];
       if (trilane?.status !== "TRILANE_ROUTER_PACK_GREEN") failures.push(`Tri-lane router not green: ${trilane?.status || "missing"}`);
+      if (laneEval?.status !== "LOCAL_MODEL_LANE_EVAL_GREEN") failures.push(`Local model lane eval not green: ${laneEval?.status || "missing"}`);
       const installed = trilane?.availability?.core_installed_count;
       const total = trilane?.availability?.core_total;
       if (!Number.isInteger(installed) || !Number.isInteger(total)) failures.push("Tri-lane installed/core totals missing");
       if (installed > total) failures.push(`Installed model count ${installed} exceeds total ${total}`);
+      if (laneEval?.inventory_truth?.core_installed_count !== installed) failures.push("Local model lane eval does not mirror TriLane installed count");
+      if (laneEval?.inventory_truth?.core_total !== total) failures.push("Local model lane eval does not mirror TriLane core total");
+      if (laneEval?.constraints?.model_call_attempted !== false) failures.push("Local model lane eval must not call models");
+      if (laneEval?.constraints?.ollama_pull_attempted !== false) failures.push("Local model lane eval must not pull Ollama models");
+      if (laneEval?.promotion_law?.no_model_card_promotion !== true) failures.push("Local model lane eval must forbid model-card promotion");
+      if (laneEval?.promotion_law?.wildcard_never_final_authority !== true) failures.push("Wildcard authority law missing");
+      if (laneEval?.packet_eval?.fixtures_green !== laneEval?.packet_eval?.fixtures_total) failures.push("Not all local model role packet fixtures are green");
       if ((installed || 0) < (total || 0) && project?.models?.installed_core_count !== installed) failures.push("Project report does not mirror installed core model count");
       return failures.length
-        ? failTask("local_model_router_claims", failures, { installed, total, project_installed: project?.models?.installed_core_count })
-        : okTask("local_model_router_claims", { installed, total, project_installed: project?.models?.installed_core_count });
+        ? failTask("local_model_router_claims", failures, {
+          installed,
+          total,
+          project_installed: project?.models?.installed_core_count,
+          lane_eval_status: laneEval?.status || null,
+        })
+        : okTask("local_model_router_claims", {
+          installed,
+          total,
+          project_installed: project?.models?.installed_core_count,
+          lane_eval_status: laneEval.status,
+          fixtures_green: laneEval.packet_eval.fixtures_green,
+          fixtures_total: laneEval.packet_eval.fixtures_total,
+        });
     },
   },
   {

@@ -62,6 +62,7 @@ reality-watch         report actual reachable rails and warnings
 strongarm-doctor      verify STRONGARM pressure gate
 gremlin-doctor        verify Misfits/Gremlin dataset and trainer handoff
 trilane-doctor        verify model registry and router policy
+model-lane-eval      verify local model role lanes and wildcard discipline
 soul-doctor           verify SOUL GENOME continuity map
 knowledge-improvements refresh learned improvement candidates without self-promotion
 research-scout       fetch public research signals and park upgrade candidates

@@ -157,6 +157,7 @@ async function main() {
   const strongarm = readJson(path.join(dataRoot, "strongarm", "latest-strongarm-doctor.json"));
   const gremlin = readJson(path.join(dataRoot, "misfits", "latest-gremlin-misfits-doctor.json"));
   const triLane = readJson(path.join(dataRoot, "trilane", "latest-trilane-model-router.json"));
+  const localModelLane = readJson(path.join(dataRoot, "models", "latest-local-model-lane-eval.json"));
   const obox2Pack = readJson(path.join(dataRoot, "obox2", "latest-internal-setup-pack.json"));
   const obox2Doctor = readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json"));
   const soulDoctor = readJson(path.join(dataRoot, "knowledge", "soul-genome", "latest-soul-genome-doctor.json"));
@@ -234,6 +235,14 @@ async function main() {
     && checkmateEval.fixtures.some((fixture) => fixture.id === "benchmark_hygiene_integrity_gate")
     && Array.isArray(harnessBenchmark?.tasks)
     && harnessBenchmark.tasks.some((task) => task.id === "eval_integrity_benchmark_hygiene_truth" && task.ok === true);
+  const localModelLaneGreen =
+    localModelLane?.status === "LOCAL_MODEL_LANE_EVAL_GREEN" &&
+    localModelLane?.constraints?.frontend_touched === false &&
+    localModelLane?.constraints?.model_call_attempted === false &&
+    localModelLane?.constraints?.ollama_pull_attempted === false &&
+    localModelLane?.promotion_law?.no_model_card_promotion === true &&
+    localModelLane?.promotion_law?.wildcard_never_final_authority === true &&
+    localModelLane?.packet_eval?.fixtures_green === localModelLane?.packet_eval?.fixtures_total;
   const signalHygieneGreen = signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
   const doerWatcherSpineGreen = doerWatcherSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
   const featureProofGreen = featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
@@ -488,6 +497,16 @@ async function main() {
       next: "Install core Ollama models on Codexa and rerun model doctor.",
     },
     {
+      area: "Local model lane eval",
+      status: status(localModelLaneGreen, Boolean(localModelLane)),
+      reality: localModelLaneGreen
+        ? `Packet-role eval is green: ${localModelLane?.packet_eval?.fixtures_green || 0}/${localModelLane?.packet_eval?.fixtures_total || 0} role fixtures pass; no model calls or Ollama pulls; installed core models remain ${localModelLane?.inventory_truth?.core_installed_count || 0}/${localModelLane?.inventory_truth?.core_total || 0}.`
+        : "Local model lane eval is missing or not green, so model routing claims are limited to TriLane config truth.",
+      next: localModelLaneGreen
+        ? "Use model:lane-eval before promoting STRONGARM, Misfits, Mirror, Judgement, wildcard, or local model routing changes."
+        : "Run npm.cmd run model:lane-eval and fix the exact failed role fixture.",
+    },
+    {
       area: "OBOX2 setup package",
       status: status(obox2ContractGreen, packageGreen || obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN"),
       reality: obox2ContractGreen
@@ -568,6 +587,7 @@ async function main() {
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         action_doctor: packageScript("action:doctor", packageJson),
         skills_lifecycle: packageScript("skills:lifecycle", packageJson),
+        model_lane_eval: packageScript("model:lane-eval", packageJson),
       },
     },
     models: {
@@ -577,6 +597,11 @@ async function main() {
       routing_policy_version: routingPolicy?.version || null,
       installed_core_count: triLane?.availability?.core_installed_count || 0,
       installed_core_total: triLane?.availability?.core_total || 0,
+      local_model_lane_eval_status: localModelLane?.status || null,
+      local_model_lane_eval_fixtures: {
+        green: localModelLane?.packet_eval?.fixtures_green || 0,
+        total: localModelLane?.packet_eval?.fixtures_total || 0,
+      },
     },
     soul_genome: {
       status: soulGenome?.status || null,
@@ -625,6 +650,15 @@ async function main() {
       strongarm: { path: path.join(dataRoot, "strongarm", "latest-strongarm-doctor.json"), status: strongarm?.status || null },
       gremlin: { path: path.join(dataRoot, "misfits", "latest-gremlin-misfits-doctor.json"), status: gremlin?.status || null },
       trilane: { path: path.join(dataRoot, "trilane", "latest-trilane-model-router.json"), status: triLane?.status || null },
+      local_model_lane_eval: {
+        path: path.join(dataRoot, "models", "latest-local-model-lane-eval.json"),
+        status: localModelLane?.status || null,
+        fixtures_green: localModelLane?.packet_eval?.fixtures_green || 0,
+        fixtures_total: localModelLane?.packet_eval?.fixtures_total || 0,
+        full_local_model_runtime_green: localModelLane?.inventory_truth?.full_local_model_runtime_green ?? null,
+        core_installed_count: localModelLane?.inventory_truth?.core_installed_count ?? null,
+        core_total: localModelLane?.inventory_truth?.core_total ?? null,
+      },
       obox2_pack: { path: path.join(dataRoot, "obox2", "latest-internal-setup-pack.json"), status: obox2Pack?.status || null },
       obox2_doctor: {
         path: path.join(dataRoot, "obox2", "latest-package-doctor.json"),

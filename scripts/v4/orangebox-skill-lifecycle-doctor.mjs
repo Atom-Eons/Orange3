@@ -73,6 +73,7 @@ const requiredCommands = [
   { name: "strongarm-doctor", kind: "npm", script: "strongarm:doctor" },
   { name: "gremlin-doctor", kind: "npm", script: "gremlin:doctor" },
   { name: "trilane-doctor", kind: "npm", script: "trilane:doctor" },
+  { name: "model-lane-eval", kind: "npm", script: "model:lane-eval" },
   { name: "soul-doctor", kind: "npm", script: "soul:doctor" },
   { name: "knowledge-improvements", kind: "npm", script: "knowledge:improvements" },
   { name: "research-scout", kind: "npm", script: "research:scout" },

@@ -72,6 +72,8 @@ function main() {
   const gremlinDoctor = readJson(gremlinDoctorPath);
   const triLaneRouterPath = path.join(dataRoot, "trilane", "latest-trilane-model-router.json");
   const triLaneRouter = readJson(triLaneRouterPath);
+  const localModelLanePath = path.join(dataRoot, "models", "latest-local-model-lane-eval.json");
+  const localModelLane = readJson(localModelLanePath);
   const obox2PackPath = path.join(dataRoot, "obox2", "latest-internal-setup-pack.json");
   const obox2Pack = readJson(obox2PackPath);
   const obox2DoctorPath = path.join(dataRoot, "obox2", "latest-package-doctor.json");
@@ -352,6 +354,21 @@ function main() {
       status: triLaneRouter?.status || null,
       local_config_ready: triLaneRouter?.install_status?.local_config_ready || false,
       codexa_status_note: triLaneRouter?.codexa_status_note || null,
+    },
+    local_model_lane_eval: {
+      ok:
+        localModelLane?.ok === true &&
+        localModelLane?.status === "LOCAL_MODEL_LANE_EVAL_GREEN" &&
+        localModelLane?.constraints?.model_call_attempted === false &&
+        localModelLane?.constraints?.ollama_pull_attempted === false &&
+        localModelLane?.packet_eval?.fixtures_green === localModelLane?.packet_eval?.fixtures_total,
+      path: localModelLanePath,
+      status: localModelLane?.status || null,
+      fixtures_green: localModelLane?.packet_eval?.fixtures_green || 0,
+      fixtures_total: localModelLane?.packet_eval?.fixtures_total || 0,
+      core_installed_count: localModelLane?.inventory_truth?.core_installed_count ?? null,
+      core_total: localModelLane?.inventory_truth?.core_total ?? null,
+      note: "Proves local model role lanes and wildcard limits without claiming Codexa models are installed.",
     },
     obox2_internal_setup_pack: {
       ok: obox2Pack?.ok === true && obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN" && exists(obox2Pack?.zip_path || ""),

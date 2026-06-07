@@ -355,6 +355,35 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "local_model_lane_eval",
+      claim: "Local model lanes are evaluated as bounded packet roles with wildcard limits, STRONGARM/Misfits receipts, and honest installed inventory.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run trilane:doctor && npm.cmd run model:lane-eval",
+      acceptance_gate: "Model lane eval is green, does not call or pull models, forbids wildcard authority roles, and keeps full runtime availability separate from policy proof.",
+      rollback_path: "Revert local model lane eval doctor/command wiring and rerun trilane:doctor, model:lane-eval, feature:proof, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "models", "latest-local-model-lane-eval.json"), "LOCAL_MODEL_LANE_EVAL_GREEN", {
+          accept: (parsed, status) => status === "LOCAL_MODEL_LANE_EVAL_GREEN"
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.ollama_pull_attempted === false
+            && parsed?.constraints?.model_call_attempted === false
+            && parsed?.promotion_law?.no_model_card_promotion === true
+            && parsed?.promotion_law?.wildcard_never_final_authority === true
+            && Number(parsed?.packet_eval?.fixtures_green || 0) === Number(parsed?.packet_eval?.fixtures_total || -1),
+          detail: (parsed) => ({
+            fixtures_green: parsed?.packet_eval?.fixtures_green ?? null,
+            fixtures_total: parsed?.packet_eval?.fixtures_total ?? null,
+            core_installed_count: parsed?.inventory_truth?.core_installed_count ?? null,
+            core_total: parsed?.inventory_truth?.core_total ?? null,
+            full_local_model_runtime_green: parsed?.inventory_truth?.full_local_model_runtime_green ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "trilane_policy",
       claim: "Tri-lane model policy exists, but installed model inventory remains explicit.",
       lane: "backend_ops",
