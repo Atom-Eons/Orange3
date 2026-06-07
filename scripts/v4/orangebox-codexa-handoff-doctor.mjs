@@ -190,6 +190,7 @@ async function main() {
   const missingLaunchers = requiredLaunchers.filter((name) => !presentFiles.has(name));
   const cockpitVerifyCommands = [
     "npm.cmd run codexa:alert:popup",
+    "npm.cmd run codexa:watch",
     "npm.cmd run model:inventory",
     "npm.cmd run trilane:doctor",
     "npm.cmd run model:lane-eval",
@@ -259,7 +260,7 @@ async function main() {
     { id: "gap_ledger_valid", ok: ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(gapLedger?.status) },
     { id: "first_click_named", ok: codexaRunOrder[0].command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd" },
     { id: "run_order_files_present", ok: presentFiles.has("RUN_THIS_FIRST_ON_CODEXA.txt") && presentFiles.has("CODEXA_RUN_ORDER.json") },
-    { id: "cockpit_verify_commands_present", ok: cockpitVerifyCommands.length >= 5 && cockpitVerifyCommands.includes("npm.cmd run ops:gaps") },
+    { id: "cockpit_verify_commands_present", ok: cockpitVerifyCommands.length >= 6 && cockpitVerifyCommands.includes("npm.cmd run codexa:watch") && cockpitVerifyCommands.includes("npm.cmd run ops:gaps") },
     { id: "no_false_full_green", ok: gapLedger?.full_system_green_claim_allowed !== true || openGaps.length === 0 },
   ];
   const failures = checks.filter((check) => !check.ok);
