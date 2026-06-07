@@ -314,6 +314,7 @@ async function main() {
     codexa_smb_stage: packageJson.scripts?.["codexa:smb-stage"],
     mcp_doctor: packageJson.scripts?.["mcp:doctor"],
     action_doctor: packageJson.scripts?.["action:doctor"],
+    ipi_doctor: packageJson.scripts?.["ipi:doctor"],
     skills_lifecycle: packageJson.scripts?.["skills:lifecycle"],
     ops_readiness: packageJson.scripts?.["ops:readiness"],
   };
@@ -376,6 +377,7 @@ async function main() {
     ["codexa:smb-stage", npmBin, ["run", "codexa:smb-stage"], { timeout: 60_000 }],
     ["mcp:doctor", npmBin, ["run", "mcp:doctor"], { timeout: 120_000 }],
     ["action:doctor", npmBin, ["run", "action:doctor"], { timeout: 60_000 }],
+    ["ipi:doctor", npmBin, ["run", "ipi:doctor"], { timeout: 60_000 }],
     ["skills:lifecycle", npmBin, ["run", "skills:lifecycle"], { timeout: 60_000 }],
     ["tool:ergonomics", npmBin, ["run", "tool:ergonomics"], { timeout: 60_000 }],
     ["checkmate:doctor", npmBin, ["run", "checkmate:doctor"], { timeout: 60_000 }],

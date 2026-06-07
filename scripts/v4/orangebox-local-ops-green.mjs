@@ -159,6 +159,7 @@ async function main() {
   const refreshPlan = [
     ...(deep ? [{ script: "backend:proof", timeout: 180_000 }] : []),
     { script: "mcp:doctor", timeout: 60_000 },
+    { script: "ipi:doctor", timeout: 60_000 },
     { script: "action:doctor", timeout: 60_000 },
     { script: "skills:lifecycle", timeout: 90_000 },
     { script: "model:lane-eval", timeout: 60_000 },
@@ -187,6 +188,7 @@ async function main() {
   const watcherHeartbeatPath = path.join(dataRoot, "watcher", "watcher-process-heartbeat.json");
   const harnessPath = path.join(dataRoot, "harness", "latest-harness-benchmark.json");
   const mcpPath = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
+  const ipiPath = path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json");
   const actionPath = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
   const skillsPath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
   const localModelLanePath = path.join(dataRoot, "models", "latest-local-model-lane-eval.json");
@@ -208,6 +210,7 @@ async function main() {
   const watcherHeartbeat = readJson(watcherHeartbeatPath);
   const harness = readJson(harnessPath);
   const mcp = readJson(mcpPath);
+  const ipi = readJson(ipiPath);
   const action = readJson(actionPath);
   const skills = readJson(skillsPath);
   const localModelLane = readJson(localModelLanePath);
@@ -243,6 +246,12 @@ async function main() {
       status: finalVerify?.status || finalManifest?.status || null,
     }),
     gate("mcp_quarantine_green", mcp?.ok === true && mcp?.summary?.failed === 0, { status: mcp?.ok === true ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN" }),
+    gate("indirect_prompt_injection_green", ipi?.ok === true && ipi?.status === "ORANGEBOX_IPI_DRILLS_GREEN", {
+      status: ipi?.status || null,
+      fixtures_green: ipi?.summary?.fixtures_green ?? null,
+      fixtures_total: ipi?.summary?.fixtures_total ?? null,
+      untrusted_fixtures: ipi?.summary?.untrusted_fixtures ?? null,
+    }),
     gate("action_classifier_green", action?.ok === true && action?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN", { status: action?.status || null }),
     gate("skill_lifecycle_green", skills?.ok === true && skills?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN", { status: skills?.status || null, command_count: skills?.command_count ?? null }),
     gate("local_model_lane_eval_green", localModelLane?.ok === true && localModelLane?.status === "LOCAL_MODEL_LANE_EVAL_GREEN", {
@@ -292,6 +301,7 @@ async function main() {
       project_report: projectPath,
       reality_watch: realityPath,
       harness_benchmark: harnessPath,
+      indirect_prompt_injection: ipiPath,
       local_model_lane_eval: localModelLanePath,
       tool_ergonomics: toolErgonomicsPath,
       checkmate_eval_lane: checkmatePath,

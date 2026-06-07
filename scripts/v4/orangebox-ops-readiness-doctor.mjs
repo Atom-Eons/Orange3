@@ -97,6 +97,8 @@ function main() {
   const codexaAlert = readJson(codexaAlertPath);
   const mcpDoctorPath = path.join(dataRoot, "mcp", "latest-mcp-doctor.json");
   const mcpDoctor = readJson(mcpDoctorPath);
+  const ipiDoctorPath = path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json");
+  const ipiDoctor = readJson(ipiDoctorPath);
   const actionClassifierPath = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
   const actionClassifier = readJson(actionClassifierPath);
   const skillLifecyclePath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
@@ -162,6 +164,15 @@ function main() {
       passed: mcpDoctor?.summary?.passed || 0,
       failed: mcpDoctor?.summary?.failed ?? null,
       note: "Proves MCP registry/tool-list/code-mode safety without package installs, paid APIs, or host MCP config mutation.",
+    },
+    indirect_prompt_injection_doctor: {
+      ok: ipiDoctor?.ok === true && ipiDoctor?.status === "ORANGEBOX_IPI_DRILLS_GREEN",
+      path: ipiDoctorPath,
+      status: ipiDoctor?.status || null,
+      fixtures_green: ipiDoctor?.summary?.fixtures_green ?? null,
+      fixtures_total: ipiDoctor?.summary?.fixtures_total ?? null,
+      untrusted_fixtures: ipiDoctor?.summary?.untrusted_fixtures ?? null,
+      note: "Proves untrusted emails, webpages, repos, PDFs, and chat logs are data, not executable instructions.",
     },
     action_classifier: {
       ok: actionClassifier?.ok === true && actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN",

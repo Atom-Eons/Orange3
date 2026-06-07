@@ -27,6 +27,7 @@ const outRoot = path.join(dataRoot, "tool-ergonomics");
 
 const requiredProofScripts = [
   "mcp:doctor",
+  "ipi:doctor",
   "action:doctor",
   "skills:lifecycle",
   "tool:ergonomics",
@@ -59,6 +60,7 @@ const requiredSkillCommands = [
   "session-spine",
   "feature-proof",
   "mcp-doctor",
+  "ipi-doctor",
   "action-doctor",
   "skills-lifecycle",
   "model-lane-eval",

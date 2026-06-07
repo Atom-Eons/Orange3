@@ -248,6 +248,7 @@ async function main() {
     codexa_alert: latestReceipt("orangebox-codexa-alert-"),
     codexa_smb_stage: latestReceipt("orangebox-codexa-smb-stage-"),
     mcp_doctor: latestReceipt("orangebox-mcp-doctor-"),
+    ipi_doctor: latestReceipt("orangebox-ipi-doctor-"),
     action_classifier: latestReceipt("orangebox-action-classifier-"),
     skill_lifecycle: latestReceipt("orangebox-skill-lifecycle-doctor-"),
     tool_ergonomics: latestReceipt("orangebox-tool-ergonomics-"),
@@ -270,6 +271,7 @@ async function main() {
     codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
     codexa_smb_stage: readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json")) || readJson(receiptPaths.codexa_smb_stage || ""),
     mcp_doctor: readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(receiptPaths.mcp_doctor || ""),
+    ipi_doctor: readJson(path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json")) || readJson(receiptPaths.ipi_doctor || ""),
     action_classifier: readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(receiptPaths.action_classifier || ""),
     skill_lifecycle: readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(receiptPaths.skill_lifecycle || ""),
     tool_ergonomics: readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(receiptPaths.tool_ergonomics || ""),
@@ -333,6 +335,7 @@ async function main() {
   if (!openclawRetired) warnings.push("OpenClaw startup hook is still present or no retirement receipt exists.");
   if (!terminalProfileOk) warnings.push("PowerShell OB0X terminal profile is missing, blocked, or has no receipt.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) warnings.push("MCP quarantine/tool bridge doctor is not green.");
+  if (latest.ipi_doctor?.status !== "ORANGEBOX_IPI_DRILLS_GREEN") warnings.push("Indirect prompt-injection drills are not green.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") warnings.push("Action classifier doctor is not green.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") warnings.push("Orangebox skill lifecycle doctor is not green.");
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") warnings.push("Orangebox tool ergonomics doctor is not green.");
@@ -374,6 +377,7 @@ async function main() {
   if (latest.project_report?.full_project_green === false) nextActions.push("Review npm.cmd run project:report output before claiming full project completion.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
+  if (latest.ipi_doctor?.status !== "ORANGEBOX_IPI_DRILLS_GREEN") nextActions.push("Run npm.cmd run ipi:doctor to verify untrusted text cannot smuggle tool commands.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") nextActions.push("Run npm.cmd run action:doctor to verify the pre-tool action classifier.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") nextActions.push("Run npm.cmd run skills:lifecycle to verify Orangebox skill install and command mappings.");
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") nextActions.push("Run npm.cmd run tool:ergonomics to verify command/tool names, bounded outputs, and receipt-backed proof scripts.");
@@ -383,6 +387,7 @@ async function main() {
   if (latest.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") nextActions.push("Run npm.cmd run feature:proof to verify all feature claims have evidence, proof commands, and rollback or recovery truth.");
 
   const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
+  const ipiDoctorOk = latest.ipi_doctor?.status === "ORANGEBOX_IPI_DRILLS_GREEN";
   const actionClassifierOk = latest.action_classifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleOk = latest.skill_lifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const toolErgonomicsOk = latest.tool_ergonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
@@ -392,7 +397,7 @@ async function main() {
   const featureProofOk = latest.feature_proof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
   const assuranceLabOk = latest.assurance_lab?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN";
   const harnessBenchmarkOk = latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && featureProofOk && assuranceLabOk;
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && ipiDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && featureProofOk && assuranceLabOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -531,6 +536,13 @@ async function main() {
         passed: latest.mcp_doctor?.summary?.passed || 0,
         failed: latest.mcp_doctor?.summary?.failed ?? null,
         host_mcp_config_mutated: latest.mcp_doctor?.host_mcp_config_mutated ?? null,
+      },
+      ipi_doctor: {
+        path: path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"),
+        status: latest.ipi_doctor?.status || null,
+        fixtures_green: latest.ipi_doctor?.summary?.fixtures_green ?? null,
+        fixtures_total: latest.ipi_doctor?.summary?.fixtures_total ?? null,
+        untrusted_fixtures: latest.ipi_doctor?.summary?.untrusted_fixtures ?? null,
       },
       action_classifier: {
         path: path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"),

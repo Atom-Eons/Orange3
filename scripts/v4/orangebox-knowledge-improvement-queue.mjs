@@ -94,6 +94,28 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "indirect_prompt_injection_drills") {
+    const file = path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json");
+    const proof = readJson(file);
+    const drills = Array.isArray(proof?.drills) ? proof.drills : [];
+    const untrusted = drills.filter((drill) => drill.trusted === false);
+    const ok = proof?.status === "ORANGEBOX_IPI_DRILLS_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.network_called === false
+      && proof?.constraints?.command_executed === false
+      && Number(proof?.summary?.fixtures_green || 0) === Number(proof?.summary?.fixtures_total || -1)
+      && untrusted.length >= 5
+      && untrusted.every((drill) => drill.final_disposition === "quarantine_untrusted_text");
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.summary.fixtures_green}/${proof.summary.fixtures_total} IPI drills; untrusted=${untrusted.length}; command_executed=${proof.constraints.command_executed}`,
+      }
+      : null;
+  }
   if (area === "tool_ergonomics_eval_lane") {
     const file = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
     const proof = readJson(file);
@@ -458,6 +480,7 @@ function classify(text) {
   if (/operator_signal_hygiene|alert fatigue|alarm fatigue|notification fatigue|popup throttling|severity labels|visible confidence|calibrated trust|human-ai teaming|human ai teaming/.test(text)) return { area: "operator_signal_hygiene", action: "Promote as signal-hygiene rule only: popup throttling, severity labels, alert fatigue limits, and visible confidence calibration." };
   if (/operator_situation_awareness|automation bias|automation complacency|over-reliance|overreliance|vigilance|situation awareness|human factors|calibrated trust|project report|project:report|full project completion/.test(text)) return { area: "operator_situation_awareness", action: "Promote as watcher/health-report rule only: visible status, failure drills, calibrated trust, and no silent automation." };
   if (/action_classifier_permission_gate|auto mode|action classifier|permission prompt|approval fatigue|overeager|credential exploration|review bypass|transcript classifier|deny-and-continue/.test(text)) return { area: "action_classifier_permission_gate", action: "Review an Orangebox command-action classifier candidate: block overeager scope expansion, credential hunting, review bypass, and exfiltration before tool execution." };
+  if (/indirect[-_ ]prompt[-_ ]injection|untrusted (?:text|content|tool output|observation|metadata)|retrieved memory|repository_readme|repo readme|command smuggling|injected command|tool-result taint|external content.*(?:tool|command)|email.*(?:tool|command)|pdf.*(?:tool|command)|webpage.*(?:tool|command)|tool output.*(?:instruction|command)/i.test(text)) return { area: "indirect_prompt_injection_drills", action: "Promote as IPI drill receipt only: untrusted text is quarantined as data, extracted commands are classifier-evidenced, and no command executes from external content." };
   if (/tool_ergonomics_eval_lane|tool ergonomics|tool names|tool descriptions|response_format|output caps|bad tool descriptions|writing effective tools/.test(text)) return { area: "tool_ergonomics_eval_lane", action: "Review tool-ergonomics candidate; promote only as command/tool fixtures with transcript repair proof and output caps." };
   if (/eval_integrity_and_benchmark_hygiene|eval awareness|benchmark leakage|contamination|canary|string|ai-resistant|ai resistant|benchmark hygiene|browsecomp|answer key/.test(text)) return { area: "eval_integrity_and_benchmark_hygiene", action: "Promote only as CHECKMATE benchmark hygiene: source leakage checks, eval-canary blocklists, web-trace warnings, and adversarial score validation." };
   if (/memory_interference_eval|memory interference|multi-target|revised facts|revised information|intervening updates|memory construction|indexed experience|dereference|experience database/.test(text)) return { area: "memory_interference_eval", action: "Review memory-interference probes for Orangebox/AtomSmasher: revised-fact recall, multi-target aggregation, source-index dereference, and stale-memory receipts." };
@@ -522,6 +545,11 @@ const executionProfiles = {
     priority: 96,
     proof_command: "npm.cmd run mcp:doctor && npm.cmd run harness:benchmark",
     acceptance_gate: "MCP source-scope, localhost, stdio, command-template, and receipt checks pass without enabling a new external server by default.",
+  },
+  indirect_prompt_injection_drills: {
+    priority: 97,
+    proof_command: "npm.cmd run ipi:doctor && npm.cmd run action:doctor && npm.cmd run feature:proof && npm.cmd run harness:benchmark",
+    acceptance_gate: "External text from email, web, repos, PDFs, chat logs, tool outputs, and memory is treated as data; any embedded command is classified only as evidence and never executed.",
   },
   tool_ergonomics_eval_lane: {
     priority: 93,
@@ -708,6 +736,7 @@ async function main() {
     path.join(dataRoot, "obox2", "latest-package-doctor.json"),
     path.join(dataRoot, "trilane", "latest-trilane-model-router.json"),
     path.join(dataRoot, "research-scout", "latest-external-research-scout.json"),
+    path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"),
     path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json"),
   ];
   for (const file of reportFiles) {

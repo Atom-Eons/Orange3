@@ -164,6 +164,31 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "indirect_prompt_injection_drills",
+      claim: "Untrusted text from email, web, repo, PDF, chat logs, tool output, or retrieved memory cannot smuggle executable tool commands.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run ipi:doctor",
+      acceptance_gate: "IPI doctor is green, all drills pass, command_executed=false, network_called=false, and untrusted channels are quarantined.",
+      rollback_path: "Revert IPI doctor/command/report wiring and rerun ipi:doctor, action:doctor, feature:proof, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"), "ORANGEBOX_IPI_DRILLS_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_IPI_DRILLS_GREEN"
+            && parsed?.constraints?.command_executed === false
+            && parsed?.constraints?.network_called === false
+            && Number(parsed?.summary?.fixtures_green || 0) === Number(parsed?.summary?.fixtures_total || -1)
+            && Number(parsed?.summary?.untrusted_fixtures || 0) >= 5,
+          detail: (parsed) => ({
+            fixtures_green: parsed?.summary?.fixtures_green ?? null,
+            fixtures_total: parsed?.summary?.fixtures_total ?? null,
+            untrusted_fixtures: parsed?.summary?.untrusted_fixtures ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "pre_tool_action_classifier",
       claim: "Risky tool actions are classified before execution.",
       lane: "backend_ops",

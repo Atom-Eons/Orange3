@@ -168,6 +168,7 @@ async function main() {
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
+  const ipiDoctor = readJson(path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json")) || readJson(latestReceipt("orangebox-ipi-doctor-"));
   const actionClassifier = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(latestReceipt("orangebox-action-classifier-"));
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
@@ -226,6 +227,11 @@ async function main() {
     mcpDoctor?.install_attempted === false &&
     mcpDoctor?.host_mcp_config_mutated === false &&
     mcpDoctor?.paid_api_attempted === false;
+  const ipiDoctorGreen =
+    ipiDoctor?.status === "ORANGEBOX_IPI_DRILLS_GREEN" &&
+    ipiDoctor?.constraints?.command_executed === false &&
+    ipiDoctor?.constraints?.network_called === false &&
+    ipiDoctor?.summary?.fixtures_green === ipiDoctor?.summary?.fixtures_total;
   const actionClassifierGreen = actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const toolErgonomicsGreen = toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
@@ -277,6 +283,16 @@ async function main() {
       next: mcpQuarantineGreen
         ? "Keep all new MCPs as candidates until health, tools, scopes, output caps, receipts, and operator-confirmed write mode are proven."
         : "Run npm.cmd run mcp:doctor and fix the exact failed gate.",
+    },
+    {
+      area: "Indirect prompt-injection drills",
+      status: status(ipiDoctorGreen, exists(path.join(repoRoot, "scripts", "v4", "indirect-prompt-injection-doctor.mjs"))),
+      reality: ipiDoctorGreen
+        ? `IPI drills are green: ${ipiDoctor?.summary?.fixtures_green || 0}/${ipiDoctor?.summary?.fixtures_total || 0} fixtures, ${ipiDoctor?.summary?.untrusted_fixtures || 0} untrusted channels quarantined, no commands executed.`
+        : "IPI drill source exists or is planned, but the current receipt is not green yet.",
+      next: ipiDoctorGreen
+        ? "Run ipi:doctor before promoting MCP, retrieval, email, browser, repo, PDF, or memory-ingestion changes."
+        : "Run npm.cmd run ipi:doctor and fix the exact failed drill.",
     },
     {
       area: "Action classifier permission gate",
@@ -585,6 +601,7 @@ async function main() {
         ops_green: packageScript("ops:green", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
+        ipi_doctor: packageScript("ipi:doctor", packageJson),
         action_doctor: packageScript("action:doctor", packageJson),
         skills_lifecycle: packageScript("skills:lifecycle", packageJson),
         model_lane_eval: packageScript("model:lane-eval", packageJson),
@@ -725,6 +742,13 @@ async function main() {
       mcp_doctor: {
         path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
         status: mcpQuarantineGreen ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
+      },
+      ipi_doctor: {
+        path: path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"),
+        status: ipiDoctor?.status || null,
+        fixtures_green: ipiDoctor?.summary?.fixtures_green ?? null,
+        fixtures_total: ipiDoctor?.summary?.fixtures_total ?? null,
+        untrusted_fixtures: ipiDoctor?.summary?.untrusted_fixtures ?? null,
       },
       action_classifier: {
         path: path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"),
