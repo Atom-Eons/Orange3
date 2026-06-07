@@ -522,6 +522,7 @@ async function main() {
             && parsed?.backend_payload?.exists === true
             && parsed?.backend_payload?.frontend_required_for_backend === false
             && parsed?.codexa_run_order?.[0]?.command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd"
+            && parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:access")
             && parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch")
             && parsed?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")
             && (parsed?.open_gap_count > 0 ? parsed?.full_system_green_claim_allowed === false : true),
@@ -530,6 +531,7 @@ async function main() {
             critical_gap_count: parsed?.critical_gap_count ?? null,
             first_click: parsed?.codexa_run_order?.[0]?.command || null,
             backend_payload_commit: parsed?.backend_payload?.source_commit || null,
+            has_codexa_access: parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:access") || false,
             has_codexa_watch: parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch") || false,
           }),
         }),
@@ -564,6 +566,51 @@ async function main() {
             codexa_ready: parsed?.codexa_ready ?? null,
             missing: parsed?.verdict?.missing || [],
             status_history: parsed?.verdict?.status_history || [],
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "codexa_access_truth",
+      claim: "Orangebox can separately prove Codexa command rail, Ollama, RDP, WinRM, SMB, and receipt-dashboard access without attempting login or remote mutation.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run codexa:access",
+      acceptance_gate: "Codexa access doctor writes a receipt, probes all access surfaces, preserves no-login/no-mutation constraints, and gives the exact next action from observed access.",
+      recovery_path: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa or restore RDP/WinRM/8097, then rerun codexa:access, codexa:watch, and ops:gaps.",
+      evidence: [
+        evidence(path.join(dataRoot, "codexa-access", "latest-codexa-access.json"), null, {
+          accept: (parsed, status) => [
+            "CODEXA_ACCESS_FULL_READY",
+            "CODEXA_ACCESS_COMMAND_RAIL_READY",
+            "CODEXA_ACCESS_WINRM_READY",
+            "CODEXA_ACCESS_RDP_READY",
+            "CODEXA_ACCESS_RECEIPTS_ONLY",
+            "CODEXA_ACCESS_SMB_VISIBLE_ONLY",
+            "CODEXA_ACCESS_UNREACHABLE",
+          ].includes(status)
+            && parsed?.ok === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.remote_codexa_mutation_attempted === false
+            && parsed?.constraints?.remote_login_attempted === false
+            && parsed?.constraints?.install_attempted === false
+            && typeof parsed?.access?.rdp === "boolean"
+            && typeof parsed?.access?.winrm === "boolean"
+            && typeof parsed?.access?.smb === "boolean"
+            && typeof parsed?.access?.command_rail === "boolean"
+            && typeof parsed?.access?.ollama === "boolean"
+            && Array.isArray(parsed?.next_actions)
+            && parsed.next_actions.length >= 1,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            command_rail: parsed?.access?.command_rail ?? null,
+            ollama: parsed?.access?.ollama ?? null,
+            rdp: parsed?.access?.rdp ?? null,
+            winrm: parsed?.access?.winrm ?? null,
+            smb: parsed?.access?.smb ?? null,
+            full_green_blocked: parsed?.interpretation?.full_green_blocked ?? null,
           }),
         }),
       ],

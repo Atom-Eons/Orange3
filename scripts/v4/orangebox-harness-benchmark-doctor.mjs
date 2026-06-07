@@ -201,7 +201,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "research-radar", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-watch", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "model-inventory", "ipi-doctor", "memory-doctor"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "research-radar", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-access", "codexa-watch", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "model-inventory", "ipi-doctor", "memory-doctor"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -1050,6 +1050,7 @@ const tasks = [
       if (handoff?.constraints?.remote_codexa_mutation_attempted !== false) failures.push("Codexa handoff must not mutate Codexa");
       if (handoff?.setup_zip?.exists !== true) failures.push("Codexa handoff missing setup zip proof");
       if (handoff?.codexa_run_order?.[0]?.command !== "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd") failures.push("Codexa handoff first click is not start-here admin launcher");
+      if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run codexa:access")) failures.push("Codexa handoff missing codexa:access verification command");
       if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch")) failures.push("Codexa handoff missing codexa:watch verification command");
       if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")) failures.push("Codexa handoff missing ops:gaps verification command");
       if ((ledger?.gap_count || 0) > 0 && handoff?.full_system_green_claim_allowed === true) failures.push("Codexa handoff allows full-system green while gaps remain");
@@ -1059,6 +1060,45 @@ const tasks = [
           status: handoff.status,
           open_gap_count: handoff.open_gap_count,
           first_click: handoff.codexa_run_order?.[0]?.command || null,
+        });
+    },
+  },
+  {
+    id: "codexa_access_truth",
+    category: "codexa_recovery",
+    oracle: "A focused Codexa access proof must distinguish command rail, Ollama, RDP, WinRM, SMB, and receipt dashboard reachability without login, install, or remote mutation.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const access = readJson(path.join(dataRoot, "codexa-access", "latest-codexa-access.json"), trace);
+      const failures = [];
+      const allowedStatuses = [
+        "CODEXA_ACCESS_FULL_READY",
+        "CODEXA_ACCESS_COMMAND_RAIL_READY",
+        "CODEXA_ACCESS_WINRM_READY",
+        "CODEXA_ACCESS_RDP_READY",
+        "CODEXA_ACCESS_RECEIPTS_ONLY",
+        "CODEXA_ACCESS_SMB_VISIBLE_ONLY",
+        "CODEXA_ACCESS_UNREACHABLE",
+      ];
+      if (!allowedStatuses.includes(access?.status)) failures.push(`Codexa access status invalid: ${access?.status || "missing"}`);
+      if (access?.constraints?.frontend_touched !== false) failures.push("Codexa access proof must not touch frontend");
+      if (access?.constraints?.remote_codexa_mutation_attempted !== false) failures.push("Codexa access proof must not mutate Codexa");
+      if (access?.constraints?.remote_login_attempted !== false) failures.push("Codexa access proof must not attempt remote login");
+      if (access?.constraints?.install_attempted !== false) failures.push("Codexa access proof must not install anything");
+      for (const key of ["command_rail", "receipts", "ollama", "rdp", "winrm", "smb"]) {
+        if (typeof access?.access?.[key] !== "boolean") failures.push(`Codexa access missing boolean ${key}`);
+      }
+      if (!Array.isArray(access?.next_actions) || access.next_actions.length < 1) failures.push("Codexa access proof missing next actions");
+      if (access?.setup_pack?.exists !== true) failures.push("Codexa access proof missing setup pack evidence");
+      return failures.length
+        ? failTask("codexa_access_truth", failures, { status: access?.status || null })
+        : okTask("codexa_access_truth", {
+          status: access.status,
+          command_rail: access.access.command_rail,
+          ollama: access.access.ollama,
+          rdp: access.access.rdp,
+          winrm: access.access.winrm,
+          smb: access.access.smb,
         });
     },
   },
@@ -1111,6 +1151,7 @@ const tasks = [
         "start_here_calls_power_optimizer",
         "start_here_calls_backend_installer",
         "start_here_calls_rail_starter",
+        "start_here_next_action_codexa_access",
         "start_here_next_action_codexa_watch",
         "backend_installer_payload_zip",
         "backend_installer_hash_check",
@@ -1122,6 +1163,7 @@ const tasks = [
         "model_doctor_missing_core",
         "hermes_install_orangebox_control_plane_note",
         "readme_wildcard_law",
+        "run_order_json_codexa_access",
         "run_order_json_codexa_watch",
       ];
       if (doctor?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") failures.push(`OBOX2 doctor status not green: ${doctor?.status || "missing"}`);
@@ -1140,6 +1182,7 @@ const tasks = [
           contract_ok: contracts.ok,
           check_count: checks.length,
           zip_path: doctor.zip_path,
+          has_codexa_access: doctor?.json_config?.run_order?.has_codexa_access === true,
           has_codexa_watch: doctor?.json_config?.run_order?.has_codexa_watch === true,
         });
     },

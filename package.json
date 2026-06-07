@@ -98,6 +98,7 @@
     "restart:lock": "node ./scripts/v4/orangebox-restart-lock-doctor.mjs --json --receipt",
     "codexa:sync-config": "node ./scripts/v4/orangebox-codexa-config-sync-doctor.mjs --json --receipt",
     "codexa:rail-pack": "node ./scripts/v4/codexa-rail-recovery-pack.mjs --json --receipt",
+    "codexa:access": "node ./scripts/v4/codexa-access-doctor.mjs --json --receipt",
     "codexa:smb-stage": "node ./scripts/v4/codexa-smb-stage-doctor.mjs --json --receipt",
     "codexa:handoff": "node ./scripts/v4/orangebox-codexa-handoff-doctor.mjs --json --receipt",
     "codexa:alert": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt",

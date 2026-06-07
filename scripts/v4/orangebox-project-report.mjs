@@ -168,6 +168,7 @@ async function main() {
   const assuranceLab = readJson(path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json"));
   const harnessBenchmark = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
+  const codexaAccess = readJson(path.join(dataRoot, "codexa-access", "latest-codexa-access.json"));
   const codexaBringup = readJson(path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"));
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
@@ -204,6 +205,16 @@ async function main() {
   const codexaSmbVisible = codexaAlert?.smb_port_visible === true;
   const codexaRailRecoveryPack = codexaAlert?.recovery_artifacts?.rail_recovery_pack || null;
   const codexaObox2Pack = codexaAlert?.recovery_artifacts?.obox2_setup_pack || null;
+  const codexaAccessReported = [
+    "CODEXA_ACCESS_FULL_READY",
+    "CODEXA_ACCESS_COMMAND_RAIL_READY",
+    "CODEXA_ACCESS_WINRM_READY",
+    "CODEXA_ACCESS_RDP_READY",
+    "CODEXA_ACCESS_RECEIPTS_ONLY",
+    "CODEXA_ACCESS_SMB_VISIBLE_ONLY",
+    "CODEXA_ACCESS_UNREACHABLE",
+  ].includes(codexaAccess?.status);
+  const codexaAccessGreen = codexaAccess?.status === "CODEXA_ACCESS_FULL_READY";
   const openclawRetired = openclawRetire?.status === "OPENCLAW_STARTUP_RETIRED";
   const packageGreen = obox2Doctor?.status === "OBOX2_PACKAGE_VERIFIED_GREEN";
   const obox2Contracts = operationalContractSummary(obox2Doctor);
@@ -464,6 +475,18 @@ async function main() {
         : "Run npm.cmd run codexa:alert:popup, then rerun project/readiness proof.",
     },
     {
+      area: "Codexa access surfaces",
+      status: status(codexaAccessGreen, codexaAccessReported || exists(path.join(repoRoot, "scripts", "v4", "codexa-access-doctor.mjs"))),
+      reality: codexaAccessReported
+        ? `Codexa access doctor is current: ${codexaAccess.status}. Command rail=${Boolean(codexaAccess.access?.command_rail)}, Ollama=${Boolean(codexaAccess.access?.ollama)}, RDP=${Boolean(codexaAccess.access?.rdp)}, WinRM=${Boolean(codexaAccess.access?.winrm)}, SMB=${Boolean(codexaAccess.access?.smb)}, receipts=${Boolean(codexaAccess.access?.receipts)}.`
+        : "Codexa access doctor source exists or is planned, but no current access receipt has separated RDP/WinRM/SMB/rail/Ollama truth yet.",
+      next: codexaAccessGreen
+        ? "Run model inventory and local model eval before routing heavy work to Codexa."
+        : codexaAccessReported
+          ? "Use codexa:access before codexa:watch when remote access claims are uncertain."
+          : "Run npm.cmd run codexa:access, then rerun project:report.",
+    },
+    {
       area: "Codexa bring-up watcher",
       status: status(codexaBringupReported, exists(path.join(repoRoot, "scripts", "v4", "orangebox-codexa-bringup-watch.mjs"))),
       reality: codexaBringupReported
@@ -689,6 +712,7 @@ async function main() {
         ops_green: packageScript("ops:green", packageJson),
         ops_gaps: packageScript("ops:gaps", packageJson),
         codexa_handoff: packageScript("codexa:handoff", packageJson),
+        codexa_access: packageScript("codexa:access", packageJson),
         codexa_watch: packageScript("codexa:watch", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
@@ -738,6 +762,9 @@ async function main() {
       codexaObox2Pack?.exists
         ? `Full OBOX2 setup pack is ready: ${codexaObox2Pack.path}. Preferred first click: RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd.`
         : "Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor so the full OBOX2 setup zip exists.",
+      codexaAccessReported
+        ? "Use npm.cmd run codexa:access whenever RDP/WinRM/SMB/rail/Ollama claims need a focused proof."
+        : "Run npm.cmd run codexa:access so RDP/WinRM/SMB/rail/Ollama access is separated from broad health warnings.",
       codexaSmbVisible && !codexaRemoteExecutionAvailable
         ? "Treat SMB as staging-only; do not claim remote repair until RDP, WinRM, or 8097 command rail is reachable."
         : "Use the proven remote execution path when it appears in health:report.",
@@ -841,6 +868,17 @@ async function main() {
         status: readJson(path.join(dataRoot, "ops-green", "latest-local-ops-green.json"))?.status || null,
       },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null },
+      codexa_access: {
+        path: path.join(dataRoot, "codexa-access", "latest-codexa-access.json"),
+        status: codexaAccess?.status || null,
+        codexa_access_ready: codexaAccess?.codexa_access_ready ?? null,
+        command_rail: codexaAccess?.access?.command_rail ?? null,
+        receipts: codexaAccess?.access?.receipts ?? null,
+        ollama: codexaAccess?.access?.ollama ?? null,
+        rdp: codexaAccess?.access?.rdp ?? null,
+        winrm: codexaAccess?.access?.winrm ?? null,
+        smb: codexaAccess?.access?.smb ?? null,
+      },
       codexa_bringup_watch: {
         path: path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"),
         status: codexaBringup?.status || null,

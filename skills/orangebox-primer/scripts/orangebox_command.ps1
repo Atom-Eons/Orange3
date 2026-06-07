@@ -173,6 +173,11 @@ $commands = [ordered]@{
     args = @("run", "codexa:alert:popup")
     description = "Probe Codexa/AI Box rails and show a throttled Windows popup if attention is required."
   }
+  "codexa-access" = @{
+    kind = "npm"
+    args = @("run", "codexa:access")
+    description = "Prove Codexa RDP, WinRM, SMB, command rail, receipt rail, and Ollama access surfaces."
+  }
   "codexa-watch" = @{
     kind = "npm"
     args = @("run", "codexa:watch")

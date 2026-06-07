@@ -47,6 +47,7 @@ const requiredProofScripts = [
   "model:lane-eval",
   "model:inventory",
   "codexa:handoff",
+  "codexa:access",
   "codexa:watch",
 ];
 
@@ -75,6 +76,7 @@ const requiredSkillCommands = [
   "model-lane-eval",
   "model-inventory",
   "codexa-alert",
+  "codexa-access",
   "codexa-watch",
   "codexa-smb-stage",
   "codexa-handoff",

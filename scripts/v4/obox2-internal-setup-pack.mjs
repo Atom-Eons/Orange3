@@ -622,7 +622,7 @@ $result = [ordered]@{
   steps = @($steps)
   required_failures = @($requiredFailures | ForEach-Object { $_.name })
   optional_failures = @($optionalFailures | ForEach-Object { $_.name })
-  next_action = $(if ($ok) { 'Back on Cockpit, run npm.cmd run codexa:alert:popup, npm.cmd run codexa:watch, and npm.cmd run ops:green.' } else { 'Fix the first required failure in steps, then rerun this start-here launcher.' })
+  next_action = $(if ($ok) { 'Back on Cockpit, run npm.cmd run codexa:access, npm.cmd run codexa:alert:popup, npm.cmd run codexa:watch, and npm.cmd run ops:green.' } else { 'Fix the first required failure in steps, then rerun this start-here launcher.' })
   doctrine = 'Power proves always-on. Rail proves reachability. Model doctor proves local lanes. Receipts prove reality.'
 }
 $path = Join-Path $receiptRoot 'obox2-start-here-latest.json'
@@ -953,6 +953,7 @@ async function main() {
       },
     ],
     cockpit_verify_commands: [
+      "npm.cmd run codexa:access",
       "npm.cmd run codexa:alert:popup",
       "npm.cmd run codexa:watch",
       "npm.cmd run model:inventory",
