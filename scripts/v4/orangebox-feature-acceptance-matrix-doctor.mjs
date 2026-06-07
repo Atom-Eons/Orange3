@@ -522,6 +522,7 @@ async function main() {
             && parsed?.backend_payload?.exists === true
             && parsed?.backend_payload?.frontend_required_for_backend === false
             && parsed?.codexa_run_order?.[0]?.command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd"
+            && parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch")
             && parsed?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")
             && (parsed?.open_gap_count > 0 ? parsed?.full_system_green_claim_allowed === false : true),
           detail: (parsed) => ({
@@ -529,6 +530,7 @@ async function main() {
             critical_gap_count: parsed?.critical_gap_count ?? null,
             first_click: parsed?.codexa_run_order?.[0]?.command || null,
             backend_payload_commit: parsed?.backend_payload?.source_commit || null,
+            has_codexa_watch: parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch") || false,
           }),
         }),
       ],

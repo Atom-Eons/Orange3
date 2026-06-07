@@ -148,6 +148,8 @@ function validateJsonConfig(extractDir) {
       runOrder?.first_click === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd" &&
       runOrder?.backend_payload?.sha256 === backendHash &&
       runOrder?.backend_payload?.frontend_required_for_backend === false &&
+      (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:alert:popup") &&
+      (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:watch") &&
       (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run ops:green") &&
       localModels.length >= 10 &&
       missingDefaults.length === 0 &&
@@ -172,6 +174,9 @@ function validateJsonConfig(extractDir) {
       first_click: runOrder?.first_click || null,
       steps: Array.isArray(runOrder?.run_order) ? runOrder.run_order.length : 0,
       cockpit_verify_commands: Array.isArray(runOrder?.cockpit_verify_commands) ? runOrder.cockpit_verify_commands.length : 0,
+      has_codexa_alert_popup: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:alert:popup"),
+      has_codexa_watch: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:watch"),
+      has_ops_green: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run ops:green"),
     },
     wildcard_law_count: wildcardLaw.length,
   };
@@ -254,6 +259,7 @@ function validateOperationalContracts(extractDir) {
   requirePattern(checks, startHere, "start_here_calls_model_doctor", /CODEXA_MODEL_DOCTOR\.ps1/i, "Start-here launcher runs model doctor.");
   requirePattern(checks, startHere, "start_here_hermes_optional", /HERMES_AGENT_DOCTOR\.ps1' @\(\) \$false/i, "Start-here launcher treats Hermes doctor as optional.");
   requirePattern(checks, startHere, "start_here_receipt_written", /obox2-start-here-latest\.json/i, "Start-here launcher writes a stable receipt.");
+  requirePattern(checks, startHere, "start_here_next_action_codexa_watch", /npm\.cmd run codexa:watch/i, "Start-here launcher tells cockpit to run Codexa bring-up watch.");
 
   const modelInstaller = file("INSTALL_CODEXA_OBOX2_MODELS.ps1");
   requirePattern(checks, modelInstaller, "model_installer_tiered", /ValidateSet\('core','extended','heavy','wildcard','all'\)/i, "Model installer supports tiered installs.");
@@ -298,6 +304,7 @@ function validateOperationalContracts(extractDir) {
   const runOrder = file("CODEXA_RUN_ORDER.json");
   requirePattern(checks, runOrder, "run_order_json_first_click", /"first_click"\s*:\s*"RUN_START_HERE_ON_CODEXA_AS_ADMIN\.cmd"/i, "Run-order JSON names the first-click launcher.");
   requirePattern(checks, runOrder, "run_order_json_cockpit_verify", /npm\.cmd run ops:green/i, "Run-order JSON includes cockpit verification commands.");
+  requirePattern(checks, runOrder, "run_order_json_codexa_watch", /npm\.cmd run codexa:watch/i, "Run-order JSON includes bounded Codexa bring-up watch verification.");
   requirePattern(checks, runOrder, "run_order_json_false_green_guard", /false_green_guard/i, "Run-order JSON preserves false-green guard.");
 
   const failures = checks.filter((check) => !check.ok);

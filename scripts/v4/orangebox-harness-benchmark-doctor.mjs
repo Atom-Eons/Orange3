@@ -1050,6 +1050,7 @@ const tasks = [
       if (handoff?.constraints?.remote_codexa_mutation_attempted !== false) failures.push("Codexa handoff must not mutate Codexa");
       if (handoff?.setup_zip?.exists !== true) failures.push("Codexa handoff missing setup zip proof");
       if (handoff?.codexa_run_order?.[0]?.command !== "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd") failures.push("Codexa handoff first click is not start-here admin launcher");
+      if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch")) failures.push("Codexa handoff missing codexa:watch verification command");
       if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")) failures.push("Codexa handoff missing ops:gaps verification command");
       if ((ledger?.gap_count || 0) > 0 && handoff?.full_system_green_claim_allowed === true) failures.push("Codexa handoff allows full-system green while gaps remain");
       return failures.length
@@ -1110,6 +1111,7 @@ const tasks = [
         "start_here_calls_power_optimizer",
         "start_here_calls_backend_installer",
         "start_here_calls_rail_starter",
+        "start_here_next_action_codexa_watch",
         "backend_installer_payload_zip",
         "backend_installer_hash_check",
         "backend_installer_approved_path",
@@ -1120,6 +1122,7 @@ const tasks = [
         "model_doctor_missing_core",
         "hermes_install_orangebox_control_plane_note",
         "readme_wildcard_law",
+        "run_order_json_codexa_watch",
       ];
       if (doctor?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") failures.push(`OBOX2 doctor status not green: ${doctor?.status || "missing"}`);
       if (contracts.ok !== true) failures.push("OBOX2 operational contracts are not green");
@@ -1137,6 +1140,7 @@ const tasks = [
           contract_ok: contracts.ok,
           check_count: checks.length,
           zip_path: doctor.zip_path,
+          has_codexa_watch: doctor?.json_config?.run_order?.has_codexa_watch === true,
         });
     },
   },
