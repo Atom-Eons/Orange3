@@ -116,6 +116,24 @@ function proofForArea(area) {
       }
       : null;
   }
+  if (area === "memory_interference_eval") {
+    const file = path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json");
+    const proof = readJson(file);
+    const ok = proof?.status === "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN"
+      && proof?.constraints?.frontend_touched === false
+      && proof?.constraints?.raw_history_injected === false
+      && Number(proof?.summary?.drills_green || 0) === Number(proof?.summary?.drills_total || -1)
+      && Number(proof?.summary?.stale_conflicts_detected || 0) >= 1;
+    return ok
+      ? {
+        ok: true,
+        status: "proven_receipt_green",
+        proof_path: file,
+        proof_status: proof.status,
+        proof_detail: `${proof.summary.drills_green}/${proof.summary.drills_total} memory/source drills; stale_conflicts=${proof.summary.stale_conflicts_detected}; raw_history_injected=${proof.constraints.raw_history_injected}`,
+      }
+      : null;
+  }
   if (area === "tool_ergonomics_eval_lane") {
     const file = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
     const proof = readJson(file);
@@ -573,7 +591,7 @@ const executionProfiles = {
   },
   memory_interference_eval: {
     priority: 87,
-    proof_command: "npm.cmd run atomsmasher:doctor && npm.cmd run harness:benchmark",
+    proof_command: "npm.cmd run memory:doctor && npm.cmd run harness:benchmark",
     acceptance_gate: "Memory-interference fixture proves revised facts, stale recall, source dereference, and repeated hydration behavior without raw-history flooding.",
   },
   knowledge_engine_atomsmasher: {

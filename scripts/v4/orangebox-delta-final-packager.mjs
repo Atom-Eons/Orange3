@@ -239,6 +239,7 @@ function backendPackageJson() {
       "research:scout": "node ./scripts/v4/orangebox-external-research-scout.mjs --json --receipt",
       "assurance:doctor": "node ./scripts/v4/orangebox-assurance-lab-doctor.mjs --json --receipt",
       "ipi:doctor": "node ./scripts/v4/indirect-prompt-injection-doctor.mjs --json --receipt",
+      "memory:doctor": "node ./scripts/v4/memory-source-truth-doctor.mjs --json --receipt",
       "harness:benchmark": "node ./scripts/v4/orangebox-harness-benchmark-doctor.mjs --json --receipt",
       "tool:ergonomics": "node ./scripts/v4/orangebox-tool-ergonomics-doctor.mjs --json --receipt",
       "checkmate:doctor": "node ./scripts/v4/checkmate-eval-lane-doctor.mjs --json --receipt",

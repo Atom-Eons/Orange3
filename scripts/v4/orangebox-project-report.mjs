@@ -169,6 +169,7 @@ async function main() {
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
   const ipiDoctor = readJson(path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json")) || readJson(latestReceipt("orangebox-ipi-doctor-"));
+  const memoryDoctor = readJson(path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json")) || readJson(latestReceipt("orangebox-memory-source-truth-"));
   const actionClassifier = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(latestReceipt("orangebox-action-classifier-"));
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
@@ -232,6 +233,11 @@ async function main() {
     ipiDoctor?.constraints?.command_executed === false &&
     ipiDoctor?.constraints?.network_called === false &&
     ipiDoctor?.summary?.fixtures_green === ipiDoctor?.summary?.fixtures_total;
+  const memoryDoctorGreen =
+    memoryDoctor?.status === "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN" &&
+    memoryDoctor?.constraints?.raw_history_injected === false &&
+    memoryDoctor?.summary?.drills_green === memoryDoctor?.summary?.drills_total &&
+    Number(memoryDoctor?.summary?.stale_conflicts_detected || 0) >= 1;
   const actionClassifierGreen = actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const toolErgonomicsGreen = toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
@@ -293,6 +299,16 @@ async function main() {
       next: ipiDoctorGreen
         ? "Run ipi:doctor before promoting MCP, retrieval, email, browser, repo, PDF, or memory-ingestion changes."
         : "Run npm.cmd run ipi:doctor and fix the exact failed drill.",
+    },
+    {
+      area: "Memory/source truth",
+      status: status(memoryDoctorGreen, exists(path.join(repoRoot, "scripts", "v4", "memory-source-truth-doctor.mjs"))),
+      reality: memoryDoctorGreen
+        ? `Memory/source truth drills are green: ${memoryDoctor?.summary?.drills_green || 0}/${memoryDoctor?.summary?.drills_total || 0} drills, ${memoryDoctor?.summary?.stale_conflicts_detected || 0} stale conflict(s), hot packet ${memoryDoctor?.summary?.hot_packet_token_estimate || 0} token proxy.`
+        : "Memory/source-truth drill source exists or is planned, but the current receipt is not green yet.",
+      next: memoryDoctorGreen
+        ? "Run memory:doctor before promoting chatbackup, AtomSmasher compression, retrieval, or Knowledge Engine upgrades."
+        : "Run npm.cmd run memory:doctor and fix the exact failed stale-memory/source-pointer drill.",
     },
     {
       area: "Action classifier permission gate",
@@ -602,6 +618,7 @@ async function main() {
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         ipi_doctor: packageScript("ipi:doctor", packageJson),
+        memory_doctor: packageScript("memory:doctor", packageJson),
         action_doctor: packageScript("action:doctor", packageJson),
         skills_lifecycle: packageScript("skills:lifecycle", packageJson),
         model_lane_eval: packageScript("model:lane-eval", packageJson),
@@ -749,6 +766,14 @@ async function main() {
         fixtures_green: ipiDoctor?.summary?.fixtures_green ?? null,
         fixtures_total: ipiDoctor?.summary?.fixtures_total ?? null,
         untrusted_fixtures: ipiDoctor?.summary?.untrusted_fixtures ?? null,
+      },
+      memory_doctor: {
+        path: path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json"),
+        status: memoryDoctor?.status || null,
+        drills_green: memoryDoctor?.summary?.drills_green ?? null,
+        drills_total: memoryDoctor?.summary?.drills_total ?? null,
+        stale_conflicts_detected: memoryDoctor?.summary?.stale_conflicts_detected ?? null,
+        hot_packet_token_estimate: memoryDoctor?.summary?.hot_packet_token_estimate ?? null,
       },
       action_classifier: {
         path: path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"),

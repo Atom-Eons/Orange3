@@ -78,6 +78,7 @@ codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
 codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default
 mcp-doctor           verify MCP quarantine/tool bridge
 ipi-doctor           verify indirect prompt-injection drills and untrusted-text quarantine
+memory-doctor        verify latest source-backed truth beats stale chat memory
 action-doctor        verify pre-tool action classifier and unsafe-command blocking
 skills-lifecycle     verify active skills are compressed executable procedures
 obox2-pack            build Orangebox V2 Internal setup zip

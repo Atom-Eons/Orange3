@@ -163,6 +163,11 @@ $commands = [ordered]@{
     args = @("run", "ipi:doctor")
     description = "Verify indirect prompt-injection drills and untrusted-text quarantine."
   }
+  "memory-doctor" = @{
+    kind = "npm"
+    args = @("run", "memory:doctor")
+    description = "Verify latest source-backed receipt truth beats stale chat memory and compressed summaries carry source pointers."
+  }
   "action-doctor" = @{
     kind = "npm"
     args = @("run", "action:doctor")

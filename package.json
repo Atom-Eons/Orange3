@@ -33,6 +33,7 @@
     "mcp": "node ./scripts/orangebox-mcp-server.mjs",
     "mcp:doctor": "node ./scripts/v4/mcp-doctor.mjs --json --receipt",
     "ipi:doctor": "node ./scripts/v4/indirect-prompt-injection-doctor.mjs --json --receipt",
+    "memory:doctor": "node ./scripts/v4/memory-source-truth-doctor.mjs --json --receipt",
     "action:doctor": "node ./scripts/v4/action-classifier-doctor.mjs --json --receipt",
     "knowledge": "node ./scripts/orangebox-knowledge-v2.mjs",
     "knowledge:v1": "node ./scripts/orangebox-knowledge.mjs",

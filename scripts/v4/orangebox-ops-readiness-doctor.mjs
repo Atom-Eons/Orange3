@@ -99,6 +99,8 @@ function main() {
   const mcpDoctor = readJson(mcpDoctorPath);
   const ipiDoctorPath = path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json");
   const ipiDoctor = readJson(ipiDoctorPath);
+  const memoryDoctorPath = path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json");
+  const memoryDoctor = readJson(memoryDoctorPath);
   const actionClassifierPath = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
   const actionClassifier = readJson(actionClassifierPath);
   const skillLifecyclePath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
@@ -173,6 +175,15 @@ function main() {
       fixtures_total: ipiDoctor?.summary?.fixtures_total ?? null,
       untrusted_fixtures: ipiDoctor?.summary?.untrusted_fixtures ?? null,
       note: "Proves untrusted emails, webpages, repos, PDFs, and chat logs are data, not executable instructions.",
+    },
+    memory_source_truth_doctor: {
+      ok: memoryDoctor?.ok === true && memoryDoctor?.status === "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN",
+      path: memoryDoctorPath,
+      status: memoryDoctor?.status || null,
+      drills_green: memoryDoctor?.summary?.drills_green ?? null,
+      drills_total: memoryDoctor?.summary?.drills_total ?? null,
+      stale_conflicts_detected: memoryDoctor?.summary?.stale_conflicts_detected ?? null,
+      note: "Proves latest source-backed receipt truth beats stale chat memory, compressed summaries carry source pointers, and revised facts create compression debt.",
     },
     action_classifier: {
       ok: actionClassifier?.ok === true && actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN",

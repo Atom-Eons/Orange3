@@ -196,7 +196,7 @@ function buildAssurancePlaybook(scout, improvements, receipts) {
       {
         id: "deterministic_validation_first",
         rule: "A deterministic doctor, harness task, CHECKMATE fixture, or feature-proof row must exist before a model judgement lane can endorse it.",
-        receipts: [receipts.harness, receipts.checkmate, receipts.feature_proof, receipts.ipi],
+        receipts: [receipts.harness, receipts.checkmate, receipts.feature_proof, receipts.ipi, receipts.memory],
       },
       {
         id: "receipt_and_rollback",
@@ -212,6 +212,7 @@ function buildAssurancePlaybook(scout, improvements, receipts) {
     direct_applications: [
       "MCP quarantine and tool-output scope checks",
       "Indirect prompt-injection drills for email, web, repo, PDF, chat-log, tool-output, and memory ingestion",
+      "Memory/source-truth drills for revised facts, multi-target aggregation, source dereference, stale conflict debt, and hot-context budget",
       "Agent skill lifecycle scoring",
       "CHECKMATE eval fixtures before prompt/model/router changes",
       "Feature acceptance matrix for long-horizon upgrades",
@@ -246,6 +247,7 @@ async function main() {
     mcp: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
     action: path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"),
     ipi: path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"),
+    memory: path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json"),
     project: path.join(dataRoot, "reports", "project", "latest-project-report.json"),
   };
 
@@ -269,6 +271,7 @@ async function main() {
     mcp: paths.mcp,
     action: paths.action,
     ipi: paths.ipi,
+    memory: paths.memory,
     project: paths.project,
   };
   const playbook = buildAssurancePlaybook(scout, improvements, receipts);
@@ -329,6 +332,14 @@ async function main() {
           && untrusted.every((drill) => drill.final_disposition === "quarantine_untrusted_text");
       },
       detail: (parsed) => ({ fixtures_green: parsed?.summary?.fixtures_green ?? null, fixtures_total: parsed?.summary?.fixtures_total ?? null, command_executed: parsed?.constraints?.command_executed ?? null }),
+    }),
+    receiptCheck("memory_source_truth_green", paths.memory, "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN", {
+      accept: (parsed, status) => status === "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN"
+        && parsed?.constraints?.frontend_touched === false
+        && parsed?.constraints?.raw_history_injected === false
+        && Number(parsed?.summary?.drills_green || 0) === Number(parsed?.summary?.drills_total || -1)
+        && Number(parsed?.summary?.stale_conflicts_detected || 0) >= 1,
+      detail: (parsed) => ({ drills_green: parsed?.summary?.drills_green ?? null, drills_total: parsed?.summary?.drills_total ?? null, stale_conflicts_detected: parsed?.summary?.stale_conflicts_detected ?? null }),
     }),
     check("package_script_present", Boolean(packageJson.scripts?.["assurance:doctor"]), { script: packageJson.scripts?.["assurance:doctor"] || null }),
     check("playbook_has_required_gates", playbook.gates.length >= 6 && playbook.gates.some((gate) => gate.id === "no_auto_promotion") && playbook.gates.some((gate) => gate.id === "deterministic_validation_first"), { gate_ids: playbook.gates.map((gate) => gate.id) }),

@@ -249,6 +249,7 @@ async function main() {
     codexa_smb_stage: latestReceipt("orangebox-codexa-smb-stage-"),
     mcp_doctor: latestReceipt("orangebox-mcp-doctor-"),
     ipi_doctor: latestReceipt("orangebox-ipi-doctor-"),
+    memory_doctor: latestReceipt("orangebox-memory-source-truth-"),
     action_classifier: latestReceipt("orangebox-action-classifier-"),
     skill_lifecycle: latestReceipt("orangebox-skill-lifecycle-doctor-"),
     tool_ergonomics: latestReceipt("orangebox-tool-ergonomics-"),
@@ -272,6 +273,7 @@ async function main() {
     codexa_smb_stage: readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json")) || readJson(receiptPaths.codexa_smb_stage || ""),
     mcp_doctor: readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(receiptPaths.mcp_doctor || ""),
     ipi_doctor: readJson(path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json")) || readJson(receiptPaths.ipi_doctor || ""),
+    memory_doctor: readJson(path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json")) || readJson(receiptPaths.memory_doctor || ""),
     action_classifier: readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(receiptPaths.action_classifier || ""),
     skill_lifecycle: readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(receiptPaths.skill_lifecycle || ""),
     tool_ergonomics: readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(receiptPaths.tool_ergonomics || ""),
@@ -336,6 +338,7 @@ async function main() {
   if (!terminalProfileOk) warnings.push("PowerShell OB0X terminal profile is missing, blocked, or has no receipt.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) warnings.push("MCP quarantine/tool bridge doctor is not green.");
   if (latest.ipi_doctor?.status !== "ORANGEBOX_IPI_DRILLS_GREEN") warnings.push("Indirect prompt-injection drills are not green.");
+  if (latest.memory_doctor?.status !== "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN") warnings.push("Memory/source-truth doctor is not green.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") warnings.push("Action classifier doctor is not green.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") warnings.push("Orangebox skill lifecycle doctor is not green.");
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") warnings.push("Orangebox tool ergonomics doctor is not green.");
@@ -378,6 +381,7 @@ async function main() {
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
   if (latest.ipi_doctor?.status !== "ORANGEBOX_IPI_DRILLS_GREEN") nextActions.push("Run npm.cmd run ipi:doctor to verify untrusted text cannot smuggle tool commands.");
+  if (latest.memory_doctor?.status !== "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN") nextActions.push("Run npm.cmd run memory:doctor to verify latest source-backed truth beats stale chat memory.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") nextActions.push("Run npm.cmd run action:doctor to verify the pre-tool action classifier.");
   if (latest.skill_lifecycle?.status !== "ORANGEBOX_SKILL_LIFECYCLE_GREEN") nextActions.push("Run npm.cmd run skills:lifecycle to verify Orangebox skill install and command mappings.");
   if (latest.tool_ergonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") nextActions.push("Run npm.cmd run tool:ergonomics to verify command/tool names, bounded outputs, and receipt-backed proof scripts.");
@@ -388,6 +392,7 @@ async function main() {
 
   const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
   const ipiDoctorOk = latest.ipi_doctor?.status === "ORANGEBOX_IPI_DRILLS_GREEN";
+  const memoryDoctorOk = latest.memory_doctor?.status === "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN";
   const actionClassifierOk = latest.action_classifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleOk = latest.skill_lifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const toolErgonomicsOk = latest.tool_ergonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
@@ -397,7 +402,7 @@ async function main() {
   const featureProofOk = latest.feature_proof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
   const assuranceLabOk = latest.assurance_lab?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN";
   const harnessBenchmarkOk = latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
-  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && ipiDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && featureProofOk && assuranceLabOk;
+  const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && ipiDoctorOk && memoryDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && featureProofOk && assuranceLabOk;
   const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
     && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
   const status = localCoreOk && aiBoxOk && warnings.length === 0
@@ -543,6 +548,14 @@ async function main() {
         fixtures_green: latest.ipi_doctor?.summary?.fixtures_green ?? null,
         fixtures_total: latest.ipi_doctor?.summary?.fixtures_total ?? null,
         untrusted_fixtures: latest.ipi_doctor?.summary?.untrusted_fixtures ?? null,
+      },
+      memory_doctor: {
+        path: path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json"),
+        status: latest.memory_doctor?.status || null,
+        drills_green: latest.memory_doctor?.summary?.drills_green ?? null,
+        drills_total: latest.memory_doctor?.summary?.drills_total ?? null,
+        stale_conflicts_detected: latest.memory_doctor?.summary?.stale_conflicts_detected ?? null,
+        hot_packet_token_estimate: latest.memory_doctor?.summary?.hot_packet_token_estimate ?? null,
       },
       action_classifier: {
         path: path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"),

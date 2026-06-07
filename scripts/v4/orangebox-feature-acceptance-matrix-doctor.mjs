@@ -203,6 +203,31 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "memory_source_truth",
+      claim: "Latest source-backed receipt truth beats stale chat memory, and compressed memory carries dereferenceable source pointers.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run memory:doctor",
+      acceptance_gate: "Memory/source-truth doctor is green, all drills pass, raw_history_injected=false, and revised facts create compression debt.",
+      rollback_path: "Revert memory-source-truth doctor/command/report wiring and rerun memory:doctor, feature:proof, project:report, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json"), "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN"
+            && parsed?.constraints?.raw_history_injected === false
+            && Number(parsed?.summary?.drills_green || 0) === Number(parsed?.summary?.drills_total || -1)
+            && Number(parsed?.summary?.stale_conflicts_detected || 0) >= 1,
+          detail: (parsed) => ({
+            drills_green: parsed?.summary?.drills_green ?? null,
+            drills_total: parsed?.summary?.drills_total ?? null,
+            stale_conflicts_detected: parsed?.summary?.stale_conflicts_detected ?? null,
+            hot_packet_token_estimate: parsed?.summary?.hot_packet_token_estimate ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "skill_primer_everywhere",
       claim: "Modern Orangebox primer skill is installed in Codex, Claude, Antigravity/Gemini, and shared agent roots with stale skills removed.",
       lane: "backend_ops",
@@ -552,8 +577,9 @@ async function main() {
     acc[item.status] = (acc[item.status] || 0) + 1;
     return acc;
   }, {});
-  const fullGreenTruthOk = codexaReady || project?.full_project_green === false;
-  if (!fullGreenTruthOk) {
+  const fullGreenTruthGuardOk = codexaReady || project?.full_project_green === false;
+  const fullProjectGreenClaimAllowed = codexaReady === true && project?.full_project_green === true;
+  if (!fullGreenTruthGuardOk) {
     failures.push({ id: "full_system_truth", failure: "project_claims_full_green_while_codexa_blocked" });
   }
   if (!packageJson?.scripts?.["feature:proof"]) {
@@ -571,7 +597,9 @@ async function main() {
     public_name: "Orangebox Version 1",
     package_name: "Orangebox Delta Final",
     backend_proof_in_progress: backendProofInProgress,
-    full_project_green_claim_allowed: fullGreenTruthOk,
+    codexa_ready: codexaReady,
+    full_project_green_truth_guard_ok: fullGreenTruthGuardOk,
+    full_project_green_claim_allowed: fullProjectGreenClaimAllowed,
     counts,
     features_total: matrix.length,
     features_green: matrix.filter((item) => item.ok).length,

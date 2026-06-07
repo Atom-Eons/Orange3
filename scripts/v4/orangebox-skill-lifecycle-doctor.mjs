@@ -89,6 +89,7 @@ const requiredCommands = [
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },
   { name: "mcp-doctor", kind: "npm", script: "mcp:doctor" },
   { name: "ipi-doctor", kind: "npm", script: "ipi:doctor" },
+  { name: "memory-doctor", kind: "npm", script: "memory:doctor" },
   { name: "action-doctor", kind: "npm", script: "action:doctor" },
   { name: "skills-lifecycle", kind: "npm", script: "skills:lifecycle" },
   { name: "obox2-pack", kind: "npm", script: "obox2:pack" },

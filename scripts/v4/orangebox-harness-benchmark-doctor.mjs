@@ -156,6 +156,7 @@ const requiredOpsScripts = [
   "codexa:smb-stage",
   "mcp:doctor",
   "ipi:doctor",
+  "memory:doctor",
   "action:doctor",
   "skills:lifecycle",
   "model:lane-eval",
@@ -194,7 +195,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "ipi-doctor"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "ipi-doctor", "memory-doctor"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -307,6 +308,42 @@ const tasks = [
           fixtures_total: ipi.summary.fixtures_total,
           untrusted_count: untrusted.length,
           drill_hash: ipi.summary.drill_hash,
+        });
+    },
+  },
+  {
+    id: "memory_source_truth",
+    category: "memory_interference",
+    oracle: "Latest source-backed receipt truth must beat stale chat memory, preserve multi-target status, dereference source pointers, and avoid raw-history flooding.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const memory = readJson(path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const failures = [];
+      const drills = Array.isArray(memory?.drills) ? memory.drills : [];
+      const byId = new Map(drills.map((drill) => [drill.id, drill]));
+      if (memory?.status !== "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN") failures.push(`Memory/source-truth doctor not green: ${memory?.status || "missing"}`);
+      if (memory?.constraints?.raw_history_injected !== false) failures.push("Memory/source-truth doctor must prove raw_history_injected=false");
+      if ((memory?.summary?.drills_green || 0) !== (memory?.summary?.drills_total || -1)) failures.push("Not all memory/source-truth drills are green");
+      if (Number(memory?.summary?.stale_conflicts_detected || 0) < 1) failures.push("No stale revised-fact conflict was detected");
+      if (byId.get("revised_fact_latest_wins")?.selected_value !== "DEAD") failures.push("Latest revised Codexa rail fact did not win");
+      if (byId.get("multi_target_no_collapse")?.selected_status !== "CODEXA_PARTIAL_OR_WARN") failures.push("Multi-target Codexa state collapsed into the wrong status");
+      if (byId.get("source_index_dereference")?.ok !== true) failures.push("Source pointer dereference drill failed");
+      if (byId.get("raw_history_budget_guard")?.raw_history_included !== false) failures.push("Raw history was included in hot memory packet");
+      if (project?.evidence?.memory_doctor?.status !== "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN") failures.push("Project report does not mirror memory/source-truth green status");
+      return failures.length
+        ? failTask("memory_source_truth", failures, {
+          status: memory?.status || null,
+          drills_green: memory?.summary?.drills_green ?? null,
+          drills_total: memory?.summary?.drills_total ?? null,
+          stale_conflicts_detected: memory?.summary?.stale_conflicts_detected ?? null,
+        })
+        : okTask("memory_source_truth", {
+          status: memory.status,
+          drills_green: memory.summary.drills_green,
+          drills_total: memory.summary.drills_total,
+          stale_conflicts_detected: memory.summary.stale_conflicts_detected,
+          proof_hash: memory.summary.proof_hash,
         });
     },
   },

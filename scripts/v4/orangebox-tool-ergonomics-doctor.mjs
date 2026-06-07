@@ -28,6 +28,7 @@ const outRoot = path.join(dataRoot, "tool-ergonomics");
 const requiredProofScripts = [
   "mcp:doctor",
   "ipi:doctor",
+  "memory:doctor",
   "action:doctor",
   "skills:lifecycle",
   "tool:ergonomics",
@@ -61,6 +62,7 @@ const requiredSkillCommands = [
   "feature-proof",
   "mcp-doctor",
   "ipi-doctor",
+  "memory-doctor",
   "action-doctor",
   "skills-lifecycle",
   "model-lane-eval",
@@ -235,6 +237,8 @@ async function main() {
 
   const receiptSurfaces = [
     receiptSummary("mcp", path.join(dataRoot, "mcp", "latest-mcp-doctor.json"), (value) => value?.ok === true && value?.summary?.failed === 0 ? "MCP_QUARANTINE_GREEN" : null),
+    receiptSummary("ipi", path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"), (value) => value?.status || null),
+    receiptSummary("memory", path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json"), (value) => value?.status || null),
     receiptSummary("action", path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"), (value) => value?.status || null),
     receiptSummary("skills", path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), (value) => value?.status || null),
     receiptSummary("checkmate", path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), (value) => value?.status || null),

@@ -315,6 +315,7 @@ async function main() {
     mcp_doctor: packageJson.scripts?.["mcp:doctor"],
     action_doctor: packageJson.scripts?.["action:doctor"],
     ipi_doctor: packageJson.scripts?.["ipi:doctor"],
+    memory_doctor: packageJson.scripts?.["memory:doctor"],
     skills_lifecycle: packageJson.scripts?.["skills:lifecycle"],
     ops_readiness: packageJson.scripts?.["ops:readiness"],
   };
@@ -378,6 +379,7 @@ async function main() {
     ["mcp:doctor", npmBin, ["run", "mcp:doctor"], { timeout: 120_000 }],
     ["action:doctor", npmBin, ["run", "action:doctor"], { timeout: 60_000 }],
     ["ipi:doctor", npmBin, ["run", "ipi:doctor"], { timeout: 60_000 }],
+    ["memory:doctor", npmBin, ["run", "memory:doctor"], { timeout: 60_000 }],
     ["skills:lifecycle", npmBin, ["run", "skills:lifecycle"], { timeout: 60_000 }],
     ["tool:ergonomics", npmBin, ["run", "tool:ergonomics"], { timeout: 60_000 }],
     ["checkmate:doctor", npmBin, ["run", "checkmate:doctor"], { timeout: 60_000 }],
