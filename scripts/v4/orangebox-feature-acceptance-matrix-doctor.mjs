@@ -147,18 +147,28 @@ async function main() {
     }),
     matrixRow({
       id: "mcp_quarantine",
-      claim: "MCP/tool bridge exists behind quarantine, no host MCP mutation, no paid API, no installs by default.",
+      claim: "MCP/tool bridge exists behind quarantine with descriptor-integrity drift detection, no host MCP mutation, no paid API, no installs by default.",
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run mcp:doctor",
-      acceptance_gate: "MCP doctor has zero failed checks and host_mcp_config_mutated=false.",
+      acceptance_gate: "MCP doctor has zero failed checks, host_mcp_config_mutated=false, and tool descriptor drift/rug-pull detection is proven.",
       rollback_path: "Disable candidate MCP registry entries and rerun mcp:doctor.",
       evidence: [
         evidence(path.join(dataRoot, "mcp", "latest-mcp-doctor.json"), null, {
-          accept: (parsed) => parsed?.ok === true && parsed?.summary?.failed === 0 && parsed?.host_mcp_config_mutated === false,
+          accept: (parsed) => parsed?.ok === true
+            && parsed?.summary?.failed === 0
+            && parsed?.host_mcp_config_mutated === false
+            && parsed?.descriptor_integrity?.drift_detected === true
+            && parsed?.descriptor_integrity?.tool_list_rug_pull_blocked === true
+            && parsed?.descriptor_integrity?.auto_trust_after_drift === false,
           okStatus: "MCP_QUARANTINE_GREEN",
-          detail: (parsed) => ({ failed: parsed?.summary?.failed ?? null, host_mcp_config_mutated: parsed?.host_mcp_config_mutated ?? null }),
+          detail: (parsed) => ({
+            failed: parsed?.summary?.failed ?? null,
+            host_mcp_config_mutated: parsed?.host_mcp_config_mutated ?? null,
+            descriptor_drift_detected: parsed?.descriptor_integrity?.drift_detected ?? null,
+            tool_list_rug_pull_blocked: parsed?.descriptor_integrity?.tool_list_rug_pull_blocked ?? null,
+          }),
         }),
       ],
       operator_approval_required: false,

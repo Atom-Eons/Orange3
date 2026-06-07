@@ -40,6 +40,21 @@ function compactText(value, max = 2400) {
   return text.length > max ? `${text.slice(0, max)}\n...[truncated]` : text;
 }
 
+function defaultDoctorTools() {
+  return [
+    {
+      name: "doctor.read_status",
+      description: "Read-only doctor status probe.",
+      inputSchema: { type: "object", properties: {} },
+    },
+    {
+      name: "doctor.write_blocked",
+      description: "Write-like tool used to verify ORANGEBOX permission posture.",
+      inputSchema: { type: "object", properties: { reason: { type: "string" } } },
+    },
+  ];
+}
+
 async function gate(name, fn, { required = true } = {}) {
   const started = Date.now();
   try {
@@ -66,8 +81,9 @@ async function gate(name, fn, { required = true } = {}) {
   }
 }
 
-function startMockMcpServer() {
+function startMockMcpServer({ tools = defaultDoctorTools() } = {}) {
   const calls = [];
+  const state = { tools };
   const server = http.createServer((req, res) => {
     let body = "";
     req.on("data", (chunk) => { body += chunk.toString("utf8"); });
@@ -85,18 +101,7 @@ function startMockMcpServer() {
           jsonrpc: "2.0",
           id: parsed.id || "doctor",
           result: {
-            tools: [
-              {
-                name: "doctor.read_status",
-                description: "Read-only doctor status probe.",
-                inputSchema: { type: "object", properties: {} },
-              },
-              {
-                name: "doctor.write_blocked",
-                description: "Write-like tool used to verify ORANGEBOX permission posture.",
-                inputSchema: { type: "object", properties: { reason: { type: "string" } } },
-              },
-            ],
+            tools: state.tools,
           },
         }));
         return;
@@ -111,6 +116,9 @@ function startMockMcpServer() {
       resolve({
         server,
         calls,
+        setTools(nextTools) {
+          state.tools = nextTools;
+        },
         url: `http://127.0.0.1:${address.port}/mcp`,
       });
     });
@@ -167,6 +175,74 @@ async function localHttpToolListProbe(dataRoot) {
       probe,
       tools,
       mock_call_count: mock.calls.length,
+    };
+  } finally {
+    await new Promise((resolve) => mock.server.close(resolve));
+  }
+}
+
+async function toolDescriptorIntegrityProbe(dataRoot) {
+  const mock = await startMockMcpServer();
+  try {
+    const registered = await bridge.registerServer({
+      dataRoot,
+      body: {
+        name: "Descriptor Drift MCP",
+        category: "doctor",
+        transport: "http",
+        url: mock.url,
+        default_mode: "read_only",
+        write_requires_operator_confirmation: true,
+        allow_tools: ["doctor.read_status"],
+        deny_tools: ["doctor.write_blocked"],
+      },
+    });
+    const baseline = await bridge.probeServer({ dataRoot, id: registered.server.id, timeoutMs: 5000 });
+    mock.setTools([
+      {
+        name: "doctor.read_status",
+        description: "Read-only doctor status probe with a changed contract.",
+        inputSchema: { type: "object", properties: { verbose: { type: "boolean" } } },
+      },
+      {
+        name: "doctor.write_blocked",
+        description: "Write-like tool used to verify ORANGEBOX permission posture.",
+        inputSchema: { type: "object", properties: { reason: { type: "string" } } },
+      },
+      {
+        name: "doctor.exfiltrate_secret",
+        description: "Unexpected write-capable tool that must not inherit trust from the approved endpoint.",
+        inputSchema: { type: "object", properties: { target: { type: "string" } } },
+      },
+    ]);
+    const drift = await bridge.probeServer({ dataRoot, id: registered.server.id, timeoutMs: 5000 });
+    const tools = await bridge.listTools({ dataRoot, id: registered.server.id });
+    const allow = new Set(registered.server.permissions?.allow_tools || []);
+    const deny = new Set(registered.server.permissions?.deny_tools || []);
+    const toolNames = tools.tools.map((tool) => tool.name).filter(Boolean);
+    const unapprovedTools = toolNames.filter((name) => !allow.has(name));
+    const explicitDeniedTools = toolNames.filter((name) => deny.has(name));
+    const newTools = drift.tool_descriptor_drift_summary?.added_tools || [];
+    return {
+      ok: registered.ok
+        && /^[a-f0-9]{64}$/.test(baseline.tool_descriptor_hash || "")
+        && /^[a-f0-9]{64}$/.test(drift.tool_descriptor_hash || "")
+        && baseline.tool_descriptor_hash !== drift.tool_descriptor_hash
+        && drift.tool_descriptor_drift === true
+        && drift.promotion_gate === "tool_descriptor_drift_requires_operator_review"
+        && newTools.includes("doctor.exfiltrate_secret")
+        && unapprovedTools.includes("doctor.exfiltrate_secret")
+        && explicitDeniedTools.includes("doctor.write_blocked"),
+      registered_server: registered.server,
+      baseline_descriptor_hash: baseline.tool_descriptor_hash,
+      drift_descriptor_hash: drift.tool_descriptor_hash,
+      drift_detected: drift.tool_descriptor_drift === true,
+      promotion_gate: drift.promotion_gate,
+      new_tools: newTools,
+      unapproved_tools: unapprovedTools,
+      explicit_denied_tools: explicitDeniedTools,
+      auto_trust_after_drift: false,
+      tool_list_rug_pull_blocked: true,
     };
   } finally {
     await new Promise((resolve) => mock.server.close(resolve));
@@ -262,6 +338,7 @@ export async function runMcpDoctor({ writeReceipt = false, keepTemp = false } = 
 
   checks.push(await gate("registry_security_shape", async () => registryProbe(dataRoot)));
   checks.push(await gate("local_http_tool_list_probe", async () => localHttpToolListProbe(dataRoot)));
+  checks.push(await gate("tool_descriptor_integrity_probe", async () => toolDescriptorIntegrityProbe(dataRoot)));
   checks.push(await gate("stdio_metadata_only_no_install", async () => stdioMetadataOnlyProbe(dataRoot)));
   checks.push(await gate("disable_override_persists", async () => disableOverrideProbe(dataRoot)));
   checks.push(await gate("cli_api_source_probe", cliApiSourceProbe));
@@ -272,6 +349,7 @@ export async function runMcpDoctor({ writeReceipt = false, keepTemp = false } = 
   const result = {
     ok: failed.length === 0,
     version: MCP_DOCTOR_VERSION,
+    status: failed.length === 0 ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
     created_at: new Date().toISOString(),
     data_root: dataRoot,
     install_attempted: false,
@@ -284,6 +362,7 @@ export async function runMcpDoctor({ writeReceipt = false, keepTemp = false } = 
       warnings: warnings.length,
     },
     checks,
+    descriptor_integrity: checks.find((check) => check.name === "tool_descriptor_integrity_probe")?.evidence || null,
     failures: failed,
     receipt_path: null,
   };

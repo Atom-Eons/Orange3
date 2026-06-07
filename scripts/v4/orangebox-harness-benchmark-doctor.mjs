@@ -253,6 +253,40 @@ const tasks = [
     },
   },
   {
+    id: "mcp_descriptor_integrity_truth",
+    category: "agent_security",
+    oracle: "MCP tools must be fingerprinted, and descriptor/tool-list drift must force review instead of inheriting trust.",
+    budget: { timeout_ms: 1500, max_files_read: 1, max_tool_calls: 0 },
+    run(trace) {
+      const mcp = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json"), trace);
+      const integrity = mcp?.descriptor_integrity || {};
+      const failures = [];
+      if (mcp?.status !== "MCP_QUARANTINE_GREEN") failures.push(`MCP doctor status not green: ${mcp?.status || "missing"}`);
+      if (integrity.drift_detected !== true) failures.push("MCP descriptor drift was not detected");
+      if (integrity.tool_list_rug_pull_blocked !== true) failures.push("MCP tool-list rug-pull was not blocked");
+      if (integrity.auto_trust_after_drift !== false) failures.push("MCP drift must not auto-inherit trust");
+      if (!/^[a-f0-9]{64}$/.test(integrity.baseline_descriptor_hash || "")) failures.push("Baseline descriptor hash missing or invalid");
+      if (!/^[a-f0-9]{64}$/.test(integrity.drift_descriptor_hash || "")) failures.push("Drift descriptor hash missing or invalid");
+      if (integrity.baseline_descriptor_hash === integrity.drift_descriptor_hash) failures.push("Descriptor hashes did not change across drift fixture");
+      if (!Array.isArray(integrity.new_tools) || !integrity.new_tools.includes("doctor.exfiltrate_secret")) failures.push("Unexpected added tool was not captured");
+      if (!Array.isArray(integrity.unapproved_tools) || !integrity.unapproved_tools.includes("doctor.exfiltrate_secret")) failures.push("Unexpected tool was not marked unapproved");
+      return failures.length
+        ? failTask("mcp_descriptor_integrity_truth", failures, {
+          status: mcp?.status || null,
+          drift_detected: integrity.drift_detected ?? null,
+          baseline_descriptor_hash: integrity.baseline_descriptor_hash || null,
+          drift_descriptor_hash: integrity.drift_descriptor_hash || null,
+        })
+        : okTask("mcp_descriptor_integrity_truth", {
+          status: mcp.status,
+          drift_detected: integrity.drift_detected,
+          promotion_gate: integrity.promotion_gate,
+          new_tools: integrity.new_tools,
+          unapproved_tools: integrity.unapproved_tools,
+        });
+    },
+  },
+  {
     id: "codexa_gap_truth_guard",
     category: "state_adaptation",
     oracle: "If Codexa rails or Ollama are down, reports must preserve warning state and refuse full-project green.",

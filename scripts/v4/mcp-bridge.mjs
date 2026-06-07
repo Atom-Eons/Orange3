@@ -52,6 +52,37 @@ function assertHttpUrl(url) {
   return u.toString();
 }
 
+function stableJsonValue(value) {
+  if (Array.isArray(value)) return value.map(stableJsonValue);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .filter((key) => value[key] !== undefined)
+        .sort()
+        .map((key) => [key, stableJsonValue(value[key])])
+    );
+  }
+  return value;
+}
+
+function sha256Json(value) {
+  return crypto.createHash("sha256").update(JSON.stringify(stableJsonValue(value))).digest("hex");
+}
+
+export function canonicalToolDescriptors(tools = []) {
+  return (Array.isArray(tools) ? tools : [])
+    .map(stableJsonValue)
+    .sort((a, b) => {
+      const byName = String(a?.name || "").localeCompare(String(b?.name || ""));
+      if (byName !== 0) return byName;
+      return sha256Json(a).localeCompare(sha256Json(b));
+    });
+}
+
+export function hashToolDescriptors(tools = []) {
+  return sha256Json(canonicalToolDescriptors(tools));
+}
+
 export const BUILT_IN_MCP_SERVERS = [
   {
     id: "meta-ads-mcp",
@@ -353,6 +384,7 @@ function tryParseJson(text) {
 
 function summarizeProbe(server, health, toolsList) {
   const tools = Array.isArray(toolsList?.json?.result?.tools) ? toolsList.json.result.tools : [];
+  const toolDescriptorHash = tools.length ? hashToolDescriptors(tools) : null;
   const authLikely = [401, 403].includes(health?.status) || [401, 403].includes(toolsList?.status);
   const jsonRpcOk = !!toolsList?.json?.result || !!toolsList?.json?.error;
   return {
@@ -364,10 +396,12 @@ function summarizeProbe(server, health, toolsList) {
     health: health || null,
     tools_list: toolsList || null,
     tools_count: tools.length,
+    tool_descriptor_hash: toolDescriptorHash,
     tools: tools.slice(0, 100).map((tool) => ({
       name: tool.name,
       description: tool.description || "",
       input_schema_present: !!tool.inputSchema,
+      descriptor_hash: hashToolDescriptors([tool]),
     })),
     auth_likely_required: authLikely,
     auth_spec_version: server.auth_spec_version || MCP_AUTH_SPEC_VERSION,
@@ -382,6 +416,7 @@ export async function probeServer({ dataRoot = defaultDataRoot(), id, timeoutMs 
   if (!id) throw new Error("server id required");
   const server = await getServer(dataRoot, id);
   if (!server) throw new Error(`unknown MCP server: ${id}`);
+  const previousProbe = await readLastProbe(dataRoot, id);
   if (server.disabled) {
     const probe = { ok: false, id, probed_at: nowIso(), disabled: true, promotion_gate: "disabled" };
     await writeProbe(dataRoot, id, probe);
@@ -415,6 +450,23 @@ export async function probeServer({ dataRoot = defaultDataRoot(), id, timeoutMs 
     body: JSON.stringify({ jsonrpc: "2.0", id: `obx-${Date.now()}`, method: "tools/list", params: {} }),
   }, timeoutMs);
   const probe = summarizeProbe(server, health, toolsList);
+  const previousHash = previousProbe?.tool_descriptor_hash || null;
+  const currentHash = probe.tool_descriptor_hash || null;
+  probe.previous_tool_descriptor_hash = previousHash;
+  probe.tool_descriptor_drift = Boolean(previousHash && currentHash && previousHash !== currentHash);
+  if (probe.tool_descriptor_drift) {
+    const previousNames = new Set((previousProbe?.tools || []).map((tool) => String(tool.name || "")));
+    const currentNames = new Set((probe.tools || []).map((tool) => String(tool.name || "")));
+    probe.tool_descriptor_drift_summary = {
+      previous_tools_count: previousProbe?.tools_count || previousNames.size,
+      current_tools_count: probe.tools_count,
+      added_tools: [...currentNames].filter((name) => name && !previousNames.has(name)).sort(),
+      removed_tools: [...previousNames].filter((name) => name && !currentNames.has(name)).sort(),
+    };
+    probe.promotion_gate = "tool_descriptor_drift_requires_operator_review";
+  } else {
+    probe.tool_descriptor_drift_summary = null;
+  }
   await writeProbe(dataRoot, id, probe);
   return probe;
 }
