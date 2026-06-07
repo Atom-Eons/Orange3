@@ -229,6 +229,11 @@ async function main() {
   const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const toolErgonomicsGreen = toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
   const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
+  const evalIntegrityGreen = checkmateEvalGreen
+    && Array.isArray(checkmateEval?.fixtures)
+    && checkmateEval.fixtures.some((fixture) => fixture.id === "benchmark_hygiene_integrity_gate")
+    && Array.isArray(harnessBenchmark?.tasks)
+    && harnessBenchmark.tasks.some((task) => task.id === "eval_integrity_benchmark_hygiene_truth" && task.ok === true);
   const signalHygieneGreen = signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN";
   const doerWatcherSpineGreen = doerWatcherSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN";
   const featureProofGreen = featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN";
@@ -303,6 +308,16 @@ async function main() {
       next: checkmateEvalGreen
         ? "Run this doctor before prompt, model, routing, benchmark, or tool-surface promotions."
         : "Run npm.cmd run checkmate:doctor and fix the exact failed eval gate.",
+    },
+    {
+      area: "Eval integrity / benchmark hygiene",
+      status: status(evalIntegrityGreen, exists(path.join(repoRoot, "scripts", "v4", "checkmate-eval-lane-doctor.mjs"))),
+      reality: evalIntegrityGreen
+        ? "Benchmark hygiene is green: CHECKMATE has leakage/canary/web-trace/score-inflation fixtures and the harness eval-integrity task passes."
+        : "Benchmark hygiene is planned or partially present, but the current CHECKMATE/harness receipts are not both green yet.",
+      next: evalIntegrityGreen
+        ? "Run checkmate:doctor and harness:benchmark before trusting any benchmark, score, model, or routing optimization claim."
+        : "Run npm.cmd run checkmate:doctor && npm.cmd run harness:benchmark, then fix the exact eval-integrity failure.",
     },
     {
       area: "Operator signal hygiene",
@@ -696,6 +711,14 @@ async function main() {
         status: checkmateEval?.status || null,
         fixture_count: checkmateEval?.fixtures?.length || 0,
         failures: checkmateEval?.failures?.length ?? null,
+      },
+      eval_integrity_benchmark_hygiene: {
+        path: path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"),
+        status: evalIntegrityGreen ? "EVAL_INTEGRITY_BENCHMARK_HYGIENE_GREEN" : "EVAL_INTEGRITY_BENCHMARK_HYGIENE_NOT_GREEN",
+        fixture_present: Array.isArray(checkmateEval?.fixtures)
+          && checkmateEval.fixtures.some((fixture) => fixture.id === "benchmark_hygiene_integrity_gate"),
+        harness_task_present: Array.isArray(harnessBenchmark?.tasks)
+          && harnessBenchmark.tasks.some((task) => task.id === "eval_integrity_benchmark_hygiene_truth" && task.ok === true),
       },
       signal_hygiene: {
         path: path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json"),

@@ -223,6 +223,37 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "eval_integrity_benchmark_hygiene",
+      claim: "Benchmark and eval claims are checked for leakage, canary misses, web-trace contamination, and unsupported score inflation.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run checkmate:doctor && npm.cmd run harness:benchmark",
+      acceptance_gate: "CHECKMATE has the benchmark hygiene fixture and the harness eval-integrity task passes.",
+      rollback_path: "Revert benchmark hygiene fixture/task changes and rerun checkmate:doctor, harness:benchmark, feature:proof, and knowledge:improvements.",
+      evidence: [
+        evidence(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), "CHECKMATE_EVAL_LANE_GREEN", {
+          accept: (parsed, status) => status === "CHECKMATE_EVAL_LANE_GREEN"
+            && Array.isArray(parsed?.fixtures)
+            && parsed.fixtures.some((fixture) => fixture.id === "benchmark_hygiene_integrity_gate"),
+          detail: (parsed) => ({
+            fixture_count: parsed?.fixtures?.length ?? null,
+            benchmark_hygiene_fixture: parsed?.fixtures?.some((fixture) => fixture.id === "benchmark_hygiene_integrity_gate") || false,
+          }),
+        }),
+        evidence(path.join(dataRoot, "harness", "latest-harness-benchmark.json"), "ORANGEBOX_HARNESS_BENCHMARK_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN"
+            && Array.isArray(parsed?.tasks)
+            && parsed.tasks.some((task) => task.id === "eval_integrity_benchmark_hygiene_truth" && task.ok === true),
+          detail: (parsed) => ({
+            tasks_total: parsed?.tasks_total ?? null,
+            eval_integrity_task: parsed?.tasks?.some((task) => task.id === "eval_integrity_benchmark_hygiene_truth" && task.ok === true) || false,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "operator_signal_hygiene",
       claim: "Alerts preserve local-vs-full truth, severity, cadence, and confidence calibration.",
       lane: "backend_ops",

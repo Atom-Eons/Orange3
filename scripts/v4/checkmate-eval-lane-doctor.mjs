@@ -105,6 +105,16 @@ const fixtures = [
     canaries: ["answer_key_hidden", "source_trace_present", "score_not_from_summary"],
     reject_if: ["answer_key_exposed", "source_leakage", "score_inflation", "chat_summary_as_proof"],
   },
+  {
+    id: "benchmark_hygiene_integrity_gate",
+    change_type: "eval_integrity_change",
+    trigger: "A benchmark, eval, or score claim could be contaminated by source leakage, canary exposure, web traces, or benchmark-key visibility.",
+    oracle: "The benchmark claim must prove hidden keys stay hidden, source traces are warnings not answers, canaries are blocked, and scores cannot inflate without fixture evidence.",
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    required_receipts: ["checkmate", "harness", "knowledge_improvements"],
+    canaries: ["eval_canary_blocklist", "source_leakage_check", "web_trace_warning", "adversarial_score_validation"],
+    reject_if: ["benchmark_key_exposed", "fixture_answer_leaked", "web_trace_as_answer", "unsupported_score_inflation"],
+  },
 ];
 
 const requiredChangeTypes = new Set([
@@ -113,6 +123,7 @@ const requiredChangeTypes = new Set([
   "routing_policy_change",
   "tool_surface_change",
   "benchmark_or_score_change",
+  "eval_integrity_change",
 ]);
 
 const canaryBlocklist = [
@@ -124,6 +135,10 @@ const canaryBlocklist = [
   "full_green_when_codexa_down",
   "frontend_touched_from_ops",
   "paid_api_default",
+  "eval_canary_miss",
+  "web_trace_as_answer",
+  "unsupported_score_inflation",
+  "fixture_answer_leaked",
 ];
 
 async function main() {
@@ -156,6 +171,9 @@ async function main() {
     operator_approval_required: true,
     rollback_required: true,
     canary_blocklist_required: true,
+    source_leakage_check_required: true,
+    web_trace_warning_required: true,
+    adversarial_score_validation_required: true,
     no_chat_summary_as_proof: true,
     no_model_card_promotion: true,
     no_frontend_from_ops: true,
@@ -178,7 +196,14 @@ async function main() {
     check("required_change_types_present", missingTypes.length === 0, { missing_change_types: missingTypes }),
     check("fixtures_have_oracles_budgets_receipts_canaries", fixtureFailures.length === 0, { fixture_failures: fixtureFailures }),
     check("gates_complete", Object.values(gates).every(Boolean), { gates }),
-    check("canary_blocklist_present", canaryBlocklist.length >= 8, { canary_blocklist_count: canaryBlocklist.length }),
+    check("canary_blocklist_present", canaryBlocklist.length >= 12, { canary_blocklist_count: canaryBlocklist.length }),
+    check("benchmark_hygiene_fixture_present", fixtures.some((fixture) => fixture.id === "benchmark_hygiene_integrity_gate"
+      && fixture.canaries.includes("source_leakage_check")
+      && fixture.canaries.includes("web_trace_warning")
+      && fixture.canaries.includes("adversarial_score_validation")
+      && fixture.reject_if.includes("unsupported_score_inflation")), {
+      fixture_id: "benchmark_hygiene_integrity_gate",
+    }),
     check("harness_receipt_contract_referenced", harnessReceiptFixtures.length >= 4, { fixtures_requiring_harness: harnessReceiptFixtures }),
     check("knowledge_queue_ready", knowledge?.status === "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY" && knowledge?.not_autonomous === true, { knowledge_status: knowledge?.status || null }),
     check("tool_ergonomics_green", toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { tool_ergonomics_status: toolErgonomics?.status || null }),

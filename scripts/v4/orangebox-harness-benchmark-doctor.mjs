@@ -509,28 +509,84 @@ const tasks = [
       const constraints = checkmate?.constraints || {};
       const gates = checkmate?.gates || {};
       const changeTypes = new Set((checkmate?.fixtures || []).map((fixture) => fixture.change_type));
-      const required = ["prompt_change", "model_lane_change", "routing_policy_change", "tool_surface_change", "benchmark_or_score_change"];
+      const fixtures = Array.isArray(checkmate?.fixtures) ? checkmate.fixtures : [];
+      const benchmarkHygiene = fixtures.find((fixture) => fixture.id === "benchmark_hygiene_integrity_gate");
+      const required = ["prompt_change", "model_lane_change", "routing_policy_change", "tool_surface_change", "benchmark_or_score_change", "eval_integrity_change"];
       if (checkmate?.status !== "CHECKMATE_EVAL_LANE_GREEN") failures.push(`CHECKMATE eval lane not green: ${checkmate?.status || "missing"}`);
-      if ((checkmate?.fixtures || []).length < 5) failures.push(`CHECKMATE fixture count too low: ${(checkmate?.fixtures || []).length}`);
+      if (fixtures.length < 6) failures.push(`CHECKMATE fixture count too low: ${fixtures.length}`);
       for (const type of required) {
         if (!changeTypes.has(type)) failures.push(`CHECKMATE missing fixture type ${type}`);
       }
       if (gates.deterministic_oracle_first !== true) failures.push("CHECKMATE gate deterministic_oracle_first missing");
       if (gates.receipt_required !== true) failures.push("CHECKMATE gate receipt_required missing");
       if (gates.operator_approval_required !== true) failures.push("CHECKMATE gate operator_approval_required missing");
+      if (gates.source_leakage_check_required !== true) failures.push("CHECKMATE gate source_leakage_check_required missing");
+      if (gates.web_trace_warning_required !== true) failures.push("CHECKMATE gate web_trace_warning_required missing");
+      if (gates.adversarial_score_validation_required !== true) failures.push("CHECKMATE gate adversarial_score_validation_required missing");
+      if (!benchmarkHygiene) failures.push("CHECKMATE missing benchmark_hygiene_integrity_gate fixture");
+      if (benchmarkHygiene && !benchmarkHygiene.canaries?.includes("source_leakage_check")) failures.push("Benchmark hygiene fixture lacks source_leakage_check canary");
+      if (benchmarkHygiene && !benchmarkHygiene.canaries?.includes("web_trace_warning")) failures.push("Benchmark hygiene fixture lacks web_trace_warning canary");
+      if (benchmarkHygiene && !benchmarkHygiene.canaries?.includes("adversarial_score_validation")) failures.push("Benchmark hygiene fixture lacks adversarial_score_validation canary");
+      if (benchmarkHygiene && !benchmarkHygiene.reject_if?.includes("unsupported_score_inflation")) failures.push("Benchmark hygiene fixture does not reject unsupported_score_inflation");
       if (constraints.frontend_touched !== false) failures.push("CHECKMATE must prove frontend_touched=false");
       if (constraints.prompt_model_or_routing_changed !== false) failures.push("CHECKMATE doctor must not mutate prompts/models/routing");
       return failures.length
         ? failTask("checkmate_eval_lane_truth", failures, {
           status: checkmate?.status || null,
-          fixtures_total: (checkmate?.fixtures || []).length,
+          fixtures_total: fixtures.length,
           constraints,
         })
         : okTask("checkmate_eval_lane_truth", {
           status: checkmate.status,
-          fixtures_total: checkmate.fixtures.length,
+          fixtures_total: fixtures.length,
+          benchmark_hygiene_fixture: benchmarkHygiene.id,
           fixture_hash: checkmate.fixture_hash || null,
           constraints,
+        });
+    },
+  },
+  {
+    id: "eval_integrity_benchmark_hygiene_truth",
+    category: "eval_integrity",
+    oracle: "Benchmark and eval claims must prove no source leakage, eval-canary miss, benchmark-key exposure, web-trace answer leakage, or unsupported score inflation.",
+    budget: { timeout_ms: 1600, max_files_read: 2, max_tool_calls: 0 },
+    run(trace) {
+      const checkmate = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"), trace);
+      const improvements = readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json"), trace);
+      const fixtures = Array.isArray(checkmate?.fixtures) ? checkmate.fixtures : [];
+      const hygiene = fixtures.find((fixture) => fixture.id === "benchmark_hygiene_integrity_gate");
+      const blocklist = Array.isArray(checkmate?.canary_blocklist) ? checkmate.canary_blocklist : [];
+      const failures = [];
+      if (checkmate?.status !== "CHECKMATE_EVAL_LANE_GREEN") failures.push(`CHECKMATE eval lane not green: ${checkmate?.status || "missing"}`);
+      if (!hygiene) failures.push("benchmark_hygiene_integrity_gate fixture missing");
+      if (hygiene && hygiene.change_type !== "eval_integrity_change") failures.push(`Benchmark hygiene change_type wrong: ${hygiene.change_type}`);
+      for (const canary of ["eval_canary_blocklist", "source_leakage_check", "web_trace_warning", "adversarial_score_validation"]) {
+        if (!hygiene?.canaries?.includes(canary)) failures.push(`Benchmark hygiene missing canary ${canary}`);
+      }
+      for (const rejected of ["benchmark_key_exposed", "fixture_answer_leaked", "web_trace_as_answer", "unsupported_score_inflation"]) {
+        if (!hygiene?.reject_if?.includes(rejected)) failures.push(`Benchmark hygiene missing reject_if ${rejected}`);
+      }
+      for (const blocked of ["benchmark_secret", "source_label_leak", "eval_canary_miss", "web_trace_as_answer", "unsupported_score_inflation", "fixture_answer_leaked"]) {
+        if (!blocklist.includes(blocked)) failures.push(`Canary blocklist missing ${blocked}`);
+      }
+      if (!checkmate?.research_basis?.some((item) => /eval-awareness|BrowseComp|contamination|leakage/i.test(`${item.url || ""} ${item.lesson || ""}`))) {
+        failures.push("CHECKMATE research_basis lacks eval-awareness/leakage signal");
+      }
+      const backlog = Array.isArray(improvements?.execution_backlog) ? improvements.execution_backlog : [];
+      const candidate = backlog.find((item) => item.area === "eval_integrity_and_benchmark_hygiene") || improvements?.top_execution_candidate;
+      if (candidate?.area === "eval_integrity_and_benchmark_hygiene" && candidate?.frontend_touch_allowed !== false) failures.push("Eval integrity candidate must forbid frontend touch");
+      return failures.length
+        ? failTask("eval_integrity_benchmark_hygiene_truth", failures, {
+          checkmate_status: checkmate?.status || null,
+          fixture_present: Boolean(hygiene),
+          blocklist_count: blocklist.length,
+          candidate_status: candidate?.status || null,
+        })
+        : okTask("eval_integrity_benchmark_hygiene_truth", {
+          checkmate_status: checkmate.status,
+          fixture_id: hygiene.id,
+          blocklist_count: blocklist.length,
+          candidate_status: candidate?.status || null,
         });
     },
   },

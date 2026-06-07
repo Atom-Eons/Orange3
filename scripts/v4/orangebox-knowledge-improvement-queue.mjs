@@ -114,22 +114,32 @@ function proofForArea(area) {
       }
       : null;
   }
-  if (area === "checkmate_eval_lane") {
+  if (area === "checkmate_eval_lane" || area === "eval_integrity_and_benchmark_hygiene") {
     const file = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
     const proof = readJson(file);
+    const fixtures = Array.isArray(proof?.fixtures) ? proof.fixtures : [];
+    const hygieneFixture = fixtures.find((fixture) => fixture.id === "benchmark_hygiene_integrity_gate");
     const ok = proof?.status === "CHECKMATE_EVAL_LANE_GREEN"
       && proof?.constraints?.frontend_touched === false
       && proof?.constraints?.prompt_model_or_routing_changed === false
-      && Number(proof?.fixtures?.length || 0) >= 5
+      && Number(fixtures.length || 0) >= (area === "eval_integrity_and_benchmark_hygiene" ? 6 : 5)
       && Array.isArray(proof?.failures)
-      && proof.failures.length === 0;
+      && proof.failures.length === 0
+      && (area !== "eval_integrity_and_benchmark_hygiene"
+        || (Boolean(hygieneFixture)
+          && hygieneFixture.canaries?.includes("source_leakage_check")
+          && hygieneFixture.canaries?.includes("web_trace_warning")
+          && hygieneFixture.canaries?.includes("adversarial_score_validation")
+          && hygieneFixture.reject_if?.includes("unsupported_score_inflation")));
     return ok
       ? {
         ok: true,
         status: "proven_receipt_green",
         proof_path: file,
         proof_status: proof.status,
-        proof_detail: `${proof.fixtures.length} eval fixtures gate prompt/model/routing/tool/score changes`,
+        proof_detail: area === "eval_integrity_and_benchmark_hygiene"
+          ? `${fixtures.length} eval fixtures include benchmark hygiene, leakage canaries, web-trace warning, and score-inflation rejection`
+          : `${fixtures.length} eval fixtures gate prompt/model/routing/tool/score changes`,
       }
       : null;
   }
