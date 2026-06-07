@@ -506,12 +506,12 @@ async function main() {
     }),
     matrixRow({
       id: "codexa_handoff",
-      claim: "Orangebox generates a single Codexa setup handoff with the first-click launcher, open blockers, setup zip proof, and cockpit verification order.",
+      claim: "Orangebox generates a single Codexa setup handoff with the first-click launcher, embedded backend payload proof, open blockers, setup zip proof, and cockpit verification order.",
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run codexa:handoff",
-      acceptance_gate: "Handoff is valid, names RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd, references the verified OBOX2 zip, includes cockpit proof commands, and refuses full-system green while open gaps remain.",
+      acceptance_gate: "Handoff is valid, names RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd, references the verified OBOX2 zip, proves the embedded backend payload, includes cockpit proof commands, and refuses full-system green while open gaps remain.",
       rollback_path: "Revert Codexa handoff command/doctor wiring and rerun codexa:handoff, feature:proof, project:report, and harness:benchmark.",
       evidence: [
         evidence(path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json"), null, {
@@ -519,6 +519,8 @@ async function main() {
             && parsed?.constraints?.frontend_touched === false
             && parsed?.constraints?.remote_codexa_mutation_attempted === false
             && parsed?.setup_zip?.exists === true
+            && parsed?.backend_payload?.exists === true
+            && parsed?.backend_payload?.frontend_required_for_backend === false
             && parsed?.codexa_run_order?.[0]?.command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd"
             && parsed?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")
             && (parsed?.open_gap_count > 0 ? parsed?.full_system_green_claim_allowed === false : true),
@@ -526,6 +528,7 @@ async function main() {
             open_gap_count: parsed?.open_gap_count ?? null,
             critical_gap_count: parsed?.critical_gap_count ?? null,
             first_click: parsed?.codexa_run_order?.[0]?.command || null,
+            backend_payload_commit: parsed?.backend_payload?.source_commit || null,
           }),
         }),
       ],
@@ -600,15 +603,26 @@ async function main() {
     }),
     matrixRow({
       id: "obox2_setup_pack",
-      claim: "Codexa setup package is built and verified as a handoff pack, not remotely installed from this chat.",
+      claim: "Codexa setup package is built and verified as a full handoff pack with embedded backend payload, not remotely installed from this chat.",
       lane: "codexa",
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run obox2:pack && npm.cmd run obox2:doctor",
-      acceptance_gate: "OBOX2 package doctor is green with setup contracts.",
+      acceptance_gate: "OBOX2 package doctor is green with setup contracts, backend payload hash proof, backend installer proof, and frontend-not-required metadata.",
       recovery_path: "Rebuild the OBOX2 zip and rerun obox2:doctor before using it on Codexa.",
       evidence: [
-        evidence(path.join(dataRoot, "obox2", "latest-package-doctor.json"), "OBOX2_PACKAGE_VERIFIED_GREEN"),
+        evidence(path.join(dataRoot, "obox2", "latest-package-doctor.json"), "OBOX2_PACKAGE_VERIFIED_GREEN", {
+          accept: (parsed, status) => status === "OBOX2_PACKAGE_VERIFIED_GREEN"
+            && parsed?.json_config?.backend_payload?.ok === true
+            && parsed?.json_config?.backend_payload?.frontend_required_for_backend === false
+            && parsed?.operational_contracts?.checks?.some((check) => check.id === "backend_installer_payload_zip" && check.ok === true)
+            && parsed?.operational_contracts?.checks?.some((check) => check.id === "backend_installer_receipt" && check.ok === true),
+          detail: (parsed) => ({
+            backend_payload_commit: parsed?.json_config?.backend_payload?.source_commit || null,
+            backend_payload_ok: parsed?.json_config?.backend_payload?.ok ?? null,
+            frontend_required_for_backend: parsed?.json_config?.backend_payload?.frontend_required_for_backend ?? null,
+          }),
+        }),
       ],
       operator_approval_required: true,
     }),

@@ -603,7 +603,7 @@ async function main() {
           ? `Zip status is green, but setup-contract proof is incomplete (${obox2Contracts.check_count} checks, ${obox2Contracts.failed_count} failed).`
           : "Zip exists or is planned, but package doctor is not green.",
       next: obox2ContractGreen
-        ? "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa first. Then use core/all model installers only after the rail and power proof are green."
+        ? "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa first. It now installs/verifies the embedded backend payload before rail/model proof. Then use core/all model installers only after the rail and power proof are green."
         : "Run npm.cmd run obox2:doctor and fix any failed setup-contract checks before touching Codexa.",
     },
     {
@@ -715,7 +715,7 @@ async function main() {
       obox2ContractGreen
         ? `OBOX2 setup package contract proof is green (${obox2Contracts.check_count} checks); run it on Codexa as admin when operator time is available.`
         : "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
-      "On Codexa, run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd from the OBOX2 setup pack so power, rail, and doctors all produce one receipt-backed truth path.",
+      "On Codexa, run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd from the OBOX2 setup pack so power, backend install, rail, and doctors all produce one receipt-backed truth path.",
       codexaRailRecoveryPack?.exists
         ? `Use the small rail recovery zip when needed: ${codexaRailRecoveryPack.path}.`
         : "Run npm.cmd run codexa:rail-pack so the small Codexa rail recovery zip exists.",

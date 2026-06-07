@@ -382,7 +382,7 @@ async function main() {
 
   const nextActions = [];
   if (!openclawRetired) nextActions.push("Run npm.cmd run openclaw:retire from the Orangebox repo.");
-  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) nextActions.push("On AI Box/Codexa, unzip the OBOX2 setup pack and run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd as Administrator. Manual fallback: RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd.");
+  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) nextActions.push("On AI Box/Codexa, unzip the OBOX2 setup pack and run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd as Administrator. Manual fallback: RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && !recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push("Run npm.cmd run codexa:rail-pack to generate a small Windows-native rail recovery zip.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push(`Use the rail recovery zip at ${recoveryArtifacts.rail_recovery_pack.path} when the full OBOX2 pack is too heavy.`);
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) nextActions.push("Treat SMB as staging-only until RDP, WinRM, or the 8097 command rail is reachable.");

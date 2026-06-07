@@ -1063,7 +1063,7 @@ const tasks = [
   {
     id: "codexa_setup_contract_truth",
     category: "codexa_recovery",
-    oracle: "OBOX2 setup package must prove always-on power, rail recovery, model install, wildcard discipline, and optional Hermes contracts before being handed to Codexa.",
+    oracle: "OBOX2 setup package must prove always-on power, embedded backend payload install, rail recovery, model install, wildcard discipline, and optional Hermes contracts before being handed to Codexa.",
     budget: { timeout_ms: 1600, max_files_read: 2, max_tool_calls: 0 },
     run(trace) {
       const doctor = readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json"), trace);
@@ -1081,7 +1081,13 @@ const tasks = [
         "rail_firewall_trusted_ips",
         "rail_local_health_probe",
         "start_here_calls_power_optimizer",
+        "start_here_calls_backend_installer",
         "start_here_calls_rail_starter",
+        "backend_installer_payload_zip",
+        "backend_installer_hash_check",
+        "backend_installer_approved_path",
+        "backend_installer_frontend_not_required",
+        "backend_installer_receipt",
         "model_installer_tiered",
         "model_installer_missing_required",
         "model_doctor_missing_core",
