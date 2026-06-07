@@ -123,6 +123,22 @@ function main() {
   const terminalProfileReceipt = readJson(terminalProfileReceiptPath);
   const antigravityRoot = path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "SKILL.md");
   const antigravityText = exists(antigravityRoot) ? fs.readFileSync(antigravityRoot, "utf8") : "";
+  const primerPaths = {
+    codex: path.join(userRoot, ".codex", "skills", "orangebox-primer", "SKILL.md"),
+    shared_agents: path.join(userRoot, ".agents", "skills", "orangebox-primer", "SKILL.md"),
+    claude: path.join(userRoot, ".claude", "skills", "orangebox-primer", "SKILL.md"),
+    claude_desktop: path.join(userRoot, "AppData", "Roaming", "Claude", "skills", "orangebox-primer", "SKILL.md"),
+    claude_3p: path.join(userRoot, "AppData", "Roaming", "Claude-3p", "skills", "orangebox-primer", "SKILL.md"),
+    antigravity: path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "orangebox-primer", "SKILL.md"),
+    antigravity_appdata: path.join(userRoot, "AppData", "Roaming", "Antigravity", "skills", "orangebox-primer", "SKILL.md"),
+    gemini_user: path.join(userRoot, ".gemini", "skills", "orangebox-primer", "SKILL.md"),
+    repo: path.join(repoRoot, "skills", "orangebox-primer", "SKILL.md"),
+  };
+  const primerPresence = Object.fromEntries(Object.entries(primerPaths).map(([key, value]) => [key, exists(value)]));
+  const missingPrimerPaths = Object.entries(primerPaths)
+    .filter(([key]) => !primerPresence[key])
+    .map(([key, value]) => ({ key, path: value }));
+  const chatBackupStartupPath = path.join(userRoot, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "Orangebox ChatBackup Listener.lnk");
 
   const checks = {
     chat_primer: {
@@ -200,25 +216,10 @@ function main() {
       note: "Proves pre-tool command classification for safe diagnostics, staged state changes, credential hunts, exfiltration, review bypasses, and suspicious multi-action chains.",
     },
     skill_primer: {
-      ok:
-        exists(path.join(userRoot, ".codex", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(userRoot, ".agents", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(userRoot, ".claude", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(userRoot, "AppData", "Roaming", "Claude", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(userRoot, "AppData", "Roaming", "Claude-3p", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(userRoot, "AppData", "Roaming", "Antigravity", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(userRoot, ".gemini", "skills", "orangebox-primer", "SKILL.md")) &&
-        exists(path.join(repoRoot, "skills", "orangebox-primer", "SKILL.md")),
-      codex: path.join(userRoot, ".codex", "skills", "orangebox-primer", "SKILL.md"),
-      shared_agents: path.join(userRoot, ".agents", "skills", "orangebox-primer", "SKILL.md"),
-      claude: path.join(userRoot, ".claude", "skills", "orangebox-primer", "SKILL.md"),
-      claude_desktop: path.join(userRoot, "AppData", "Roaming", "Claude", "skills", "orangebox-primer", "SKILL.md"),
-      claude_3p: path.join(userRoot, "AppData", "Roaming", "Claude-3p", "skills", "orangebox-primer", "SKILL.md"),
-      antigravity: path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "orangebox-primer", "SKILL.md"),
-      antigravity_appdata: path.join(userRoot, "AppData", "Roaming", "Antigravity", "skills", "orangebox-primer", "SKILL.md"),
-      gemini_user: path.join(userRoot, ".gemini", "skills", "orangebox-primer", "SKILL.md"),
-      repo: path.join(repoRoot, "skills", "orangebox-primer", "SKILL.md"),
+      ok: missingPrimerPaths.length === 0,
+      ...primerPaths,
+      presence: primerPresence,
+      missing_paths: missingPrimerPaths,
     },
     antigravity_redirect: {
       ok: antigravityText.includes("orangebox-primer") && antigravityText.includes("Backend-only"),
@@ -305,8 +306,9 @@ function main() {
       heartbeat,
     },
     chatbackup_startup: {
-      ok: exists(path.join(userRoot, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "Orangebox ChatBackup Listener.lnk")),
-      path: path.join(userRoot, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "Orangebox ChatBackup Listener.lnk"),
+      ok: exists(chatBackupStartupPath),
+      path: chatBackupStartupPath,
+      missing_paths: exists(chatBackupStartupPath) ? [] : [chatBackupStartupPath],
     },
     reality_watcher: {
       ok: watcherFresh,
