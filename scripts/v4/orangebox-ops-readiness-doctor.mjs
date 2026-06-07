@@ -193,8 +193,11 @@ function main() {
       allowed_count: actionClassifier?.allowed_count || 0,
       staged_count: actionClassifier?.staged_count || 0,
       blocked_count: actionClassifier?.blocked_count || 0,
+      sequence_cases_run: actionClassifier?.sequence_cases_run || 0,
+      sequence_staged_count: actionClassifier?.sequence_staged_count || 0,
+      sequence_blocked_count: actionClassifier?.sequence_blocked_count || 0,
       failures: actionClassifier?.failures?.length ?? null,
-      note: "Proves pre-tool command classification for safe diagnostics, staged state changes, credential hunts, exfiltration, and review bypasses.",
+      note: "Proves pre-tool command classification for safe diagnostics, staged state changes, credential hunts, exfiltration, review bypasses, and suspicious multi-action chains.",
     },
     skill_primer: {
       ok:

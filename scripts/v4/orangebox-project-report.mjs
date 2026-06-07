@@ -317,7 +317,7 @@ async function main() {
       area: "Action classifier permission gate",
       status: status(actionClassifierGreen, exists(path.join(repoRoot, "scripts", "v4", "action-classifier.mjs"))),
       reality: actionClassifierGreen
-        ? `Pre-tool command classifier is green: ${actionClassifier?.allowed_count || 0} allowed, ${actionClassifier?.staged_count || 0} staged, ${actionClassifier?.blocked_count || 0} blocked, ${actionClassifier?.cases_run || 0} fixtures. Command server imports the same classifier.`
+        ? `Pre-tool command classifier is green: ${actionClassifier?.allowed_count || 0} allowed, ${actionClassifier?.staged_count || 0} staged, ${actionClassifier?.blocked_count || 0} blocked, ${actionClassifier?.cases_run || 0} single-action fixtures; ${actionClassifier?.sequence_blocked_count || 0}/${actionClassifier?.sequence_cases_run || 0} suspicious action-sequence fixture(s) blocked. Command server imports the same classifier.`
         : "Action classifier source exists, but its doctor is not green yet.",
       next: actionClassifierGreen
         ? "Keep expanding fixtures before new tool surfaces are allowed."

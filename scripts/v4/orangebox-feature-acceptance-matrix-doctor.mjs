@@ -206,10 +206,23 @@ async function main() {
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run action:doctor",
-      acceptance_gate: "Action classifier fixtures include allowed, staged, and blocked decisions.",
-      rollback_path: "Revert action-classifier fixture/rule changes and rerun action:doctor.",
+      acceptance_gate: "Action classifier fixtures include allowed, staged, blocked, and suspicious multi-action sequence decisions.",
+      rollback_path: "Revert action-classifier fixture/rule changes and rerun action:doctor and harness:benchmark.",
       evidence: [
-        evidence(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"), "ORANGEBOX_ACTION_CLASSIFIER_GREEN"),
+        evidence(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json"), "ORANGEBOX_ACTION_CLASSIFIER_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN"
+            && Number(parsed?.blocked_count || 0) >= 1
+            && Number(parsed?.staged_count || 0) >= 1
+            && Number(parsed?.sequence_cases_run || 0) >= 3
+            && Number(parsed?.sequence_blocked_count || 0) >= 1,
+          detail: (parsed) => ({
+            cases_run: parsed?.cases_run || 0,
+            blocked_count: parsed?.blocked_count || 0,
+            staged_count: parsed?.staged_count || 0,
+            sequence_cases_run: parsed?.sequence_cases_run || 0,
+            sequence_blocked_count: parsed?.sequence_blocked_count || 0,
+          }),
+        }),
       ],
       operator_approval_required: false,
     }),

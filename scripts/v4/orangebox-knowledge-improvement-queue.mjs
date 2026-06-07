@@ -66,14 +66,16 @@ function proofForArea(area) {
     const ok = proof?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN"
       && Number(proof?.cases_run || 0) >= 10
       && Number(proof?.blocked_count || 0) >= 1
-      && Number(proof?.staged_count || 0) >= 1;
+      && Number(proof?.staged_count || 0) >= 1
+      && Number(proof?.sequence_cases_run || 0) >= 3
+      && Number(proof?.sequence_blocked_count || 0) >= 1;
     return ok
       ? {
         ok: true,
         status: "proven_receipt_green",
         proof_path: file,
         proof_status: proof.status,
-        proof_detail: `${proof.blocked_count} blocked / ${proof.staged_count} staged / ${proof.cases_run} fixtures`,
+        proof_detail: `${proof.blocked_count} blocked / ${proof.staged_count} staged / ${proof.cases_run} single-action fixtures; ${proof.sequence_blocked_count} blocked / ${proof.sequence_cases_run} sequence fixtures`,
       }
       : null;
   }

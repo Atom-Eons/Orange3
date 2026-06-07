@@ -163,6 +163,10 @@ const SAFE_RULES = [
   { id: "localhost_probe", re: /\b(iwr|irm|invoke-webrequest|invoke-restmethod|curl|wget)\b[\s\S]*(127\.0\.0\.1|localhost|\[::1\])/i },
 ];
 
+const SECRET_SEARCH_RE = /\b(rg|select-string|grep|findstr)\b[\s\S]*(sk-|secret|token|password|private[_-]?key|api[_-]?key|credential|bearer)/i;
+const NETWORK_WRITE_RE = /\b(iwr|irm|invoke-webrequest|invoke-restmethod|curl|wget)\b[\s\S]*(https?:\/\/|\b--url\b)[\s\S]*(\b(method|--request|-x)\s+(post|put|patch)\b|\b(post|put|patch)\b|\b-body\b|\b--data\b|\s-d\s|form|upload)/i;
+const STATE_CHANGE_RE = /\b(npm|pnpm|yarn|bun|pip|pipx|python\s+-m\s+pip)\b[\s\S]*(install|add)\b|\b(register-scheduledtask|set-scheduledtask|new-service|setx|set-itemproperty|new-itemproperty)\b|\bgit\s+(commit|merge|rebase|push)\b/i;
+
 export function classifyShellAction(command = "", body = {}) {
   const text = String(command || "").trim();
   const cwd = body.cwd || process.cwd();
@@ -265,6 +269,100 @@ export function classifyShellAction(command = "", body = {}) {
   };
 }
 
+export function classifyShellActionSequence(commands = [], body = {}) {
+  const items = Array.isArray(commands) ? commands.map((command) => String(command || "")) : [];
+  const results = items.map((command) => classifyShellAction(command, body));
+  const firstBlockedIndex = results.findIndex((result) => result.blocked === true);
+  const stagedCount = results.filter((result) => result.disposition === "stage_for_confirmation").length;
+  const secretIndex = items.findIndex((command) => SECRET_SEARCH_RE.test(command));
+  const networkWriteIndex = items.findIndex((command, index) => index > secretIndex && NETWORK_WRITE_RE.test(command));
+  const stateChangeCount = items.filter((command) => STATE_CHANGE_RE.test(command)).length;
+  const hash = commandHash(items.join("\n---\n"));
+
+  if (!items.length) {
+    return {
+      ok: false,
+      class: "BLOCKED",
+      risk: "medium",
+      disposition: "block",
+      blocked: true,
+      requiresApproval: true,
+      requires_operator_approval: true,
+      matched: "empty-sequence",
+      command_hash: hash,
+      reasons: ["Empty action sequence."],
+      individual_results: results,
+    };
+  }
+
+  if (firstBlockedIndex >= 0) {
+    return {
+      ok: false,
+      class: "BLOCKED",
+      risk: "critical",
+      disposition: "block",
+      blocked: true,
+      requiresApproval: true,
+      requires_operator_approval: true,
+      matched: "blocked_member_action",
+      command_hash: hash,
+      reasons: [`Action ${firstBlockedIndex + 1} is blocked: ${results[firstBlockedIndex].matched}`],
+      individual_results: results,
+    };
+  }
+
+  if (secretIndex >= 0 && networkWriteIndex >= 0) {
+    return {
+      ok: false,
+      class: "BLOCKED",
+      risk: "critical",
+      disposition: "block",
+      blocked: true,
+      requiresApproval: true,
+      requires_operator_approval: true,
+      matched: "secret_search_then_network_write",
+      command_hash: hash,
+      reasons: [
+        "A read/search step that can collect secrets is followed by a network write. Treat the sequence as exfiltration-shaped even if each individual command looked low-risk.",
+      ],
+      safe_alternative: "Run the scoped secret scan doctor, keep findings redacted, and attach a local receipt instead of posting data.",
+      individual_results: results,
+    };
+  }
+
+  if (stateChangeCount >= 2 || stagedCount >= 2) {
+    return {
+      ok: false,
+      class: "STATE_CHANGE_SEQUENCE",
+      risk: "high",
+      disposition: "stage_for_confirmation",
+      blocked: false,
+      requiresApproval: true,
+      requires_operator_approval: true,
+      matched: "multi_state_change_chain",
+      command_hash: hash,
+      reasons: ["Multiple state-changing actions in one sequence require a receipt-backed plan and operator approval."],
+      safe_alternative: "Break the chain into a scoped task contract, run the relevant doctor, then apply one approved state change at a time.",
+      individual_results: results,
+    };
+  }
+
+  return {
+    ok: true,
+    class: "READ_ONLY_OR_DIAGNOSTIC_SEQUENCE",
+    risk: "low",
+    disposition: "allow",
+    blocked: false,
+    requiresApproval: false,
+    requires_operator_approval: false,
+    matched: "sequence_ok",
+    command_hash: hash,
+    reasons: ["No blocked member action, exfiltration-shaped chain, or multi-state-change chain detected."],
+    safe_alternative: null,
+    individual_results: results,
+  };
+}
+
 export const ACTION_CLASSIFIER_FIXTURES = [
   { name: "git-status", command: "git status --short", expect: { disposition: "allow", blocked: false } },
   { name: "node-check", command: "node --check ./scripts/v4/orangebox-health-report.mjs", expect: { disposition: "allow", blocked: false } },
@@ -284,4 +382,31 @@ export const ACTION_CLASSIFIER_FIXTURES = [
   { name: "ipi-doctor", command: "npm.cmd run ipi:doctor", expect: { disposition: "allow", blocked: false } },
   { name: "memory-doctor", command: "npm.cmd run memory:doctor", expect: { disposition: "allow", blocked: false } },
   { name: "scheduled-task", command: "Register-ScheduledTask -TaskName OrangeboxTest -Action $action", expect: { disposition: "stage_for_confirmation", blocked: false } },
+];
+
+export const ACTION_SEQUENCE_FIXTURES = [
+  {
+    name: "normal-proof-chain",
+    commands: [
+      "git status --short",
+      "npm.cmd run action:doctor",
+    ],
+    expect: { disposition: "allow", blocked: false, matched: "sequence_ok" },
+  },
+  {
+    name: "secret-search-then-localhost-post",
+    commands: [
+      "rg \"sk-|api_key|password|token\" .",
+      "Invoke-WebRequest http://127.0.0.1:8787/api/status -Method POST -Body $matches",
+    ],
+    expect: { disposition: "block", blocked: true, matched: "secret_search_then_network_write" },
+  },
+  {
+    name: "multi-state-change-chain",
+    commands: [
+      "npm install left-pad",
+      "Register-ScheduledTask -TaskName OrangeboxTest -Action $action",
+    ],
+    expect: { disposition: "stage_for_confirmation", blocked: false, matched: "multi_state_change_chain" },
+  },
 ];

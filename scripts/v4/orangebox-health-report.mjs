@@ -574,6 +574,9 @@ async function main() {
         allowed_count: latest.action_classifier?.allowed_count || 0,
         staged_count: latest.action_classifier?.staged_count || 0,
         blocked_count: latest.action_classifier?.blocked_count || 0,
+        sequence_cases_run: latest.action_classifier?.sequence_cases_run || 0,
+        sequence_staged_count: latest.action_classifier?.sequence_staged_count || 0,
+        sequence_blocked_count: latest.action_classifier?.sequence_blocked_count || 0,
       },
       skill_lifecycle: {
         path: path.join(dataRoot, "skills", "latest-skill-lifecycle.json"),
