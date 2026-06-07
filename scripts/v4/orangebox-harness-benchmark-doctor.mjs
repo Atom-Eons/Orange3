@@ -255,10 +255,12 @@ const tasks = [
   {
     id: "mcp_descriptor_integrity_truth",
     category: "agent_security",
-    oracle: "MCP tools must be fingerprinted, and descriptor/tool-list drift must force review instead of inheriting trust.",
-    budget: { timeout_ms: 1500, max_files_read: 1, max_tool_calls: 0 },
+    oracle: "MCP tools must be fingerprinted, descriptor/tool-list drift must force review, and health/project reports must surface that truth.",
+    budget: { timeout_ms: 1500, max_files_read: 3, max_tool_calls: 0 },
     run(trace) {
       const mcp = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const health = readJson(path.join(dataRoot, "reports", "health", "latest-health-report.json"), trace);
       const integrity = mcp?.descriptor_integrity || {};
       const failures = [];
       if (mcp?.status !== "MCP_QUARANTINE_GREEN") failures.push(`MCP doctor status not green: ${mcp?.status || "missing"}`);
@@ -270,6 +272,8 @@ const tasks = [
       if (integrity.baseline_descriptor_hash === integrity.drift_descriptor_hash) failures.push("Descriptor hashes did not change across drift fixture");
       if (!Array.isArray(integrity.new_tools) || !integrity.new_tools.includes("doctor.exfiltrate_secret")) failures.push("Unexpected added tool was not captured");
       if (!Array.isArray(integrity.unapproved_tools) || !integrity.unapproved_tools.includes("doctor.exfiltrate_secret")) failures.push("Unexpected tool was not marked unapproved");
+      if (project?.evidence?.mcp_doctor?.descriptor_drift_detected !== true) failures.push("Project report does not surface MCP descriptor drift truth");
+      if (health?.receipts?.mcp_doctor?.descriptor_drift_detected !== true) failures.push("Health report does not surface MCP descriptor drift truth");
       return failures.length
         ? failTask("mcp_descriptor_integrity_truth", failures, {
           status: mcp?.status || null,
@@ -283,6 +287,8 @@ const tasks = [
           promotion_gate: integrity.promotion_gate,
           new_tools: integrity.new_tools,
           unapproved_tools: integrity.unapproved_tools,
+          project_mirrors_descriptor_drift: project?.evidence?.mcp_doctor?.descriptor_drift_detected === true,
+          health_mirrors_descriptor_drift: health?.receipts?.mcp_doctor?.descriptor_drift_detected === true,
         });
     },
   },

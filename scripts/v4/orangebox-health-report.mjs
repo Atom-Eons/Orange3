@@ -337,6 +337,11 @@ async function main() {
   if (!openclawRetired) warnings.push("OpenClaw startup hook is still present or no retirement receipt exists.");
   if (!terminalProfileOk) warnings.push("PowerShell OB0X terminal profile is missing, blocked, or has no receipt.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) warnings.push("MCP quarantine/tool bridge doctor is not green.");
+  const mcpDescriptorIntegrityGreen =
+    latest.mcp_doctor?.descriptor_integrity?.drift_detected === true &&
+    latest.mcp_doctor?.descriptor_integrity?.tool_list_rug_pull_blocked === true &&
+    latest.mcp_doctor?.descriptor_integrity?.auto_trust_after_drift === false;
+  if (latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0 && !mcpDescriptorIntegrityGreen) warnings.push("MCP descriptor-integrity drift proof is not green.");
   if (latest.ipi_doctor?.status !== "ORANGEBOX_IPI_DRILLS_GREEN") warnings.push("Indirect prompt-injection drills are not green.");
   if (latest.memory_doctor?.status !== "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN") warnings.push("Memory/source-truth doctor is not green.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") warnings.push("Action classifier doctor is not green.");
@@ -380,6 +385,7 @@ async function main() {
   if (latest.project_report?.full_project_green === false) nextActions.push("Review npm.cmd run project:report output before claiming full project completion.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
+  else if (!mcpDescriptorIntegrityGreen) nextActions.push("Run npm.cmd run mcp:doctor to refresh MCP descriptor-integrity drift proof.");
   if (latest.ipi_doctor?.status !== "ORANGEBOX_IPI_DRILLS_GREEN") nextActions.push("Run npm.cmd run ipi:doctor to verify untrusted text cannot smuggle tool commands.");
   if (latest.memory_doctor?.status !== "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN") nextActions.push("Run npm.cmd run memory:doctor to verify latest source-backed truth beats stale chat memory.");
   if (latest.action_classifier?.status !== "ORANGEBOX_ACTION_CLASSIFIER_GREEN") nextActions.push("Run npm.cmd run action:doctor to verify the pre-tool action classifier.");
@@ -390,7 +396,7 @@ async function main() {
   if (latest.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") nextActions.push("Run npm.cmd run session:spine to verify doer surfaces, watcher freshness, and one-reality state.");
   if (latest.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") nextActions.push("Run npm.cmd run feature:proof to verify all feature claims have evidence, proof commands, and rollback or recovery truth.");
 
-  const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0;
+  const mcpDoctorOk = latest.mcp_doctor?.ok === true && latest.mcp_doctor?.summary?.failed === 0 && mcpDescriptorIntegrityGreen;
   const ipiDoctorOk = latest.ipi_doctor?.status === "ORANGEBOX_IPI_DRILLS_GREEN";
   const memoryDoctorOk = latest.memory_doctor?.status === "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN";
   const actionClassifierOk = latest.action_classifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
@@ -541,6 +547,10 @@ async function main() {
         passed: latest.mcp_doctor?.summary?.passed || 0,
         failed: latest.mcp_doctor?.summary?.failed ?? null,
         host_mcp_config_mutated: latest.mcp_doctor?.host_mcp_config_mutated ?? null,
+        descriptor_drift_detected: latest.mcp_doctor?.descriptor_integrity?.drift_detected ?? null,
+        tool_list_rug_pull_blocked: latest.mcp_doctor?.descriptor_integrity?.tool_list_rug_pull_blocked ?? null,
+        auto_trust_after_drift: latest.mcp_doctor?.descriptor_integrity?.auto_trust_after_drift ?? null,
+        promotion_gate: latest.mcp_doctor?.descriptor_integrity?.promotion_gate || null,
       },
       ipi_doctor: {
         path: path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"),

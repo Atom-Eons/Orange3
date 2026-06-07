@@ -227,7 +227,10 @@ async function main() {
     mcpDoctor?.summary?.failed === 0 &&
     mcpDoctor?.install_attempted === false &&
     mcpDoctor?.host_mcp_config_mutated === false &&
-    mcpDoctor?.paid_api_attempted === false;
+    mcpDoctor?.paid_api_attempted === false &&
+    mcpDoctor?.descriptor_integrity?.drift_detected === true &&
+    mcpDoctor?.descriptor_integrity?.tool_list_rug_pull_blocked === true &&
+    mcpDoctor?.descriptor_integrity?.auto_trust_after_drift === false;
   const ipiDoctorGreen =
     ipiDoctor?.status === "ORANGEBOX_IPI_DRILLS_GREEN" &&
     ipiDoctor?.constraints?.command_executed === false &&
@@ -284,7 +287,7 @@ async function main() {
       area: "MCP quarantine/tool bridge",
       status: status(mcpQuarantineGreen, exists(path.join(repoRoot, "scripts", "v4", "mcp-doctor.mjs"))),
       reality: mcpQuarantineGreen
-        ? `MCP registry, local HTTP tool-list probe, metadata-only stdio probe, disable override, CLI/API source probe, and code-mode execute guard are green (${mcpDoctor?.summary?.passed || 0}/${mcpDoctor?.summary?.checks || 0}).`
+        ? `MCP registry, local HTTP tool-list probe, descriptor drift/rug-pull detection, metadata-only stdio probe, disable override, CLI/API source probe, and code-mode execute guard are green (${mcpDoctor?.summary?.passed || 0}/${mcpDoctor?.summary?.checks || 0}).`
         : "MCP bridge source exists, but the quarantine doctor is not green yet.",
       next: mcpQuarantineGreen
         ? "Keep all new MCPs as candidates until health, tools, scopes, output caps, receipts, and operator-confirmed write mode are proven."
@@ -759,6 +762,10 @@ async function main() {
       mcp_doctor: {
         path: path.join(dataRoot, "mcp", "latest-mcp-doctor.json"),
         status: mcpQuarantineGreen ? "MCP_QUARANTINE_GREEN" : "MCP_QUARANTINE_NOT_GREEN",
+        descriptor_drift_detected: mcpDoctor?.descriptor_integrity?.drift_detected ?? null,
+        tool_list_rug_pull_blocked: mcpDoctor?.descriptor_integrity?.tool_list_rug_pull_blocked ?? null,
+        auto_trust_after_drift: mcpDoctor?.descriptor_integrity?.auto_trust_after_drift ?? null,
+        promotion_gate: mcpDoctor?.descriptor_integrity?.promotion_gate || null,
       },
       ipi_doctor: {
         path: path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json"),
