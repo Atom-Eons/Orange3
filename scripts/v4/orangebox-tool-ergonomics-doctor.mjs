@@ -203,6 +203,34 @@ async function main() {
       hits: theaterPatterns.filter((pattern) => pattern.test(`${command.name} ${command.description}`)).map(String),
     }))
     .filter((row) => row.hits.length > 0);
+  const allowedOpenClawCommands = new Set(["openclaw-retire-dry", "openclaw-retire"]);
+  const moonWordingHits = commands
+    .filter((command) => /\bmoon\b/i.test(`${command.name} ${command.description}`))
+    .map((command) => ({ name: command.name, description: command.description }));
+  const openClawCommandHits = commands
+    .filter((command) => /openclaw|open claw/i.test(`${command.name} ${command.description} ${command.npm_script || ""}`))
+    .map((command) => ({
+      name: command.name,
+      description: command.description,
+      npm_script: command.npm_script,
+      allowed_retirement_command: allowedOpenClawCommands.has(command.name)
+        && /retire|retirement|dry-run|startup/i.test(command.description),
+    }));
+  const unexpectedOpenClawCommands = openClawCommandHits.filter((command) => !command.allowed_retirement_command);
+  const staleSkillLanguageHits = commands
+    .filter((command) => /\b(aefactory|aeskills|old[-_ ]?orangebox)\b/i.test(`${command.name} ${command.description}`))
+    .map((command) => ({ name: command.name, description: command.description }));
+  const operatorLanguageGuard = {
+    ok: moonWordingHits.length === 0 && unexpectedOpenClawCommands.length === 0 && staleSkillLanguageHits.length === 0,
+    no_moon_wording: moonWordingHits.length === 0,
+    moon_wording_hits: moonWordingHits,
+    openclaw_retirement_only: unexpectedOpenClawCommands.length === 0,
+    allowed_openclaw_commands: [...allowedOpenClawCommands],
+    openclaw_command_hits: openClawCommandHits,
+    unexpected_openclaw_commands: unexpectedOpenClawCommands,
+    stale_skill_language_hits: staleSkillLanguageHits,
+    doctrine: "Legacy OpenClaw may appear only as a surgical retirement/recovery tool; stale moon wording and stale skill-brand names stay out of the active command surface.",
+  };
   const confusingPairs = [];
   for (let i = 0; i < commands.length; i += 1) {
     for (let j = i + 1; j < commands.length; j += 1) {
@@ -268,6 +296,7 @@ async function main() {
     check("command_names_distinct", confusingPairs.length === 0, { confusing_pairs: confusingPairs }),
     check("descriptions_concise", missingDescriptions.length === 0 && longDescriptions.length === 0, { missing_descriptions: missingDescriptions.map((item) => item.name), long_descriptions: longDescriptions.map((item) => ({ name: item.name, chars: item.description_chars })) }),
     check("no_theater_commands", theaterHits.length === 0, { theater_hits: theaterHits }),
+    check("operator_legacy_language_guard", operatorLanguageGuard.ok, operatorLanguageGuard),
     check("wrapper_maps_to_package_scripts", missingPackageScripts.length === 0, { missing_package_scripts: missingPackageScripts.map((item) => ({ name: item.name, npm_script: item.npm_script })) }),
     check("proof_scripts_receipt_visible", receiptScriptFailures.length === 0, { proof_scripts: receiptScripts, failures: receiptScriptFailures }),
     check("receipt_surfaces_present", receiptSurfaces.filter((item) => item.ok).length >= 3, { receipt_surfaces: receiptSurfaces }),
@@ -322,6 +351,7 @@ async function main() {
       wrapper_path: commandPath,
       skill_path: skillMdPath,
       package_path: packageJsonPath,
+      operator_language_guard: operatorLanguageGuard,
     },
     proof_contracts: {
       required_proof_scripts: receiptScripts,

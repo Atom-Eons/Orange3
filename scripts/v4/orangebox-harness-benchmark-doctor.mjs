@@ -682,12 +682,16 @@ const tasks = [
       const commandCount = toolErgonomics?.command_surface?.command_count || 0;
       const outputContracts = toolErgonomics?.proof_contracts?.output_contracts || {};
       const constraints = toolErgonomics?.constraints || {};
+      const languageGuard = toolErgonomics?.command_surface?.operator_language_guard || {};
       if (toolErgonomics?.status !== "ORANGEBOX_TOOL_ERGONOMICS_GREEN") failures.push(`Tool ergonomics not green: ${toolErgonomics?.status || "missing"}`);
       if (commandCount < 26) failures.push(`Tool command count too low: ${commandCount}`);
       if (Array.isArray(toolErgonomics?.failures) && toolErgonomics.failures.length > 0) failures.push(`Tool ergonomics has ${toolErgonomics.failures.length} failure(s)`);
       if (outputContracts.wrapper_writes_command_receipts !== true) failures.push("Wrapper does not prove command receipt writes");
       if (outputContracts.wrapper_tail_bounded !== true) failures.push("Wrapper does not prove bounded output tail");
       if (outputContracts.package_proofs_json_receipt !== true) failures.push("Proof scripts are not all receipt-visible");
+      if (languageGuard.ok !== true) failures.push("Operator legacy-language guard is not green");
+      if (languageGuard.no_moon_wording !== true) failures.push("Active command surface still has stale moon wording");
+      if (languageGuard.openclaw_retirement_only !== true) failures.push("OpenClaw appears outside retirement-only commands");
       if (constraints.frontend_touched !== false) failures.push("Tool ergonomics doctor must prove frontend_touched=false");
       if (constraints.install_attempted !== false) failures.push("Tool ergonomics doctor must prove install_attempted=false");
       if (constraints.paid_api_attempted !== false) failures.push("Tool ergonomics doctor must prove paid_api_attempted=false");
@@ -695,12 +699,18 @@ const tasks = [
         ? failTask("tool_ergonomics_eval_lane_truth", failures, {
           status: toolErgonomics?.status || null,
           command_count: commandCount,
+          language_guard: languageGuard,
           constraints,
         })
         : okTask("tool_ergonomics_eval_lane_truth", {
           status: toolErgonomics.status,
           command_count: commandCount,
           command_hash: toolErgonomics?.command_surface?.command_hash || null,
+          language_guard: {
+            no_moon_wording: languageGuard.no_moon_wording,
+            openclaw_retirement_only: languageGuard.openclaw_retirement_only,
+            allowed_openclaw_commands: languageGuard.allowed_openclaw_commands || [],
+          },
           constraints,
         });
     },
