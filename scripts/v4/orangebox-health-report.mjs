@@ -313,6 +313,9 @@ async function main() {
     topKnowledgeExecution?.frontend_touch_allowed === false;
 
   const startupOpenClaw = startupPath("OpenClaw Gateway (atomeons).cmd");
+  const openclawStartupMoved = Array.isArray(latest.openclaw_retirement?.startup_matches)
+    ? latest.openclaw_retirement.startup_matches.find((match) => match?.source === startupOpenClaw && match?.moved === true)
+    : null;
   const openclawRetired = !exists(startupOpenClaw) && latest.openclaw_retirement?.status === "OPENCLAW_STARTUP_RETIRED";
   const terminalProfileOk =
     exists(powershellProfilePath) &&
@@ -410,7 +413,10 @@ async function main() {
       probes: devProbes,
       openclaw_startup_retired: {
         ok: openclawRetired,
-        startup_path: startupOpenClaw,
+        startup_hook_path: startupOpenClaw,
+        startup_hook_present: exists(startupOpenClaw),
+        retired_source_path: openclawStartupMoved?.source || null,
+        disabled_backup_path: openclawStartupMoved?.destination || null,
         retirement_status: latest.openclaw_retirement?.status || null,
       },
       terminal_profile: {
