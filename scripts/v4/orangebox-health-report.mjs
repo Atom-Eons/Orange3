@@ -239,6 +239,7 @@ async function main() {
     ops_readiness: latestReceipt("orangebox-ops-readiness-") || latestReceipt("orangebox-ops-readiness-", path.join(repoRoot, "receipts")),
     backend_install: latestReceipt("orangebox-backend-install-"),
     ops_gap_ledger: latestReceipt("orangebox-ops-gap-ledger-"),
+    codexa_handoff: latestReceipt("orangebox-codexa-handoff-"),
     project_report: latestReceipt("orangebox-project-report-"),
     reality_watch: latestReceipt("orangebox-reality-watch-"),
     obox2_package: latestReceipt("orangebox-obox2-package-doctor-"),
@@ -266,6 +267,7 @@ async function main() {
     ops_readiness: readJson(receiptPaths.ops_readiness || path.join(dataRoot, "watcher", "latest-reality-watch.json")),
     backend_install: readJson(receiptPaths.backend_install || ""),
     ops_gap_ledger: readJson(path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json")) || readJson(receiptPaths.ops_gap_ledger || ""),
+    codexa_handoff: readJson(path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json")) || readJson(receiptPaths.codexa_handoff || ""),
     project_report: readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json")) || readJson(receiptPaths.project_report || ""),
     reality_watch: readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json")) || readJson(receiptPaths.reality_watch || ""),
     obox2_package: readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json")) || readJson(receiptPaths.obox2_package || ""),
@@ -360,6 +362,7 @@ async function main() {
   if (latest.doer_watcher_spine?.status !== "ORANGEBOX_DOER_WATCHER_SPINE_GREEN") warnings.push("Doer/watcher session spine doctor is not green.");
   if (latest.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") warnings.push("Feature acceptance matrix doctor is not green.");
   if (!["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(latest.ops_gap_ledger?.status)) warnings.push("Ops gap ledger is not refreshed; partial system state may be harder to act on.");
+  if (!["CODEXA_HANDOFF_READY_WITH_OPEN_GAPS", "CODEXA_HANDOFF_READY_NO_OPEN_GAPS"].includes(latest.codexa_handoff?.status)) warnings.push("Codexa setup handoff is not refreshed; operator first-click sequence may be stale.");
   if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
   if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
   if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
@@ -392,6 +395,7 @@ async function main() {
   if (latest.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") nextActions.push("Run npm.cmd run assurance:doctor so research-derived upgrades become scoped playbooks, gates, receipts, and rollback proof.");
   if (latest.harness_benchmark?.status !== "ORANGEBOX_HARNESS_BENCHMARK_GREEN") nextActions.push("Run npm.cmd run harness:benchmark to prove offline oracle tasks before claiming tool/routing optimization.");
   if (!["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(latest.ops_gap_ledger?.status)) nextActions.push("Run npm.cmd run ops:gaps so remaining partials become named blockers with proof commands.");
+  if (!["CODEXA_HANDOFF_READY_WITH_OPEN_GAPS", "CODEXA_HANDOFF_READY_NO_OPEN_GAPS"].includes(latest.codexa_handoff?.status)) nextActions.push("Run npm.cmd run codexa:handoff so the AI Box setup first-click path and verification order are current.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
   else if (!knowledgeBacklogReady) nextActions.push("Rerun npm.cmd run knowledge:improvements after the queue script upgrade so learned candidates include backend-only execution proof.");
   else if (topKnowledgeExecution) nextActions.push(`Top learned backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}); prove with ${topKnowledgeExecution.proof_command}.`);
@@ -500,6 +504,12 @@ async function main() {
         status: latest.ops_gap_ledger?.status || null,
         gap_count: latest.ops_gap_ledger?.gap_count ?? null,
         critical_gap_count: latest.ops_gap_ledger?.critical_gap_count ?? null,
+      },
+      codexa_handoff: {
+        path: path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json"),
+        status: latest.codexa_handoff?.status || null,
+        open_gap_count: latest.codexa_handoff?.open_gap_count ?? null,
+        setup_zip: latest.codexa_handoff?.setup_zip?.path || null,
       },
       project_report: {
         path: path.join(dataRoot, "reports", "project", "latest-project-report.json"),

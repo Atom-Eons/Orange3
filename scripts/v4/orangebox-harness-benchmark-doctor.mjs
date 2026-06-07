@@ -144,6 +144,7 @@ const requiredOpsScripts = [
   "health:report",
   "project:report",
   "ops:gaps",
+  "codexa:handoff",
   "research:scout",
   "research:radar",
   "knowledge:improvements",
@@ -1031,6 +1032,31 @@ const tasks = [
           gap_count: ledger.gap_count,
           critical_gap_count: ledger.critical_gap_count,
           full_system_green_claim_allowed: ledger.full_system_green_claim_allowed,
+        });
+    },
+  },
+  {
+    id: "codexa_handoff_truth",
+    category: "codexa_recovery",
+    oracle: "A Codexa handoff is valid only when it names the verified setup zip, first-click admin launcher, open blockers, cockpit verification commands, and forbids false full-system green.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const handoff = readJson(path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json"), trace);
+      const ledger = readJson(path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json"), trace);
+      const failures = [];
+      if (!["CODEXA_HANDOFF_READY_WITH_OPEN_GAPS", "CODEXA_HANDOFF_READY_NO_OPEN_GAPS"].includes(handoff?.status)) failures.push(`Codexa handoff not ready: ${handoff?.status || "missing"}`);
+      if (handoff?.constraints?.frontend_touched !== false) failures.push("Codexa handoff must not touch frontend");
+      if (handoff?.constraints?.remote_codexa_mutation_attempted !== false) failures.push("Codexa handoff must not mutate Codexa");
+      if (handoff?.setup_zip?.exists !== true) failures.push("Codexa handoff missing setup zip proof");
+      if (handoff?.codexa_run_order?.[0]?.command !== "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd") failures.push("Codexa handoff first click is not start-here admin launcher");
+      if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")) failures.push("Codexa handoff missing ops:gaps verification command");
+      if ((ledger?.gap_count || 0) > 0 && handoff?.full_system_green_claim_allowed === true) failures.push("Codexa handoff allows full-system green while gaps remain");
+      return failures.length
+        ? failTask("codexa_handoff_truth", failures, { status: handoff?.status || null })
+        : okTask("codexa_handoff_truth", {
+          status: handoff.status,
+          open_gap_count: handoff.open_gap_count,
+          first_click: handoff.codexa_run_order?.[0]?.command || null,
         });
     },
   },

@@ -505,6 +505,33 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "codexa_handoff",
+      claim: "Orangebox generates a single Codexa setup handoff with the first-click launcher, open blockers, setup zip proof, and cockpit verification order.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run codexa:handoff",
+      acceptance_gate: "Handoff is valid, names RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd, references the verified OBOX2 zip, includes cockpit proof commands, and refuses full-system green while open gaps remain.",
+      rollback_path: "Revert Codexa handoff command/doctor wiring and rerun codexa:handoff, feature:proof, project:report, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json"), null, {
+          accept: (parsed, status) => ["CODEXA_HANDOFF_READY_WITH_OPEN_GAPS", "CODEXA_HANDOFF_READY_NO_OPEN_GAPS"].includes(status)
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.remote_codexa_mutation_attempted === false
+            && parsed?.setup_zip?.exists === true
+            && parsed?.codexa_run_order?.[0]?.command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd"
+            && parsed?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")
+            && (parsed?.open_gap_count > 0 ? parsed?.full_system_green_claim_allowed === false : true),
+          detail: (parsed) => ({
+            open_gap_count: parsed?.open_gap_count ?? null,
+            critical_gap_count: parsed?.critical_gap_count ?? null,
+            first_click: parsed?.codexa_run_order?.[0]?.command || null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "model_inventory_truth",
       claim: "Orangebox separates registered/planned model lanes from actually observed cockpit and Codexa models.",
       lane: "backend_ops",

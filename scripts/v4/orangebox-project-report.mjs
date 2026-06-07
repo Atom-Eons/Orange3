@@ -180,6 +180,7 @@ async function main() {
   const doerWatcherSpine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(latestReceipt("orangebox-doer-watcher-spine-"));
   const featureProof = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json")) || readJson(latestReceipt("orangebox-feature-acceptance-matrix-"));
   const opsGapLedger = readJson(path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json")) || readJson(latestReceipt("orangebox-ops-gap-ledger-"));
+  const codexaHandoff = readJson(path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json")) || readJson(latestReceipt("orangebox-codexa-handoff-"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const openclawRetire = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"));
   const fullGreen = readJson(path.join(dataRoot, "gauntlet", "latest-orangebox-full-green.json"));
@@ -276,6 +277,9 @@ async function main() {
   const opsGapLedgerReady =
     opsGapLedger?.status === "ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS" ||
     opsGapLedger?.status === "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS";
+  const codexaHandoffReady =
+    codexaHandoff?.status === "CODEXA_HANDOFF_READY_WITH_OPEN_GAPS" ||
+    codexaHandoff?.status === "CODEXA_HANDOFF_READY_NO_OPEN_GAPS";
   const localOpsBackendGreen =
     backendInstall?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN" &&
     opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN";
@@ -417,6 +421,16 @@ async function main() {
       next: opsGapLedgerReady
         ? "Work the highest-severity gap first and rerun ops:gaps before making full-system claims."
         : "Run npm.cmd run ops:gaps, then rerun project/readiness proof.",
+    },
+    {
+      area: "Codexa setup handoff",
+      status: status(codexaHandoffReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-codexa-handoff-doctor.mjs"))),
+      reality: codexaHandoffReady
+        ? `Codexa handoff is current: first click=${codexaHandoff?.codexa_run_order?.[0]?.command || "unknown"}, setup zip exists=${Boolean(codexaHandoff?.setup_zip?.exists)}, open gaps=${codexaHandoff?.open_gap_count ?? 0}.`
+        : "Codexa handoff source exists or is planned, but no current handoff receipt is green yet.",
+      next: codexaHandoffReady
+        ? "Use codexa:handoff before operator setup on Codexa, then rerun the listed cockpit verification commands."
+        : "Run npm.cmd run codexa:handoff so Codexa setup has one current receipt and first-click order.",
     },
     {
       area: "N150 to AI Box MCP/command bridge",
@@ -659,6 +673,7 @@ async function main() {
         feature_proof: packageScript("feature:proof", packageJson),
         ops_green: packageScript("ops:green", packageJson),
         ops_gaps: packageScript("ops:gaps", packageJson),
+        codexa_handoff: packageScript("codexa:handoff", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
         ipi_doctor: packageScript("ipi:doctor", packageJson),
@@ -727,6 +742,9 @@ async function main() {
       opsGapLedgerReady
         ? "Use npm.cmd run ops:gaps before status answers so every remaining blocker has evidence, proof commands, and safe next action."
         : "Run npm.cmd run ops:gaps so remaining partials become named blockers with proof commands.",
+      codexaHandoffReady
+        ? "Use npm.cmd run codexa:handoff before Codexa setup so the operator has one first-click and verification receipt."
+        : "Run npm.cmd run codexa:handoff so the AI Box setup handoff is current.",
       "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
       topKnowledgeExecution
         ? `Top Knowledge Engine backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}) -> ${topKnowledgeExecution.proof_command}`
@@ -907,6 +925,13 @@ async function main() {
         gap_count: opsGapLedger?.gap_count ?? null,
         critical_gap_count: opsGapLedger?.critical_gap_count ?? null,
         full_system_green_claim_allowed: opsGapLedger?.full_system_green_claim_allowed ?? null,
+      },
+      codexa_handoff: {
+        path: path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json"),
+        status: codexaHandoff?.status || null,
+        open_gap_count: codexaHandoff?.open_gap_count ?? null,
+        first_click: codexaHandoff?.codexa_run_order?.[0]?.command || null,
+        setup_zip: codexaHandoff?.setup_zip?.path || null,
       },
       reality: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null },
       openclaw_retirement: { path: path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), status: openclawRetire?.status || null },

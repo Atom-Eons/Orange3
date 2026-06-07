@@ -167,15 +167,19 @@ async function main() {
     { script: "tool:ergonomics", timeout: 60_000 },
     { script: "checkmate:doctor", timeout: 60_000 },
     { script: "assurance:doctor", timeout: 60_000 },
+    { script: "ops:gaps", timeout: 60_000 },
+    { script: "codexa:handoff", timeout: 60_000 },
     { script: "signal:hygiene", timeout: 60_000 },
     { script: "session:spine", timeout: 60_000 },
-    { script: "ops:gaps", timeout: 60_000 },
     { script: "feature:proof", timeout: 90_000 },
     { script: "ops:readiness", timeout: 180_000 },
     { script: "health:report", timeout: 90_000 },
     { script: "project:report", timeout: 90_000 },
     { script: "reality:watch", timeout: 90_000 },
     { script: "harness:benchmark", timeout: 90_000 },
+    { script: "health:report", timeout: 90_000 },
+    { script: "project:report", timeout: 90_000 },
+    { script: "reality:watch", timeout: 90_000 },
   ];
   const commands = [];
   if (!noRefresh) {
@@ -201,6 +205,7 @@ async function main() {
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const sessionSpinePath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
   const opsGapLedgerPath = path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json");
+  const codexaHandoffPath = path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json");
   const featureProofPath = path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const backendPath = latestReceipt("orangebox-backend-install-");
@@ -225,6 +230,7 @@ async function main() {
   const signalHygiene = readJson(signalHygienePath);
   const sessionSpine = readJson(sessionSpinePath);
   const opsGapLedger = readJson(opsGapLedgerPath);
+  const codexaHandoff = readJson(codexaHandoffPath);
   const featureProof = readJson(featureProofPath);
   const openclaw = readJson(openclawPath);
   const backend = readJson(backendPath || "");
@@ -285,6 +291,11 @@ async function main() {
       critical_gap_count: opsGapLedger?.critical_gap_count ?? null,
       full_system_green_claim_allowed: opsGapLedger?.full_system_green_claim_allowed ?? null,
     }),
+    gate("codexa_handoff_current", codexaHandoff?.ok === true && ["CODEXA_HANDOFF_READY_WITH_OPEN_GAPS", "CODEXA_HANDOFF_READY_NO_OPEN_GAPS"].includes(codexaHandoff?.status), {
+      status: codexaHandoff?.status || null,
+      open_gap_count: codexaHandoff?.open_gap_count ?? null,
+      first_click: codexaHandoff?.codexa_run_order?.[0]?.command || null,
+    }),
     gate("feature_acceptance_matrix_green", featureProof?.ok === true && featureProof?.status === "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN", { status: featureProof?.status || null, features_green: featureProof?.features_green ?? null, features_total: featureProof?.features_total ?? null }),
     gate("harness_benchmark_green", harness?.ok === true && harness?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN", { status: harness?.status || null, tasks_ok: harness?.tasks_ok ?? null, tasks_total: harness?.tasks_total ?? null }),
     gate("reality_watch_local_ops_truth", reality?.checks?.project_report?.local_ops_green === true || reality?.checks?.project_report?.ok === true, { status: reality?.status || null }),
@@ -328,6 +339,7 @@ async function main() {
       signal_hygiene: signalHygienePath,
       doer_watcher_spine: sessionSpinePath,
       ops_gap_ledger: opsGapLedgerPath,
+      codexa_handoff: codexaHandoffPath,
       backend_install: backendPath,
       ops_readiness: opsReadinessPath,
       final_verify: finalVerifyPath || (exists(finalManifestPath) ? finalManifestPath : null),

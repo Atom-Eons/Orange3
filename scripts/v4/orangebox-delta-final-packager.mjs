@@ -255,6 +255,7 @@ function backendPackageJson() {
       "codexa:alert": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt",
       "codexa:alert:popup": "node ./scripts/v4/orangebox-codexa-alert-doctor.mjs --json --receipt --popup",
       "codexa:smb-stage": "node ./scripts/v4/codexa-smb-stage-doctor.mjs --json --receipt",
+      "codexa:handoff": "node ./scripts/v4/orangebox-codexa-handoff-doctor.mjs --json --receipt",
       "mcp:doctor": "node ./scripts/v4/mcp-doctor.mjs --json --receipt",
       "action:doctor": "node ./scripts/v4/action-classifier-doctor.mjs --json --receipt",
       "health:report": "node ./scripts/v4/orangebox-health-report.mjs --json --receipt",

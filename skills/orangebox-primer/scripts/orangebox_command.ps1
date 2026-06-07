@@ -178,6 +178,11 @@ $commands = [ordered]@{
     args = @("run", "codexa:smb-stage")
     description = "Probe whether Codexa SMB can stage recovery artifacts; dry by default, no remote execution."
   }
+  "codexa-handoff" = @{
+    kind = "npm"
+    args = @("run", "codexa:handoff")
+    description = "Write the exact Codexa first-click setup handoff, current blockers, and verify order."
+  }
   "mcp-doctor" = @{
     kind = "npm"
     args = @("run", "mcp:doctor")

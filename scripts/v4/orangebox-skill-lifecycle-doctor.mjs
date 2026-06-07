@@ -92,6 +92,7 @@ const requiredCommands = [
   { name: "codexa-alert", kind: "npm", script: "codexa:alert" },
   { name: "codexa-alert-popup", kind: "npm", script: "codexa:alert:popup" },
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },
+  { name: "codexa-handoff", kind: "npm", script: "codexa:handoff" },
   { name: "mcp-doctor", kind: "npm", script: "mcp:doctor" },
   { name: "ipi-doctor", kind: "npm", script: "ipi:doctor" },
   { name: "memory-doctor", kind: "npm", script: "memory:doctor" },
