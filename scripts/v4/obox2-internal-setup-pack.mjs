@@ -30,6 +30,8 @@ const exportsRoot = path.join(dataRoot, "exports");
 const outDir = path.join(exportsRoot, "obox2-internal-setup-pack");
 const downloads = path.join(userRoot, "Downloads");
 const zipPath = path.join(downloads, "Orangebox_V2_Internal_Setup_Pack.zip");
+const finalDownloadReceiptPath = path.join(dataRoot, "downloads", "latest-orangebox-delta-final-download-zip.json");
+const backendPayloadName = "Orangebox_Delta_Final_BACKEND_PACKAGE.zip";
 
 function stamp(date = new Date()) {
   return date.toISOString().replace(/[-:]/g, "").replace(/\..+$/, "Z");
@@ -54,6 +56,146 @@ function readJson(file) {
 
 function psSingle(value) {
   return String(value).replace(/'/g, "''");
+}
+
+function backendInstallerScript() {
+  return `param(
+  [string]$InstallRoot = 'C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final',
+  [switch]$SkipNpmProof
+)
+$ErrorActionPreference = 'Continue'
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$receiptRoot = 'C:\\AtomEons\\ai-box\\receipts'
+New-Item -ItemType Directory -Force -Path $receiptRoot | Out-Null
+
+function Write-Orange($Text) { Write-Host $Text -ForegroundColor DarkYellow }
+function Write-Green($Text) { Write-Host $Text -ForegroundColor Green }
+function Write-RedLine($Text) { Write-Host $Text -ForegroundColor Red }
+function Write-Muted($Text) { Write-Host $Text -ForegroundColor DarkGray }
+function Get-Sha256($Path) {
+  if (-not (Test-Path -LiteralPath $Path)) { return $null }
+  return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
+}
+function Is-Admin {
+  $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+  $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+  return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+function Run-Npm($Name, $Args, $WorkingDirectory) {
+  $started = Get-Date
+  $npm = Get-Command npm.cmd -ErrorAction SilentlyContinue
+  if (-not $npm) {
+    return [ordered]@{ name = $Name; ok = $false; status = 'NPM_NOT_FOUND'; seconds = 0; output_tail = '' }
+  }
+  Push-Location $WorkingDirectory
+  try {
+    $output = & npm.cmd @Args 2>&1
+    $exit = $LASTEXITCODE
+  } finally {
+    Pop-Location
+  }
+  return [ordered]@{
+    name = $Name
+    ok = ($exit -eq 0)
+    status = $(if ($exit -eq 0) { 'GREEN' } else { 'NOT_GREEN' })
+    exit_code = $exit
+    seconds = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
+    output_tail = (($output | Select-Object -Last 45) -join [Environment]::NewLine)
+  }
+}
+
+Write-Orange '============================================================'
+Write-Orange '  ORANGEBOX VERSION 1 - CODEXA BACKEND INSTALL'
+Write-Orange '============================================================'
+Write-Muted  'Installs the verified backend payload. Frontend is not required for backend proof.'
+
+$admin = Is-Admin
+$payload = Join-Path $root '${backendPayloadName}'
+$metadataPath = Join-Path $root 'FINAL_BACKEND_PACKAGE.json'
+$metadata = $null
+if (Test-Path -LiteralPath $metadataPath) {
+  try { $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json } catch {}
+}
+$safeInstallRoot = 'C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final'
+$pathAllowed = ([System.IO.Path]::GetFullPath($InstallRoot).TrimEnd('\\') -eq [System.IO.Path]::GetFullPath($safeInstallRoot).TrimEnd('\\'))
+$payloadHash = Get-Sha256 $payload
+$hashOk = ($metadata -and $metadata.sha256 -and $payloadHash -eq ([string]$metadata.sha256).ToLowerInvariant())
+$steps = @()
+$failures = @()
+
+if (-not $admin) { $failures += 'Run this installer as Administrator.' }
+if (-not $pathAllowed) { $failures += ('InstallRoot is outside the approved Orangebox final path: ' + $InstallRoot) }
+if (-not (Test-Path -LiteralPath $payload)) { $failures += ('Backend payload missing: ' + $payload) }
+if (-not $metadata) { $failures += ('Backend package metadata missing or invalid: ' + $metadataPath) }
+if (-not $hashOk) { $failures += ('Backend payload hash mismatch. expected=' + $metadata.sha256 + ' actual=' + $payloadHash) }
+if ($metadata -and [bool]$metadata.frontend_required_for_backend) { $failures += 'Metadata says frontend is required for backend, which violates this install lane.' }
+
+$installed = $false
+$backupPath = $null
+if ($failures.Count -eq 0) {
+  $parent = Split-Path -Parent $InstallRoot
+  New-Item -ItemType Directory -Force -Path $parent | Out-Null
+  $stamp = (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')
+  $stage = Join-Path $parent ('_orangebox_delta_stage_' + $stamp)
+  if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
+  New-Item -ItemType Directory -Force -Path $stage | Out-Null
+  try {
+    Expand-Archive -LiteralPath $payload -DestinationPath $stage -Force
+    if (-not (Test-Path -LiteralPath (Join-Path $stage 'package.json'))) {
+      $failures += 'Expanded payload does not contain package.json at archive root.'
+    } else {
+      if (Test-Path -LiteralPath $InstallRoot) {
+        $backupPath = Join-Path $parent ('Orangebox Delta Final.previous-' + $stamp)
+        Move-Item -LiteralPath $InstallRoot -Destination $backupPath -Force
+      }
+      Move-Item -LiteralPath $stage -Destination $InstallRoot -Force
+      $installed = $true
+    }
+  } catch {
+    $failures += $_.Exception.Message
+  } finally {
+    if ((Test-Path -LiteralPath $stage) -and -not $installed) {
+      Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
+}
+
+if ($installed -and -not $SkipNpmProof) {
+  $steps += Run-Npm 'package-script-doctor' @('run','package-script-doctor') $InstallRoot
+  $steps += Run-Npm 'backend-proof' @('run','backend:proof') $InstallRoot
+}
+
+$requiredProofFailures = @($steps | Where-Object { -not $_.ok })
+$ok = ($failures.Count -eq 0 -and $installed -and ($SkipNpmProof -or $requiredProofFailures.Count -eq 0))
+$result = [ordered]@{
+  ok = $ok
+  status = $(if ($ok) { 'OBOX2_CODEXA_BACKEND_INSTALL_GREEN' } else { 'OBOX2_CODEXA_BACKEND_INSTALL_NOT_GREEN' })
+  checked_at = (Get-Date).ToUniversalTime().ToString('o')
+  admin = $admin
+  install_root = $InstallRoot
+  approved_install_root = $safeInstallRoot
+  path_allowed = $pathAllowed
+  payload = $payload
+  payload_exists = (Test-Path -LiteralPath $payload)
+  payload_sha256 = $payloadHash
+  expected_sha256 = $metadata.sha256
+  hash_ok = $hashOk
+  source_commit = $metadata.source_commit
+  frontend_included = [bool]$metadata.frontend_included
+  frontend_required_for_backend = [bool]$metadata.frontend_required_for_backend
+  installed = $installed
+  backup_path = $backupPath
+  npm_proof_skipped = [bool]$SkipNpmProof
+  steps = @($steps)
+  failures = @($failures + @($requiredProofFailures | ForEach-Object { $_.name }))
+  next_action = $(if ($ok) { 'Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd if rail/model setup is not already green, then verify from Cockpit.' } else { 'Fix failures above, then rerun this backend installer.' })
+}
+$path = Join-Path $receiptRoot 'obox2-backend-install-latest.json'
+$result | ConvertTo-Json -Depth 30 | Set-Content -Encoding UTF8 -Path $path
+if ($ok) { Write-Green $result.status } else { Write-RedLine $result.status }
+Write-Muted ("Receipt: " + $path)
+if (-not $ok) { exit 1 }
+`;
 }
 
 function installScript() {
@@ -419,7 +561,7 @@ Write-Orange '============================================================'
 Write-Orange '  ORANGEBOX VERSION 1 / OBOX2 INTERNAL - CODEXA START HERE'
 Write-Orange '============================================================'
 Write-Muted  ('Mode: ' + $Mode)
-Write-Muted  'This verifies always-on power, command rails, local models, and optional Hermes.'
+  Write-Muted  'This verifies always-on power, backend payload, command rails, local models, and optional Hermes.'
 Write-Muted  'Green means receipt-backed. Not green means do not route heavy work to Codexa yet.'
 Write-Host ''
 
@@ -452,6 +594,7 @@ if ($Mode -eq 'doctor-only') {
 } else {
   $steps += Invoke-PackStep 'always-on power optimizer' 'CODEXA_POWER_OPTIMIZER.ps1' $powerArgs
   $steps += Invoke-PackStep 'power doctor' 'CODEXA_POWER_DOCTOR.ps1' @()
+  $steps += Invoke-PackStep 'backend payload installer' 'INSTALL_ORANGEBOX_BACKEND_ON_CODEXA.ps1' @()
   $railArgs = @()
   if ($EnableRdp) { $railArgs += '-EnableRdp' }
   $steps += Invoke-PackStep 'command rail starter' 'START_CODEXA_RAIL.ps1' $railArgs
@@ -479,7 +622,7 @@ $result = [ordered]@{
   steps = @($steps)
   required_failures = @($requiredFailures | ForEach-Object { $_.name })
   optional_failures = @($optionalFailures | ForEach-Object { $_.name })
-  next_action = $(if ($ok) { 'Back on Cockpit, run npm.cmd run codexa:alert and npm.cmd run health:report.' } else { 'Fix the first required failure in steps, then rerun this start-here launcher.' })
+  next_action = $(if ($ok) { 'Back on Cockpit, run npm.cmd run codexa:alert:popup and npm.cmd run ops:green.' } else { 'Fix the first required failure in steps, then rerun this start-here launcher.' })
   doctrine = 'Power proves always-on. Rail proves reachability. Model doctor proves local lanes. Receipts prove reality.'
 }
 $path = Join-Path $receiptRoot 'obox2-start-here-latest.json'
@@ -621,6 +764,35 @@ async function main() {
   await writeJson(path.join(outDir, "ROLE_MAP.json"), roleMap);
   await writeJson(path.join(outDir, "ROUTING_POLICY.json"), routingPolicy);
   await writeJson(path.join(outDir, "SOUL_GENOME.json"), soulGenome);
+  const finalDownload = fs.existsSync(finalDownloadReceiptPath) ? readJson(finalDownloadReceiptPath) : null;
+  const finalZipPath = finalDownload?.zip_path;
+  const finalZipOk =
+    finalDownload?.status === "ORANGEBOX_DELTA_FINAL_DOWNLOAD_ZIP_GREEN" &&
+    finalDownload?.archive_verified === true &&
+    finalDownload?.frontend_required_for_backend === false &&
+    finalZipPath &&
+    fs.existsSync(finalZipPath);
+  if (!finalZipOk) {
+    throw new Error(`Verified backend final zip is missing or stale. Run npm.cmd run final:zip first. Checked ${finalDownloadReceiptPath}`);
+  }
+  const backendPayloadPath = path.join(outDir, backendPayloadName);
+  await fsp.copyFile(finalZipPath, backendPayloadPath);
+  await writeJson(path.join(outDir, "FINAL_BACKEND_PACKAGE.json"), {
+    version: "orangebox-final-backend-payload/v1",
+    public_name: finalDownload.public_name,
+    package_name: finalDownload.package_name,
+    source_commit: finalDownload.source_commit,
+    source_branch: finalDownload.source_branch,
+    source_zip_path: finalDownload.zip_path,
+    payload_name: backendPayloadName,
+    sha256: finalDownload.sha256,
+    bytes: finalDownload.bytes,
+    entries: finalDownload.entries,
+    frontend_included: Boolean(finalDownload.frontend_included),
+    frontend_required_for_backend: Boolean(finalDownload.frontend_required_for_backend),
+    archive_verified: Boolean(finalDownload.archive_verified),
+    created_at: new Date().toISOString(),
+  });
   const railStarter = path.join(repoRoot, "scripts", "START_CODEXA_RAIL.ps1");
   if (fs.existsSync(railStarter)) {
     await fsp.copyFile(railStarter, path.join(outDir, "START_CODEXA_RAIL.ps1"));
@@ -633,6 +805,7 @@ async function main() {
     ].join("\r\n"));
   }
   await writeFile(path.join(outDir, "INSTALL_CODEXA_OBOX2_MODELS.ps1"), installScript());
+  await writeFile(path.join(outDir, "INSTALL_ORANGEBOX_BACKEND_ON_CODEXA.ps1"), backendInstallerScript());
   await writeFile(path.join(outDir, "CODEXA_MODEL_DOCTOR.ps1"), doctorScript());
   await writeFile(path.join(outDir, "CODEXA_POWER_OPTIMIZER.ps1"), powerOptimizerScript());
   await writeFile(path.join(outDir, "CODEXA_POWER_DOCTOR.ps1"), powerDoctorScript());
@@ -645,6 +818,15 @@ async function main() {
     "title Orangebox Version 1 - Codexa Start Here",
     "color 0E",
     "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%~dp0START_HERE_OBOX2_INTERNAL.ps1\" -Mode fast -EnableRdp",
+    "pause",
+    "",
+  ].join("\r\n"));
+  await writeFile(path.join(outDir, "RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd"), [
+    "@echo off",
+    "cd /d %~dp0",
+    "title Orangebox Version 1 - Codexa Backend Install",
+    "color 0E",
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%~dp0INSTALL_ORANGEBOX_BACKEND_ON_CODEXA.ps1\"",
     "pause",
     "",
   ].join("\r\n"));
@@ -706,6 +888,7 @@ Run this pack on Codexa / AI Box.
 
 This pack updates the local model side of Orangebox:
 
+- verified Orangebox backend install payload for Codexa
 - visible tri-lane model registry
 - role map for Librarian / Forge / Mirror / Gremlin / STRONGARM / Judgement
 - routing policy with cheap / normal / deep modes
@@ -724,9 +907,16 @@ RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd
 \`\`\`
 
 That runs always-on power setup, power doctor, rail starter, model doctor, and Hermes doctor if present.
+It also installs the verified Orangebox backend payload to:
+
+\`\`\`text
+C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final
+\`\`\`
+
 It writes:
 
 \`\`\`text
+C:\\AtomEons\\ai-box\\receipts\\obox2-backend-install-latest.json
 C:\\AtomEons\\ai-box\\receipts\\obox2-start-here-latest.json
 \`\`\`
 
@@ -735,6 +925,7 @@ Manual fast path:
 \`\`\`cmd
 RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd
 RUN_CODEXA_POWER_DOCTOR.cmd
+RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd
 RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
 RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd
 RUN_MODEL_DOCTOR_ON_CODEXA.cmd
@@ -746,6 +937,7 @@ RUN_HERMES_DOCTOR_ON_CODEXA.cmd
 \`\`\`cmd
 RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd
 RUN_CODEXA_POWER_DOCTOR.cmd
+RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd
 RUN_START_CODEXA_RAIL_AS_ADMIN.cmd
 RUN_INSTALL_ALL_LLMS_ON_CODEXA.cmd
 RUN_MODEL_DOCTOR_ON_CODEXA.cmd
@@ -754,6 +946,25 @@ RUN_HERMES_DOCTOR_ON_CODEXA.cmd
 \`\`\`
 
 The full path is large. It can take a long time and a lot of disk space.
+
+## Backend payload law
+
+This pack includes:
+
+\`\`\`text
+${backendPayloadName}
+FINAL_BACKEND_PACKAGE.json
+INSTALL_ORANGEBOX_BACKEND_ON_CODEXA.ps1
+RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd
+\`\`\`
+
+The backend installer verifies the payload SHA-256, installs only to the approved Orangebox final path, preserves any previous install as a sibling backup, runs backend/package proof when npm is available, and writes:
+
+\`\`\`text
+C:\\AtomEons\\ai-box\\receipts\\obox2-backend-install-latest.json
+\`\`\`
+
+The payload is backend/Ops scoped. It is not a frontend/dashboard install and it does not require frontend to run backend proof.
 
 ## AI Box always-on power law
 
@@ -835,6 +1046,15 @@ It is not a model body, hidden ruler, system rename, or training claim. It tells
     out_dir: outDir,
     zip_path: zipPath,
     zip_bytes: fs.existsSync(zipPath) ? fs.statSync(zipPath).size : 0,
+    backend_payload: {
+      name: backendPayloadName,
+      source_zip_path: finalDownload.zip_path,
+      source_commit: finalDownload.source_commit,
+      sha256: finalDownload.sha256,
+      bytes: finalDownload.bytes,
+      frontend_included: Boolean(finalDownload.frontend_included),
+      frontend_required_for_backend: Boolean(finalDownload.frontend_required_for_backend),
+    },
     files,
     note: "Run this pack on Codexa / AI Box. Local generation of the pack does not prove models are installed on Codexa.",
   };

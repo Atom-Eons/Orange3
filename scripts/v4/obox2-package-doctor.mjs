@@ -30,6 +30,9 @@ const latestPackPath = path.join(dataRoot, "obox2", "latest-internal-setup-pack.
 const defaultZip = path.join(userRoot, "Downloads", "Orangebox_V2_Internal_Setup_Pack.zip");
 
 const requiredFiles = [
+  "FINAL_BACKEND_PACKAGE.json",
+  "Orangebox_Delta_Final_BACKEND_PACKAGE.zip",
+  "INSTALL_ORANGEBOX_BACKEND_ON_CODEXA.ps1",
   "MODEL_REGISTRY.json",
   "ROLE_MAP.json",
   "ROUTING_POLICY.json",
@@ -43,6 +46,7 @@ const requiredFiles = [
   "HERMES_AGENT_DOCTOR.ps1",
   "START_CODEXA_RAIL.ps1",
   "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+  "RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd",
   "RUN_START_CODEXA_RAIL_AS_ADMIN.cmd",
   "RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd",
   "RUN_CODEXA_POWER_DOCTOR.cmd",
@@ -118,6 +122,9 @@ function validateJsonConfig(extractDir) {
   const roleMap = readJson(path.join(extractDir, "ROLE_MAP.json"));
   const routingPolicy = readJson(path.join(extractDir, "ROUTING_POLICY.json"));
   const soulGenome = readJson(path.join(extractDir, "SOUL_GENOME.json"));
+  const backendPackage = readJson(path.join(extractDir, "FINAL_BACKEND_PACKAGE.json"));
+  const backendPayload = path.join(extractDir, "Orangebox_Delta_Final_BACKEND_PACKAGE.zip");
+  const backendHash = fs.existsSync(backendPayload) ? sha256File(backendPayload) : null;
   const localModels = modelRegistry?.local_models || [];
   const modelIds = new Set(localModels.map((model) => model.id));
   const roleDefaults = Object.values(roleMap?.roles || {}).map((role) => role.default_model).filter(Boolean);
@@ -129,6 +136,11 @@ function validateJsonConfig(extractDir) {
       roleMap?.version === "orangebox-role-map/v2" &&
       routingPolicy?.version === "orangebox-routing-policy/v2" &&
       soulGenome?.status === "INTERNAL_KNOWLEDGE_ENGINE_SPEC" &&
+      backendPackage?.version === "orangebox-final-backend-payload/v1" &&
+      backendPackage?.archive_verified === true &&
+      backendPackage?.frontend_included === false &&
+      backendPackage?.frontend_required_for_backend === false &&
+      backendPackage?.sha256 === backendHash &&
       localModels.length >= 10 &&
       missingDefaults.length === 0 &&
       wildcardLaw.some((line) => /Wildcard models may not be final/i.test(line)),
@@ -136,6 +148,16 @@ function validateJsonConfig(extractDir) {
     model_ids: [...modelIds],
     missing_role_default_models: missingDefaults,
     soul_status: soulGenome?.status || null,
+    backend_payload: {
+      ok: backendPackage?.sha256 === backendHash,
+      name: "Orangebox_Delta_Final_BACKEND_PACKAGE.zip",
+      bytes: fs.existsSync(backendPayload) ? fs.statSync(backendPayload).size : 0,
+      sha256: backendHash,
+      expected_sha256: backendPackage?.sha256 || null,
+      source_commit: backendPackage?.source_commit || null,
+      frontend_included: backendPackage?.frontend_included ?? null,
+      frontend_required_for_backend: backendPackage?.frontend_required_for_backend ?? null,
+    },
     wildcard_law_count: wildcardLaw.length,
   };
 }
@@ -156,9 +178,11 @@ function validateCmdLaunchers(extractDir) {
 
 function scanForbiddenText(extractDir) {
   const findings = [];
+  const textLike = new Set([".cmd", ".json", ".md", ".ps1", ".txt"]);
   for (const name of fs.readdirSync(extractDir)) {
     const file = path.join(extractDir, name);
     if (!fs.statSync(file).isFile()) continue;
+    if (!textLike.has(path.extname(name).toLowerCase())) continue;
     const text = fs.readFileSync(file, "utf8");
     if (/openclaw|open claw/i.test(name) || /openclaw|open claw/i.test(text)) {
       findings.push({ file: name, issue: "OpenClaw text found in OBOX2 setup pack." });
@@ -210,6 +234,7 @@ function validateOperationalContracts(extractDir) {
   requirePattern(checks, startHere, "start_here_requires_admin", /OBOX2_START_HERE_NEEDS_ADMIN/i, "Start-here launcher refuses non-admin installs.");
   requirePattern(checks, startHere, "start_here_calls_power_optimizer", /CODEXA_POWER_OPTIMIZER\.ps1/i, "Start-here launcher runs the power optimizer.");
   requirePattern(checks, startHere, "start_here_calls_power_doctor", /CODEXA_POWER_DOCTOR\.ps1/i, "Start-here launcher runs the power doctor.");
+  requirePattern(checks, startHere, "start_here_calls_backend_installer", /INSTALL_ORANGEBOX_BACKEND_ON_CODEXA\.ps1/i, "Start-here launcher installs/verifies the backend payload.");
   requirePattern(checks, startHere, "start_here_calls_rail_starter", /START_CODEXA_RAIL\.ps1/i, "Start-here launcher starts the rail.");
   requirePattern(checks, startHere, "start_here_calls_model_doctor", /CODEXA_MODEL_DOCTOR\.ps1/i, "Start-here launcher runs model doctor.");
   requirePattern(checks, startHere, "start_here_hermes_optional", /HERMES_AGENT_DOCTOR\.ps1' @\(\) \$false/i, "Start-here launcher treats Hermes doctor as optional.");
@@ -226,6 +251,17 @@ function validateOperationalContracts(extractDir) {
   requirePattern(checks, modelDoctor, "model_doctor_missing_core", /missingCore/i, "Model doctor reports missing core models.");
   requirePattern(checks, modelDoctor, "model_doctor_green_status", /OBOX2_CODEXA_MODEL_DOCTOR_GREEN/i, "Model doctor has a green status contract.");
 
+  const backendInstaller = file("INSTALL_ORANGEBOX_BACKEND_ON_CODEXA.ps1");
+  requirePattern(checks, backendInstaller, "backend_installer_payload_zip", /Orangebox_Delta_Final_BACKEND_PACKAGE\.zip/i, "Backend installer uses the embedded final backend payload.");
+  requirePattern(checks, backendInstaller, "backend_installer_metadata", /FINAL_BACKEND_PACKAGE\.json/i, "Backend installer verifies payload metadata.");
+  requirePattern(checks, backendInstaller, "backend_installer_hash_check", /Get-FileHash[\s\S]*SHA256[\s\S]*hashOk/i, "Backend installer checks SHA-256 before install.");
+  requirePattern(checks, backendInstaller, "backend_installer_approved_path", /C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final/i, "Backend installer restricts target to the approved final path.");
+  requirePattern(checks, backendInstaller, "backend_installer_frontend_not_required", /frontend_required_for_backend/i, "Backend installer refuses payloads that require frontend for backend.");
+  requirePattern(checks, backendInstaller, "backend_installer_preserves_previous", /previous-\s*'\s*\+\s*\$stamp|previous-' \+ \$stamp|backup_path/i, "Backend installer preserves previous install as a sibling backup.");
+  requirePattern(checks, backendInstaller, "backend_installer_package_doctor", /package-script-doctor/i, "Backend installer runs package-script-doctor when npm proof is enabled.");
+  requirePattern(checks, backendInstaller, "backend_installer_backend_proof", /backend:proof/i, "Backend installer runs backend proof when npm proof is enabled.");
+  requirePattern(checks, backendInstaller, "backend_installer_receipt", /obox2-backend-install-latest\.json/i, "Backend installer writes a stable receipt.");
+
   const hermesInstall = file("INSTALL_HERMES_AGENT.ps1");
   requirePattern(checks, hermesInstall, "hermes_install_checks_node", /node\s+--version[\s\S]*major/i, "Hermes installer checks Node before install.");
   requirePattern(checks, hermesInstall, "hermes_install_optional_skip", /SkipInstall/i, "Hermes installer supports no-install doctor behavior.");
@@ -233,6 +269,8 @@ function validateOperationalContracts(extractDir) {
 
   const readme = file("README_OBOX2_INTERNAL_SETUP.md");
   requirePattern(checks, readme, "readme_names_start_here", /RUN_START_HERE_ON_CODEXA_AS_ADMIN\.cmd/i, "README points operator to the start-here launcher.");
+  requirePattern(checks, readme, "readme_names_backend_installer", /RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN\.cmd/i, "README names the backend payload installer.");
+  requirePattern(checks, readme, "readme_backend_payload_law", /Backend payload law/i, "README explains the backend payload law.");
   requirePattern(checks, readme, "readme_warns_battery_laptop", /Do not apply it to a battery laptop/i, "README warns not to apply always-on behavior to battery laptops.");
   requirePattern(checks, readme, "readme_wildcard_law", /Dolphin and abliterated models are pressure lanes only/i, "README preserves wildcard model authority limits.");
 

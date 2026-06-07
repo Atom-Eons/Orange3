@@ -117,6 +117,9 @@ function renderMarkdown(result) {
   lines.push(`- OBOX2 setup zip: \`${result.setup_zip.path}\``);
   lines.push(`- zip exists: ${result.setup_zip.exists}`);
   lines.push(`- zip sha256: \`${result.setup_zip.sha256 || "missing"}\``);
+  lines.push(`- embedded backend payload: ${result.backend_payload.exists}`);
+  lines.push(`- backend source commit: \`${result.backend_payload.source_commit || "missing"}\``);
+  lines.push(`- backend payload sha256: \`${result.backend_payload.sha256 || "missing"}\``);
   lines.push(`- package doctor: ${result.evidence.obox2_package.status || "missing"}`);
   lines.push(`- gap ledger: ${result.evidence.ops_gap_ledger.status || "missing"} (${result.open_gap_count} open, ${result.critical_gap_count} critical)`);
   lines.push("");
@@ -126,6 +129,7 @@ function renderMarkdown(result) {
   lines.push("2. Unzip it.");
   lines.push("3. Right-click `RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd` and run as Administrator.");
   lines.push("4. Wait for it to print/write receipts under `C:\\AtomEons\\ai-box\\receipts`.");
+  lines.push("5. If backend install fails but power/rail are fine, run `RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd` from the same unzipped pack.");
   lines.push("");
   lines.push("## Codexa Run Order");
   lines.push("");
@@ -166,12 +170,14 @@ async function main() {
   const finalPackage = readJson(latestReceipt("orangebox-delta-final-package-") || "");
 
   const setupZipPath = obox2Pack?.zip_path || obox2Doctor?.zip_path || path.join(downloadsRoot, "Orangebox_V2_Internal_Setup_Pack.zip");
+  const backendPayloadSource = obox2Pack?.backend_payload || obox2Doctor?.json_config?.backend_payload || {};
   const openGaps = (gapLedger?.gaps || []).map(compactGap);
   const criticalGaps = openGaps.filter((gap) => gap.severity === "critical");
   const localOpsGreen = project?.local_ops_green === true || finalPackage?.status === "ORANGEBOX_DELTA_FINAL_VERIFIED_GREEN";
   const setupZip = fileSummary(setupZipPath);
   const requiredLaunchers = [
     "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+    "RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd",
     "RUN_CODEXA_POWER_DOCTOR.cmd",
     "RUN_START_CODEXA_RAIL_AS_ADMIN.cmd",
     "RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd",
@@ -192,42 +198,48 @@ async function main() {
     {
       order: 1,
       command: "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
-      why: "One-click power optimizer, power doctor, rail starter, and model/Hermes doctors.",
+      why: "One-click power optimizer, backend payload installer, power doctor, rail starter, and model/Hermes doctors.",
       blocks_until_green: ["codexa_command_rail_8097_down", "codexa_remote_control_unproven"],
     },
     {
       order: 2,
+      command: "RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd",
+      why: "Fallback direct backend install from the embedded verified backend payload if start-here does not complete it.",
+      blocks_until_green: ["codexa_command_rail_8097_down"],
+    },
+    {
+      order: 3,
       command: "RUN_CODEXA_POWER_DOCTOR.cmd",
       why: "Verify Codexa is not sleeping/hibernating away from the operator.",
       blocks_until_green: ["codexa_remote_control_unproven"],
     },
     {
-      order: 3,
+      order: 4,
       command: "RUN_START_CODEXA_RAIL_AS_ADMIN.cmd",
       why: "Recover command rail 8097 and bridge rail 8098 if start-here did not leave them reachable.",
       blocks_until_green: ["codexa_command_rail_8097_down"],
     },
     {
-      order: 4,
+      order: 5,
       command: "RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd",
       why: "Install core local models before heavy/all tiers.",
       blocks_until_green: ["codexa_ollama_unreachable", "core_local_models_missing"],
     },
     {
-      order: 5,
+      order: 6,
       command: "RUN_MODEL_DOCTOR_ON_CODEXA.cmd",
       why: "Write Codexa model receipt and show missing core models explicitly.",
       blocks_until_green: ["core_local_models_missing"],
     },
     {
-      order: 6,
+      order: 7,
       command: "RUN_INSTALL_HERMES_AGENT_ON_CODEXA.cmd",
       why: "Optional after rail/core model proof; Hermes is not authority and must be doctor-proven.",
       blocks_until_green: ["hermes_outer_orchestration_unproven"],
       optional: true,
     },
     {
-      order: 7,
+      order: 8,
       command: "RUN_HERMES_DOCTOR_ON_CODEXA.cmd",
       why: "Verify optional Hermes outer orchestration only after core setup is stable.",
       blocks_until_green: ["hermes_outer_orchestration_unproven"],
@@ -239,6 +251,7 @@ async function main() {
     { id: "package_script_present", ok: Boolean(packageJson?.scripts?.["codexa:handoff"]) },
     { id: "setup_zip_exists", ok: setupZip.exists, detail: setupZip },
     { id: "obox2_package_green", ok: obox2Doctor?.status === "OBOX2_PACKAGE_VERIFIED_GREEN" && obox2Doctor?.ok === true },
+    { id: "backend_payload_embedded", ok: Boolean(backendPayloadSource?.sha256 || backendPayloadSource?.expected_sha256) && backendPayloadSource?.frontend_required_for_backend === false },
     { id: "required_launchers_present", ok: missingLaunchers.length === 0, missing: missingLaunchers },
     { id: "gap_ledger_valid", ok: ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(gapLedger?.status) },
     { id: "first_click_named", ok: codexaRunOrder[0].command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd" },
@@ -274,10 +287,20 @@ async function main() {
     open_gap_count: openGaps.length,
     critical_gap_count: criticalGaps.length,
     setup_zip: setupZip,
+    backend_payload: {
+      exists: Boolean(backendPayloadSource?.sha256 || backendPayloadSource?.expected_sha256),
+      name: backendPayloadSource?.name || backendPayloadSource?.payload_name || "Orangebox_Delta_Final_BACKEND_PACKAGE.zip",
+      source_commit: backendPayloadSource?.source_commit || null,
+      sha256: backendPayloadSource?.sha256 || backendPayloadSource?.expected_sha256 || null,
+      bytes: Number(backendPayloadSource?.bytes || 0),
+      frontend_included: backendPayloadSource?.frontend_included ?? null,
+      frontend_required_for_backend: backendPayloadSource?.frontend_required_for_backend ?? null,
+    },
     codexa_run_order: codexaRunOrder,
     cockpit_verify_commands: cockpitVerifyCommands,
     expected_codexa_receipts: [
       "C:\\AtomEons\\ai-box\\receipts\\obox2-start-here-latest.json",
+      "C:\\AtomEons\\ai-box\\receipts\\obox2-backend-install-latest.json",
       "C:\\AtomEons\\ai-box\\receipts\\obox2-power-doctor-latest.json",
       "C:\\AtomEons\\ai-box\\receipts\\orangebox-command-rail-latest.json",
       "C:\\AtomEons\\ai-box\\receipts\\obox2-model-doctor-latest.json",
