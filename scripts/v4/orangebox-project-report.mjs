@@ -364,7 +364,7 @@ async function main() {
       area: "Operator signal hygiene",
       status: status(signalHygieneGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-operator-signal-hygiene-doctor.mjs"))),
       reality: signalHygieneGreen
-        ? `Operator signal hygiene is green: severity=${signalHygiene?.signal_hygiene?.severity || "unknown"}, confidence=${signalHygiene?.confidence_calibration?.local_ops || "unknown"}, checks=${signalHygiene?.checks?.length || 0}.`
+        ? `Operator signal hygiene is green: severity=${signalHygiene?.signal_hygiene?.severity || "unknown"}, confidence=${signalHygiene?.confidence_calibration?.local_ops || "unknown"}, checks=${signalHygiene?.checks?.length || 0}, transparency=${signalHygiene?.operator_transparency?.version || "missing"}, full_green_gate=${signalHygiene?.operator_transparency?.level_3_foresight?.full_green_gate || "unknown"}.`
         : "Operator signal hygiene source exists or is planned, but the current receipt is not green yet.",
       next: signalHygieneGreen
         ? "Run this doctor before changing alert, watcher, popup, or status-report behavior."

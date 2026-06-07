@@ -588,6 +588,14 @@ async function main() {
         status: latest.signal_hygiene?.status || null,
         severity: latest.signal_hygiene?.signal_hygiene?.severity || null,
         confidence_calibration: latest.signal_hygiene?.confidence_calibration || null,
+        operator_transparency: latest.signal_hygiene?.operator_transparency
+          ? {
+            version: latest.signal_hygiene.operator_transparency.version || null,
+            current_alert: latest.signal_hygiene.operator_transparency.level_1_status?.current_alert || null,
+            full_green_gate: latest.signal_hygiene.operator_transparency.level_3_foresight?.full_green_gate || null,
+            next_safe_action: latest.signal_hygiene.operator_transparency.level_3_foresight?.next_safe_action || null,
+          }
+          : null,
         failures: latest.signal_hygiene?.failures?.length ?? null,
       },
       doer_watcher_spine: {

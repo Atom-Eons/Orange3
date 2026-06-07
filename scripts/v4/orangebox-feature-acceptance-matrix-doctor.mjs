@@ -310,10 +310,22 @@ async function main() {
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run signal:hygiene",
-      acceptance_gate: "Signal hygiene receipt is green and popup_created_by_this_doctor=false.",
+      acceptance_gate: "Signal hygiene receipt is green, popup_created_by_this_doctor=false, and operator_transparency has status/rationale/foresight/after-action receipts.",
       rollback_path: "Revert alert/cadence report changes and rerun codexa:alert, health:report, project:report, signal:hygiene.",
       evidence: [
-        evidence(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json"), "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN"),
+        evidence(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json"), "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN"
+            && parsed?.constraints?.popup_created_by_this_doctor === false
+            && parsed?.operator_transparency?.version === "orangebox-operator-transparency/v1"
+            && Boolean(parsed?.operator_transparency?.level_1_status?.current_alert)
+            && Boolean(parsed?.operator_transparency?.level_2_rationale?.full_system_blocked_reason)
+            && Boolean(parsed?.operator_transparency?.level_3_foresight?.next_safe_action)
+            && Boolean(parsed?.operator_transparency?.after_action_review?.receipts?.health),
+          detail: (parsed) => ({
+            transparency_version: parsed?.operator_transparency?.version || null,
+            full_green_gate: parsed?.operator_transparency?.level_3_foresight?.full_green_gate || null,
+          }),
+        }),
       ],
       operator_approval_required: false,
     }),

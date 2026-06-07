@@ -173,7 +173,56 @@ async function main() {
     proof_basis: "receipt_and_probe_only",
   };
 
+  const operatorTransparency = {
+    version: "orangebox-operator-transparency/v1",
+    research_basis: "Human-autonomy transparency: status, rationale, foresight, and after-action receipts must be visible without flooding the operator.",
+    level_1_status: {
+      local_ops: confidenceCalibration.local_ops,
+      codexa: confidenceCalibration.codexa,
+      full_system: confidenceCalibration.full_system,
+      current_alert: status,
+      severity: hygiene.severity || null,
+    },
+    level_2_rationale: {
+      local_ops_green_reason: "Local backend proofs, command/API/STRONGARM listeners, skills, action classifier, memory truth, and receipts are green.",
+      full_system_blocked_reason: statusReady
+        ? "Codexa probes are ready; full-system proof is eligible but still requires its own gate."
+        : "Codexa command rail, Ollama, or remote control is not probe-green; full two-machine routing remains gated.",
+      model_inventory_reason: confidenceCalibration.model_inventory,
+    },
+    level_3_foresight: {
+      next_safe_action: statusReady
+        ? "Run system:full-green when the operator wants full distributed proof."
+        : "Run the OBOX2 setup pack on Codexa, then rerun codexa:alert, health:report, project:report, and ops:green.",
+      popup_policy: hygiene.alert_fatigue_policy || "Popup only on status change or cooldown.",
+      next_popup_after: hygiene.next_popup_after || null,
+      full_green_gate: statusReady ? "eligible" : "blocked_until_codexa_rail_ollama_remote_control_green",
+    },
+    after_action_review: {
+      receipts: {
+        alert: alertPath,
+        health: healthPath,
+        project: projectPath,
+        reality: realityPath,
+      },
+      rollback: [
+        "Revert alert/report/signal changes.",
+        "Rerun codexa:alert, health:report, project:report, reality:watch, and signal:hygiene.",
+      ],
+    },
+  };
+
   checks.push(check("confidence_calibration_visible", Object.values(confidenceCalibration).every(Boolean), confidenceCalibration));
+  checks.push(check("operator_transparency_lifecycle_visible",
+    operatorTransparency.version === "orangebox-operator-transparency/v1"
+    && Boolean(operatorTransparency.level_1_status.current_alert)
+    && Boolean(operatorTransparency.level_2_rationale.full_system_blocked_reason)
+    && Boolean(operatorTransparency.level_3_foresight.next_safe_action)
+    && Boolean(operatorTransparency.after_action_review.receipts.health), {
+      transparency_version: operatorTransparency.version,
+      current_alert: operatorTransparency.level_1_status.current_alert,
+      full_green_gate: operatorTransparency.level_3_foresight.full_green_gate,
+    }));
 
   const failures = checks.filter((row) => !row.ok).map((row) => row.id);
   const result = {
@@ -192,6 +241,7 @@ async function main() {
     },
     signal_hygiene: hygiene,
     confidence_calibration: confidenceCalibration,
+    operator_transparency: operatorTransparency,
     checks,
     failures,
     constraints: {
@@ -205,7 +255,7 @@ async function main() {
     next_action: failures.length === 0
       ? "Keep this doctor in the local Ops proof chain before changing popup, watcher, alert, or status-report behavior."
       : "Run codexa:alert, health:report, project:report, and reality:watch, then rerun signal:hygiene.",
-    proof_hash: sha256(JSON.stringify({ checks, status, confidenceCalibration })),
+    proof_hash: sha256(JSON.stringify({ checks, status, confidenceCalibration, operatorTransparency })),
   };
 
   const latestPath = path.join(outRoot, "latest-operator-signal-hygiene.json");

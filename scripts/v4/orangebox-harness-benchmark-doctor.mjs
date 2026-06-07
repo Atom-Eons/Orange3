@@ -398,6 +398,11 @@ const tasks = [
       if (signal?.constraints?.frontend_touched !== false) failures.push("Signal hygiene doctor must not touch frontend");
       if (signal?.constraints?.popup_created_by_this_doctor !== false) failures.push("Signal hygiene doctor must not create popups");
       if (!signal?.confidence_calibration?.local_ops) failures.push("Signal hygiene lacks confidence calibration");
+      if (signal?.operator_transparency?.version !== "orangebox-operator-transparency/v1") failures.push("Signal hygiene lacks operator transparency lifecycle");
+      if (!signal?.operator_transparency?.level_1_status?.current_alert) failures.push("Operator transparency lacks Level 1 status");
+      if (!signal?.operator_transparency?.level_2_rationale?.full_system_blocked_reason) failures.push("Operator transparency lacks Level 2 rationale");
+      if (!signal?.operator_transparency?.level_3_foresight?.next_safe_action) failures.push("Operator transparency lacks Level 3 foresight");
+      if (!signal?.operator_transparency?.after_action_review?.receipts?.health) failures.push("Operator transparency lacks after-action receipt links");
       if (!Array.isArray(signal?.checks) || signal.checks.length < 6) failures.push("Signal hygiene check count too low");
       if (Array.isArray(signal?.failures) && signal.failures.length > 0) failures.push(`Signal hygiene failures: ${signal.failures.join(", ")}`);
       return failures.length
@@ -410,6 +415,10 @@ const tasks = [
           checks: signal.checks.length,
           proof_hash: signal.proof_hash,
           confidence_calibration: signal.confidence_calibration,
+          operator_transparency: {
+            version: signal.operator_transparency.version,
+            full_green_gate: signal.operator_transparency.level_3_foresight.full_green_gate,
+          },
         });
     },
   },
