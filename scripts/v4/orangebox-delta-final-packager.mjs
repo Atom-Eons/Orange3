@@ -271,7 +271,8 @@ function backendPackageJson() {
       "package-script-doctor": "node ./scripts/v4/package-script-doctor.mjs --json --receipt",
       "pack:portable": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt",
       "final:package": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt",
-      "final:verify": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt --verify-install"
+      "final:verify": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt --verify-install",
+      "final:zip": "node ./scripts/v4/orangebox-final-download-zip.mjs --json --receipt"
     },
     engines: sourcePkg.engines || undefined,
   };

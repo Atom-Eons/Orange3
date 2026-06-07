@@ -605,8 +605,10 @@ const tasks = [
     budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
     run(trace) {
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
-      const finalPackage = readJson(latestReceipt("orangebox-delta-final-package-") || "", trace)
-        || readJson(path.join(repoRoot, "orangebox-delta-final-manifest.json"), trace);
+      const finalReceiptPath = latestReceipt("orangebox-delta-final-package-");
+      const finalPackage = finalReceiptPath
+        ? readJson(finalReceiptPath, trace)
+        : readJson(path.join(repoRoot, "orangebox-delta-final-manifest.json"), trace);
       const download = readJson(path.join(dataRoot, "downloads", "latest-orangebox-delta-final-download-zip.json"), trace);
       const failures = [];
       if (!packageJson?.scripts?.["final:zip"]?.includes("orangebox-final-download-zip.mjs")) failures.push("Package script final:zip missing or not wired to verifier");
