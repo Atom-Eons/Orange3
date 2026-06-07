@@ -140,6 +140,7 @@ async function runTask(task) {
 const requiredOpsScripts = [
   "backend:proof",
   "final:verify",
+  "final:zip",
   "health:report",
   "project:report",
   "research:scout",
@@ -195,7 +196,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "ipi-doctor", "memory-doctor"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "ipi-doctor", "memory-doctor"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -594,6 +595,40 @@ const tasks = [
           backend_frontend_required: backendInstall?.frontend_required_for_backend ?? (backendProofInProgress ? false : null),
           final_frontend_included: finalPackage?.frontend_included ?? frontendDirExists,
           final_evidence: finalPackage ? "receipt_or_manifest" : "frontend_dir_absence",
+        });
+    },
+  },
+  {
+    id: "final_download_zip_truth",
+    category: "scope_control",
+    oracle: "The final backend Downloads zip must be produced by a real command, hash-verified, archive-verified, and frontend-independent.",
+    budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
+    run(trace) {
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const finalPackage = readJson(latestReceipt("orangebox-delta-final-package-") || "", trace)
+        || readJson(path.join(repoRoot, "orangebox-delta-final-manifest.json"), trace);
+      const download = readJson(path.join(dataRoot, "downloads", "latest-orangebox-delta-final-download-zip.json"), trace);
+      const failures = [];
+      if (!packageJson?.scripts?.["final:zip"]?.includes("orangebox-final-download-zip.mjs")) failures.push("Package script final:zip missing or not wired to verifier");
+      if (finalPackage?.frontend_included !== false) failures.push("Final package receipt/manifest does not prove frontend_included=false");
+      if (finalPackage?.frontend_required_for_backend !== false) failures.push("Final package receipt/manifest does not prove frontend_required_for_backend=false");
+      if (download?.status !== "ORANGEBOX_DELTA_FINAL_DOWNLOAD_ZIP_GREEN") failures.push(`Download zip status wrong/missing: ${download?.status || "missing"}`);
+      if (download?.archive_verified !== true) failures.push("Download zip archive_verified=true missing");
+      if (!/^[a-f0-9]{64}$/.test(download?.sha256 || "")) failures.push("Download zip sha256 missing or invalid");
+      if (Number(download?.entries || 0) <= 500) failures.push(`Download zip entry count too low: ${download?.entries || 0}`);
+      if (download?.frontend_included !== false || download?.frontend_required_for_backend !== false) failures.push("Download zip receipt does not preserve frontend exclusion/backend independence");
+      return failures.length
+        ? failTask("final_download_zip_truth", failures, {
+          final_zip_script: packageJson?.scripts?.["final:zip"] || null,
+          status: download?.status || null,
+          entries: download?.entries || null,
+          zip_path: download?.zip_path || null,
+        })
+        : okTask("final_download_zip_truth", {
+          status: download.status,
+          entries: download.entries,
+          zip_path: download.zip_path,
+          sha256: download.sha256,
         });
     },
   },

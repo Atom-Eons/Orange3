@@ -134,6 +134,7 @@
     "pack:portable:native": "node ./scripts/pack-v6-portable.mjs",
     "final:package": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt",
     "final:verify": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt --verify-install",
+    "final:zip": "node ./scripts/v4/orangebox-final-download-zip.mjs --json --receipt",
     "package-script-doctor": "node ./scripts/v4/package-script-doctor.mjs --json --receipt",
     "network:ethereal-pack": "node ./scripts/obx.mjs network ethereal pack --storage-mode=Auto --receipt",
     "install:doctor": "node ./scripts/obx.mjs install doctor --json --receipt",

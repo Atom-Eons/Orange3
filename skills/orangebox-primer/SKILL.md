@@ -73,6 +73,8 @@ checkmate-eval       verify eval gates before prompt/model/routing/tool changes
 signal-hygiene       verify alert cadence, severity labels, and confidence calibration
 session-spine        verify active doer surfaces plus watcher freshness and one-reality state
 feature-proof        verify feature claims have evidence, proof commands, and rollback truth
+final-verify         refresh and verify Orangebox Delta Final backend package
+final-zip            build and verify the Orangebox Delta Final Downloads zip
 codexa-alert         probe AI Box rails and write an explicit alert receipt
 codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
 codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default
@@ -267,8 +269,9 @@ A claim that Orangebox is green needs a receipt. Preferred proof levels:
 - local Ops backend install/proof: `npm.cmd run backend:proof`
 - local Ops green aggregate: `npm.cmd run ops:green`
 - final backend package proof: `npm.cmd run final:verify`
+- final backend Downloads zip: `npm.cmd run final:zip`
 - full two-machine/system proof: `npm.cmd run system:full-green`
 
-`ops:green` proves the local backend/Ops machine. `system:full-green` is the broad gate. It may remain red when Codexa/AI Box rails, Ollama, Hermes, or wider two-device lanes are not proven. Do not confuse that with the local Ops backend, which is judged by `ops:green`, `backend:proof`, `final:verify`, `health:report`, and `project:report`.
+`ops:green` proves the local backend/Ops machine. `system:full-green` is the broad gate. It may remain red when Codexa/AI Box rails, Ollama, Hermes, or wider two-device lanes are not proven. Do not confuse that with the local Ops backend, which is judged by `ops:green`, `backend:proof`, `final:verify`, `final:zip`, `health:report`, and `project:report`.
 
 Do not call something done unless the proof path is named.

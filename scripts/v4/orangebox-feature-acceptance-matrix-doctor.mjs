@@ -120,6 +120,7 @@ async function main() {
   const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
   const finalPackagePath = latestReceipt("orangebox-delta-final-package-");
   const finalManifestPath = path.join(repoRoot, "orangebox-delta-final-manifest.json");
+  const finalDownloadZipPath = path.join(dataRoot, "downloads", "latest-orangebox-delta-final-download-zip.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
   const terminalReceiptPath = latestReceipt("orangebox-powershell-profile-policy-", path.join(dataRoot, "profile-backups"));
 
@@ -557,9 +558,9 @@ async function main() {
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
-      proof_command: "npm.cmd run final:verify",
-      acceptance_gate: "Final package receipt or manifest proves frontend_included=false and frontend_required_for_backend=false.",
-      rollback_path: "Use the previous verified zip in Downloads or rebuild with final:verify.",
+      proof_command: "npm.cmd run final:verify && npm.cmd run final:zip",
+      acceptance_gate: "Final package receipt proves frontend_included=false/frontend_required_for_backend=false, and final Downloads zip receipt proves archive_verified=true.",
+      rollback_path: "Use the previous verified zip in Downloads or rebuild with final:verify and final:zip.",
       evidence: [
         evidence(backendProofInProgress ? path.join(repoRoot, "package.json") : (finalPackagePath || finalManifestPath), null, {
           accept: (parsed) => backendProofInProgress
@@ -570,6 +571,21 @@ async function main() {
             frontend_required_for_backend: parsed?.frontend_required_for_backend ?? (backendProofInProgress ? false : null),
             final_verify_script: parsed?.scripts?.["final:verify"] || null,
             backend_proof_in_progress: backendProofInProgress,
+          }),
+        }),
+        evidence(finalDownloadZipPath, "ORANGEBOX_DELTA_FINAL_DOWNLOAD_ZIP_GREEN", {
+          accept: (parsed, status) => backendProofInProgress || (
+            status === "ORANGEBOX_DELTA_FINAL_DOWNLOAD_ZIP_GREEN" &&
+            parsed?.archive_verified === true &&
+            parsed?.frontend_included === false &&
+            parsed?.frontend_required_for_backend === false &&
+            Number(parsed?.entries || 0) > 500 &&
+            /^[a-f0-9]{64}$/.test(parsed?.sha256 || "")
+          ),
+          detail: (parsed) => ({
+            archive_verified: parsed?.archive_verified ?? null,
+            entries: parsed?.entries ?? null,
+            zip_path: parsed?.zip_path || null,
           }),
         }),
       ],

@@ -138,6 +138,16 @@ $commands = [ordered]@{
     args = @("run", "feature:proof")
     description = "Verify every Orangebox feature claim has status, evidence, proof command, and rollback or recovery truth."
   }
+  "final-verify" = @{
+    kind = "npm"
+    args = @("run", "final:verify")
+    description = "Refresh and verify Orangebox Delta Final backend install package."
+  }
+  "final-zip" = @{
+    kind = "npm"
+    args = @("run", "final:zip")
+    description = "Build and verify the Orangebox Delta Final Downloads zip."
+  }
   "codexa-alert" = @{
     kind = "npm"
     args = @("run", "codexa:alert")
