@@ -48,6 +48,7 @@ const requiredProofScripts = [
   "model:inventory",
   "codexa:handoff",
   "codexa:access",
+  "codexa:remote-proof",
   "codexa:watch",
 ];
 
@@ -77,6 +78,7 @@ const requiredSkillCommands = [
   "model-inventory",
   "codexa-alert",
   "codexa-access",
+  "codexa-remote-proof",
   "codexa-watch",
   "codexa-smb-stage",
   "codexa-handoff",

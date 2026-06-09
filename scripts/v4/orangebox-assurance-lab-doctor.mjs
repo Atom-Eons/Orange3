@@ -345,10 +345,16 @@ async function main() {
     }),
     check("package_script_present", Boolean(packageJson.scripts?.["assurance:doctor"]), { script: packageJson.scripts?.["assurance:doctor"] || null }),
     check("playbook_has_required_gates", playbook.gates.length >= 6 && playbook.gates.some((gate) => gate.id === "no_auto_promotion") && playbook.gates.some((gate) => gate.id === "deterministic_validation_first"), { gate_ids: playbook.gates.map((gate) => gate.id) }),
-    check("project_preserves_backend_scope", backendProofInProgress || (project?.full_project_green === false && project?.evidence?.feature_proof?.path), {
+    check("project_preserves_backend_scope", backendProofInProgress || (
+      Boolean(project?.evidence?.feature_proof?.path) &&
+      project?.scope?.some((row) => row?.area === "Orangebox Ops backend" && ["REAL", "PARTIAL", "NONBLOCKING_ATTENTION"].includes(row?.status)) &&
+      project?.scope?.some((row) => row?.area === "Visual/frontend lane" && row?.status === "SEPARATE_LANE")
+    ), {
       local_ops_green: project?.local_ops_green ?? null,
       full_project_green: project?.full_project_green ?? null,
       feature_proof_path: project?.evidence?.feature_proof?.path || null,
+      backend_lane_status: project?.scope?.find((row) => row?.area === "Orangebox Ops backend")?.status || null,
+      visual_lane_status: project?.scope?.find((row) => row?.area === "Visual/frontend lane")?.status || null,
       backend_proof_in_progress: backendProofInProgress,
     }),
   ];

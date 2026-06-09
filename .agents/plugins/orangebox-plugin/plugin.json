@@ -1,0 +1,17 @@
+{
+  "name": "orangebox-plugin",
+  "version": "1.0.0",
+  "description": "Orangebox Version 1 backend Ops primer, command deck, and receipt-proof bridge.",
+  "author": {
+    "name": "AtomEons Systems Laboratory"
+  },
+  "license": "Commercial",
+  "keywords": [
+    "orangebox",
+    "obox",
+    "aecode",
+    "backend-ops",
+    "receipts",
+    "skills"
+  ]
+}

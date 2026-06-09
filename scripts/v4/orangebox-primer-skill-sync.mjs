@@ -25,9 +25,14 @@ const fixedTargets = [
   { id: "claude-user", app: "Claude Code / Claude user skill root", dir: path.join(userRoot, ".claude", "skills", "orangebox-primer"), type: "skill" },
   { id: "claude-desktop-appdata", app: "Claude Desktop app-data skill root", dir: path.join(appData, "Claude", "skills", "orangebox-primer"), type: "skill" },
   { id: "claude-3p-appdata", app: "Claude 3p app-data skill root", dir: path.join(appData, "Claude-3p", "skills", "orangebox-primer"), type: "skill" },
+  { id: "antigravity-global-config-skill", app: "Antigravity official global skill root", dir: path.join(userRoot, ".gemini", "config", "skills", "orangebox-primer"), type: "skill" },
   { id: "antigravity-gemini-plugin", app: "Antigravity / Gemini plugin skill root", dir: path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "orangebox-primer"), type: "skill" },
+  { id: "antigravity-cli-global-skill", app: "Antigravity CLI official global skill root", dir: path.join(userRoot, ".gemini", "antigravity-cli", "skills", "orangebox-primer"), type: "skill" },
+  { id: "antigravity-cli-plugin-skill", app: "Antigravity CLI plugin skill root", dir: path.join(userRoot, ".gemini", "antigravity-cli", "plugins", "orangebox-plugin", "skills", "orangebox-primer"), type: "skill" },
   { id: "antigravity-appdata", app: "Antigravity app-data skill root", dir: path.join(appData, "Antigravity", "skills", "orangebox-primer"), type: "skill" },
   { id: "gemini-user", app: "Gemini user skill root", dir: path.join(userRoot, ".gemini", "skills", "orangebox-primer"), type: "skill" },
+  { id: "antigravity-workspace-skill", app: "Antigravity workspace skill root", dir: path.join(repoRoot, ".agents", "skills", "orangebox-primer"), type: "skill" },
+  { id: "antigravity-workspace-plugin-skill", app: "Antigravity workspace plugin skill root", dir: path.join(repoRoot, ".agents", "plugins", "orangebox-plugin", "skills", "orangebox-primer"), type: "skill" },
   { id: "orangebox-repo", app: "Orangebox repo mirror", dir: path.join(repoRoot, "skills", "orangebox-primer"), type: "skill" },
 ];
 
@@ -39,7 +44,11 @@ const legacySkillRoots = [
   path.join(appData, "Claude-3p", "skills"),
   path.join(appData, "Antigravity", "skills"),
   path.join(userRoot, ".gemini", "skills"),
+  path.join(userRoot, ".gemini", "config", "skills"),
   path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills"),
+  path.join(userRoot, ".gemini", "antigravity-cli", "skills"),
+  path.join(repoRoot, ".agents", "skills"),
+  path.join(repoRoot, ".agents", "plugins", "orangebox-plugin", "skills"),
 ];
 
 const staleSkillPattern = /^(ae[-_ ]?0|ae0|ae[-_ ]?[1-9][0-9]?|ae[-_ ]?code|aecode|ae[-_ ]?factory|aefactory|ae[-_ ]?skill|aeskill|aeskills|old[-_ ]?orangebox|openclaw|open[-_ ]?claw)([-_ ].*)?$/i;
@@ -79,7 +88,11 @@ function moveLegacySkill(source) {
     path.join(appData, "Claude-3p", "skills").toLowerCase(),
     path.join(appData, "Antigravity", "skills").toLowerCase(),
     path.join(userRoot, ".gemini", "skills").toLowerCase(),
+    path.join(userRoot, ".gemini", "config", "skills").toLowerCase(),
     path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills").toLowerCase(),
+    path.join(userRoot, ".gemini", "antigravity-cli", "skills").toLowerCase(),
+    path.join(repoRoot, ".agents", "skills").toLowerCase(),
+    path.join(repoRoot, ".agents", "plugins", "orangebox-plugin", "skills").toLowerCase(),
   ];
   if (!allowedRoots.some((root) => lower.startsWith(root))) {
     throw new Error(`Refusing to move unexpected path: ${source}`);
@@ -115,6 +128,7 @@ function installedAppHints() {
     ["claude-3p", path.join(appData, "Claude-3p")],
     ["antigravity", path.join(appData, "Antigravity")],
     ["gemini", path.join(userRoot, ".gemini")],
+    ["antigravity-cli", path.join(userRoot, ".gemini", "antigravity-cli")],
     ["cursor", path.join(userRoot, ".cursor")],
     ["cursor-appdata", path.join(appData, "Cursor")],
     ["windsurf", path.join(userRoot, ".windsurf")],
@@ -123,8 +137,36 @@ function installedAppHints() {
   return candidates.map(([id, dir]) => ({ id, dir, detected: exists(dir) }));
 }
 
-function writeAntigravityRootSkill() {
-  const rootSkill = path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills", "SKILL.md");
+function writeAntigravityPluginFiles() {
+  const pluginRoots = [
+    {
+      id: "antigravity-global-plugin",
+      dir: path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin"),
+    },
+    {
+      id: "antigravity-cli-global-plugin",
+      dir: path.join(userRoot, ".gemini", "antigravity-cli", "plugins", "orangebox-plugin"),
+    },
+    {
+      id: "antigravity-workspace-plugin",
+      dir: path.join(repoRoot, ".agents", "plugins", "orangebox-plugin"),
+    },
+  ];
+
+  const written = [];
+  for (const plugin of pluginRoots) {
+    ensureDir(plugin.dir);
+    const pluginJson = path.join(plugin.dir, "plugin.json");
+    fs.writeFileSync(pluginJson, `${JSON.stringify({
+      name: "orangebox-plugin",
+      version: "1.0.0",
+      description: "Orangebox Version 1 backend Ops primer, command deck, and receipt-proof bridge.",
+      author: { name: "AtomEons Systems Laboratory" },
+      license: "Commercial",
+      keywords: ["orangebox", "obox", "aecode", "backend-ops", "receipts", "skills"],
+    }, null, 2)}\n`, "utf8");
+
+    const rootSkill = path.join(plugin.dir, "skills", "SKILL.md");
   ensureDir(path.dirname(rootSkill));
   let backedUp = null;
   if (exists(rootSkill)) {
@@ -151,14 +193,75 @@ Default action:
 2. Confirm whether the task is backend Ops, primer, ChatBackup, AECode contract, gauntlet, receipt, model routing, worktree, deploy intake, or incoming module intake.
 3. Do not start visual, store, website, deployment, or broad app generation without explicit operator approval.
 
+For Antigravity itself, prefer the CWD-safe launcher:
+
+\`\`\`powershell
+cd C:\\AtomEons\\orangebox-delta
+npm.cmd run antigravity:launch
+\`\`\`
+
 AECode is the middle voice for writing final output contracts. React, Flutter, Slint, ImGui, Wails/Tauri, docs, tests, screenshots, and deployments are output targets, not the master.
 `;
   fs.writeFileSync(rootSkill, body, "utf8");
-  return { rootSkill, backedUp };
+    written.push({ ...plugin, plugin_json: pluginJson, rootSkill, backedUp });
+  }
+  return written;
 }
 
 function writeRuleAdapters() {
   const adapters = [];
+  const antigravityGlobalRule = path.join(userRoot, ".gemini", "GEMINI.md");
+  ensureDir(path.dirname(antigravityGlobalRule));
+  const antigravityGlobalBody = `# Orangebox Global Rule
+
+When the user says Orangebox, OBox, OB0X, AECode, AtomEons, system proof, gauntlet, receipt, Codexa, STRONGARM, Misfits, AtomSmasher, or backend Ops, treat the request as Orangebox Version 1 backend operations work.
+
+Load the Orangebox primer skill before acting:
+
+- C:\\Users\\a\\.gemini\\config\\skills\\orangebox-primer\\SKILL.md
+- C:\\AtomEons\\orangebox-delta\\skills\\orangebox-primer\\SKILL.md
+
+First move: run or summarize the Orangebox system check. Default lane is backend Ops. Do not edit frontend, website, store, or visual/product lanes unless the operator explicitly authorizes that lane in the current chat.
+`;
+  let globalRuleBackup = null;
+  if (exists(antigravityGlobalRule)) {
+    const current = fs.readFileSync(antigravityGlobalRule, "utf8");
+    if (!current.includes("# Orangebox Global Rule")) {
+      globalRuleBackup = path.join(backupRoot, "gemini-GEMINI.md");
+      ensureDir(path.dirname(globalRuleBackup));
+      fs.copyFileSync(antigravityGlobalRule, globalRuleBackup);
+    }
+  }
+  fs.writeFileSync(antigravityGlobalRule, antigravityGlobalBody, "utf8");
+  adapters.push({ id: "antigravity-global-gemini-rule", file: antigravityGlobalRule, backed_up_to: globalRuleBackup });
+
+  const antigravityRuleDirs = [
+    path.join(repoRoot, ".agents", "rules"),
+    path.join(repoRoot, ".agent", "rules"),
+  ];
+  for (const rulesDir of antigravityRuleDirs) {
+    ensureDir(rulesDir);
+    const file = path.join(rulesDir, "orangebox-primer.md");
+    const body = `---
+description: Always apply for Orangebox/OBox/AECode/backend Ops requests.
+alwaysApply: true
+---
+
+# Orangebox Version 1 Backend Ops
+
+When the user says Orangebox, OBox, OB0X, AECode, AtomEons, system proof, gauntlet, receipt, Codexa, STRONGARM, Misfits, AtomSmasher, or backend Ops:
+
+1. Load \`../skills/orangebox-primer/SKILL.md\`.
+2. Run or summarize the Orangebox system check.
+3. Keep the active lane as Orangebox Ops backend.
+4. Do not edit frontend, website, store, or visual/product lanes unless the operator explicitly authorizes that lane.
+5. Proof before report. Receipts over vibes.
+6. When opening Antigravity for Orangebox work, launch from the repo root with \`npm.cmd run antigravity:launch\` so workspace paths, rules, skills, and MCP configs resolve from Orangebox instead of the user home directory.
+`;
+    fs.writeFileSync(file, body, "utf8");
+    adapters.push({ id: `antigravity-workspace-rule-${path.basename(path.dirname(rulesDir))}`, file });
+  }
+
   const cursorDir = path.join(userRoot, ".cursor");
   if (exists(cursorDir)) {
     const rulesDir = path.join(cursorDir, "rules");
@@ -219,7 +322,7 @@ function main() {
     synced.push({ ...target, destination: target.dir, backed_up_to: backedUp, copied });
   }
 
-  const antigravityRoot = writeAntigravityRootSkill();
+  const antigravityPlugins = writeAntigravityPluginFiles();
   const ruleAdapters = writeRuleAdapters();
   const chatPrimer = mirrorChatPrimer();
 
@@ -233,7 +336,7 @@ function main() {
     synced,
     rule_adapters: ruleAdapters,
     moved_legacy: movedLegacy,
-    antigravity_root: antigravityRoot,
+    antigravity_plugins: antigravityPlugins,
     chat_primer: chatPrimer,
     backup_root: backupRoot,
     note: "Orangebox primer installed into Codex/OpenAI, shared agents, Claude, Claude Desktop app data, Antigravity/Gemini, and repo mirrors. Cursor/Windsurf get rule adapters when present because they do not use SKILL.md the same way.",

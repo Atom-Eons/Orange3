@@ -511,7 +511,7 @@ async function main() {
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run codexa:handoff",
-      acceptance_gate: "Handoff is valid, names RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd, references the verified OBOX2 zip, proves the embedded backend payload, includes cockpit proof commands, and refuses full-system green while open gaps remain.",
+      acceptance_gate: "Handoff is valid, names RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd, references the verified OBOX2 zip, proves the embedded backend payload, includes cockpit proof commands, and refuses full-system green while blocking gaps remain.",
       rollback_path: "Revert Codexa handoff command/doctor wiring and rerun codexa:handoff, feature:proof, project:report, and harness:benchmark.",
       evidence: [
         evidence(path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json"), null, {
@@ -523,15 +523,17 @@ async function main() {
             && parsed?.backend_payload?.frontend_required_for_backend === false
             && parsed?.codexa_run_order?.[0]?.command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd"
             && parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:access")
+            && parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:remote-proof")
             && parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch")
             && parsed?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")
-            && (parsed?.open_gap_count > 0 ? parsed?.full_system_green_claim_allowed === false : true),
+            && (parsed?.full_system_green_claim_allowed !== true || Number(parsed?.critical_gap_count || 0) === 0),
           detail: (parsed) => ({
             open_gap_count: parsed?.open_gap_count ?? null,
             critical_gap_count: parsed?.critical_gap_count ?? null,
             first_click: parsed?.codexa_run_order?.[0]?.command || null,
             backend_payload_commit: parsed?.backend_payload?.source_commit || null,
             has_codexa_access: parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:access") || false,
+            has_codexa_remote_proof: parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:remote-proof") || false,
             has_codexa_watch: parsed?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch") || false,
           }),
         }),
@@ -546,7 +548,7 @@ async function main() {
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run codexa:watch",
       acceptance_gate: "Codexa bring-up watcher writes a receipt, preserves no-remote-mutation constraints, records status history, and separates report success from two-machine readiness.",
-      recovery_path: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa, then rerun codexa:watch, codexa:alert, model:inventory, ops:gaps, and ops:green.",
+      recovery_path: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa, then rerun codexa:remote-proof, codexa:watch, codexa:alert, model:inventory, ops:gaps, and ops:green.",
       evidence: [
         evidence(path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"), null, {
           accept: (parsed, status) => [
@@ -579,7 +581,7 @@ async function main() {
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run codexa:access",
       acceptance_gate: "Codexa access doctor writes a receipt, probes all access surfaces, preserves no-login/no-mutation constraints, and gives the exact next action from observed access.",
-      recovery_path: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa or restore RDP/WinRM/8097, then rerun codexa:access, codexa:watch, and ops:gaps.",
+      recovery_path: "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa or restore RDP/WinRM/8097, then rerun codexa:access, codexa:remote-proof, codexa:watch, and ops:gaps.",
       evidence: [
         evidence(path.join(dataRoot, "codexa-access", "latest-codexa-access.json"), null, {
           accept: (parsed, status) => [
@@ -611,6 +613,41 @@ async function main() {
             winrm: parsed?.access?.winrm ?? null,
             smb: parsed?.access?.smb ?? null,
             full_green_blocked: parsed?.interpretation?.full_green_blocked ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "codexa_remote_runtime_proof",
+      claim: "Orangebox can prove Codexa loopback-local Ollama, exact model tags, Hermes, Docker, and boot receipts through the command rail without exposing Ollama directly.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run codexa:remote-proof",
+      acceptance_gate: "Remote runtime proof writes a receipt, uses a read-only command through the token-gated rail, proves all expected model tags, and preserves no-install/no-mutation constraints.",
+      recovery_path: "If remote proof is not green, restore command rail token/8097 or rerun the OBOX2 setup pack on Codexa, then rerun codexa:remote-proof, model:inventory, trilane:doctor, and ops:gaps.",
+      evidence: [
+        evidence(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"), null, {
+          accept: (parsed, status) => status === "CODEXA_REMOTE_RUNTIME_GREEN"
+            && parsed?.codexa_remote_runtime_green === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.visual_lane_touched === false
+            && parsed?.constraints?.install_attempted === false
+            && parsed?.constraints?.remote_codexa_mutation_attempted === false
+            && parsed?.constraints?.remote_read_only_command_attempted === true
+            && parsed?.summary?.ollama_loopback_ok === true
+            && parsed?.summary?.expected_models_installed === parsed?.summary?.expected_models_total
+            && Array.isArray(parsed?.summary?.missing_models)
+            && parsed.summary.missing_models.length === 0
+            && parsed?.summary?.hermes_green === true,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            host: parsed?.summary?.host || null,
+            expected_models: `${parsed?.summary?.expected_models_installed ?? "?"}/${parsed?.summary?.expected_models_total ?? "?"}`,
+            missing_models: parsed?.summary?.missing_models || [],
+            hermes_green: parsed?.summary?.hermes_green ?? null,
+            docker_containers: parsed?.summary?.docker_containers ?? null,
           }),
         }),
       ],

@@ -37,6 +37,7 @@ const downloadsRoot = path.join(userRoot, "Downloads");
 const directIp = process.env.ORANGEBOX_CODEXA_DIRECT_IP || process.env.ORANGEBOX_AI_BOX_DIRECT_IP || "10.0.99.1";
 const lanIp = process.env.ORANGEBOX_CODEXA_IP || process.env.ORANGEBOX_AI_BOX_IP || "10.0.0.4";
 const cooldownMinutes = Number(process.env.ORANGEBOX_CODEXA_ALERT_COOLDOWN_MINUTES || 30);
+const remoteProofScript = path.join(repoRoot, "scripts", "v4", "codexa-remote-runtime-proof.mjs");
 
 function stamp(date = new Date()) {
   return date.toISOString().replace(/[-:]/g, "").replace(/\..+$/, "Z");
@@ -108,7 +109,7 @@ function probeTcp(host, port, timeoutMs = 900) {
 
 function buildMessage(status, probes) {
   if (status === "CODEXA_READY") {
-    return "Codexa/AI Box is reachable. Command rail and Ollama responded; heavy-lane routing can be considered after the model doctor is green.";
+    return "Codexa/AI Box is reachable. Command rail and Ollama/model proof responded; heavy-lane routing can be considered after the model doctor is green.";
   }
   if (status === "CODEXA_RECEIPTS_ONLY") {
     return "Codexa/AI Box receipt dashboard is reachable, but command rail or Ollama is down. Do not route heavy work to Codexa yet.";
@@ -117,6 +118,59 @@ function buildMessage(status, probes) {
     return "Codexa/AI Box command rail is reachable, but Ollama is down. Rail tasks may work; local model tasks need model setup.";
   }
   return "Orangebox cannot talk to Codexa/AI Box command/model rails. Local Basic Install still works; run the OBOX2 power, rail, and model setup pack on Codexa.";
+}
+
+function parseJsonFromStdout(stdout) {
+  const text = String(stdout || "").trim();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {}
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start >= 0 && end > start) {
+    try {
+      return JSON.parse(text.slice(start, end + 1));
+    } catch {}
+  }
+  return null;
+}
+
+async function runRemoteRuntimeProof(commandRailReachable, directOllamaReachable) {
+  if (!commandRailReachable) return { attempted: false, ok: false, reason: "command rail not reachable" };
+  if (directOllamaReachable) return { attempted: false, ok: false, reason: "direct Ollama already reachable" };
+  const started = Date.now();
+  try {
+    const { stdout, stderr } = await execFileAsync(process.execPath, [remoteProofScript, "--json", "--receipt"], {
+      cwd: repoRoot,
+      timeout: 70_000,
+      windowsHide: true,
+      maxBuffer: 2_000_000,
+      env: { ...process.env, ORANGEBOX_REPO_ROOT: repoRoot, ORANGEBOX_DATA_ROOT: dataRoot },
+    });
+    const parsed = parseJsonFromStdout(stdout);
+    return {
+      attempted: true,
+      ok: parsed?.codexa_remote_runtime_green === true,
+      status: parsed?.status || null,
+      duration_ms: Date.now() - started,
+      receipt_path: parsed?.receipt_path || null,
+      summary: parsed?.summary || null,
+      stderr_tail: String(stderr || "").slice(-600),
+    };
+  } catch (error) {
+    const parsed = parseJsonFromStdout(error.stdout);
+    return {
+      attempted: true,
+      ok: parsed?.codexa_remote_runtime_green === true,
+      status: parsed?.status || "CODEXA_REMOTE_PROOF_FAILED",
+      duration_ms: Date.now() - started,
+      receipt_path: parsed?.receipt_path || null,
+      summary: parsed?.summary || null,
+      error: error.message,
+      stderr_tail: String(error.stderr || "").slice(-600),
+    };
+  }
 }
 
 async function showPopup(title, message) {
@@ -236,7 +290,9 @@ async function main() {
 
   const commandOk = probes.direct_command_rail_8097.ok || probes.lan_command_rail_8097.ok;
   const receiptsOk = probes.direct_receipts_8099.ok || probes.lan_receipts_8099.ok;
-  const ollamaOk = probes.direct_ollama_11434.ok || probes.lan_ollama_11434.ok;
+  const directOllamaOk = probes.direct_ollama_11434.ok || probes.lan_ollama_11434.ok;
+  const remoteRuntimeProof = await runRemoteRuntimeProof(commandOk, directOllamaOk);
+  const ollamaOk = directOllamaOk || remoteRuntimeProof.ok;
   const wikiOk = probes.direct_wiki_bridge_8098.ok;
   const rdpOk = remote_control.direct_rdp_3389.ok || remote_control.lan_rdp_3389.ok;
   const winrmOk = remote_control.direct_winrm_5985.ok || remote_control.lan_winrm_5985.ok;
@@ -263,7 +319,7 @@ async function main() {
   if (!commandOk && !recoveryArtifacts.rail_recovery_pack.exists) nextActions.push("Run npm.cmd run codexa:rail-pack on this cockpit to generate the small Windows-native rail recovery zip.");
   if (!commandOk && recoveryArtifacts.rail_recovery_pack.exists) nextActions.push(`Rail recovery zip is ready at ${recoveryArtifacts.rail_recovery_pack.path}; copy it to Codexa and run RUN_ON_CODEXA_AS_ADMIN.cmd as Administrator if the larger OBOX2 pack is inconvenient.`);
   if (!commandOk && recoveryArtifacts.obox2_setup_pack.exists) nextActions.push(`Full OBOX2 setup pack is ready at ${recoveryArtifacts.obox2_setup_pack.path}. Manual fallback: RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd.`);
-  if (!ollamaOk) nextActions.push("After rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd and RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
+  if (!ollamaOk) nextActions.push("After rail proof is green, run npm.cmd run codexa:remote-proof. If Codexa loopback Ollama/models are still not green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd and RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (receiptsOk && !commandOk) nextActions.push("Receipts/dashboard rail is alive; focus on the 8097 command rail service before model pulls.");
   if (!commandOk && !rdpOk && !winrmOk) nextActions.push("RDP and WinRM are not reachable from this cockpit; Codexa cannot be repaired remotely from here until one access path is opened.");
   if (!commandOk && smbPortOpen && !winrmOk) nextActions.push("SMB port is visible on the LAN, but no remote execution path is proven. Do not call a repair complete until the 8097 rail answers.");
@@ -295,6 +351,8 @@ async function main() {
     wiki_bridge_reachable: wikiOk,
     receipts_reachable: receiptsOk,
     ollama_reachable: ollamaOk,
+    direct_ollama_reachable: directOllamaOk,
+    remote_runtime_proof: remoteRuntimeProof,
     remote_control_available: rdpOk || winrmOk,
     remote_execution_available: winrmOk,
     smb_port_visible: smbPortOpen,

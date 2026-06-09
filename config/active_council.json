@@ -1,0 +1,109 @@
+{
+  "version": "orangebox-active-council/v1",
+  "posture": "active_almost_always",
+  "doctrine": "Orangebox should feel alive: small lanes stay hot, specialists stay event-armed, heavy lanes wake with warrant.",
+  "pulse_interval_seconds": 180,
+  "stale_after_seconds": 600,
+  "warm_policy": {
+    "enabled": true,
+    "warm_on_pulse": true,
+    "max_parallel_warm": 1,
+    "memory_guard_free_gb_min": 22,
+    "remote_mutation": "runtime_keepalive_only",
+    "paid_api_allowed": false,
+    "frontend_touch_allowed": false,
+    "heavy_requires_warrant": true
+  },
+  "lanes": [
+    {
+      "id": "sentinel",
+      "role": "librarian_classifier",
+      "model": "qwen3:4b",
+      "state": "always_hot",
+      "keep_alive": "30m",
+      "warm_on_pulse": true,
+      "why": "Keeps the smallest useful brain awake for task triage and JSON packets."
+    },
+    {
+      "id": "strongarm",
+      "role": "draft_auditor",
+      "model": "qwen3:4b",
+      "state": "always_hot",
+      "keep_alive": "30m",
+      "warm_on_pulse": true,
+      "why": "Shares the sentinel model for cheap pass/rewrite/escalate/block pressure."
+    },
+    {
+      "id": "gremlin",
+      "role": "misfit_pressure",
+      "model": "dolphin3:8b",
+      "state": "always_hot",
+      "keep_alive": "20m",
+      "warm_on_pulse": true,
+      "why": "Keeps anti-fog pressure close to the operator instead of waiting for a manual request."
+    },
+    {
+      "id": "judgement",
+      "role": "local_ruler",
+      "model": "qwen3:30b-a3b",
+      "state": "warm",
+      "keep_alive": "12m",
+      "warm_on_pulse": true,
+      "why": "Keeps local synthesis warm for normal decisions without waking cloud models."
+    },
+    {
+      "id": "forge",
+      "role": "builder",
+      "model": "mistral-small:24b",
+      "state": "event_armed",
+      "keep_alive": "10m",
+      "warm_on_pulse": false,
+      "why": "Build lane wakes when a real artifact or backend patch is queued."
+    },
+    {
+      "id": "mirror",
+      "role": "logic_review",
+      "model": "deepseek-r1:32b",
+      "state": "event_armed",
+      "keep_alive": "10m",
+      "warm_on_pulse": false,
+      "why": "Mirror wakes for contradiction, receipt disputes, and proof failures."
+    },
+    {
+      "id": "wildcard",
+      "role": "hard_misfit_pressure",
+      "model": "llama3.1:8b-abliterated",
+      "state": "event_armed",
+      "keep_alive": "8m",
+      "warm_on_pulse": false,
+      "why": "Wildcard pressure is available, but never final authority."
+    },
+    {
+      "id": "large_general",
+      "role": "local_deep_architect",
+      "model": "llama3.3:70b",
+      "state": "warrant_only",
+      "keep_alive": "8m",
+      "warm_on_pulse": false,
+      "why": "Large local synthesis wakes only when the smaller council cannot settle the path."
+    },
+    {
+      "id": "heavy_mirror",
+      "role": "deep_truth_dispute",
+      "model": "deepseek-r1:70b",
+      "state": "warrant_only",
+      "keep_alive": "8m",
+      "warm_on_pulse": false,
+      "why": "Heavy Mirror wakes for hard proof disputes, not routine questions."
+    }
+  ],
+  "decision_flow": [
+    "sentinel checks request and current receipts",
+    "strongarm audits draft quality",
+    "gremlin pressures weak or evasive paths",
+    "forge wakes when a build artifact is actually needed",
+    "mirror wakes when proof or contradiction matters",
+    "judgement synthesizes packets into the next action",
+    "heavy/cloud lanes require warrant and operator approval"
+  ]
+}

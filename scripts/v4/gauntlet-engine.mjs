@@ -450,6 +450,7 @@ async function orangeboxFullGreen(missionId = DEFAULT_SYSTEM_MISSION_ID, {
 } = {}) {
   const startedAt = new Date().toISOString();
   const commandPlan = [
+    { id: "innovation_activation", script: "innovation:activate", timeout: 240_000 },
     { id: "ten_upgrade_finish", script: "ten:finish", timeout: 240_000 },
     { id: "inference_acceleration_doctor", script: "inference:doctor", timeout: 180_000 },
     ...(includeControlPlane ? [{ id: "control_plane_big", script: "control:big", timeout: 420_000 }] : []),

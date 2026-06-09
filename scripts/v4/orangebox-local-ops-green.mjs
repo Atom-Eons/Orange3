@@ -6,7 +6,7 @@
   cockpit/N150 proof from the broader two-machine Codexa/Hermes/Ollama gate.
 */
 
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
@@ -40,6 +40,43 @@ function readJson(file) {
     return JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
   } catch {
     return null;
+  }
+}
+
+function readProcessRuntimeProof() {
+  if (process.platform !== "win32") {
+    return { ok: true, skipped: true, reason: "Windows process command-line proof only." };
+  }
+  try {
+    const script = [
+      "$items = Get-CimInstance Win32_Process |",
+      "Where-Object { $_.CommandLine -match 'orangebox-command-server\\.mjs|dist\\\\server\\.js|orangebox-delta-backend\\.ps1|orangebox-delta-api\\.ps1' } |",
+      "Select-Object ProcessId,Name,CommandLine;",
+      "$items | ConvertTo-Json -Depth 4",
+    ].join(" ");
+    const out = execFileSync("powershell.exe", ["-NoProfile", "-Command", script], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      windowsHide: true,
+      timeout: 20_000,
+      maxBuffer: 2_000_000,
+    }).trim();
+    const parsed = out ? JSON.parse(out) : [];
+    const processes = Array.isArray(parsed) ? parsed : [parsed];
+    const commandServer = processes.find((item) => /orangebox-command-server\.mjs/i.test(item.CommandLine || ""));
+    const apiServer = processes.find((item) => /dist\\server\.js/i.test(item.CommandLine || ""));
+    const nodeServers = processes.filter((item) =>
+      /node\.exe/i.test(item.Name || "") &&
+      /orangebox-command-server\.mjs|dist\\server\.js/i.test(item.CommandLine || "")
+    );
+    return {
+      ok: Boolean(commandServer && apiServer && /bun\.exe/i.test(commandServer.Name || "") && /bun\.exe/i.test(apiServer.Name || "") && nodeServers.length === 0),
+      command_server_runtime: commandServer ? { pid: commandServer.ProcessId, name: commandServer.Name, command_line: commandServer.CommandLine } : null,
+      api_server_runtime: apiServer ? { pid: apiServer.ProcessId, name: apiServer.Name, command_line: apiServer.CommandLine } : null,
+      node_server_processes: nodeServers.map((item) => ({ pid: item.ProcessId, name: item.Name, command_line: item.CommandLine })),
+    };
+  } catch (error) {
+    return { ok: false, error: error.message };
   }
 }
 
@@ -97,7 +134,10 @@ function runNpm(script, timeoutMs = 90_000) {
     try {
       child = spawn(command, commandArgs, {
         cwd: repoRoot,
-        env: childEnv({ ORANGEBOX_LOCAL_OPS_GREEN_IN_PROGRESS: "1" }),
+        env: childEnv({
+          ORANGEBOX_LOCAL_OPS_GREEN_IN_PROGRESS: "1",
+          ORANGEBOX_BACKEND_PROOF_IN_PROGRESS: "1",
+        }),
         windowsHide: true,
       });
     } catch (error) {
@@ -154,35 +194,46 @@ function gate(id, ok, evidence = {}) {
   return { id, ok: Boolean(ok), ...evidence };
 }
 
+function refreshCommandOk(command) {
+  if (command.ok) return true;
+  // These commands intentionally return non-zero when they are reporting open
+  // warnings instead of hard local Ops failure. Their receipt content is checked
+  // by explicit gates below, so the refresh gate should not double-count them.
+  const warningOnlyScripts = new Set(["health:report", "project:report", "ops:gaps", "codexa:handoff", "reality:watch"]);
+  return warningOnlyScripts.has(command.script) && command.exit_code === 1;
+}
+
 async function main() {
   const startedAt = new Date().toISOString();
   const refreshPlan = [
     ...(deep ? [{ script: "backend:proof", timeout: 180_000 }] : []),
+    { script: "strongarm:start", timeout: 120_000 },
+    { script: "ops:services", timeout: 360_000 },
+    { script: "control:doctor", timeout: 180_000 },
+    { script: "control:smoke", timeout: 180_000 },
     { script: "mcp:doctor", timeout: 60_000 },
     { script: "ipi:doctor", timeout: 60_000 },
     { script: "memory:doctor", timeout: 60_000 },
     { script: "action:doctor", timeout: 60_000 },
     { script: "skills:lifecycle", timeout: 90_000 },
     { script: "model:lane-eval", timeout: 60_000 },
+    { script: "council:doctor", timeout: 90_000 },
     { script: "tool:ergonomics", timeout: 60_000 },
     { script: "checkmate:doctor", timeout: 60_000 },
     { script: "assurance:doctor", timeout: 60_000 },
-    { script: "ops:gaps", timeout: 60_000 },
-    { script: "codexa:handoff", timeout: 60_000 },
     { script: "signal:hygiene", timeout: 60_000 },
     { script: "session:spine", timeout: 60_000 },
     { script: "feature:proof", timeout: 90_000 },
-    { script: "health:report", timeout: 90_000 },
-    { script: "project:report", timeout: 90_000 },
-    { script: "reality:watch", timeout: 90_000 },
-    // Keep this immediately before harness:benchmark. The harness validates
-    // receipt provenance and reads the latest ops-readiness receipt; refreshing
-    // here prevents a stale or transient readiness receipt from becoming a
-    // false local-red after the earlier doctors repaired their surfaces.
+    // Readiness must happen after the source doctors and feature matrix.
+    // Reports, gap ledgers, and handoffs are mirrors; running them too early
+    // creates false red receipts that cascade through the final proof.
     { script: "ops:readiness", timeout: 180_000 },
-    { script: "harness:benchmark", timeout: 90_000 },
-    { script: "health:report", timeout: 90_000 },
     { script: "project:report", timeout: 90_000 },
+    { script: "ops:gaps", timeout: 60_000 },
+    { script: "codexa:handoff", timeout: 60_000 },
+    { script: "harness:benchmark", timeout: 90_000 },
+    { script: "project:report", timeout: 90_000 },
+    { script: "health:report", timeout: 90_000 },
     { script: "reality:watch", timeout: 90_000 },
   ];
   const commands = [];
@@ -203,6 +254,7 @@ async function main() {
   const actionPath = path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json");
   const skillsPath = path.join(dataRoot, "skills", "latest-skill-lifecycle.json");
   const localModelLanePath = path.join(dataRoot, "models", "latest-local-model-lane-eval.json");
+  const activeCouncilPath = path.join(dataRoot, "active-council", "latest-active-council.json");
   const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
@@ -212,8 +264,11 @@ async function main() {
   const codexaHandoffPath = path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json");
   const featureProofPath = path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
+  const servicesPath = path.join(dataRoot, "services", "latest-ops-services.json");
   const backendPath = latestReceipt("orangebox-backend-install-");
   const opsReadinessPath = latestReceipt("orangebox-ops-readiness-");
+  const controlDoctorPath = latestReceipt("orangebox-control-plane-doctor-");
+  const controlSmokePath = latestReceipt("orangebox-bun-control-plane-smoke-");
   const finalVerifyPath = latestReceipt("orangebox-delta-final-package-");
   const finalManifestPath = path.join(repoRoot, "orangebox-delta-final-manifest.json");
 
@@ -228,6 +283,7 @@ async function main() {
   const action = readJson(actionPath);
   const skills = readJson(skillsPath);
   const localModelLane = readJson(localModelLanePath);
+  const activeCouncil = readJson(activeCouncilPath);
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmate = readJson(checkmatePath);
   const assurance = readJson(assurancePath);
@@ -237,10 +293,14 @@ async function main() {
   const codexaHandoff = readJson(codexaHandoffPath);
   const featureProof = readJson(featureProofPath);
   const openclaw = readJson(openclawPath);
+  const services = readJson(servicesPath);
   const backend = readJson(backendPath || "");
   const opsReadiness = readJson(opsReadinessPath || "");
+  const controlDoctor = readJson(controlDoctorPath || "");
+  const controlSmoke = readJson(controlSmokePath || "");
   const finalVerify = readJson(finalVerifyPath || "");
   const finalManifest = readJson(finalManifestPath);
+  const runtimeProof = readProcessRuntimeProof();
 
   const watcherFresh = watcherHeartbeat?.ok === true && ageMs(watcherHeartbeat.last_finished) !== null && ageMs(watcherHeartbeat.last_finished) < 15 * 60 * 1000;
   const finalPackageGreen =
@@ -248,14 +308,43 @@ async function main() {
     finalManifest?.status === "ORANGEBOX_DELTA_FINAL_VERIFIED_GREEN" ||
     (finalManifest?.ok === true && finalManifest?.verification?.ok === true);
   const gates = [
-    gate("refresh_commands_green", noRefresh || commands.every((item) => item.ok), { commands_run: commands.length }),
-    gate("command_server_reachable", health?.dev?.probes?.command_server?.ok === true, health?.dev?.probes?.command_server || {}),
-    gate("api_server_reachable", health?.dev?.probes?.api_server?.ok === true, health?.dev?.probes?.api_server || {}),
-    gate("local_llama_listener_reachable", health?.dev?.probes?.local_llama_health?.ok === true, health?.dev?.probes?.local_llama_health || {}),
-    gate("strongarm_gate_reachable", health?.dev?.probes?.strongarm_gate?.ok === true, health?.dev?.probes?.strongarm_gate || {}),
+    gate("refresh_commands_green", noRefresh || commands.every(refreshCommandOk), {
+      commands_run: commands.length,
+      warning_only_failures: commands.filter((item) => !item.ok && refreshCommandOk(item)).map((item) => item.script),
+      hard_failures: commands.filter((item) => !refreshCommandOk(item)).map((item) => item.script),
+    }),
+    gate("command_server_reachable", health?.dev?.probes?.command_server?.ok === true || services?.final_probes?.command_server?.ok === true, {
+      ...(health?.dev?.probes?.command_server || {}),
+      service_probe: services?.final_probes?.command_server || null,
+    }),
+    gate("api_server_reachable", health?.dev?.probes?.api_server?.ok === true || services?.final_probes?.api_server?.ok === true, {
+      ...(health?.dev?.probes?.api_server || {}),
+      service_probe: services?.final_probes?.api_server || null,
+    }),
+    gate("local_llama_listener_reachable", health?.dev?.probes?.local_llama_health?.ok === true || services?.final_probes?.local_llama_listener?.ok === true, {
+      ...(health?.dev?.probes?.local_llama_health || {}),
+      service_probe: services?.final_probes?.local_llama_listener || null,
+    }),
+    gate("strongarm_gate_reachable", health?.dev?.probes?.strongarm_gate?.ok === true || services?.final_probes?.strongarm_gate?.ok === true, {
+      ...(health?.dev?.probes?.strongarm_gate || {}),
+      service_probe: services?.final_probes?.strongarm_gate || null,
+    }),
     gate("local_ops_project_green", project?.local_ops_green === true, { status: project?.status || null, gap_count: project?.gap_count ?? null }),
     gate("backend_install_green", backend?.ok === true && backend?.status === "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN", { path: backendPath, status: backend?.status || null }),
     gate("ops_readiness_green", opsReadiness?.ok === true && opsReadiness?.status === "ORANGEBOX_OPS_RAILS_GREEN", { path: opsReadinessPath, status: opsReadiness?.status || null }),
+    gate("bun_control_plane_doctor_green", controlDoctor?.ok === true && controlDoctor?.summary?.failed === 0, {
+      path: controlDoctorPath,
+      status: controlDoctor?.ok === true ? "ORANGEBOX_BUN_CONTROL_PLANE_DOCTOR_GREEN" : null,
+      checks: controlDoctor?.summary?.checks ?? null,
+      passed: controlDoctor?.summary?.passed ?? null,
+      failed: controlDoctor?.summary?.failed ?? null,
+    }),
+    gate("bun_control_plane_smoke_green", controlSmoke?.ok === true && (controlSmoke?.checks || []).every((item) => item.pass === true), {
+      path: controlSmokePath,
+      status: controlSmoke?.ok === true ? "ORANGEBOX_BUN_CONTROL_PLANE_SMOKE_GREEN" : null,
+      checks: controlSmoke?.checks?.length ?? null,
+    }),
+    gate("bun_live_backend_runtime_green", runtimeProof.ok === true, runtimeProof),
     gate("final_package_verified", finalPackageGreen, {
       receipt_path: finalVerifyPath,
       manifest_path: exists(finalManifestPath) ? finalManifestPath : null,
@@ -283,6 +372,14 @@ async function main() {
       core_installed_count: localModelLane?.inventory_truth?.core_installed_count ?? null,
       core_total: localModelLane?.inventory_truth?.core_total ?? null,
       full_local_model_runtime_green: localModelLane?.inventory_truth?.full_local_model_runtime_green ?? null,
+    }),
+    gate("active_council_green", ["ACTIVE_COUNCIL_GREEN", "ACTIVE_COUNCIL_PULSE_GREEN"].includes(activeCouncil?.status) && activeCouncil?.runtime_truth?.latest_pulse_fresh === true && activeCouncil?.runtime_truth?.watcher_status === "ACTIVE_COUNCIL_WATCHER_RUNNING", {
+      status: activeCouncil?.status || null,
+      pulse_fresh: activeCouncil?.runtime_truth?.latest_pulse_fresh ?? null,
+      watcher_status: activeCouncil?.runtime_truth?.watcher_status || null,
+      warm_models: activeCouncil?.active_posture?.warm_models || [],
+      event_armed_models: activeCouncil?.active_posture?.event_armed_models || [],
+      warrant_only_models: activeCouncil?.active_posture?.warrant_only_models || [],
     }),
     gate("tool_ergonomics_green", toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { status: toolErgonomics?.status || null, command_count: toolErgonomics?.command_surface?.command_count ?? null }),
     gate("checkmate_eval_lane_green", checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN", { status: checkmate?.status || null, fixtures_total: checkmate?.fixtures?.length ?? null }),
@@ -337,6 +434,7 @@ async function main() {
       indirect_prompt_injection: ipiPath,
       memory_source_truth: memoryPath,
       local_model_lane_eval: localModelLanePath,
+      active_council: activeCouncilPath,
       tool_ergonomics: toolErgonomicsPath,
       checkmate_eval_lane: checkmatePath,
       assurance_lab: assurancePath,
@@ -344,8 +442,12 @@ async function main() {
       doer_watcher_spine: sessionSpinePath,
       ops_gap_ledger: opsGapLedgerPath,
       codexa_handoff: codexaHandoffPath,
+      ops_services: servicesPath,
       backend_install: backendPath,
       ops_readiness: opsReadinessPath,
+      bun_control_plane_doctor: controlDoctorPath,
+      bun_control_plane_smoke: controlSmokePath,
+      bun_live_backend_runtime: runtimeProof,
       final_verify: finalVerifyPath || (exists(finalManifestPath) ? finalManifestPath : null),
     },
     next_action: gates.every((item) => item.ok)

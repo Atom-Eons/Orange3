@@ -15,8 +15,8 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 
 ## Tool Surface
 
-- Package scripts scanned: 132
-- Eligible backend tools: 99
+- Package scripts scanned: 152
+- Eligible backend tools: 119
 - Excluded visual/product tools: 20
 - Sleeping other tools: 13
 
@@ -25,6 +25,8 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 - `backend:install` -> proof_receipt, coverage_receipt, immune_scan, source_order_fence
 - `backend:proof` -> proof_receipt, coverage_receipt, immune_scan, source_order_fence
 - `mcp:doctor` -> proof_receipt, coverage_receipt
+- `ipi:doctor` -> proof_receipt, coverage_receipt
+- `memory:doctor` -> proof_receipt, coverage_receipt
 - `action:doctor` -> proof_receipt, coverage_receipt
 - `knowledge` -> commitment_atom
 - `knowledge:v1` -> commitment_atom
@@ -32,23 +34,21 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 - `knowledge:repo` -> commitment_atom
 - `knowledge:improvements` -> commitment_atom
 - `research:scout` -> commitment_atom
+- `research:radar` -> commitment_atom
+- `assurance:doctor` -> proof_receipt, coverage_receipt
+- `tool:ergonomics` -> proof_receipt, coverage_receipt
+- `checkmate:doctor` -> proof_receipt, coverage_receipt
+- `signal:hygiene` -> proof_receipt, coverage_receipt
+- `session:spine` -> proof_receipt, coverage_receipt
+- `feature:proof` -> proof_receipt, coverage_receipt
 - `harness:benchmark` -> proof_receipt, coverage_receipt
-- `provider-watch` -> routing_engine, runtime_profile, agent_lease
-- `provider-watch:repo` -> routing_engine, runtime_profile, agent_lease
-- `awareness:update` -> routing_engine, runtime_profile, agent_lease
-- `alpha:intake` -> commitment_atom
-- `alpha:sources` -> proof_receipt, coverage_receipt
-- `innovation:synthesis` -> proof_receipt, coverage_receipt
-- `innovation:activate` -> proof_receipt, coverage_receipt
-- `ten:finish` -> proof_receipt, coverage_receipt
-- `clc:doctor` -> proof_receipt, coverage_receipt
 
 ## AtomSmasher Proof
 
 - Feature registry: 620
 - Schema version: 10
 - Compile route: cache_answer
-- Saved tokens proxy: 9534
+- Saved tokens proxy: 5726
 - Security scan: clean
 
 ## Outputs

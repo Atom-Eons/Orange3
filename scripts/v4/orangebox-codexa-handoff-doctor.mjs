@@ -69,12 +69,14 @@ function fileSummary(file) {
 }
 
 async function writeJson(file, value) {
-  await fsp.mkdir(path.dirname(file), { recursive: true });
+  const dir = path.dirname(file);
+  if (!exists(dir)) await fsp.mkdir(dir, { recursive: true });
   await fsp.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
 async function writeText(file, value) {
-  await fsp.mkdir(path.dirname(file), { recursive: true });
+  const dir = path.dirname(file);
+  if (!exists(dir)) await fsp.mkdir(dir, { recursive: true });
   await fsp.writeFile(file, `${String(value).trimEnd()}\n`, "utf8");
 }
 
@@ -174,6 +176,7 @@ async function main() {
   const backendPayloadSource = obox2Pack?.backend_payload || obox2Doctor?.json_config?.backend_payload || {};
   const openGaps = (gapLedger?.gaps || []).map(compactGap);
   const criticalGaps = openGaps.filter((gap) => gap.severity === "critical");
+  const blockingGaps = openGaps.filter((gap) => gap.blocks_full_system_green === true || gap.severity === "critical");
   const localOpsGreen = project?.local_ops_green === true || finalPackage?.status === "ORANGEBOX_DELTA_FINAL_VERIFIED_GREEN";
   const setupZip = fileSummary(setupZipPath);
   const requiredLaunchers = [
@@ -190,6 +193,7 @@ async function main() {
   const missingLaunchers = requiredLaunchers.filter((name) => !presentFiles.has(name));
   const cockpitVerifyCommands = [
     "npm.cmd run codexa:access",
+    "npm.cmd run codexa:remote-proof",
     "npm.cmd run codexa:alert:popup",
     "npm.cmd run codexa:watch",
     "npm.cmd run model:inventory",
@@ -261,8 +265,8 @@ async function main() {
     { id: "gap_ledger_valid", ok: ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(gapLedger?.status) },
     { id: "first_click_named", ok: codexaRunOrder[0].command === "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd" },
     { id: "run_order_files_present", ok: presentFiles.has("RUN_THIS_FIRST_ON_CODEXA.txt") && presentFiles.has("CODEXA_RUN_ORDER.json") },
-    { id: "cockpit_verify_commands_present", ok: cockpitVerifyCommands.length >= 7 && cockpitVerifyCommands.includes("npm.cmd run codexa:access") && cockpitVerifyCommands.includes("npm.cmd run codexa:watch") && cockpitVerifyCommands.includes("npm.cmd run ops:gaps") },
-    { id: "no_false_full_green", ok: gapLedger?.full_system_green_claim_allowed !== true || openGaps.length === 0 },
+    { id: "cockpit_verify_commands_present", ok: cockpitVerifyCommands.length >= 8 && cockpitVerifyCommands.includes("npm.cmd run codexa:access") && cockpitVerifyCommands.includes("npm.cmd run codexa:remote-proof") && cockpitVerifyCommands.includes("npm.cmd run codexa:watch") && cockpitVerifyCommands.includes("npm.cmd run ops:gaps") },
+    { id: "no_false_full_green", ok: gapLedger?.full_system_green_claim_allowed !== true || blockingGaps.length === 0 },
   ];
   const failures = checks.filter((check) => !check.ok);
   const status = failures.length === 0
@@ -289,7 +293,7 @@ async function main() {
       production_deploy_attempted: false,
     },
     local_ops_green: Boolean(localOpsGreen),
-    full_system_green_claim_allowed: openGaps.length === 0 && gapLedger?.full_system_green_claim_allowed === true,
+    full_system_green_claim_allowed: blockingGaps.length === 0 && gapLedger?.full_system_green_claim_allowed === true,
     open_gap_count: openGaps.length,
     critical_gap_count: criticalGaps.length,
     setup_zip: setupZip,

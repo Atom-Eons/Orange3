@@ -1,7 +1,7 @@
 mission_id: orangebox-main-system-v0
 title: Orangebox Main System v0
 intent: Turn Orangebox into a receipt-backed local-first AI build organism without mutating current visuals.
-target_repo: C:\AtomEons\orangebox
+target_repo: C:\AtomEons\orangebox-delta
 target_files:
   - package.json
   - scripts/v4/gauntlet-engine.mjs
@@ -27,9 +27,13 @@ acceptance_tests:
   - npm.cmd run aecode:format
   - npm.cmd run gauntlet:fast
   - npm.cmd run gauntlet:security
-  - npm.cmd run machine:test-drive
+  - npm.cmd run innovation:activate
+  - npm.cmd run ten:finish
+  - npm.cmd run four:doctor
+  - npm.cmd run aecode:schemas
+  - npm.cmd run aecode:compile
 visual_required: false
 visual_policy: current_visual_build_paused; AECode governs visuals, it does not force redesign
 approval_required: true
-created_at: 2026-06-06T16:37:03.114Z
+created_at: 2026-06-08T04:52:12.375Z
 status: IN_PROGRESS

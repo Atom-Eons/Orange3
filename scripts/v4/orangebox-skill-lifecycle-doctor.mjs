@@ -33,8 +33,13 @@ const activeRoots = [
   { id: "claude-desktop", root: path.join(appData, "Claude", "skills"), required: true },
   { id: "claude-3p", root: path.join(appData, "Claude-3p", "skills"), required: true },
   { id: "antigravity-appdata", root: path.join(appData, "Antigravity", "skills"), required: true },
+  { id: "antigravity-global-config", root: path.join(userRoot, ".gemini", "config", "skills"), required: true },
+  { id: "antigravity-cli-global", root: path.join(userRoot, ".gemini", "antigravity-cli", "skills"), required: true },
+  { id: "antigravity-workspace", root: path.join(repoRoot, ".agents", "skills"), required: true },
   { id: "gemini", root: path.join(userRoot, ".gemini", "skills"), required: true },
   { id: "antigravity-plugin", root: path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "skills"), required: true },
+  { id: "antigravity-cli-plugin", root: path.join(userRoot, ".gemini", "antigravity-cli", "plugins", "orangebox-plugin", "skills"), required: true },
+  { id: "antigravity-workspace-plugin", root: path.join(repoRoot, ".agents", "plugins", "orangebox-plugin", "skills"), required: true },
 ];
 
 const staleNames = new Set([
@@ -92,6 +97,7 @@ const requiredCommands = [
   { name: "codexa-alert", kind: "npm", script: "codexa:alert" },
   { name: "codexa-alert-popup", kind: "npm", script: "codexa:alert:popup" },
   { name: "codexa-access", kind: "npm", script: "codexa:access" },
+  { name: "codexa-remote-proof", kind: "npm", script: "codexa:remote-proof" },
   { name: "codexa-watch", kind: "npm", script: "codexa:watch" },
   { name: "codexa-watch-popup", kind: "npm", script: "codexa:watch:popup" },
   { name: "codexa-smb-stage", kind: "npm", script: "codexa:smb-stage" },
@@ -101,6 +107,9 @@ const requiredCommands = [
   { name: "memory-doctor", kind: "npm", script: "memory:doctor" },
   { name: "action-doctor", kind: "npm", script: "action:doctor" },
   { name: "skills-lifecycle", kind: "npm", script: "skills:lifecycle" },
+  { name: "antigravity-doctor", kind: "npm", script: "antigravity:doctor" },
+  { name: "antigravity-launch", kind: "npm", script: "antigravity:launch" },
+  { name: "antigravity-launch-dry", kind: "npm", script: "antigravity:launch:dry" },
   { name: "obox2-pack", kind: "npm", script: "obox2:pack" },
   { name: "obox2-doctor", kind: "npm", script: "obox2:doctor" },
   { name: "openclaw-retire-dry", kind: "npm", script: "openclaw:retire:dry" },
@@ -200,6 +209,18 @@ async function main() {
     ? fs.readdirSync(commandReceiptRoot).filter((name) => name.endsWith(".json"))
     : [];
   const staleCount = roots.reduce((sum, root) => sum + root.stale_count, 0);
+  const antigravityOfficialProof = {
+    global_skill: exists(path.join(userRoot, ".gemini", "config", "skills", "orangebox-primer", "SKILL.md")),
+    cli_global_skill: exists(path.join(userRoot, ".gemini", "antigravity-cli", "skills", "orangebox-primer", "SKILL.md")),
+    workspace_skill: exists(path.join(repoRoot, ".agents", "skills", "orangebox-primer", "SKILL.md")),
+    global_plugin_manifest: exists(path.join(userRoot, ".gemini", "config", "plugins", "orangebox-plugin", "plugin.json")),
+    cli_plugin_manifest: exists(path.join(userRoot, ".gemini", "antigravity-cli", "plugins", "orangebox-plugin", "plugin.json")),
+    workspace_plugin_manifest: exists(path.join(repoRoot, ".agents", "plugins", "orangebox-plugin", "plugin.json")),
+    global_rule: exists(path.join(userRoot, ".gemini", "GEMINI.md")),
+    workspace_rule: exists(path.join(repoRoot, ".agents", "rules", "orangebox-primer.md")),
+    legacy_workspace_rule: exists(path.join(repoRoot, ".agent", "rules", "orangebox-primer.md")),
+  };
+  antigravityOfficialProof.ok = Object.values(antigravityOfficialProof).every(Boolean);
   const missingRootCount = roots.filter((root) => !root.ok).length;
   const missingCommandCount = commandChecks.filter((command) => !command.ok).length;
   const commandOkCount = commandChecks.filter((command) => command.ok).length;
@@ -210,6 +231,7 @@ async function main() {
     staleCount === 0 &&
     missingRootCount === 0 &&
     missingCommandCount === 0 &&
+    antigravityOfficialProof.ok &&
     commandChecks.length >= 25 &&
     wrapperMappingCount === commandChecks.length &&
     exists(commandReceiptRoot);
@@ -225,6 +247,7 @@ async function main() {
     wrapper_mapping_rate: Number((wrapperMappingCount / Math.max(1, commandChecks.length)).toFixed(4)),
     active_root_count: roots.length,
     active_roots_green: roots.filter((root) => root.ok).length,
+    antigravity_official_paths_green: antigravityOfficialProof.ok,
     stale_count: staleCount,
     receipt_surface_exists: exists(commandReceiptRoot),
     promotion_requirements: [
@@ -255,6 +278,7 @@ async function main() {
     roots,
     stale_count: staleCount,
     command_checks: commandChecks,
+    antigravity_official_proof: antigravityOfficialProof,
     command_count: commandChecks.length,
     command_failures: commandChecks.filter((command) => !command.ok),
     primer_sync_latest: {

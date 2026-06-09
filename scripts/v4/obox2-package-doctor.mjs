@@ -149,6 +149,7 @@ function validateJsonConfig(extractDir) {
       runOrder?.backend_payload?.sha256 === backendHash &&
       runOrder?.backend_payload?.frontend_required_for_backend === false &&
       (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:access") &&
+      (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:remote-proof") &&
       (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:alert:popup") &&
       (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:watch") &&
       (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run ops:green") &&
@@ -176,6 +177,7 @@ function validateJsonConfig(extractDir) {
       steps: Array.isArray(runOrder?.run_order) ? runOrder.run_order.length : 0,
       cockpit_verify_commands: Array.isArray(runOrder?.cockpit_verify_commands) ? runOrder.cockpit_verify_commands.length : 0,
       has_codexa_access: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:access"),
+      has_codexa_remote_proof: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:remote-proof"),
       has_codexa_alert_popup: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:alert:popup"),
       has_codexa_watch: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run codexa:watch"),
       has_ops_green: (runOrder?.cockpit_verify_commands || []).includes("npm.cmd run ops:green"),
@@ -262,6 +264,7 @@ function validateOperationalContracts(extractDir) {
   requirePattern(checks, startHere, "start_here_hermes_optional", /HERMES_AGENT_DOCTOR\.ps1' @\(\) \$false/i, "Start-here launcher treats Hermes doctor as optional.");
   requirePattern(checks, startHere, "start_here_receipt_written", /obox2-start-here-latest\.json/i, "Start-here launcher writes a stable receipt.");
   requirePattern(checks, startHere, "start_here_next_action_codexa_access", /npm\.cmd run codexa:access/i, "Start-here launcher tells cockpit to prove Codexa access surfaces.");
+  requirePattern(checks, startHere, "start_here_next_action_codexa_remote_proof", /npm\.cmd run codexa:remote-proof/i, "Start-here launcher tells cockpit to prove Codexa loopback-local runtime through the command rail.");
   requirePattern(checks, startHere, "start_here_next_action_codexa_watch", /npm\.cmd run codexa:watch/i, "Start-here launcher tells cockpit to run Codexa bring-up watch.");
 
   const modelInstaller = file("INSTALL_CODEXA_OBOX2_MODELS.ps1");
@@ -308,6 +311,7 @@ function validateOperationalContracts(extractDir) {
   requirePattern(checks, runOrder, "run_order_json_first_click", /"first_click"\s*:\s*"RUN_START_HERE_ON_CODEXA_AS_ADMIN\.cmd"/i, "Run-order JSON names the first-click launcher.");
   requirePattern(checks, runOrder, "run_order_json_cockpit_verify", /npm\.cmd run ops:green/i, "Run-order JSON includes cockpit verification commands.");
   requirePattern(checks, runOrder, "run_order_json_codexa_access", /npm\.cmd run codexa:access/i, "Run-order JSON includes focused Codexa access verification.");
+  requirePattern(checks, runOrder, "run_order_json_codexa_remote_proof", /npm\.cmd run codexa:remote-proof/i, "Run-order JSON includes command-rail remote runtime proof.");
   requirePattern(checks, runOrder, "run_order_json_codexa_watch", /npm\.cmd run codexa:watch/i, "Run-order JSON includes bounded Codexa bring-up watch verification.");
   requirePattern(checks, runOrder, "run_order_json_false_green_guard", /false_green_guard/i, "Run-order JSON preserves false-green guard.");
 
@@ -332,13 +336,12 @@ async function main() {
   if (!zipExists) failures.push(`Zip missing: ${zipPath}`);
 
   if (zipExists) {
-    await execFileAsync("powershell.exe", [
-      "-NoProfile",
-      "-ExecutionPolicy",
-      "Bypass",
-      "-Command",
-      `Expand-Archive -LiteralPath '${psSingle(zipPath)}' -DestinationPath '${psSingle(extractDir)}' -Force`,
-    ], { windowsHide: true, timeout: 120_000 });
+    await execFileAsync("tar.exe", [
+      "-xf",
+      zipPath,
+      "-C",
+      extractDir,
+    ], { windowsHide: true, timeout: 900_000 });
   }
 
   const present = zipExists ? fs.readdirSync(extractDir).filter((name) => fs.statSync(path.join(extractDir, name)).isFile()).sort() : [];

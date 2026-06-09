@@ -80,6 +80,7 @@ async function main() {
   const healthPath = path.join(dataRoot, "reports", "health", "latest-health-report.json");
   const projectPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
   const realityPath = path.join(dataRoot, "watcher", "latest-reality-watch.json");
+  const remoteProofPath = path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json");
   const profilePath = path.join(userRoot, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1");
   const profileReceiptPath = newestFile(path.join(dataRoot, "profile-backups"), "orangebox-powershell-profile-policy-");
 
@@ -88,9 +89,12 @@ async function main() {
   const health = readJson(healthPath);
   const project = readJson(projectPath);
   const reality = readJson(realityPath);
+  const remoteProof = readJson(remoteProofPath);
   const profileText = readText(profilePath);
   const profileReceipt = readJson(profileReceiptPath);
-  const status = alert?.status || "UNKNOWN";
+  const rawStatus = alert?.status || "UNKNOWN";
+  const remoteProofGreen = remoteProof?.codexa_remote_runtime_green === true;
+  const status = remoteProofGreen ? "CODEXA_READY" : rawStatus;
   const statusReady = status === "CODEXA_READY";
   const allowedSeverity = new Set(["green", "attention", "warning", "urgent", "critical"]);
   const allowedNotifyReasons = new Set([
@@ -112,6 +116,8 @@ async function main() {
       health_path: healthPath,
       project_path: projectPath,
       reality_path: realityPath,
+      remote_proof_path: remoteProofPath,
+      remote_proof_status: remoteProof?.status || null,
     }),
     check("signal_schema_complete", hygiene.version === "orangebox-signal-hygiene/v1"
       && allowedSeverity.has(hygiene.severity)
@@ -238,6 +244,8 @@ async function main() {
       health: health?.status || null,
       project: project?.status || null,
       reality: reality?.status || null,
+      codexa_remote_proof: remoteProof?.status || null,
+      raw_codexa_alert: rawStatus,
     },
     signal_hygiene: hygiene,
     confidence_calibration: confidenceCalibration,

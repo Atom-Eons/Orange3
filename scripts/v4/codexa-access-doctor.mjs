@@ -8,12 +8,16 @@
 */
 
 import crypto from "node:crypto";
+import { execFile } from "node:child_process";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 const args = new Set(process.argv.slice(2));
 const wantsJson = args.has("--json");
@@ -28,6 +32,7 @@ const outRoot = path.join(dataRoot, "codexa-access");
 const downloadsRoot = path.join(userRoot, "Downloads");
 const directIp = process.env.ORANGEBOX_CODEXA_DIRECT_IP || process.env.ORANGEBOX_AI_BOX_DIRECT_IP || "10.0.99.1";
 const lanIp = process.env.ORANGEBOX_CODEXA_IP || process.env.ORANGEBOX_AI_BOX_IP || "10.0.0.4";
+const remoteProofScript = path.join(repoRoot, "scripts", "v4", "codexa-remote-runtime-proof.mjs");
 
 function stamp(date = new Date()) {
   return date.toISOString().replace(/[-:]/g, "").replace(/\..+$/, "Z");
@@ -97,6 +102,58 @@ function pickStatus(access) {
   return "CODEXA_ACCESS_UNREACHABLE";
 }
 
+function parseJsonFromStdout(stdout) {
+  const text = String(stdout || "").trim();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {}
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start >= 0 && end > start) {
+    try {
+      return JSON.parse(text.slice(start, end + 1));
+    } catch {}
+  }
+  return null;
+}
+
+async function runRemoteRuntimeProof(commandRailReachable) {
+  if (!commandRailReachable) return { attempted: false, ok: false, reason: "command rail not reachable" };
+  const started = Date.now();
+  try {
+    const { stdout, stderr } = await execFileAsync(process.execPath, [remoteProofScript, "--json", "--receipt"], {
+      cwd: repoRoot,
+      timeout: 70_000,
+      windowsHide: true,
+      maxBuffer: 2_000_000,
+      env: { ...process.env, ORANGEBOX_REPO_ROOT: repoRoot, ORANGEBOX_DATA_ROOT: dataRoot },
+    });
+    const parsed = parseJsonFromStdout(stdout);
+    return {
+      attempted: true,
+      ok: parsed?.codexa_remote_runtime_green === true,
+      status: parsed?.status || null,
+      duration_ms: Date.now() - started,
+      receipt_path: parsed?.receipt_path || null,
+      summary: parsed?.summary || null,
+      stderr_tail: String(stderr || "").slice(-600),
+    };
+  } catch (error) {
+    const parsed = parseJsonFromStdout(error.stdout);
+    return {
+      attempted: true,
+      ok: parsed?.codexa_remote_runtime_green === true,
+      status: parsed?.status || "CODEXA_REMOTE_PROOF_FAILED",
+      duration_ms: Date.now() - started,
+      receipt_path: parsed?.receipt_path || null,
+      summary: parsed?.summary || null,
+      error: error.message,
+      stderr_tail: String(error.stderr || "").slice(-600),
+    };
+  }
+}
+
 function nextActions(status, access, setupPack) {
   const actions = [];
   if (status === "CODEXA_ACCESS_FULL_READY") {
@@ -148,10 +205,15 @@ async function main() {
 
   const http = Object.fromEntries(await Promise.all(httpEntries.map(async ([id, url]) => [id, await probeHttp(id, url)])));
   const tcp = Object.fromEntries(await Promise.all(tcpEntries.map(async ([id, host, port]) => [id, await probeTcp(id, host, port)])));
+  const directOllama = http.direct_ollama_11434.ok || http.lan_ollama_11434.ok;
+  const commandRail = http.direct_command_8097.ok || http.lan_command_8097.ok;
+  const remoteRuntimeProof = directOllama ? { attempted: false, ok: false, reason: "direct Ollama already reachable" } : await runRemoteRuntimeProof(commandRail);
   const access = {
-    command_rail: http.direct_command_8097.ok || http.lan_command_8097.ok,
+    command_rail: commandRail,
     receipts: http.direct_receipts_8099.ok || http.lan_receipts_8099.ok,
-    ollama: http.direct_ollama_11434.ok || http.lan_ollama_11434.ok,
+    ollama: directOllama || remoteRuntimeProof.ok,
+    direct_ollama: directOllama,
+    remote_ollama: remoteRuntimeProof.ok,
     rdp: tcp.direct_rdp_3389.ok || tcp.lan_rdp_3389.ok,
     winrm: tcp.direct_winrm_5985.ok || tcp.lan_winrm_5985.ok,
     smb: tcp.direct_smb_445.ok || tcp.lan_smb_445.ok,
@@ -177,6 +239,7 @@ async function main() {
       production_deploy_attempted: false,
     },
     access,
+    remote_runtime_proof: remoteRuntimeProof,
     probes: { http, tcp },
     setup_pack: setupPack,
     interpretation: {

@@ -159,7 +159,7 @@ function hasAiBoxOllamaProof(triadStatus) {
 async function pythonPackageVersions() {
   const code = [
     "import importlib.metadata as md, json",
-    "names=['vllm','sglang','torch','flashinfer-python']",
+    "names=['vllm','sglang','torch','flashinfer-python','tilelang','tile-kernels','dflash','transformers']",
     "out={}",
     "for name in names:",
     "    try: out[name]=md.version(name)",
@@ -405,6 +405,89 @@ function buildAdaptiveActions({ packages, endpoints, hardware, processes, codexa
   return actions;
 }
 
+function buildKernelAccelerationLane({ packages, hardware, noGpuAdaptiveMode }) {
+  const tilelangInstalled = Boolean(packages.tilelang);
+  const tileKernelsInstalled = Boolean(packages["tile-kernels"]);
+  const dflashInstalled = Boolean(packages.dflash);
+  const vllmInstalled = Boolean(packages.vllm);
+  const sglangInstalled = Boolean(packages.sglang);
+
+  const recommendations = [];
+  recommendations.push({
+    id: "tilert",
+    status: "not_orangebox_local_lane",
+    decision: "Do not install TileRT into Orangebox Version 1 local/Codexa Ops by default.",
+    reason: "TileRT is pinned to a full 8x NVIDIA B200 Linux node and exact CUDA/PyTorch ABI. It is not the consumer AI-box path.",
+    gate: "Only reconsider if Codexa is replaced by a Linux 8x B200 node and the operator explicitly chooses that enterprise lane.",
+  });
+  recommendations.push({
+    id: "tilelang",
+    status: tilelangInstalled ? "installed_candidate" : "candidate_not_installed",
+    decision: "Keep TileLang as the local kernel DSL candidate for future measured acceleration work.",
+    reason: "TileLang is the practical way to experiment with tiled/pipelined kernel methods on smaller GPU setups.",
+    gate: "Promotion requires a Codexa benchmark receipt proving correctness, hardware target, latency/tokens-per-second delta, and rollback.",
+  });
+  recommendations.push({
+    id: "tilekernels",
+    status: tileKernelsInstalled ? "installed_candidate" : "candidate_not_installed",
+    decision: "Treat TileKernels as a narrow DeepSeek/TileLang kernel library candidate, not a universal consumer install.",
+    reason: "The current public requirements are SM90/SM100 and CUDA 13.1+, so it is not automatically valid for every RTX/Windows AI box.",
+    gate: "Only activate when Codexa hardware and CUDA stack match the library requirements or a verified fork supports the installed GPU.",
+  });
+  recommendations.push({
+    id: "dflash",
+    status: dflashInstalled ? "installed_candidate" : "candidate_not_installed",
+    decision: "Prioritize DFlash only after vLLM or SGLang is proven on Codexa.",
+    reason: "DFlash is a runtime-level speculative decoding lane with vLLM/SGLang integration, so it belongs behind measured serving benchmarks.",
+    gate: "Promotion requires baseline vLLM/SGLang benchmark, DFlash benchmark, quality parity check, and STRONGARM/Mirror verification on real Orangebox prompt classes.",
+  });
+
+  const readyToBenchmark = hardware.has_nvidia_gpu && (vllmInstalled || sglangInstalled) && (dflashInstalled || tilelangInstalled || tileKernelsInstalled);
+  const deferredReason = noGpuAdaptiveMode
+    ? "This command host is in two-device adaptive mode. Kernel acceleration should be installed and tested on Codexa, not the N150 controller."
+    : hardware.has_nvidia_gpu
+      ? "No TileLang/DFlash candidate package is installed yet."
+      : "No local NVIDIA GPU was detected.";
+
+  return {
+    version: "orangebox-kernel-acceleration-lane/v1",
+    status: readyToBenchmark ? "KERNEL_ACCELERATION_READY_TO_BENCHMARK" : "KERNEL_ACCELERATION_CANDIDATE_DEFERRED",
+    doctrine: "TileRT-style ideas enter Orangebox through measured kernels and serving benchmarks, not claims. No acceleration lane is promoted without receipts.",
+    packages: {
+      tilelang: packages.tilelang || null,
+      tile_kernels: packages["tile-kernels"] || null,
+      dflash: packages.dflash || null,
+      vllm: packages.vllm || null,
+      sglang: packages.sglang || null,
+      torch: packages.torch || null,
+    },
+    claims_checked: {
+      tilert_consumer_downsize_exists: false,
+      tilert_default_orangebox_candidate: false,
+      tilelang_consumer_gpu_candidate: true,
+      tilekernels_universal_consumer_candidate: false,
+      dflash_serving_candidate: true,
+    },
+    ready_to_benchmark: readyToBenchmark,
+    deferred_reason: readyToBenchmark ? null : deferredReason,
+    promotion_gate: [
+      "Run on Codexa or another GPU host, not the N150 controller.",
+      "Capture baseline vLLM/SGLang or llama.cpp throughput and latency.",
+      "Capture accelerated TileLang/TileKernels/DFlash throughput and latency.",
+      "Prove output quality does not regress on Orangebox prompt classes.",
+      "Write receipt with install versions, hardware target, command lines, model ids, rollback path, and benchmark deltas.",
+      "Only then update routing weights or model lane policy.",
+    ],
+    recommended_order: [
+      "DFlash over proven vLLM/SGLang serving for immediate decode-speed experiments.",
+      "TileLang microbenchmarks for custom kernel learning and future optimization lanes.",
+      "TileKernels only when Codexa hardware/CUDA matches current requirements.",
+      "TileRT only for an enterprise 8x B200 Linux node.",
+    ],
+    recommendations,
+  };
+}
+
 async function writeReceipt(result) {
   await fs.mkdir(RECEIPTS_DIR, { recursive: true });
   const file = path.join(RECEIPTS_DIR, `orangebox-inference-acceleration-doctor-${stamp()}.json`);
@@ -473,6 +556,7 @@ export async function runInferenceAccelerationDoctor({ writeReceipt: shouldWrite
   const adaptiveActions = buildAdaptiveActions({ packages, endpoints, hardware, processes, codexaMode, triadStatus: effectiveTriadStatus, aiBoxRailProbes, llamaServerWhere });
   const noGpuAdaptiveMode = !hardware.has_nvidia_gpu && aiBoxHosts.length > 0;
   const actions = noGpuAdaptiveMode ? adaptiveActions : strictActions;
+  const kernelAccelerationLane = buildKernelAccelerationLane({ packages, hardware, noGpuAdaptiveMode });
   const blockers = actions.filter((action) => action.severity === "blocker");
   const installedRuntime = Boolean(packages.sglang || packages.vllm || llamaCppMtpProcess || llamaServerWhere.found || llamaCppEndpoint);
   const runningAcceleratedWithFlags = processes.some((proc) => {
@@ -524,11 +608,16 @@ export async function runInferenceAccelerationDoctor({ writeReceipt: shouldWrite
       ai_box_rail_reachable: aiBoxRailProbes.some((probe) => probe.reachable),
       ai_box_ollama_proven: hasAiBoxOllamaProof(effectiveTriadStatus),
       gpu_acceleration_deferred: noGpuAdaptiveMode,
+      kernel_acceleration_status: kernelAccelerationLane.status,
+      tilelang_installed: Boolean(packages.tilelang),
+      tile_kernels_installed: Boolean(packages["tile-kernels"]),
+      dflash_installed: Boolean(packages.dflash),
       installed_runtime_available: installedRuntime,
       running_backend_with_speculative_and_prefix_flags: runningAcceleratedWithFlags,
       blocker_count: blockers.length,
       action_count: actions.length,
     },
+    kernel_acceleration_lane: kernelAccelerationLane,
     binaries: {
       python: pythonWhere,
       vllm: vllmWhere,
@@ -566,6 +655,22 @@ export async function runInferenceAccelerationDoctor({ writeReceipt: shouldWrite
     actions_required: actions,
     blockers,
     references: [
+      {
+        title: "TileRT installation hard requirements",
+        url: "https://github.com/tile-ai/TileRT",
+      },
+      {
+        title: "TileLang tested devices and install",
+        url: "https://github.com/tile-ai/tilelang",
+      },
+      {
+        title: "DeepSeek TileKernels requirements",
+        url: "https://github.com/deepseek-ai/TileKernels",
+      },
+      {
+        title: "DFlash vLLM/SGLang integration",
+        url: "https://github.com/z-lab/dflash",
+      },
       {
         title: "vLLM Speculative Decoding",
         url: "https://docs.vllm.ai/en/v0.20.1/features/speculative_decoding/",

@@ -178,6 +178,11 @@ $commands = [ordered]@{
     args = @("run", "codexa:access")
     description = "Prove Codexa RDP, WinRM, SMB, command rail, receipt rail, and Ollama access surfaces."
   }
+  "codexa-remote-proof" = @{
+    kind = "npm"
+    args = @("run", "codexa:remote-proof")
+    description = "Prove Codexa loopback Ollama, expected model tags, Hermes, Docker, and boot receipts through the command rail."
+  }
   "codexa-watch" = @{
     kind = "npm"
     args = @("run", "codexa:watch")
@@ -222,6 +227,21 @@ $commands = [ordered]@{
     kind = "npm"
     args = @("run", "skills:lifecycle")
     description = "Verify Orangebox skills are installed, non-stale, command-mapped, and receipt-visible."
+  }
+  "antigravity-doctor" = @{
+    kind = "npm"
+    args = @("run", "antigravity:doctor")
+    description = "Verify Antigravity official skills, plugins, rules, full-access profile, and CWD-safe launcher."
+  }
+  "antigravity-launch" = @{
+    kind = "npm"
+    args = @("run", "antigravity:launch")
+    description = "Open Antigravity from the Orangebox repo root so skills/rules/MCP paths resolve correctly."
+  }
+  "antigravity-launch-dry" = @{
+    kind = "npm"
+    args = @("run", "antigravity:launch:dry")
+    description = "Prove Antigravity would launch from the Orangebox repo root without opening the app."
   }
   "obox2-pack" = @{
     kind = "npm"

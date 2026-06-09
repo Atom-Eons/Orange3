@@ -81,6 +81,7 @@ final-zip            build and verify the Orangebox Delta Final Downloads zip
 codexa-alert         probe AI Box rails and write an explicit alert receipt
 codexa-alert-popup   show a throttled Windows popup when AI Box needs attention
 codexa-access        prove Codexa RDP/WinRM/SMB/rail/Ollama access surfaces
+codexa-remote-proof  prove Codexa loopback Ollama, model tags, Hermes, Docker, and boot receipts through the command rail
 codexa-watch         bounded post-setup watch for Codexa ready/open-gaps proof
 codexa-watch-popup   bounded Codexa watch with first alert popup allowed
 codexa-smb-stage     prove whether SMB can stage recovery artifacts; dry by default
@@ -90,6 +91,9 @@ ipi-doctor           verify indirect prompt-injection drills and untrusted-text 
 memory-doctor        verify latest source-backed truth beats stale chat memory
 action-doctor        verify pre-tool action classifier and unsafe-command blocking
 skills-lifecycle     verify active skills are compressed executable procedures
+antigravity-doctor   verify Antigravity skills/plugins/rules/profile/launcher
+antigravity-launch   open Antigravity from the Orangebox repo root with OB0X env
+antigravity-launch-dry prove Antigravity launch env without opening the app
 obox2-pack            build Orangebox V2 Internal setup zip
 obox2-doctor          expand and verify the setup zip
 openclaw-retire-dry   preview OpenClaw startup retirement
@@ -103,6 +107,19 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\AtomEons\orangebox\f
 ```
 
 Mirrored installs have the same command runner under their local `orangebox-primer\scripts\` folder.
+
+Antigravity should be opened from the Orangebox repo root when you want the workspace skill, rule, plugin, and MCP paths to behave. Use:
+
+```powershell
+cd "C:\AtomEons\orangebox\finals\Orangebox Delta Final"
+npm.cmd run antigravity:launch
+```
+
+Or dry-check without launching:
+
+```powershell
+npm.cmd run antigravity:launch:dry
+```
 
 Known mirrored installs may use the same script at:
 

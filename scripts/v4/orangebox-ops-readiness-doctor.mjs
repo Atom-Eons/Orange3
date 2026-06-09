@@ -74,6 +74,8 @@ function main() {
   const triLaneRouter = readJson(triLaneRouterPath);
   const localModelLanePath = path.join(dataRoot, "models", "latest-local-model-lane-eval.json");
   const localModelLane = readJson(localModelLanePath);
+  const activeCouncilPath = path.join(dataRoot, "active-council", "latest-active-council.json");
+  const activeCouncil = readJson(activeCouncilPath);
   const obox2PackPath = path.join(dataRoot, "obox2", "latest-internal-setup-pack.json");
   const obox2Pack = readJson(obox2PackPath);
   const obox2DoctorPath = path.join(dataRoot, "obox2", "latest-package-doctor.json");
@@ -396,6 +398,21 @@ function main() {
       core_installed_count: localModelLane?.inventory_truth?.core_installed_count ?? null,
       core_total: localModelLane?.inventory_truth?.core_total ?? null,
       note: "Proves local model role lanes and wildcard limits without claiming Codexa models are installed.",
+    },
+    active_council: {
+      ok:
+        activeCouncil?.ok === true &&
+        ["ACTIVE_COUNCIL_GREEN", "ACTIVE_COUNCIL_PULSE_GREEN"].includes(activeCouncil?.status) &&
+        activeCouncil?.runtime_truth?.latest_pulse_fresh === true &&
+        activeCouncil?.runtime_truth?.watcher_status === "ACTIVE_COUNCIL_WATCHER_RUNNING",
+      path: activeCouncilPath,
+      status: activeCouncil?.status || null,
+      pulse_fresh: activeCouncil?.runtime_truth?.latest_pulse_fresh ?? null,
+      watcher_status: activeCouncil?.runtime_truth?.watcher_status || null,
+      warm_models: activeCouncil?.active_posture?.warm_models || [],
+      event_armed_models: activeCouncil?.active_posture?.event_armed_models || [],
+      warrant_only_models: activeCouncil?.active_posture?.warrant_only_models || [],
+      note: "Proves the local swarm posture is active: small lanes stay warm, specialists are armed, and 70B/cloud lanes stay warrant-only.",
     },
     obox2_internal_setup_pack: {
       ok: obox2Pack?.ok === true && obox2Pack?.status === "OBOX2_INTERNAL_SETUP_PACK_GREEN" && exists(obox2Pack?.zip_path || ""),

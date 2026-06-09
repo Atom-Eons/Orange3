@@ -165,12 +165,22 @@ async function main() {
   const triLane = readJson(path.join(dataRoot, "trilane", "latest-trilane-model-router.json"));
   const localLane = readJson(path.join(dataRoot, "models", "latest-local-model-lane-eval.json"));
   const obox2Doctor = readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json"));
+  const codexaRemoteProof = readJson(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"));
 
   const probes = {
     cockpit_ollama: await probeJson("http://127.0.0.1:11434/api/tags"),
     cockpit_llama_listener: await probeJson("http://127.0.0.1:8080/v1/models"),
     codexa_direct_ollama: await probeJson("http://10.0.99.1:11434/api/tags"),
     codexa_lan_ollama: await probeJson("http://10.0.0.4:11434/api/tags"),
+    codexa_remote_runtime_proof: {
+      ok: codexaRemoteProof?.codexa_remote_runtime_green === true,
+      status: codexaRemoteProof?.status || null,
+      url: "command-rail://codexa/127.0.0.1:11434/api/tags",
+      body: {
+        models: (codexaRemoteProof?.remote?.proof?.ollama?.tags || []).map((name) => ({ name })),
+        summary: codexaRemoteProof?.summary || null,
+      },
+    },
   };
 
   const installedTags = [...new Set(Object.values(probes).flatMap(normalizeProbeTags))].sort();
@@ -205,7 +215,7 @@ async function main() {
   const warnings = [];
   if (!fullLocalModelRuntimeGreen) warnings.push(`Only ${requiredInstalled.length}/${requiredModels.length} required local models were observed installed through live probes.`);
   if (coreInstalled.length !== coreModels.length) warnings.push(`Core local model fleet is not complete: ${coreInstalled.length}/${coreModels.length} observed.`);
-  if (!probes.codexa_direct_ollama.ok && !probes.codexa_lan_ollama.ok) warnings.push("Codexa Ollama is not reachable from this cockpit, so AI Box model inventory is unproven.");
+  if (!probes.codexa_direct_ollama.ok && !probes.codexa_lan_ollama.ok && !probes.codexa_remote_runtime_proof.ok) warnings.push("Codexa Ollama is not directly reachable and no green command-rail remote proof is available, so AI Box model inventory is unproven.");
   if (!probes.cockpit_ollama.ok) warnings.push("Cockpit Ollama is not reachable on 127.0.0.1:11434.");
   if (probes.cockpit_llama_listener.ok && installedTags.includes("orangebox-n150-cpu-listener")) {
     warnings.push("Local llama listener is reachable, but it is not one of the registered Orangebox role models.");
@@ -258,6 +268,8 @@ async function main() {
       local_lane_full_runtime_green: localLane?.inventory_truth?.full_local_model_runtime_green ?? null,
       obox2_package_status: obox2Doctor?.status || null,
       obox2_zip_path: obox2Doctor?.zip_path || null,
+      codexa_remote_runtime_status: codexaRemoteProof?.status || null,
+      codexa_remote_runtime_green: codexaRemoteProof?.codexa_remote_runtime_green ?? null,
     },
     full_local_model_runtime_green: fullLocalModelRuntimeGreen,
     warnings,
@@ -267,8 +279,8 @@ async function main() {
           "Keep cloud lanes approval-gated for high-risk or local-confidence failures.",
         ]
       : [
-          "On Codexa, run the verified OBOX2 setup pack, then install core models and rerun CODEXA_MODEL_DOCTOR.ps1.",
-          "From this cockpit, rerun npm.cmd run trilane:doctor, npm.cmd run model:lane-eval, and npm.cmd run model:inventory after Codexa Ollama is reachable.",
+          "Run npm.cmd run codexa:remote-proof. If it is not green, use the verified OBOX2 setup pack on Codexa, then install core models and rerun CODEXA_MODEL_DOCTOR.ps1.",
+          "From this cockpit, rerun npm.cmd run trilane:doctor, npm.cmd run model:lane-eval, and npm.cmd run model:inventory after Codexa remote runtime proof is green.",
           "Do not claim full local model runtime green until every required local model is observed by a live probe.",
         ],
   };

@@ -120,7 +120,16 @@ async function buildArchive(zipPath) {
   if (process.platform !== "win32") {
     throw new Error("final:zip currently expects Windows tar.exe for the local release pack");
   }
-  await run("tar.exe", ["-a", "-cf", zipPath, "*"], { cwd: finalRoot, timeout: 300_000, maxBuffer: 2_000_000 });
+  await run("tar.exe", [
+    "-a",
+    "-cf",
+    zipPath,
+    "--exclude=node_modules",
+    "--exclude=*/node_modules",
+    "--exclude=.git",
+    "--exclude=.worktrees",
+    "*",
+  ], { cwd: finalRoot, timeout: 900_000, maxBuffer: 2_000_000 });
 }
 
 async function verifyArchive(zipPath) {

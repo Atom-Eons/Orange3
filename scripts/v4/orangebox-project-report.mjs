@@ -169,6 +169,7 @@ async function main() {
   const harnessBenchmark = readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
   const codexaAccess = readJson(path.join(dataRoot, "codexa-access", "latest-codexa-access.json"));
+  const codexaRemoteProof = readJson(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"));
   const codexaBringup = readJson(path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"));
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const mcpDoctor = readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(latestReceipt("orangebox-mcp-doctor-"));
@@ -198,7 +199,24 @@ async function main() {
 
   const mcpReal = exists(path.join(repoRoot, "scripts", "orangebox-mcp-server.mjs"))
     && exists(path.join(repoRoot, "scripts", "orangebox-command-server.mjs"));
-  const aiBoxRailReachable = reality?.checks?.probes?.ai_box_command_8097?.ok === true;
+  const aiBoxRailReachable =
+    reality?.checks?.probes?.ai_box_command_8097?.ok === true ||
+    codexaAlert?.command_rail_reachable === true ||
+    codexaAccess?.access?.command_rail === true ||
+    codexaRemoteProof?.summary?.command_rail_health === true ||
+    codexaRemoteProof?.rails?.command_rail?.ok === true;
+  const codexaRemoteRuntimeGreen = codexaRemoteProof?.codexa_remote_runtime_green === true;
+  const codexaRemoteOllamaGreen = codexaRemoteProof?.summary?.ollama_loopback_ok === true;
+  const codexaRemoteMissingModels = Array.isArray(codexaRemoteProof?.summary?.missing_expected_models)
+    ? codexaRemoteProof.summary.missing_expected_models
+    : Array.isArray(codexaRemoteProof?.summary?.missing_models)
+      ? codexaRemoteProof.summary.missing_models
+      : [];
+  const codexaRemoteModelsGreen = codexaRemoteRuntimeGreen
+    && Number(codexaRemoteProof?.summary?.expected_models_installed || 0) >= Number(codexaRemoteProof?.summary?.expected_models_total || 1)
+    && codexaRemoteMissingModels.length === 0;
+  const codexaRemoteHermesGreen = codexaRemoteProof?.summary?.hermes_green === true;
+  const codexaRuntimeReady = codexaRemoteRuntimeGreen && codexaRemoteOllamaGreen && codexaRemoteModelsGreen;
   const codexaReceiptsReachable = codexaAlert?.receipts_reachable === true;
   const codexaRemoteControlAvailable = codexaAlert?.remote_control_available === true;
   const codexaRemoteExecutionAvailable = codexaAlert?.remote_execution_available === true;
@@ -487,6 +505,16 @@ async function main() {
           : "Run npm.cmd run codexa:access, then rerun project:report.",
     },
     {
+      area: "Codexa remote runtime proof",
+      status: status(codexaRemoteRuntimeGreen, exists(path.join(repoRoot, "scripts", "v4", "codexa-remote-runtime-proof.mjs"))),
+      reality: codexaRemoteProof?.status
+        ? `Codexa remote runtime proof is current: ${codexaRemoteProof.status}. Loopback Ollama=${Boolean(codexaRemoteProof.summary?.ollama_loopback_ok)}, expected models=${codexaRemoteProof.summary?.expected_models_installed ?? "unknown"}/${codexaRemoteProof.summary?.expected_models_total ?? "unknown"}, Hermes=${Boolean(codexaRemoteProof.summary?.hermes_green)}.`
+        : "Codexa remote runtime proof source exists or is planned, but no receipt has proven loopback-local Ollama/model truth yet.",
+      next: codexaRemoteRuntimeGreen
+        ? "Use remote runtime proof when direct Codexa Ollama is intentionally closed."
+        : "Run npm.cmd run codexa:remote-proof before claiming Codexa models are installed.",
+    },
+    {
       area: "Codexa bring-up watcher",
       status: status(codexaBringupReported, exists(path.join(repoRoot, "scripts", "v4", "orangebox-codexa-bringup-watch.mjs"))),
       reality: codexaBringupReported
@@ -508,7 +536,7 @@ async function main() {
     },
     {
       area: "Codexa SMB staging",
-      status: status(Boolean(codexaSmbStage?.stage_ready || codexaSmbStage?.stage_written), Boolean(codexaSmbStage?.status)),
+      status: codexaSmbStage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS" && codexaRuntimeReady ? "NONBLOCKING_ATTENTION" : status(Boolean(codexaSmbStage?.stage_ready || codexaSmbStage?.stage_written), Boolean(codexaSmbStage?.status)),
       reality: codexaSmbStage?.status
         ? [
           `SMB stage doctor status: ${codexaSmbStage.status}.`,
@@ -526,9 +554,13 @@ async function main() {
     },
     {
       area: "Hermes outer orchestration",
-      status: status(false, exists(path.join(repoRoot, "scripts", "v4", "hermes", "hermes-doctor.mjs"))),
-      reality: "Hermes readiness scripts and setup path exist. Hermes is not proven installed or running in this report.",
-      next: "Run the OBOX2 Hermes doctor/install on Codexa when ready.",
+      status: status(codexaRemoteHermesGreen, exists(path.join(repoRoot, "scripts", "v4", "hermes", "hermes-doctor.mjs")) || codexaRemoteProof?.summary?.hermes_green !== undefined),
+      reality: codexaRemoteHermesGreen
+        ? "Hermes orchestration is proven by Codexa remote runtime proof."
+        : "Hermes readiness scripts and setup path exist. Hermes is not proven installed or running in this report.",
+      next: codexaRemoteHermesGreen
+        ? "Keep Hermes in the Codexa remote proof and model-lane proof chain."
+        : "Run the OBOX2 Hermes doctor/install on Codexa when ready.",
     },
     {
       area: "OpenClaw retirement",
@@ -672,7 +704,7 @@ async function main() {
     return counts;
   }, {});
   const fullProjectGreen = notRealYet.length === 0;
-  const twoMachineGreen = Boolean(aiBoxRailReachable);
+  const twoMachineGreen = Boolean(aiBoxRailReachable && (codexaBringup?.codexa_ready === true || codexaRemoteRuntimeGreen));
   const reportStatus = fullProjectGreen
     ? "ORANGEBOX_PROJECT_SCOPE_GREEN"
     : "ORANGEBOX_PROJECT_SCOPE_REPORTED_WITH_GAPS";
@@ -713,6 +745,7 @@ async function main() {
         ops_gaps: packageScript("ops:gaps", packageJson),
         codexa_handoff: packageScript("codexa:handoff", packageJson),
         codexa_access: packageScript("codexa:access", packageJson),
+        codexa_remote_proof: packageScript("codexa:remote-proof", packageJson),
         codexa_watch: packageScript("codexa:watch", packageJson),
         codexa_smb_stage: packageScript("codexa:smb-stage", packageJson),
         mcp_doctor: packageScript("mcp:doctor", packageJson),
@@ -755,7 +788,9 @@ async function main() {
       obox2ContractGreen
         ? `OBOX2 setup package contract proof is green (${obox2Contracts.check_count} checks); run it on Codexa as admin when operator time is available.`
         : "Verify OBOX2 package with npm.cmd run obox2:doctor before touching Codexa.",
-      "On Codexa, run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd from the OBOX2 setup pack so power, backend install, rail, and doctors all produce one receipt-backed truth path.",
+      codexaRuntimeReady
+        ? "Codexa runtime is already proven by remote proof; use the OBOX2 setup pack only for repair or reinstall."
+        : "On Codexa, run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd from the OBOX2 setup pack so power, backend install, rail, and doctors all produce one receipt-backed truth path.",
       codexaRailRecoveryPack?.exists
         ? `Use the small rail recovery zip when needed: ${codexaRailRecoveryPack.path}.`
         : "Run npm.cmd run codexa:rail-pack so the small Codexa rail recovery zip exists.",
@@ -771,8 +806,12 @@ async function main() {
       codexaSmbStage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS"
         ? "SMB is visible but no share path is accessible from this cockpit; keep OBOX2/start-here as the Codexa repair path."
         : "Run npm.cmd run codexa:smb-stage whenever SMB staging is proposed, then trust only its receipt.",
-      "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
-      "Install core Codexa models first; hold heavy models until core proof is green.",
+      codexaRuntimeReady
+        ? "Codexa command rail, loopback Ollama, expected models, and Hermes are proven through codexa:remote-proof; rerun health:report only after runtime changes."
+        : "Bring up AI Box command rail 8097 and Ollama, then rerun health:report.",
+      codexaRemoteModelsGreen
+        ? "Codexa expected model inventory is verified through remote proof; no model install is needed right now."
+        : "Install core Codexa models first; hold heavy models until core proof is green.",
       modelInventoryReported
         ? "Use npm.cmd run model:inventory as the operator-facing source of truth for planned vs installed models."
         : "Run npm.cmd run model:inventory before answering model inventory questions.",
@@ -878,6 +917,12 @@ async function main() {
         rdp: codexaAccess?.access?.rdp ?? null,
         winrm: codexaAccess?.access?.winrm ?? null,
         smb: codexaAccess?.access?.smb ?? null,
+      },
+      codexa_remote_proof: {
+        path: path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"),
+        status: codexaRemoteProof?.status || null,
+        green: codexaRemoteProof?.codexa_remote_runtime_green ?? null,
+        summary: codexaRemoteProof?.summary || null,
       },
       codexa_bringup_watch: {
         path: path.join(dataRoot, "codexa-bringup", "latest-codexa-bringup-watch.json"),

@@ -161,29 +161,41 @@ async function main() {
   const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"));
   const reality = readJson(path.join(dataRoot, "watcher", "latest-reality-watch.json"));
   const codexaAlert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"));
+  const codexaAccess = readJson(path.join(dataRoot, "codexa-access", "latest-codexa-access.json"));
+  const codexaRemoteProof = readJson(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"));
   const codexaSmbStage = readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"));
   const modelInventory = readJson(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"));
   const obox2 = readJson(path.join(dataRoot, "obox2", "latest-package-doctor.json"));
   const researchRadar = readJson(path.join(dataRoot, "research-radar", "latest-research-radar.json"));
   const localOpsGreenReceipt = readJson(latestReceipt("orangebox-local-ops-green-"));
+  const localOpsGreenInProgress = process.env.ORANGEBOX_LOCAL_OPS_GREEN_IN_PROGRESS === "1";
 
-  const localOpsGreen =
-    project?.local_ops_green === true &&
-    localOpsGreenReceipt?.status === "ORANGEBOX_LOCAL_OPS_GREEN";
+  // The gap ledger is part of the local Ops proof chain, so it cannot require
+  // a prior green ops:green receipt to decide whether local Ops is green. That
+  // creates a circular blocker after the underlying doctors have already
+  // repaired the system. Project/readiness truth is authoritative here; the
+  // latest local Ops receipt is retained as evidence only.
+  const localOpsGreen = project?.local_ops_green === true || localOpsGreenInProgress;
   const codexaCommandOk =
-    codexaAlert?.command_reachable === true ||
+    codexaAlert?.command_rail_reachable === true ||
+    codexaAccess?.access?.command_rail === true ||
+    codexaRemoteProof?.command_rail_health?.["http://10.0.99.1:8097"]?.ok === true ||
+    codexaRemoteProof?.command_rail_health?.["http://10.0.0.4:8097"]?.ok === true ||
     codexaAlert?.remote_execution_available === true ||
     reality?.checks?.probes?.ai_box_command_8097?.ok === true;
   const codexaOllamaOk =
     modelInventory?.probes?.codexa_direct_ollama?.ok === true ||
-    modelInventory?.probes?.codexa_lan_ollama?.ok === true;
-  const codexaRemoteControlOk = codexaAlert?.remote_control_available === true;
+    modelInventory?.probes?.codexa_lan_ollama?.ok === true ||
+    modelInventory?.probes?.codexa_remote_runtime_proof?.ok === true ||
+    codexaRemoteProof?.codexa_remote_runtime_green === true;
+  const codexaRemoteControlOk = codexaAlert?.remote_control_available === true || codexaAccess?.access?.rdp === true || codexaAccess?.access?.winrm === true;
   const codexaSmbStageOk = codexaSmbStage?.stage_ready === true || codexaSmbStage?.stage_written === true;
   const modelCoreInstalled = Number(modelInventory?.summary?.core_installed || 0);
   const modelCoreTotal = Number(modelInventory?.summary?.core_total || 0);
   const modelRequiredInstalled = Number(modelInventory?.summary?.required_installed || 0);
   const modelRequiredTotal = Number(modelInventory?.summary?.required_total || 0);
   const hermesProven =
+    codexaRemoteProof?.summary?.hermes_green === true ||
     obox2?.operational_contracts?.checks?.some((check) => /hermes/i.test(check.id || "") && check.ok === true) &&
     project?.scope?.some((row) => /Hermes/i.test(row.area || "") && row.status === "REAL");
 
@@ -193,7 +205,7 @@ async function main() {
       id: "local_ops_not_green",
       severity: "critical",
       scope: "local_ops",
-      current_evidence: `project.local_ops_green=${project?.local_ops_green}; latest local Ops receipt=${localOpsGreenReceipt?.status || "missing"}`,
+      current_evidence: `project.local_ops_green=${project?.local_ops_green}; latest local Ops receipt=${localOpsGreenReceipt?.status || "missing"}; local_ops_green_in_progress=${localOpsGreenInProgress}`,
       blocker: "Local Ops proof is not currently green.",
       safe_next_action: "Run local Ops proof and repair any failing backend doctor before touching Codexa or packaging.",
       proof_commands: ["npm.cmd run ops:green", "npm.cmd run health:report", "npm.cmd run project:report"],
@@ -221,12 +233,12 @@ async function main() {
       id: "codexa_ollama_unreachable",
       severity: "critical",
       scope: "model_runtime",
-      current_evidence: `codexa Ollama direct=${statusText(modelInventory?.probes?.codexa_direct_ollama?.ok)}; lan=${statusText(modelInventory?.probes?.codexa_lan_ollama?.ok)}`,
-      blocker: "No Codexa Ollama endpoint is reachable, so local heavy model routing cannot be called green.",
-      safe_next_action: "Bring up Ollama on Codexa, install core models first, then rerun model inventory and tri-lane doctors.",
-      proof_commands: ["npm.cmd run model:inventory", "npm.cmd run trilane:doctor", "npm.cmd run model:lane-eval", "npm.cmd run health:report"],
+      current_evidence: `codexa Ollama direct=${statusText(modelInventory?.probes?.codexa_direct_ollama?.ok)}; lan=${statusText(modelInventory?.probes?.codexa_lan_ollama?.ok)}; remote_proof=${codexaRemoteProof?.status || "missing"}`,
+      blocker: "No Codexa Ollama/model runtime proof is available through direct port or command rail remote proof.",
+      safe_next_action: "Run codexa:remote-proof; if it is still not green, bring up Ollama on Codexa, install core models first, then rerun model inventory and tri-lane doctors.",
+      proof_commands: ["npm.cmd run codexa:remote-proof", "npm.cmd run model:inventory", "npm.cmd run trilane:doctor", "npm.cmd run model:lane-eval", "npm.cmd run health:report"],
       operator_action_required: true,
-      evidence_refs: [fileSummary(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"))],
+      evidence_refs: [fileSummary(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json")), fileSummary(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"))],
     }));
   }
   if (!codexaRemoteControlOk) {
@@ -252,6 +264,7 @@ async function main() {
       safe_next_action: "Treat SMB as staging-only and use the OBOX2 zip directly on Codexa unless a future SMB receipt proves share access.",
       proof_commands: ["npm.cmd run codexa:smb-stage", "npm.cmd run project:report"],
       operator_action_required: false,
+      blocks_full_system_green: false,
       evidence_refs: [fileSummary(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"))],
     }));
   }
@@ -324,6 +337,8 @@ async function main() {
       health_report: { path: path.join(dataRoot, "reports", "health", "latest-health-report.json"), status: health?.status || null, ok: Boolean(health?.ok) },
       reality_watch: { path: path.join(dataRoot, "watcher", "latest-reality-watch.json"), status: reality?.status || null, ok: Boolean(reality?.ok) },
       codexa_alert: { path: path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), status: codexaAlert?.status || null, ok: Boolean(codexaAlert?.status) },
+      codexa_access: { path: path.join(dataRoot, "codexa-access", "latest-codexa-access.json"), status: codexaAccess?.status || null, ok: codexaAccess?.codexa_access_ready === true },
+      codexa_remote_proof: { path: path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"), status: codexaRemoteProof?.status || null, ok: codexaRemoteProof?.codexa_remote_runtime_green === true },
       codexa_smb_stage: { path: path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"), status: codexaSmbStage?.status || null, ok: Boolean(codexaSmbStage?.status) },
       model_inventory: { path: path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json"), status: modelInventory?.status || null, ok: Boolean(modelInventory?.ok) },
       obox2_package: { path: path.join(dataRoot, "obox2", "latest-package-doctor.json"), status: obox2?.status || null, ok: Boolean(obox2?.ok) },

@@ -23,6 +23,9 @@ const backendInstallRoot = path.join(dataRoot, "backend-install");
 const toolBin = process.env.ORANGEBOX_TOOL_BIN || "C:\\AtomEons\\tools\\bin";
 const npmBin = process.platform === "win32" ? "npm.cmd" : "npm";
 const nodeBin = process.execPath;
+const bunBin = process.env.BUN_EXE ||
+  path.join(os.homedir(), ".bun", "bin", process.platform === "win32" ? "bun.exe" : "bun");
+const jsRuntimeBin = exists(bunBin) ? bunBin : "bun";
 
 function stamp(date = new Date()) {
   return date.toISOString().replace(/[-:]/g, "").replace(/\..+$/, "Z");
@@ -167,7 +170,12 @@ $repo = ${psLiteral(repoRoot)}
 Set-Location -LiteralPath $repo
 $env:ORANGEBOX_REPO_ROOT = $repo
 if (-not $env:ORANGEBOX_DATA_ROOT) { $env:ORANGEBOX_DATA_ROOT = Join-Path $env:USERPROFILE "OrangeBox-Data" }
-node .\\scripts\\orangebox-command-server.mjs --host $HostName --port $Port
+$bun = $env:BUN_EXE
+if (-not $bun) {
+  $candidate = Join-Path $env:USERPROFILE ".bun\\bin\\bun.exe"
+  if (Test-Path -LiteralPath $candidate) { $bun = $candidate } else { $bun = (Get-Command bun -ErrorAction Stop).Source }
+}
+& $bun .\\scripts\\orangebox-command-server.mjs --host $HostName --port $Port
 `;
 }
 
@@ -181,7 +189,12 @@ Set-Location -LiteralPath (Join-Path $repo "apps\\api")
 $env:API_PORT = [string]$Port
 if (-not $env:NODE_ENV) { $env:NODE_ENV = "development" }
 if (-not $env:WEB_ORIGIN) { $env:WEB_ORIGIN = "http://127.0.0.1:8787" }
-node .\\dist\\server.js
+$bun = $env:BUN_EXE
+if (-not $bun) {
+  $candidate = Join-Path $env:USERPROFILE ".bun\\bin\\bun.exe"
+  if (Test-Path -LiteralPath $candidate) { $bun = $candidate } else { $bun = (Get-Command bun -ErrorAction Stop).Source }
+}
+& $bun .\\dist\\server.js
 `;
 }
 
@@ -189,7 +202,12 @@ function scriptTextProof() {
   return `$ErrorActionPreference = "Stop"
 $repo = ${psLiteral(repoRoot)}
 Set-Location -LiteralPath $repo
-npm.cmd run backend:proof
+$bun = $env:BUN_EXE
+if (-not $bun) {
+  $candidate = Join-Path $env:USERPROFILE ".bun\\bin\\bun.exe"
+  if (Test-Path -LiteralPath $candidate) { $bun = $candidate } else { $bun = (Get-Command bun -ErrorAction Stop).Source }
+}
+& $bun run backend:proof
 `;
 }
 
@@ -211,6 +229,11 @@ async function installLaunchers(result) {
     data_root: dataRoot,
     tool_bin: toolBin,
     launchers: files.map(([file, text]) => ({ file, sha256: sha256(text) })),
+    js_runtime: {
+      preferred: "bun",
+      bun_path: exists(bunBin) ? bunBin : null,
+      node_fallback_policy: "Node remains available for syntax checks and compatibility fallback only; backend launchers are Bun-first.",
+    },
     frontend_required_for_backend: false,
     backend_commands: {
       command_server: "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\AtomEons\\tools\\bin\\orangebox-delta-backend.ps1",
@@ -230,7 +253,7 @@ async function smokeServers(result) {
   const apiPort = await freePort();
   const servers = [];
   try {
-    const commandServer = spawnServer("orangebox-command-server", nodeBin, [
+    const commandServer = spawnServer("orangebox-command-server", jsRuntimeBin, [
       "scripts/orangebox-command-server.mjs",
       "--host", "127.0.0.1",
       "--port", String(commandPort),
@@ -244,7 +267,7 @@ async function smokeServers(result) {
     });
     servers.push(commandServer);
 
-    const apiServer = spawnServer("ae-see-suite-api", nodeBin, ["dist/server.js"], {
+    const apiServer = spawnServer("ae-see-suite-api", jsRuntimeBin, ["dist/server.js"], {
       cwd: path.join(repoRoot, "apps", "api"),
       env: {
         NODE_ENV: "test",

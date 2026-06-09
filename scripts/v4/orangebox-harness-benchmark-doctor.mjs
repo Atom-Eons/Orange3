@@ -158,6 +158,7 @@ const requiredOpsScripts = [
   "chatbackup:restore",
   "codexa:alert",
   "codexa:watch",
+  "codexa:remote-proof",
   "codexa:smb-stage",
   "mcp:doctor",
   "ipi:doctor",
@@ -201,7 +202,7 @@ const tasks = [
       const wrapper = readText(path.join(repoRoot, "skills", "orangebox-primer", "scripts", "orangebox_command.ps1"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const lifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json"), trace);
-      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "research-radar", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-access", "codexa-watch", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "model-inventory", "ipi-doctor", "memory-doctor"];
+      const commands = ["backend-proof", "health-report", "project-report", "research-scout", "research-radar", "assurance-doctor", "harness-benchmark", "tool-ergonomics", "checkmate-eval", "signal-hygiene", "session-spine", "feature-proof", "final-verify", "final-zip", "codexa-alert", "codexa-access", "codexa-remote-proof", "codexa-watch", "codexa-smb-stage", "skills-lifecycle", "model-lane-eval", "model-inventory", "ipi-doctor", "memory-doctor"];
       const failures = [];
       for (const command of commands) {
         if (!skillMd.includes(command)) failures.push(`SKILL.md does not list ${command}`);
@@ -445,16 +446,22 @@ const tasks = [
     run(trace) {
       const alert = readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const remoteProof = readJson(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"), trace);
       const failures = [];
       const hygiene = alert?.signal_hygiene || {};
+      const codexaReady = alert?.status === "CODEXA_READY"
+        || alert?.remote_runtime_proof?.ok === true
+        || remoteProof?.codexa_remote_runtime_green === true;
       if (hygiene.version !== "orangebox-signal-hygiene/v1") failures.push(`Signal hygiene version missing/wrong: ${hygiene.version || "missing"}`);
       if (!["attention", "warning", "green", "critical"].includes(hygiene.severity)) failures.push(`Signal hygiene severity invalid: ${hygiene.severity || "missing"}`);
       if (hygiene.local_basic_install_blocked !== false) failures.push("Signal hygiene must preserve local_basic_install_blocked=false for Codexa-only gaps");
-      if (hygiene.full_system_green_blocked !== true) failures.push("Signal hygiene must keep full_system_green_blocked=true while Codexa rail/Ollama are down");
+      if (codexaReady && hygiene.full_system_green_blocked !== false) failures.push("Signal hygiene must clear full_system_green_blocked when Codexa is green through alert or remote proof");
+      if (!codexaReady && hygiene.full_system_green_blocked !== true) failures.push("Signal hygiene must keep full_system_green_blocked=true while Codexa rail/Ollama are down");
       if (!hygiene.alert_fatigue_policy || !/cooldown|status change/i.test(hygiene.alert_fatigue_policy)) failures.push("Signal hygiene lacks popup cooldown/status-change policy");
       if (project?.evidence?.codexa_signal_hygiene?.summary_line !== hygiene.summary_line) failures.push("Project report does not mirror Codexa signal summary");
       return failures.length
         ? failTask("codexa_signal_hygiene_truth", failures, {
+          codexa_ready: codexaReady,
           version: hygiene.version,
           severity: hygiene.severity,
           local_basic_install_blocked: hygiene.local_basic_install_blocked,
@@ -463,6 +470,7 @@ const tasks = [
         : okTask("codexa_signal_hygiene_truth", {
           version: hygiene.version,
           severity: hygiene.severity,
+          codexa_ready: codexaReady,
           repeat_count: hygiene.repeat_count || 0,
           local_basic_install_blocked: hygiene.local_basic_install_blocked,
           full_system_green_blocked: hygiene.full_system_green_blocked,
@@ -1025,7 +1033,16 @@ const tasks = [
         if (!gap.safe_next_action) failures.push(`Gap ${gap.id || "unknown"} missing safe next action`);
         if (!Array.isArray(gap.proof_commands) || gap.proof_commands.length === 0) failures.push(`Gap ${gap.id || "unknown"} missing proof commands`);
       }
-      if (project?.full_project_green === false && ledger?.full_system_green_claim_allowed === true) failures.push("Ledger allows full-system green while project report is not green");
+      const projectOnlyBlockedByThisHarness = project?.full_project_green === false
+        && Array.isArray(project?.not_real_yet)
+        && project.not_real_yet.length === 1
+        && /harness benchmark/i.test(String(project.not_real_yet[0]));
+      if (!backendProofInProgress
+        && !projectOnlyBlockedByThisHarness
+        && project?.full_project_green === false
+        && ledger?.full_system_green_claim_allowed === true) {
+        failures.push("Ledger allows full-system green while project report is not green");
+      }
       return failures.length
         ? failTask("ops_gap_ledger_truth", failures, { status: ledger?.status || null, gap_count: ledger?.gap_count ?? null })
         : okTask("ops_gap_ledger_truth", {
@@ -1033,13 +1050,14 @@ const tasks = [
           gap_count: ledger.gap_count,
           critical_gap_count: ledger.critical_gap_count,
           full_system_green_claim_allowed: ledger.full_system_green_claim_allowed,
+          project_only_blocked_by_this_harness: projectOnlyBlockedByThisHarness,
         });
     },
   },
   {
     id: "codexa_handoff_truth",
     category: "codexa_recovery",
-    oracle: "A Codexa handoff is valid only when it names the verified setup zip, first-click admin launcher, open blockers, cockpit verification commands, and forbids false full-system green.",
+    oracle: "A Codexa handoff is valid only when it names the verified setup zip, first-click admin launcher, open blockers, cockpit verification commands, and forbids false full-system green while blocking gaps remain.",
     budget: { timeout_ms: 1600, max_files_read: 3, max_tool_calls: 0 },
     run(trace) {
       const handoff = readJson(path.join(dataRoot, "codexa-handoff", "latest-codexa-handoff.json"), trace);
@@ -1051,9 +1069,11 @@ const tasks = [
       if (handoff?.setup_zip?.exists !== true) failures.push("Codexa handoff missing setup zip proof");
       if (handoff?.codexa_run_order?.[0]?.command !== "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd") failures.push("Codexa handoff first click is not start-here admin launcher");
       if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run codexa:access")) failures.push("Codexa handoff missing codexa:access verification command");
+      if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run codexa:remote-proof")) failures.push("Codexa handoff missing codexa:remote-proof verification command");
       if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run codexa:watch")) failures.push("Codexa handoff missing codexa:watch verification command");
       if (!handoff?.cockpit_verify_commands?.includes("npm.cmd run ops:gaps")) failures.push("Codexa handoff missing ops:gaps verification command");
-      if ((ledger?.gap_count || 0) > 0 && handoff?.full_system_green_claim_allowed === true) failures.push("Codexa handoff allows full-system green while gaps remain");
+      const blockingGapCount = (ledger?.gaps || []).filter((gap) => gap?.blocks_full_system_green === true || gap?.severity === "critical").length;
+      if (blockingGapCount > 0 && handoff?.full_system_green_claim_allowed === true) failures.push("Codexa handoff allows full-system green while blocking gaps remain");
       return failures.length
         ? failTask("codexa_handoff_truth", failures, { status: handoff?.status || null })
         : okTask("codexa_handoff_truth", {

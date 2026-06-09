@@ -75,6 +75,7 @@ async function main() {
   const watcherHeartbeatPath = path.join(dataRoot, "watcher", "watcher-process-heartbeat.json");
   const signalPath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const alertPath = path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json");
+  const remoteProofPath = path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json");
 
   const health = readJson(healthPath);
   const project = readJson(projectPath);
@@ -82,6 +83,7 @@ async function main() {
   const watcherHeartbeat = readJson(watcherHeartbeatPath);
   const signal = readJson(signalPath);
   const alert = readJson(alertPath);
+  const remoteProof = readJson(remoteProofPath);
 
   const watcherAge = ageMs(watcherHeartbeat?.last_finished);
   const realityAge = ageMs(reality?.checked_at || reality?.generated_at || reality?.finished_at);
@@ -89,7 +91,9 @@ async function main() {
   const realityFresh = reality?.ok === false || reality?.ok === true
     ? realityAge === null || realityAge < 20 * 60 * 1000
     : false;
-  const codexaReady = alert?.status === "CODEXA_READY";
+  const remoteProofGreen = remoteProof?.codexa_remote_runtime_green === true;
+  const codexaReady = alert?.status === "CODEXA_READY" || remoteProofGreen;
+  const codexaStatus = codexaReady ? "CODEXA_READY" : (alert?.status || null);
 
   const doer = {
     command_server: health?.dev?.probes?.command_server || null,
@@ -131,6 +135,7 @@ async function main() {
       watcher_heartbeat_path: watcherHeartbeatPath,
       signal_path: signalPath,
       alert_path: alertPath,
+      remote_proof_path: remoteProofPath,
     }),
     check("doer_command_server_reachable", doer.command_server?.ok === true, doer.command_server || {}),
     check("doer_api_server_reachable", doer.api_server?.ok === true, doer.api_server || {}),
@@ -150,7 +155,8 @@ async function main() {
       project_status: project?.status || null,
       local_ops_green: project?.local_ops_green ?? null,
       full_project_green: project?.full_project_green ?? null,
-      codexa_status: alert?.status || null,
+      codexa_status: codexaStatus,
+      raw_codexa_status: alert?.status || null,
       signal_full_system_confidence: signal?.confidence_calibration?.full_system || null,
     }),
     check("codexa_gap_not_silenced", codexaReady || (
@@ -159,7 +165,8 @@ async function main() {
       && Array.isArray(reality?.warnings)
       && reality.warnings.some((warning) => /AI Box|Codexa|two-machine|full-green/i.test(warning))
     ), {
-      codexa_status: alert?.status || null,
+      codexa_status: codexaStatus,
+      raw_codexa_status: alert?.status || null,
       health_warning_count: health?.warnings?.length || 0,
       reality_warning_count: reality?.warnings?.length || 0,
     }),
@@ -179,7 +186,8 @@ async function main() {
     one_reality: {
       local_ops_green: project?.local_ops_green ?? null,
       full_project_green: project?.full_project_green ?? null,
-      codexa_status: alert?.status || null,
+      codexa_status: codexaStatus,
+      raw_codexa_status: alert?.status || null,
       full_system_green_blocked: signal?.signal_hygiene?.full_system_green_blocked ?? null,
       summary_line: alert?.signal_hygiene?.summary_line || null,
     },

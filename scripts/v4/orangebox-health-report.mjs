@@ -249,6 +249,7 @@ async function main() {
     harness_benchmark: latestReceipt("orangebox-harness-benchmark-"),
     knowledge_improvements: latestReceipt("orangebox-knowledge-improvement-queue-"),
     codexa_alert: latestReceipt("orangebox-codexa-alert-"),
+    codexa_remote_proof: latestReceipt("orangebox-codexa-remote-runtime-proof-"),
     codexa_smb_stage: latestReceipt("orangebox-codexa-smb-stage-"),
     mcp_doctor: latestReceipt("orangebox-mcp-doctor-"),
     ipi_doctor: latestReceipt("orangebox-ipi-doctor-"),
@@ -277,6 +278,7 @@ async function main() {
     harness_benchmark: readJson(path.join(dataRoot, "harness", "latest-harness-benchmark.json")) || readJson(receiptPaths.harness_benchmark || ""),
     knowledge_improvements: readJson(path.join(dataRoot, "knowledge", "improvements", "latest-improvement-candidates.json")) || readJson(receiptPaths.knowledge_improvements || ""),
     codexa_alert: readJson(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json")) || readJson(receiptPaths.codexa_alert || ""),
+    codexa_remote_proof: readJson(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json")) || readJson(receiptPaths.codexa_remote_proof || ""),
     codexa_smb_stage: readJson(path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json")) || readJson(receiptPaths.codexa_smb_stage || ""),
     mcp_doctor: readJson(path.join(dataRoot, "mcp", "latest-mcp-doctor.json")) || readJson(receiptPaths.mcp_doctor || ""),
     ipi_doctor: readJson(path.join(dataRoot, "prompt-injection", "latest-ipi-doctor.json")) || readJson(receiptPaths.ipi_doctor || ""),
@@ -308,6 +310,10 @@ async function main() {
     lan_command_rail_8097: await probe("http://10.0.0.4:8097/health", 1200),
     lan_ollama_11434: await probe("http://10.0.0.4:11434/api/tags", 1200),
   };
+  const aiBoxCommandOk = aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok;
+  const aiBoxDirectOllamaOk = aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok;
+  const aiBoxRemoteRuntimeOk = latest.codexa_remote_proof?.codexa_remote_runtime_green === true;
+  const aiBoxOllamaOk = aiBoxDirectOllamaOk || aiBoxRemoteRuntimeOk;
   const recoveryArtifacts = latest.codexa_alert?.recovery_artifacts || {
     obox2_setup_pack: fileSummary(path.join(downloadsRoot, "Orangebox_V2_Internal_Setup_Pack.zip")),
     rail_recovery_pack: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack-WINDOWS-NATIVE.zip")),
@@ -363,14 +369,14 @@ async function main() {
   if (latest.feature_proof?.status !== "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN") warnings.push("Feature acceptance matrix doctor is not green.");
   if (!["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(latest.ops_gap_ledger?.status)) warnings.push("Ops gap ledger is not refreshed; partial system state may be harder to act on.");
   if (!["CODEXA_HANDOFF_READY_WITH_OPEN_GAPS", "CODEXA_HANDOFF_READY_NO_OPEN_GAPS"].includes(latest.codexa_handoff?.status)) warnings.push("Codexa setup handoff is not refreshed; operator first-click sequence may be stale.");
-  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) warnings.push("AI Box command rail 8097 is not reachable.");
-  if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) warnings.push("AI Box Ollama is not reachable.");
+  if (!aiBoxCommandOk) warnings.push("AI Box command rail 8097 is not reachable.");
+  if (!aiBoxOllamaOk) warnings.push("AI Box Ollama/model runtime is not proven through direct port or command-rail remote proof.");
   if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) warnings.push("AI Box SMB port is visible, but no remote execution path is proven.");
   if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") warnings.push("AI Box SMB port is visible, but share access is denied/unavailable for staging.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
   if (!obox2Contracts.ok || obox2Contracts.check_count < 30) warnings.push(`OBOX2 setup contract proof is not green enough (${obox2Contracts.check_count} checks, ${obox2Contracts.failed_count} failed).`);
-  if (!recoveryArtifacts.rail_recovery_pack?.exists && (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok)) warnings.push("Codexa rail recovery zip is not generated.");
+  if (!recoveryArtifacts.rail_recovery_pack?.exists && !aiBoxCommandOk) warnings.push("Codexa rail recovery zip is not generated.");
   if (latest.research_scout?.status === "EXTERNAL_RESEARCH_SCOUT_OFFLINE") warnings.push("External research scout could not reach any source.");
   if (!["ORANGEBOX_RESEARCH_RADAR_GREEN", "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS"].includes(latest.research_radar?.status)) warnings.push("Research radar is not refreshed; approval-ready upgrade synthesis may be stale.");
   if (latest.assurance_lab?.status !== "ORANGEBOX_ASSURANCE_LAB_GREEN") warnings.push("Research Assurance Lab doctor is not green.");
@@ -382,13 +388,13 @@ async function main() {
 
   const nextActions = [];
   if (!openclawRetired) nextActions.push("Run npm.cmd run openclaw:retire from the Orangebox repo.");
-  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok) nextActions.push("On AI Box/Codexa, unzip the OBOX2 setup pack and run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd as Administrator. Manual fallback: RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd.");
-  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && !recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push("Run npm.cmd run codexa:rail-pack to generate a small Windows-native rail recovery zip.");
-  if (!aiBoxProbes.direct_command_rail_8097.ok && !aiBoxProbes.lan_command_rail_8097.ok && recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push(`Use the rail recovery zip at ${recoveryArtifacts.rail_recovery_pack.path} when the full OBOX2 pack is too heavy.`);
+  if (!aiBoxCommandOk) nextActions.push("On AI Box/Codexa, unzip the OBOX2 setup pack and run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd as Administrator. Manual fallback: RUN_CODEXA_POWER_OPTIMIZER_AS_ADMIN.cmd, RUN_CODEXA_POWER_DOCTOR.cmd, RUN_INSTALL_ORANGEBOX_BACKEND_ON_CODEXA_AS_ADMIN.cmd, then RUN_START_CODEXA_RAIL_AS_ADMIN.cmd.");
+  if (!aiBoxCommandOk && !recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push("Run npm.cmd run codexa:rail-pack to generate a small Windows-native rail recovery zip.");
+  if (!aiBoxCommandOk && recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push(`Use the rail recovery zip at ${recoveryArtifacts.rail_recovery_pack.path} when the full OBOX2 pack is too heavy.`);
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) nextActions.push("Treat SMB as staging-only until RDP, WinRM, or the 8097 command rail is reachable.");
   if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") nextActions.push("SMB staging is not available from this cockpit without credentials/share access; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097.");
   if (!latest.codexa_smb_stage?.status) nextActions.push("Run npm.cmd run codexa:smb-stage to prove whether SMB staging is available before relying on it.");
-  if (!aiBoxProbes.direct_ollama_11434.ok && !aiBoxProbes.lan_ollama_11434.ok) nextActions.push("After the AI Box power/rail proof is green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
+  if (!aiBoxOllamaOk) nextActions.push("Run npm.cmd run codexa:remote-proof. If Codexa loopback Ollama/models are still not green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN" || !obox2Contracts.ok || obox2Contracts.check_count < 30) nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor; do not treat the Codexa setup pack as proven until setup contracts are green.");
   if (!latest.research_scout?.status) nextActions.push("Run npm.cmd run research:scout to refresh external public research candidates.");
   if (!["ORANGEBOX_RESEARCH_RADAR_GREEN", "ORANGEBOX_RESEARCH_RADAR_REPORTED_WITH_GAPS"].includes(latest.research_radar?.status)) nextActions.push("Run npm.cmd run research:radar to fetch public signals, refresh learned candidates, run assurance, and write one approval report.");
@@ -428,8 +434,7 @@ async function main() {
   const assuranceLabOk = latest.assurance_lab?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN";
   const harnessBenchmarkOk = latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
   const localCoreOk = devProbes.command_server.ok && devProbes.api_server.ok && devProbes.local_llama_health.ok && devProbes.strongarm_gate.ok && openclawRetired && mcpDoctorOk && ipiDoctorOk && memoryDoctorOk && actionClassifierOk && skillLifecycleOk && toolErgonomicsOk && checkmateEvalOk && signalHygieneOk && doerWatcherSpineOk && featureProofOk && assuranceLabOk;
-  const aiBoxOk = (aiBoxProbes.direct_command_rail_8097.ok || aiBoxProbes.lan_command_rail_8097.ok)
-    && (aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok);
+  const aiBoxOk = aiBoxCommandOk && aiBoxOllamaOk;
   const status = localCoreOk && aiBoxOk && warnings.length === 0
     ? "ORANGEBOX_HEALTH_GREEN"
     : localCoreOk
@@ -479,6 +484,12 @@ async function main() {
         ollama: 11434,
       },
       probes: aiBoxProbes,
+      remote_runtime_proof: latest.codexa_remote_proof ? {
+        path: path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"),
+        status: latest.codexa_remote_proof.status || null,
+        green: latest.codexa_remote_proof.codexa_remote_runtime_green ?? null,
+        summary: latest.codexa_remote_proof.summary || null,
+      } : null,
       link_alert: latest.codexa_alert ? {
         status: latest.codexa_alert.status || null,
         message: latest.codexa_alert.message || null,
@@ -569,6 +580,12 @@ async function main() {
         smb_port_visible: latest.codexa_alert?.smb_port_visible ?? null,
         signal_hygiene: codexaSignalHygiene(latest.codexa_alert),
       message: latest.codexa_alert?.message || null,
+    },
+    codexa_remote_proof: {
+      path: path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"),
+      status: latest.codexa_remote_proof?.status || null,
+      green: latest.codexa_remote_proof?.codexa_remote_runtime_green ?? null,
+      summary: latest.codexa_remote_proof?.summary || null,
     },
     codexa_smb_stage: {
       path: path.join(dataRoot, "codexa-smb-stage", "latest-codexa-smb-stage.json"),

@@ -1,0 +1,3 @@
+display_name: Orangebox Primer
+short_description: Prime Orangebox Ops chats
+default_prompt: Use $orangebox-primer to run the Orangebox system check, load current Ops law, and align this chat before touching code.

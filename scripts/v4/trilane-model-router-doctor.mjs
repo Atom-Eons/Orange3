@@ -138,22 +138,37 @@ async function main() {
   const registry = readJson(modelRegistryPath);
   const roleMap = readJson(roleMapPath);
   const routingPolicy = readJson(routingPolicyPath);
+  const codexaRemoteProof = readJson(path.join(dataRoot, "codexa-remote-proof", "latest-codexa-remote-runtime-proof.json"));
   const validation = validateConfig(registry, roleMap, routingPolicy);
   const probes = {
     cockpit_ollama: await probeJson("http://127.0.0.1:11434/api/tags"),
     codexa_direct_ollama: await probeJson("http://10.0.99.1:11434/api/tags"),
     codexa_lan_ollama: await probeJson("http://10.0.0.4:11434/api/tags"),
+    codexa_remote_runtime_proof: {
+      ok: codexaRemoteProof?.codexa_remote_runtime_green === true,
+      status: codexaRemoteProof?.status || null,
+      url: "command-rail://codexa/127.0.0.1:11434/api/tags",
+      body: {
+        models: (codexaRemoteProof?.remote?.proof?.ollama?.tags || []).map((name) => ({ name })),
+        summary: codexaRemoteProof?.summary || null,
+      },
+    },
   };
   const installedTags = [
     ...normalizeOllamaTags(probes.cockpit_ollama.body),
     ...normalizeOllamaTags(probes.codexa_direct_ollama.body),
     ...normalizeOllamaTags(probes.codexa_lan_ollama.body),
+    ...normalizeOllamaTags(probes.codexa_remote_runtime_proof.body),
   ];
   const uniqueInstalledTags = [...new Set(installedTags)].sort();
   const modelAvailability = availabilitySummary(registry?.local_models || [], uniqueInstalledTags);
   const coreModels = modelAvailability.filter((model) => model.tier === "core");
   const coreInstalledCount = coreModels.filter((model) => model.installed).length;
   const wildcards = modelAvailability.filter((model) => model.tier === "wildcard" || model.id.includes("dolphin"));
+  const requiredModels = modelAvailability.filter((model) => !model.optional);
+  const requiredInstalledCount = requiredModels.filter((model) => model.installed).length;
+  const remoteRuntimeGreen = codexaRemoteProof?.codexa_remote_runtime_green === true;
+  const fullRuntimeVerified = remoteRuntimeGreen && requiredModels.length > 0 && requiredInstalledCount === requiredModels.length;
 
   const result = {
     ok: validation.ok,
@@ -178,12 +193,17 @@ async function main() {
     },
     codexa_status_note:
       probes.codexa_direct_ollama.ok || probes.codexa_lan_ollama.ok
-        ? "Codexa Ollama was reachable for model discovery."
-        : "Codexa Ollama was not reachable from this cockpit; use the OBOX 2 setup pack on Codexa to install/pull models.",
+        ? "Codexa Ollama was directly reachable for model discovery."
+        : probes.codexa_remote_runtime_proof.ok
+          ? "Codexa Ollama/model discovery was proven through the command rail from inside Codexa."
+          : "Codexa Ollama was not proven from this cockpit; run codexa:remote-proof or use the OBOX 2 setup pack on Codexa to install/pull models.",
     install_status: {
-      models_required_for_full_tri_lane: "PENDING_CODEXA_OPERATOR_RUN",
+      models_required_for_full_tri_lane: fullRuntimeVerified ? "INSTALLED_VERIFIED_BY_CODEXA_REMOTE_PROOF" : "PENDING_CODEXA_OPERATOR_RUN",
       local_config_ready: validation.ok,
       setup_pack_command: "npm.cmd run obox2:pack",
+      required_installed_count: requiredInstalledCount,
+      required_total: requiredModels.length,
+      codexa_remote_runtime_green: remoteRuntimeGreen,
     },
   };
 
