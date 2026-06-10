@@ -33,6 +33,31 @@ Build Cortex IDE as the local-first, visual, voice-directed, ghost-worktree, mod
 14. VRAM Multiplexing Escalation
 15. Theater Polish
 
+## ToolMesh Extension
+
+ToolMesh is now part of the V3 scope as an additive free-alpha control plane. It does not install or execute candidate tools by default.
+
+Y0. Registry Only
+Y1. Image Lab
+Y2. Design Lab
+Y3. Audio Lab
+Y4. Video Lab
+Y5. Coding Lab
+Y6. Automation Lab
+Y7. Analytics / MarketOps
+Y8. PublicAgent
+Y9. Observability / Security / ReleaseOps
+Alpha. Watchlist
+
+## ToolMesh Law
+
+- Tool cards are capability records, not execution permission.
+- Local-first is default.
+- Cloud requires warrant.
+- Repo-touching tools require ghost worktree, STRONGARM, receipt, tests, and rollback proof.
+- Public-facing tools require publish warrant and injection checks.
+- Candidate tools must beat baseline before promotion.
+
 ## Current Status
 
-Initialized with feature flags and proof-first implementation lanes. V2 remains the working baseline while V3 features prove parity behind flags.
+Initialized with feature flags and proof-first implementation lanes. V2 remains the working baseline while V3 features prove parity behind flags. ToolMesh Y0 is active as a registry and doctor layer; Y1-Y9 labs remain scoped behind promotion gates.

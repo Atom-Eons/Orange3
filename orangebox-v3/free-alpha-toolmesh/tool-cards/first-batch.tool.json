@@ -1,0 +1,2424 @@
+{
+  "cards": [
+    {
+      "id": "comfyui",
+      "name": "ComfyUI",
+      "category": "image_generation",
+      "lab": "image-lab",
+      "phase": "Y1",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "node graph image generation candidate",
+      "capabilities": [
+        "image",
+        "workflow",
+        "local generation"
+      ],
+      "input": [
+        "prompt",
+        "workflow"
+      ],
+      "output": [
+        "image",
+        "workflow receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "image-lab:doctor",
+      "promotionGate": [
+        "local install proof",
+        "sample render receipt",
+        "no secret dependency"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "missing model weights",
+        "gpu memory pressure",
+        "workflow drift"
+      ],
+      "rollback": "disable image-lab route and remove generated artifacts",
+      "binaryNames": [
+        "python"
+      ],
+      "notes": "Registry only until installed and benchmarked.",
+      "hardwareProfile": {
+        "vramRequiredGB": 16,
+        "ramRequiredGB": 32,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": true,
+        "allowedVariables": [
+          "prompt",
+          "negative_prompt",
+          "seed",
+          "input_asset_pointer",
+          "output_artifact_pointer"
+        ],
+        "templateIds": [
+          "flux-book-cover-v1",
+          "sdxl-proof-render-v1"
+        ]
+      }
+    },
+    {
+      "id": "flux",
+      "name": "FLUX",
+      "category": "image_model",
+      "lab": "image-lab",
+      "phase": "Y1",
+      "status": "candidate",
+      "cost": "free_or_open_weight",
+      "local": true,
+      "openSource": false,
+      "cloud": false,
+      "orangeboxRole": "high quality image model candidate",
+      "capabilities": [
+        "image",
+        "prompt to image"
+      ],
+      "input": [
+        "prompt"
+      ],
+      "output": [
+        "image"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "image-lab:doctor",
+      "promotionGate": [
+        "license review",
+        "local render benchmark",
+        "receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "license mismatch",
+        "missing weights",
+        "slow render"
+      ],
+      "rollback": "remove model route from image lab",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 16,
+        "ramRequiredGB": 32,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "qwen-image",
+      "name": "Qwen Image",
+      "category": "image_model",
+      "lab": "image-lab",
+      "phase": "Y1",
+      "status": "candidate",
+      "cost": "free_or_open_weight",
+      "local": true,
+      "openSource": false,
+      "cloud": false,
+      "orangeboxRole": "image generation/editing candidate",
+      "capabilities": [
+        "image",
+        "edit",
+        "text rendering"
+      ],
+      "input": [
+        "prompt",
+        "image"
+      ],
+      "output": [
+        "image"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "image-lab:doctor",
+      "promotionGate": [
+        "license review",
+        "sample edit receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "missing weights",
+        "artifact mismatch"
+      ],
+      "rollback": "remove model route from image lab",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 16,
+        "ramRequiredGB": 32,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "qwen-image-layered",
+      "name": "Qwen Image Layered",
+      "category": "image_model",
+      "lab": "image-lab",
+      "phase": "Y1",
+      "status": "candidate",
+      "cost": "free_or_open_weight",
+      "local": true,
+      "openSource": false,
+      "cloud": false,
+      "orangeboxRole": "layer-aware image workflow candidate",
+      "capabilities": [
+        "layered image",
+        "edit",
+        "asset generation"
+      ],
+      "input": [
+        "prompt",
+        "layers"
+      ],
+      "output": [
+        "layered asset"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "image-lab:doctor",
+      "promotionGate": [
+        "license review",
+        "layer export proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "unsupported layered output",
+        "model unavailable"
+      ],
+      "rollback": "disable layered route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 16,
+        "ramRequiredGB": 32,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "sdxl",
+      "name": "Stable Diffusion XL",
+      "category": "image_model",
+      "lab": "image-lab",
+      "phase": "Y1",
+      "status": "candidate",
+      "cost": "free_or_open_weight",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "baseline open image model",
+      "capabilities": [
+        "image",
+        "baseline render"
+      ],
+      "input": [
+        "prompt"
+      ],
+      "output": [
+        "image"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "image-lab:doctor",
+      "promotionGate": [
+        "local model proof",
+        "sample render receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "missing weights",
+        "low quality baseline"
+      ],
+      "rollback": "remove model route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 10,
+        "ramRequiredGB": 32,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "wan",
+      "name": "Wan",
+      "category": "video_model",
+      "lab": "video-lab",
+      "phase": "Y4",
+      "status": "candidate",
+      "cost": "free_or_open_weight",
+      "local": true,
+      "openSource": false,
+      "cloud": false,
+      "orangeboxRole": "text/image to video model candidate",
+      "capabilities": [
+        "video",
+        "motion generation"
+      ],
+      "input": [
+        "prompt",
+        "image"
+      ],
+      "output": [
+        "video"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "video-lab:doctor",
+      "promotionGate": [
+        "license review",
+        "short clip benchmark",
+        "artifact receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "missing weights",
+        "high VRAM use",
+        "slow render"
+      ],
+      "rollback": "disable video route and delete candidate artifacts",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 24,
+        "ramRequiredGB": 48,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "ltx",
+      "name": "LTX",
+      "category": "video_model",
+      "lab": "video-lab",
+      "phase": "Y4",
+      "status": "candidate",
+      "cost": "free_or_open_weight",
+      "local": true,
+      "openSource": false,
+      "cloud": false,
+      "orangeboxRole": "fast video generation candidate",
+      "capabilities": [
+        "video",
+        "fast render"
+      ],
+      "input": [
+        "prompt",
+        "image"
+      ],
+      "output": [
+        "video"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "video-lab:doctor",
+      "promotionGate": [
+        "license review",
+        "speed benchmark",
+        "receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "model unavailable",
+        "quality miss"
+      ],
+      "rollback": "disable ltx route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 16,
+        "ramRequiredGB": 48,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "davinci-resolve",
+      "name": "DaVinci Resolve",
+      "category": "video_editing",
+      "lab": "video-lab",
+      "phase": "Y4",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": false,
+      "cloud": false,
+      "orangeboxRole": "local video finishing candidate",
+      "capabilities": [
+        "video edit",
+        "color",
+        "export"
+      ],
+      "input": [
+        "video",
+        "timeline"
+      ],
+      "output": [
+        "video"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "video-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "export proof",
+        "receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "gui automation brittle"
+      ],
+      "rollback": "disable resolve route",
+      "binaryNames": [
+        "Resolve.exe"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 4,
+        "ramRequiredGB": 48,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "kdenlive",
+      "name": "Kdenlive",
+      "category": "video_editing",
+      "lab": "video-lab",
+      "phase": "Y4",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "open video editing fallback",
+      "capabilities": [
+        "video edit",
+        "timeline",
+        "export"
+      ],
+      "input": [
+        "video",
+        "timeline"
+      ],
+      "output": [
+        "video"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "video-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "export proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "codec mismatch"
+      ],
+      "rollback": "disable kdenlive route",
+      "binaryNames": [
+        "kdenlive"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 4,
+        "ramRequiredGB": 48,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "obs",
+      "name": "OBS Studio",
+      "category": "screen_capture",
+      "lab": "video-lab",
+      "phase": "Y4",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local recording and proof capture",
+      "capabilities": [
+        "record",
+        "screen capture",
+        "stream"
+      ],
+      "input": [
+        "screen",
+        "source"
+      ],
+      "output": [
+        "video"
+      ],
+      "canTouchRepo": false,
+      "canPublish": true,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "video-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "recording proof",
+        "publish disabled by default"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "privacy leak",
+        "wrong capture source"
+      ],
+      "rollback": "stop OBS route and delete candidate captures",
+      "binaryNames": [
+        "obs64.exe",
+        "obs"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 4,
+        "ramRequiredGB": 48,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_media",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "whisper",
+      "name": "Whisper",
+      "category": "speech_to_text",
+      "lab": "audio-lab",
+      "phase": "Y3",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local transcription candidate",
+      "capabilities": [
+        "transcribe",
+        "audio",
+        "captions"
+      ],
+      "input": [
+        "audio"
+      ],
+      "output": [
+        "text",
+        "srt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "audio-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "sample transcript receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "model missing",
+        "bad transcript"
+      ],
+      "rollback": "disable transcription route",
+      "binaryNames": [
+        "whisper"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "cpu_audio",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "audacity",
+      "name": "Audacity",
+      "category": "audio_editing",
+      "lab": "audio-lab",
+      "phase": "Y3",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "manual/local audio edit candidate",
+      "capabilities": [
+        "audio edit",
+        "noise reduction"
+      ],
+      "input": [
+        "audio"
+      ],
+      "output": [
+        "audio"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "audio-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "export proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "gui automation brittle"
+      ],
+      "rollback": "disable audacity route",
+      "binaryNames": [
+        "Audacity.exe",
+        "audacity"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "cpu_audio",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "demucs",
+      "name": "Demucs",
+      "category": "audio_separation",
+      "lab": "audio-lab",
+      "phase": "Y3",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "stem separation candidate",
+      "capabilities": [
+        "stems",
+        "separation",
+        "audio"
+      ],
+      "input": [
+        "audio"
+      ],
+      "output": [
+        "stems"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "audio-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "sample separation receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "missing python package",
+        "slow separation"
+      ],
+      "rollback": "disable demucs route",
+      "binaryNames": [
+        "demucs"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "cpu_audio",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "uvr",
+      "name": "Ultimate Vocal Remover",
+      "category": "audio_separation",
+      "lab": "audio-lab",
+      "phase": "Y3",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "vocal separation candidate",
+      "capabilities": [
+        "vocal remove",
+        "stems",
+        "audio"
+      ],
+      "input": [
+        "audio"
+      ],
+      "output": [
+        "stems"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "audio-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "sample receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "model missing"
+      ],
+      "rollback": "disable uvr route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "cpu_audio",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "penpot",
+      "name": "Penpot",
+      "category": "design",
+      "lab": "design-lab",
+      "phase": "Y2",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "open design system candidate",
+      "capabilities": [
+        "design",
+        "prototype",
+        "components"
+      ],
+      "input": [
+        "design brief"
+      ],
+      "output": [
+        "design file"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "design-lab:doctor",
+      "promotionGate": [
+        "self-host or local proof",
+        "export proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "service not running",
+        "export mismatch"
+      ],
+      "rollback": "disable penpot route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 4,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "gpu_design",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "inkscape",
+      "name": "Inkscape",
+      "category": "vector_design",
+      "lab": "design-lab",
+      "phase": "Y2",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local SVG/vector editor",
+      "capabilities": [
+        "svg",
+        "vector",
+        "export"
+      ],
+      "input": [
+        "svg",
+        "image"
+      ],
+      "output": [
+        "svg",
+        "png"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "design-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "export proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "font mismatch"
+      ],
+      "rollback": "disable inkscape route",
+      "binaryNames": [
+        "inkscape"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 4,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "gpu_design",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "krita",
+      "name": "Krita",
+      "category": "raster_design",
+      "lab": "design-lab",
+      "phase": "Y2",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local painting and raster edit",
+      "capabilities": [
+        "paint",
+        "raster",
+        "illustration"
+      ],
+      "input": [
+        "image"
+      ],
+      "output": [
+        "image"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "design-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "export proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "manual workflow"
+      ],
+      "rollback": "disable krita route",
+      "binaryNames": [
+        "krita"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 4,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "gpu_design",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "gimp",
+      "name": "GIMP",
+      "category": "raster_design",
+      "lab": "design-lab",
+      "phase": "Y2",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local raster editing fallback",
+      "capabilities": [
+        "image edit",
+        "raster",
+        "export"
+      ],
+      "input": [
+        "image"
+      ],
+      "output": [
+        "image"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "design-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "export proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "script mismatch"
+      ],
+      "rollback": "disable gimp route",
+      "binaryNames": [
+        "gimp"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 4,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "gpu_design",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "blender",
+      "name": "Blender",
+      "category": "3d_design",
+      "lab": "design-lab",
+      "phase": "Y2",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "3D asset and animation candidate",
+      "capabilities": [
+        "3d",
+        "render",
+        "animation"
+      ],
+      "input": [
+        "scene",
+        "asset"
+      ],
+      "output": [
+        "image",
+        "video",
+        "model"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "design-lab:doctor",
+      "promotionGate": [
+        "install proof",
+        "render proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "not installed",
+        "long render"
+      ],
+      "rollback": "disable blender route",
+      "binaryNames": [
+        "blender"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 8,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "gpu_design",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "category": "coding_agent",
+      "lab": "coding-lab",
+      "phase": "Y5",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "candidate code edit agent behind ghost worktree",
+      "capabilities": [
+        "code edit",
+        "patch",
+        "tests"
+      ],
+      "input": [
+        "task",
+        "repo"
+      ],
+      "output": [
+        "diff"
+      ],
+      "canTouchRepo": true,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "coding-lab:doctor",
+      "promotionGate": [
+        "ghost worktree proof",
+        "diff receipt",
+        "rollback proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "direct repo mutation",
+        "bad patch",
+        "test failure"
+      ],
+      "rollback": "destroy ghost worktree and reject patch",
+      "binaryNames": [
+        "aider"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "repo_agent",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "continue",
+      "name": "Continue",
+      "category": "coding_agent",
+      "lab": "coding-lab",
+      "phase": "Y5",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "IDE agent candidate with local model routes",
+      "capabilities": [
+        "ide agent",
+        "code edit",
+        "autocomplete"
+      ],
+      "input": [
+        "task",
+        "repo"
+      ],
+      "output": [
+        "diff",
+        "answer"
+      ],
+      "canTouchRepo": true,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "coding-lab:doctor",
+      "promotionGate": [
+        "config proof",
+        "ghost worktree only",
+        "receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "untracked edit",
+        "wrong model route"
+      ],
+      "rollback": "disable Continue skill/config route",
+      "binaryNames": [
+        "continue"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "repo_agent",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "openhands",
+      "name": "OpenHands",
+      "category": "coding_agent",
+      "lab": "coding-lab",
+      "phase": "Y5",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "autonomous coding candidate behind decision gates",
+      "capabilities": [
+        "agent",
+        "terminal",
+        "code"
+      ],
+      "input": [
+        "task",
+        "repo"
+      ],
+      "output": [
+        "diff",
+        "logs"
+      ],
+      "canTouchRepo": true,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "coding-lab:doctor",
+      "promotionGate": [
+        "isolated workspace",
+        "terminal log receipt",
+        "rollback proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "runaway action",
+        "destructive command",
+        "bad patch"
+      ],
+      "rollback": "stop container/process and discard workspace",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "repo_agent",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "goose",
+      "name": "Goose",
+      "category": "coding_agent",
+      "lab": "coding-lab",
+      "phase": "Y5",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "executor hands candidate after envelope gating",
+      "capabilities": [
+        "agent",
+        "mcp",
+        "terminal"
+      ],
+      "input": [
+        "task",
+        "tools"
+      ],
+      "output": [
+        "actions",
+        "logs"
+      ],
+      "canTouchRepo": true,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "coding-lab:doctor",
+      "promotionGate": [
+        "goose envelope",
+        "ghost worktree",
+        "action receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "tool overreach",
+        "missing MCP boundary"
+      ],
+      "rollback": "disable goose executor route",
+      "binaryNames": [
+        "goose"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "repo_agent",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "n8n",
+      "name": "n8n",
+      "category": "automation",
+      "lab": "automation-lab",
+      "phase": "Y6",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "workflow automation candidate",
+      "capabilities": [
+        "workflow",
+        "webhook",
+        "automation"
+      ],
+      "input": [
+        "trigger",
+        "workflow"
+      ],
+      "output": [
+        "action receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": true,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "automation-lab:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "disabled external creds by default",
+        "receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "credential leak",
+        "bad webhook",
+        "unwanted side effect"
+      ],
+      "rollback": "disable workflow and revoke webhook",
+      "binaryNames": [
+        "n8n"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "side_effect",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": true,
+        "allowedVariables": [
+          "prompt",
+          "negative_prompt",
+          "seed",
+          "input_asset_pointer",
+          "output_artifact_pointer"
+        ],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "node-red",
+      "name": "Node-RED",
+      "category": "automation",
+      "lab": "automation-lab",
+      "phase": "Y6",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local flow automation candidate",
+      "capabilities": [
+        "flow",
+        "automation",
+        "iot"
+      ],
+      "input": [
+        "flow"
+      ],
+      "output": [
+        "action receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": true,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "automation-lab:doctor",
+      "promotionGate": [
+        "local proof",
+        "no public publish by default",
+        "receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "bad flow",
+        "network exposure"
+      ],
+      "rollback": "disable flow and close port",
+      "binaryNames": [
+        "node-red"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "side_effect",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "windmill",
+      "name": "Windmill",
+      "category": "automation",
+      "lab": "automation-lab",
+      "phase": "Y6",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "script/workflow automation candidate",
+      "capabilities": [
+        "workflow",
+        "script",
+        "jobs"
+      ],
+      "input": [
+        "script",
+        "schedule"
+      ],
+      "output": [
+        "job receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": true,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "automation-lab:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "job receipt",
+        "rollback"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "bad schedule",
+        "credential leak"
+      ],
+      "rollback": "disable job and revoke credentials",
+      "binaryNames": [
+        "wmill"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "side_effect",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": true,
+        "allowedVariables": [
+          "prompt",
+          "negative_prompt",
+          "seed",
+          "input_asset_pointer",
+          "output_artifact_pointer"
+        ],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "matomo",
+      "name": "Matomo",
+      "category": "analytics",
+      "lab": "analytics-lab",
+      "phase": "Y7",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "privacy analytics candidate",
+      "capabilities": [
+        "analytics",
+        "traffic",
+        "reports"
+      ],
+      "input": [
+        "events"
+      ],
+      "output": [
+        "report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "analytics-lab:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "privacy proof",
+        "report receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "tracking mismatch",
+        "service not running"
+      ],
+      "rollback": "disable analytics route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "data_service",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "plausible",
+      "name": "Plausible",
+      "category": "analytics",
+      "lab": "analytics-lab",
+      "phase": "Y7",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "light privacy analytics candidate",
+      "capabilities": [
+        "analytics",
+        "web metrics"
+      ],
+      "input": [
+        "events"
+      ],
+      "output": [
+        "report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "analytics-lab:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "privacy proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "service not running",
+        "event mismatch"
+      ],
+      "rollback": "disable plausible route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "data_service",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "umami",
+      "name": "Umami",
+      "category": "analytics",
+      "lab": "analytics-lab",
+      "phase": "Y7",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "simple analytics candidate",
+      "capabilities": [
+        "analytics",
+        "web metrics"
+      ],
+      "input": [
+        "events"
+      ],
+      "output": [
+        "report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "analytics-lab:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "report receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "service not running",
+        "bad event mapping"
+      ],
+      "rollback": "disable umami route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "data_service",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "posthog",
+      "name": "PostHog",
+      "category": "analytics",
+      "lab": "analytics-lab",
+      "phase": "Y7",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "product analytics and experiment candidate",
+      "capabilities": [
+        "analytics",
+        "funnels",
+        "events"
+      ],
+      "input": [
+        "events"
+      ],
+      "output": [
+        "report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "analytics-lab:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "data boundary proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "heavy service",
+        "tracking scope creep"
+      ],
+      "rollback": "disable posthog route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "data_service",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "metabase",
+      "name": "Metabase",
+      "category": "analytics",
+      "lab": "analytics-lab",
+      "phase": "Y7",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local BI/reporting candidate",
+      "capabilities": [
+        "dashboard",
+        "sql",
+        "report"
+      ],
+      "input": [
+        "database"
+      ],
+      "output": [
+        "dashboard",
+        "report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "analytics-lab:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "read-only connection proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "bad data source",
+        "exposed dashboard"
+      ],
+      "rollback": "disable metabase route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "data_service",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "langfuse",
+      "name": "Langfuse",
+      "category": "observability",
+      "lab": "observability-lab",
+      "phase": "Y9",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "LLM trace observability candidate",
+      "capabilities": [
+        "traces",
+        "evals",
+        "prompts"
+      ],
+      "input": [
+        "trace"
+      ],
+      "output": [
+        "observability report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "observability:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "no prompt leak proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "prompt leakage",
+        "service not running"
+      ],
+      "rollback": "disable langfuse route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "trace_service",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "phoenix",
+      "name": "Phoenix",
+      "category": "observability",
+      "lab": "observability-lab",
+      "phase": "Y9",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "LLM eval and trace candidate",
+      "capabilities": [
+        "traces",
+        "evals",
+        "embeddings"
+      ],
+      "input": [
+        "trace"
+      ],
+      "output": [
+        "observability report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "observability:doctor",
+      "promotionGate": [
+        "local proof",
+        "trace receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "service not running",
+        "large data"
+      ],
+      "rollback": "disable phoenix route",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "trace_service",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "semgrep",
+      "name": "Semgrep",
+      "category": "security",
+      "lab": "security-lab",
+      "phase": "Y9",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "static security scan candidate",
+      "capabilities": [
+        "sast",
+        "security",
+        "scan"
+      ],
+      "input": [
+        "repo"
+      ],
+      "output": [
+        "security report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "security:doctor",
+      "promotionGate": [
+        "install proof",
+        "scan receipt",
+        "false-positive policy"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "false positive",
+        "slow scan"
+      ],
+      "rollback": "remove from release gate",
+      "binaryNames": [
+        "semgrep"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "security_scan",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "trivy",
+      "name": "Trivy",
+      "category": "security",
+      "lab": "security-lab",
+      "phase": "Y9",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "dependency/container vulnerability scan candidate",
+      "capabilities": [
+        "dependency scan",
+        "container scan",
+        "security"
+      ],
+      "input": [
+        "repo",
+        "image"
+      ],
+      "output": [
+        "security report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "security:doctor",
+      "promotionGate": [
+        "install proof",
+        "scan receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "database stale",
+        "false positive"
+      ],
+      "rollback": "remove from release gate",
+      "binaryNames": [
+        "trivy"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "security_scan",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "gitleaks",
+      "name": "Gitleaks",
+      "category": "security",
+      "lab": "security-lab",
+      "phase": "Y9",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "secret scan candidate",
+      "capabilities": [
+        "secret scan",
+        "security",
+        "git"
+      ],
+      "input": [
+        "repo"
+      ],
+      "output": [
+        "secret report"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "security:doctor",
+      "promotionGate": [
+        "install proof",
+        "scan receipt",
+        "redaction proof"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "false positive",
+        "secret exposure in logs"
+      ],
+      "rollback": "remove from release gate",
+      "binaryNames": [
+        "gitleaks"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "security_scan",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "flowise",
+      "name": "Flowise",
+      "category": "public_agent",
+      "lab": "public-agent-lab",
+      "phase": "Y8",
+      "status": "candidate",
+      "cost": "free_selfhost",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "public agent builder candidate behind publish gates",
+      "capabilities": [
+        "public agent",
+        "chatbot",
+        "lead capture"
+      ],
+      "input": [
+        "agent spec",
+        "knowledge source"
+      ],
+      "output": [
+        "agent endpoint",
+        "receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": true,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": true,
+      "doctor": "public-agent:doctor",
+      "promotionGate": [
+        "self-host proof",
+        "injection proof",
+        "publish warrant",
+        "receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "prompt injection",
+        "unwanted public exposure",
+        "bad source grounding"
+      ],
+      "rollback": "disable agent endpoint and remove route",
+      "binaryNames": [
+        "flowise"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 12,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "public_agent",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "act",
+      "name": "act",
+      "category": "releaseops",
+      "lab": "releaseops-lab",
+      "phase": "Y9",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "local GitHub Actions rehearsal candidate",
+      "capabilities": [
+        "release",
+        "ci",
+        "preflight"
+      ],
+      "input": [
+        "workflow",
+        "repo"
+      ],
+      "output": [
+        "release rehearsal receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "releaseops:doctor",
+      "promotionGate": [
+        "install proof",
+        "workflow rehearsal receipt",
+        "no secret exposure"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "docker unavailable",
+        "workflow mismatch",
+        "secret leakage"
+      ],
+      "rollback": "remove from release preflight gate",
+      "binaryNames": [
+        "act"
+      ],
+      "hardwareProfile": {
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 8,
+        "requiresLLMUnload": false,
+        "concurrencyLock": "release_rehearsal",
+        "notes": "Light profile under normal ToolMesh gate."
+      },
+      "executionMode": "headless_or_workspace_prep",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    },
+    {
+      "id": "tilelang",
+      "name": "TileLang",
+      "category": "alpha_runtime",
+      "lab": "alpha-watchlist",
+      "phase": "Alpha",
+      "status": "candidate",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "inference-kernel alpha candidate for future Codexa acceleration",
+      "capabilities": [
+        "alpha",
+        "gpu kernels",
+        "inference acceleration"
+      ],
+      "input": [
+        "kernel benchmark"
+      ],
+      "output": [
+        "benchmark receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "alpha-watchlist:doctor",
+      "promotionGate": [
+        "external research gate",
+        "hardware compatibility proof",
+        "microbenchmark receipt"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "unsupported hardware",
+        "dependency weight",
+        "benchmark theater"
+      ],
+      "rollback": "keep watchlist-only and do not install into runtime",
+      "binaryNames": [],
+      "hardwareProfile": {
+        "vramRequiredGB": 8,
+        "ramRequiredGB": 16,
+        "requiresLLMUnload": true,
+        "concurrencyLock": "alpha_benchmark",
+        "notes": "Acquire lock and unload local LLM lane before execution."
+      },
+      "executionMode": "registry_only",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": false,
+        "gcEligible": false
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": false,
+        "allowedVariables": [],
+        "templateIds": []
+      }
+    }
+  ]
+}

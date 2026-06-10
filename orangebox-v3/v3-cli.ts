@@ -29,6 +29,13 @@ const expectedFiles = [
   "ghost/promote-ghost.ts",
   "ghost/ghost-status.ts",
   "memory-wildcard/k3-cli.ts",
+  "toolmesh/toolmesh-cli.ts",
+  "toolmesh/adapter-doctor.ts",
+  "toolmesh/hardware-manager.ts",
+  "free-alpha-toolmesh/TOOLMESH_SCOPE.md",
+  "free-alpha-toolmesh/HARDWARE_ARTIFACT_PROTOCOL.md",
+  "free-alpha-toolmesh/registries/free-tool-stack.registry.json",
+  "free-alpha-toolmesh/registries/v3-wave-registry.json",
 ];
 
 const phaseFiles: Record<string, string[]> = {
@@ -46,6 +53,14 @@ const phaseFiles: Record<string, string[]> = {
   forge: ["forge/predict-next-actions.ts"],
   goose: ["goose/goose-envelope.ts"],
   vite: ["vite/allocate-port.ts"],
+  toolmesh: [
+    "toolmesh/tool-card.schema.ts",
+    "toolmesh/tool-registry.ts",
+    "toolmesh/capability-router.ts",
+    "toolmesh/hardware-manager.ts",
+    "toolmesh/toolmesh-cli.ts",
+    "free-alpha-toolmesh/tool-cards/first-batch.tool.json",
+  ],
 };
 
 function exists(rel: string) {
@@ -65,6 +80,12 @@ async function doctor() {
   checks.push({ id: "baseline_recorded", ok: Boolean(baseline), detail: baseline ? "latest-baseline.json" : "missing" });
   const k3Bench = readJson(path.join(dataRoot, "v3", "k3", "latest-benchmark.json"), null);
   checks.push({ id: "k3_benchmark_available_or_pending", ok: Boolean(k3Bench) || flags.ORANGEBOX_V3_MEMORY_WILDCARD === "0", detail: k3Bench ? "latest-benchmark.json" : "wildcard still off" });
+  const toolmeshDoctor = readJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"), null);
+  checks.push({
+    id: "toolmesh_doctor_available_when_enabled",
+    ok: Boolean(toolmeshDoctor) || flags.ORANGEBOX_FREE_ALPHA_TOOLMESH !== "1",
+    detail: toolmeshDoctor ? "latest-toolmesh-doctor.json" : "run npm run toolmesh:doctor",
+  });
   const packageCheck = await run("bun", ["orangebox-v3/v3-cli.ts", "flags"], { cwd: repoRoot, timeoutMs: 30_000 });
   checks.push({ id: "v3_cli_bun_smoke", ok: packageCheck.ok, detail: packageCheck.stderr || packageCheck.stdout });
   const ok = checks.every((check) => check.ok);

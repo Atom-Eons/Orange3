@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Orangebox ToolMesh Artifact Receipt",
+  "type": "object",
+  "required": ["schema_version", "tool_id", "status", "artifact", "receipt_hash"],
+  "properties": {
+    "schema_version": { "const": "orangebox.toolmesh.artifact-receipt.v1" },
+    "tool_id": { "type": "string" },
+    "status": { "enum": ["GREEN", "NEEDS_ATTENTION", "BLOCKED"] },
+    "artifact": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string" },
+        "sha256": { "type": "string" },
+        "sizeBytes": { "type": "integer" }
+      }
+    },
+    "receipt_hash": { "type": "string" },
+    "rollback": { "type": "string" }
+  }
+}

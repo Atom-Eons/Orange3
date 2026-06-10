@@ -155,6 +155,8 @@ const requiredOpsScripts = [
   "session:spine",
   "feature:proof",
   "harness:benchmark",
+  "toolmesh:doctor",
+  "v3:doctor",
   "chatbackup:restore",
   "codexa:alert",
   "codexa:watch",
@@ -725,6 +727,53 @@ const tasks = [
             allowed_openclaw_commands: languageGuard.allowed_openclaw_commands || [],
           },
           constraints,
+        });
+    },
+  },
+  {
+    id: "v3_toolmesh_wave_truth",
+    category: "toolmesh",
+    oracle: "V3 ToolMesh must preserve prior V3 waves, register free-alpha tool cards, and block execution until promotion gates are satisfied.",
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    run(trace) {
+      const toolmesh = readJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const scopeText = readText(path.join(repoRoot, "orangebox-v3", "free-alpha-toolmesh", "TOOLMESH_SCOPE.md"), trace);
+      const failures = [];
+      if (toolmesh?.status !== "GREEN" || toolmesh?.ok !== true) failures.push(`ToolMesh not green: ${toolmesh?.status || "missing"}`);
+      if ((toolmesh?.summary?.cards_total || 0) < 39) failures.push(`ToolMesh card count too low: ${toolmesh?.summary?.cards_total || 0}`);
+      if (toolmesh?.checks?.first_batch_registered !== true) failures.push("First-batch tool ids are not fully registered");
+      if (toolmesh?.checks?.execution_blocked_until_promoted !== true) failures.push("Execution is not explicitly blocked until promotion");
+      if (toolmesh?.checks?.hardware_profiles_declared !== true) failures.push("Hardware profiles are not declared on every tool card");
+      if (toolmesh?.checks?.artifact_pointer_policy_declared !== true) failures.push("Artifact pointer policy is not declared on every tool card");
+      if (toolmesh?.checks?.execution_modes_declared !== true) failures.push("Execution mode is not declared on every tool card");
+      if (toolmesh?.checks?.immutable_templates_for_workflow_tools !== true) failures.push("Workflow tools do not all require immutable templates");
+      if (toolmesh?.waveValidation?.preservedV3Count !== 16) failures.push(`Preserved V3 wave count is not 16: ${toolmesh?.waveValidation?.preservedV3Count || 0}`);
+      if (toolmesh?.waveValidation?.toolmeshCount !== 10) failures.push(`ToolMesh wave count is not 10: ${toolmesh?.waveValidation?.toolmeshCount || 0}`);
+      if (Array.isArray(toolmesh?.missingRequiredFirstBatch) && toolmesh.missingRequiredFirstBatch.length > 0) failures.push(`Missing first-batch ids: ${toolmesh.missingRequiredFirstBatch.join(", ")}`);
+      if (!packageJson?.scripts?.["toolmesh:doctor"]) failures.push("Package script toolmesh:doctor missing");
+      if (!packageJson?.scripts?.["v3:doctor"]) failures.push("Package script v3:doctor missing");
+      if (!packageJson?.scripts?.["image-lab:doctor"]) failures.push("Package script image-lab:doctor missing");
+      if (!packageJson?.scripts?.["releaseops:doctor"]) failures.push("Package script releaseops:doctor missing");
+      if (!feature?.matrix?.some((row) => row.id === "v3_free_alpha_toolmesh" && row.ok === true)) failures.push("Feature matrix does not prove v3_free_alpha_toolmesh");
+      if (!scopeText.includes("Tool cards are not permission to execute")) failures.push("ToolMesh scope file does not state execution boundary");
+      return failures.length
+        ? failTask("v3_toolmesh_wave_truth", failures, {
+          status: toolmesh?.status || null,
+          cards_total: toolmesh?.summary?.cards_total || 0,
+          waveValidation: toolmesh?.waveValidation || null,
+        })
+        : okTask("v3_toolmesh_wave_truth", {
+          status: toolmesh.status,
+          cards_total: toolmesh.summary.cards_total,
+          preserved_v3_waves: toolmesh.waveValidation.preservedV3Count,
+          toolmesh_waves: toolmesh.waveValidation.toolmeshCount,
+          execution_blocked_until_promoted: toolmesh.checks.execution_blocked_until_promoted,
+          hardware_profiles_declared: toolmesh.checks.hardware_profiles_declared,
+          artifact_pointer_policy_declared: toolmesh.checks.artifact_pointer_policy_declared,
+          immutable_templates_for_workflow_tools: toolmesh.checks.immutable_templates_for_workflow_tools,
+          feature_row: "v3_free_alpha_toolmesh",
         });
     },
   },

@@ -1,0 +1,74 @@
+{
+  "schema_version": "orangebox.toolmesh.registry.v1",
+  "name": "Orangebox V3 Free Alpha ToolMesh",
+  "doctrine": [
+    "TriLane remains sovereign.",
+    "STRONGARM gates risky actions.",
+    "Receipts prove action.",
+    "Tool cards are registry truth, not execution permission.",
+    "Local-first is default.",
+    "Cloud requires warrant.",
+    "Candidate tools must beat baseline before promotion."
+    ,"Tool cards declare hardware profile, execution mode, artifact policy, and template policy."
+    ,"Binary outputs return file pointers and hashes only."
+    ,"Rigid workflow tools use immutable templates with approved variable injection."
+  ],
+  "waves": [
+    "Y0 Registry Only",
+    "Y1 Image Lab",
+    "Y2 Design Lab",
+    "Y3 Audio Lab",
+    "Y4 Video Lab",
+    "Y5 Coding Lab",
+    "Y6 Automation Lab",
+    "Y7 Analytics / MarketOps",
+    "Y8 PublicAgent",
+    "Y9 Observability / Security / ReleaseOps",
+    "Alpha Watchlist"
+  ],
+  "required_first_batch_tool_ids": [
+    "comfyui",
+    "flux",
+    "qwen-image",
+    "qwen-image-layered",
+    "sdxl",
+    "wan",
+    "ltx",
+    "davinci-resolve",
+    "kdenlive",
+    "obs",
+    "whisper",
+    "audacity",
+    "demucs",
+    "uvr",
+    "penpot",
+    "inkscape",
+    "krita",
+    "gimp",
+    "blender",
+    "aider",
+    "continue",
+    "openhands",
+    "goose",
+    "n8n",
+    "node-red",
+    "windmill",
+    "matomo",
+    "plausible",
+    "umami",
+    "posthog",
+    "metabase",
+    "langfuse",
+    "phoenix",
+    "semgrep",
+    "trivy",
+    "gitleaks"
+  ],
+  "promotion_law": [
+    "Run doctor.",
+    "Run benchmark.",
+    "Emit receipt.",
+    "Require STRONGARM for repo, publish, auth, or public-facing side effects.",
+    "Keep rollback path."
+  ]
+}

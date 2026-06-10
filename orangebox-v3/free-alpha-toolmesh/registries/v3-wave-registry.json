@@ -1,0 +1,33 @@
+{
+  "schema_version": "orangebox.v3.wave-registry.v1",
+  "preserved_v3_waves": [
+    { "id": "phase-0", "title": "Baseline and Branch", "status": "preserved" },
+    { "id": "phase-1", "title": "Ghost Worktree Spine", "status": "preserved" },
+    { "id": "phase-2", "title": "Elysia API Bridge", "status": "preserved" },
+    { "id": "phase-3", "title": "Chat Continuity Bus", "status": "preserved" },
+    { "id": "phase-4", "title": "Source Injection + Omni-Vision Base", "status": "preserved" },
+    { "id": "phase-5", "title": "Tree-Sitter Skeleton + Minimal Diff", "status": "preserved" },
+    { "id": "phase-6", "title": "Chronos Scrubber", "status": "preserved" },
+    { "id": "phase-7", "title": "Spatial Voice", "status": "preserved" },
+    { "id": "phase-8", "title": "Retina Loop", "status": "preserved" },
+    { "id": "phase-9", "title": "MCP + Context7", "status": "preserved" },
+    { "id": "phase-10", "title": "Speculative Sidecar", "status": "preserved" },
+    { "id": "phase-11", "title": "Predictive Shadow Forge", "status": "preserved" },
+    { "id": "phase-12", "title": "Goose Executor", "status": "preserved" },
+    { "id": "phase-13", "title": "OpenJarvis Eval Harness", "status": "preserved" },
+    { "id": "phase-14", "title": "VRAM Multiplexing Escalation", "status": "preserved" },
+    { "id": "phase-15", "title": "Theater Polish", "status": "preserved" }
+  ],
+  "toolmesh_waves": [
+    { "id": "y0", "title": "Registry Only", "status": "active_control_plane" },
+    { "id": "y1", "title": "Image Lab", "status": "scoped_doctor_gated" },
+    { "id": "y2", "title": "Design Lab", "status": "scoped_doctor_gated" },
+    { "id": "y3", "title": "Audio Lab", "status": "scoped_doctor_gated" },
+    { "id": "y4", "title": "Video Lab", "status": "scoped_doctor_gated" },
+    { "id": "y5", "title": "Coding Lab", "status": "scoped_doctor_gated" },
+    { "id": "y6", "title": "Automation Lab", "status": "scoped_doctor_gated" },
+    { "id": "y7", "title": "Analytics / MarketOps", "status": "scoped_doctor_gated" },
+    { "id": "y8", "title": "PublicAgent", "status": "scoped_doctor_gated" },
+    { "id": "y9", "title": "Observability / Security / ReleaseOps", "status": "scoped_doctor_gated" }
+  ]
+}

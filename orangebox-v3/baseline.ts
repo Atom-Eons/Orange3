@@ -46,7 +46,7 @@ export async function runV3Baseline() {
   }
   const pkg = readJson<any>(path.join(repoRoot, "package.json"), {});
   const scripts = Object.keys(pkg.scripts || {}).filter((name) =>
-    /v3|ghost|knowledge|k3|elysia|chatbus|vision|chronos|voice|mcp|speculative|goose|openjarvis|gpu|littleorange|atomsmasher|memory|model|trilane|strongarm|gremlin|health|project|harness/.test(name)
+    /v3|ghost|knowledge|k3|elysia|chatbus|vision|chronos|voice|mcp|speculative|goose|openjarvis|gpu|littleorange|atomsmasher|memory|model|trilane|strongarm|gremlin|health|project|harness|toolmesh|image-lab|video-lab|audio-lab|design-lab|coding-lab|automation-lab|analytics-lab|public-agent|observability|security|releaseops|alpha-watchlist/.test(name)
   );
   const latest = {
     memory_truth: latestJson(path.join(dataRoot, "memory-truth", "latest-memory-source-truth-doctor.json")),
@@ -55,6 +55,7 @@ export async function runV3Baseline() {
     atomsmasher: latestJson(path.join(dataRoot, "atomsmasher", "latest-atomsmasher-doctor.json")),
     feature_matrix: latestJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json")),
     model_inventory: latestJson(path.join(dataRoot, "reports", "models", "latest-model-inventory.json")),
+    toolmesh: latestJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json")),
   };
   const report = {
     ok: true,

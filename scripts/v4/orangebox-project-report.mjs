@@ -178,6 +178,7 @@ async function main() {
   const actionClassifier = readJson(path.join(dataRoot, "action-classifier", "latest-action-classifier-doctor.json")) || readJson(latestReceipt("orangebox-action-classifier-"));
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
+  const toolmesh = readJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"));
   const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
   const doerWatcherSpine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(latestReceipt("orangebox-doer-watcher-spine-"));
@@ -281,6 +282,18 @@ async function main() {
   const actionClassifierGreen = actionClassifier?.status === "ORANGEBOX_ACTION_CLASSIFIER_GREEN";
   const skillLifecycleGreen = skillLifecycle?.status === "ORANGEBOX_SKILL_LIFECYCLE_GREEN";
   const toolErgonomicsGreen = toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN";
+  const toolmeshGreen =
+    toolmesh?.status === "GREEN" &&
+    toolmesh?.ok === true &&
+    Number(toolmesh?.summary?.cards_total || 0) >= 39 &&
+    toolmesh?.checks?.first_batch_registered === true &&
+    toolmesh?.checks?.execution_blocked_until_promoted === true &&
+    toolmesh?.checks?.hardware_profiles_declared === true &&
+    toolmesh?.checks?.artifact_pointer_policy_declared === true &&
+    toolmesh?.checks?.execution_modes_declared === true &&
+    toolmesh?.checks?.immutable_templates_for_workflow_tools === true &&
+    toolmesh?.waveValidation?.preservedV3Count === 16 &&
+    toolmesh?.waveValidation?.toolmeshCount === 10;
   const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const evalIntegrityGreen = checkmateEvalGreen
     && Array.isArray(checkmateEval?.fixtures)
@@ -395,6 +408,16 @@ async function main() {
       next: toolErgonomicsGreen
         ? "Run this doctor before adding, renaming, or promoting Orangebox commands/tools."
         : "Run npm.cmd run tool:ergonomics and fix the exact failed command/tool surface check.",
+    },
+    {
+      area: "V3 free-alpha ToolMesh",
+      status: status(toolmeshGreen, exists(path.join(repoRoot, "orangebox-v3", "toolmesh", "toolmesh-cli.ts"))),
+      reality: toolmeshGreen
+        ? `ToolMesh registry is green: ${toolmesh?.summary?.cards_total || 0} cards, ${toolmesh?.waveValidation?.preservedV3Count || 0} preserved V3 waves, ${toolmesh?.waveValidation?.toolmeshCount || 0} ToolMesh waves, execution blocked until promotion, hardware profiles and artifact-pointer policy declared.`
+        : "ToolMesh source exists or is planned, but the current doctor receipt is not green yet.",
+      next: toolmeshGreen
+        ? "Use lab doctors and benchmark gates before installing, executing, or promoting candidate tools."
+        : "Run npm.cmd run toolmesh:doctor and fix the exact registry/card/wave failure.",
     },
     {
       area: "CHECKMATE eval lane",
@@ -991,6 +1014,17 @@ async function main() {
         status: toolErgonomics?.status || null,
         command_count: toolErgonomics?.command_surface?.command_count || 0,
         failures: toolErgonomics?.failures?.length ?? null,
+      },
+      toolmesh: {
+        path: path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"),
+        status: toolmesh?.status || null,
+        cards_total: toolmesh?.summary?.cards_total ?? null,
+        preserved_v3_waves: toolmesh?.waveValidation?.preservedV3Count ?? null,
+        toolmesh_waves: toolmesh?.waveValidation?.toolmeshCount ?? null,
+        execution_blocked_until_promoted: toolmesh?.checks?.execution_blocked_until_promoted ?? null,
+        hardware_profiles_declared: toolmesh?.checks?.hardware_profiles_declared ?? null,
+        artifact_pointer_policy_declared: toolmesh?.checks?.artifact_pointer_policy_declared ?? null,
+        immutable_templates_for_workflow_tools: toolmesh?.checks?.immutable_templates_for_workflow_tools ?? null,
       },
       checkmate_eval_lane: {
         path: path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"),

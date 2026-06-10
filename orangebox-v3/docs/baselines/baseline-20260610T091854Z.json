@@ -3842,6 +3842,5 @@
     "v3_repo_changes": "Revert orangebox-v3 files and package scripts before merge if superseded.",
     "branch": "git checkout main",
     "ghost_data": "Review or delete C:\\Users\\a\\OrangeBox-Data\\v3 only if the V3 trial is intentionally discarded."
-  },
-  "receipt_path": "C:\\Users\\a\\OrangeBox-Data\\v3\\receipts\\orangebox-v3-baseline-20260610T091855Z.json"
+  }
 }

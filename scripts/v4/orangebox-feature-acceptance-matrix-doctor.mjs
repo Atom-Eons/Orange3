@@ -283,6 +283,43 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "v3_free_alpha_toolmesh",
+      claim: "Orangebox V3 has a free-alpha ToolMesh control plane covering all preserved V3 waves and all ToolMesh waves without promoting execution.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run toolmesh:doctor && npm.cmd run v3:doctor",
+      acceptance_gate: "ToolMesh doctor is green with required first-batch cards registered, 16 preserved V3 waves, 10 ToolMesh waves, and execution blocked until promoted.",
+      rollback_path: "Turn ORANGEBOX_FREE_ALPHA_TOOLMESH=0, remove ToolMesh package scripts, and rerun v3:doctor and feature:proof.",
+      evidence: [
+        evidence(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"), "GREEN", {
+          accept: (parsed, status) => status === "GREEN"
+            && parsed?.ok === true
+            && Number(parsed?.summary?.cards_total || 0) >= 39
+            && parsed?.checks?.first_batch_registered === true
+            && parsed?.checks?.execution_blocked_until_promoted === true
+            && parsed?.checks?.hardware_profiles_declared === true
+            && parsed?.checks?.artifact_pointer_policy_declared === true
+            && parsed?.checks?.execution_modes_declared === true
+            && parsed?.checks?.immutable_templates_for_workflow_tools === true
+            && parsed?.waveValidation?.preservedV3Count === 16
+            && parsed?.waveValidation?.toolmeshCount === 10
+            && Array.isArray(parsed?.missingRequiredFirstBatch)
+            && parsed.missingRequiredFirstBatch.length === 0,
+          detail: (parsed) => ({
+            cards_total: parsed?.summary?.cards_total ?? null,
+            preserved_v3_waves: parsed?.waveValidation?.preservedV3Count ?? null,
+            toolmesh_waves: parsed?.waveValidation?.toolmeshCount ?? null,
+            execution_blocked_until_promoted: parsed?.checks?.execution_blocked_until_promoted ?? null,
+            hardware_profiles_declared: parsed?.checks?.hardware_profiles_declared ?? null,
+            artifact_pointer_policy_declared: parsed?.checks?.artifact_pointer_policy_declared ?? null,
+            immutable_templates_for_workflow_tools: parsed?.checks?.immutable_templates_for_workflow_tools ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "checkmate_eval_lane",
       claim: "Prompt/model/routing/tool changes are gated by deterministic CHECKMATE eval fixtures.",
       lane: "backend_ops",
