@@ -1,0 +1,41 @@
+export type K3Card = {
+  card_id: string;
+  source_path: string;
+  source_type: string;
+  source_hash: string | null;
+  source_size: number;
+  source_mtime: string | null;
+  authority_level: number;
+  title: string;
+  symbols: string[];
+  aliases: string[];
+  tags: string[];
+  receipt_id: string | null;
+  soul_genome_ref: string | null;
+  atom_smasher_ref: string | null;
+  index_version: string;
+  embedding_model: string;
+  search_text: string;
+};
+
+export type K3Candidate = {
+  card_id: string;
+  source_path: string;
+  source_type: string;
+  source_hash: string | null;
+  authority_level: number;
+  title: string;
+  aliases: string[];
+  tags: string[];
+  exact_score: number;
+  alias_score: number;
+  lexical_score: number;
+  vector_score: number;
+  authority_score: number;
+  recency_score: number;
+  stale_penalty: number;
+  failed_doctor_penalty: number;
+  final_score: number;
+  cold_truth_gate?: "passed" | "failed" | "not_run";
+  gate_reason?: string;
+};

@@ -1,0 +1,67 @@
+[
+  {
+    "query": "heavy memory compiler",
+    "expected": [
+      "AtomSmasher"
+    ]
+  },
+  {
+    "query": "context compressor",
+    "expected": [
+      "AtomSmasher"
+    ]
+  },
+  {
+    "query": "pressure gate",
+    "expected": [
+      "STRONGARM"
+    ]
+  },
+  {
+    "query": "routing spine",
+    "expected": [
+      "TriLane"
+    ]
+  },
+  {
+    "query": "visual time travel",
+    "expected": [
+      "Chronos"
+    ]
+  },
+  {
+    "query": "safe hidden branch",
+    "expected": [
+      "Ghost Worktree"
+    ]
+  },
+  {
+    "query": "source mapped screenshot",
+    "expected": [
+      "Omni-Vision",
+      "Retina Loop"
+    ]
+  },
+  {
+    "query": "chat compaction",
+    "expected": [
+      "ChatBackup",
+      "AtomSmasher"
+    ]
+  },
+  {
+    "query": "known bad full rewrite",
+    "expected": [
+      "NO_REWRITE",
+      "Option F",
+      "V3-F Ghost"
+    ]
+  },
+  {
+    "query": "fresh documentation lane",
+    "expected": [
+      "MCP",
+      "Context7"
+    ]
+  }
+]

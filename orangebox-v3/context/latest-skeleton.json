@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "status": "AST_SKELETON_READY",
+  "file": "orangebox-v3/ghost/create-ghost.ts",
+  "absolute_file": "C:\\AtomEons\\orangebox-delta\\orangebox-v3\\ghost\\create-ghost.ts",
+  "hash": "da4433a02e361cb5b428d90a4c9e3bfc412c47880326ae283e85e1e04abc6e9a",
+  "skeleton_hash": "78728af6bad0489ac12fafd134313b4e33869dd76457fc348a06b524af5cc06c",
+  "parser": "v3-regex-skeleton-compatible-tree-sitter-contract",
+  "exports": [
+    {
+      "name": "createGhost",
+      "line": 7
+    }
+  ],
+  "components": [],
+  "imports": [
+    {
+      "spec": "path",
+      "from": "node:path",
+      "line": 1
+    },
+    {
+      "spec": "{ argValue, currentBranch, currentHead, git, isMain, safeId, sha256, stamp }",
+      "from": "../lib/core.ts",
+      "line": 2
+    },
+    {
+      "spec": "{ ghostWorktreeRoot, initGhostStore, saveGhost }",
+      "from": "./ghost-store.ts",
+      "line": 3
+    },
+    {
+      "spec": "{ writeGhostReceipt }",
+      "from": "./ghost-receipt.ts",
+      "line": 4
+    },
+    {
+      "spec": "type { GhostEnvelope }",
+      "from": "./ghost-types.ts",
+      "line": 5
+    }
+  ],
+  "hooks": [],
+  "props": [],
+  "lineRanges": [
+    {
+      "name": "createGhost",
+      "start": 7,
+      "end": 7
+    }
+  ],
+  "domSourceTargets": []
+}

@@ -32,6 +32,7 @@ const ROOT_ITEMS = [
   "data-template",
   "docs",
   "integrations",
+  "orangebox-v3",
   "references",
   "schemas",
   "scripts",
@@ -203,7 +204,7 @@ async function copyTree() {
 
 function backendPackageJson() {
   const sourcePkg = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"));
-  return {
+  const pkg = {
     name: "orangebox-version-1",
     version: "1.0.0",
     private: true,
@@ -282,8 +283,13 @@ function backendPackageJson() {
       "final:verify": "node ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt --verify-install",
       "final:zip": "node ./scripts/v4/orangebox-final-download-zip.mjs --json --receipt"
     },
+    dependencies: sourcePkg.dependencies || {},
     engines: sourcePkg.engines || undefined,
   };
+  for (const [name, script] of Object.entries(sourcePkg.scripts || {})) {
+    if (/^(antigravity:|v3:|k3:)/.test(name)) pkg.scripts[name] = script;
+  }
+  return pkg;
 }
 
 async function writeFinalFiles() {

@@ -1,0 +1,3410 @@
+{
+  "ok": true,
+  "version": "orangebox-v3-baseline/v0",
+  "status": "ORANGEBOX_V3_BASELINE_RECORDED",
+  "started_at": "2026-06-10T06:31:08.385Z",
+  "finished_at": "2026-06-10T06:31:10.952Z",
+  "repo_root": "C:\\AtomEons\\orangebox-delta",
+  "v3_root": "C:\\AtomEons\\orangebox-delta\\orangebox-v3",
+  "branch": "orangebox-v3-cortex",
+  "head": "14fd8c1bb0254bb3197df07a60f87b780d7dd32e",
+  "git_status": "## orangebox-v3-cortex\n M package.json\n?? orangebox-v3/\n",
+  "git_worktrees": "worktree C:/AtomEons/orangebox-delta\nHEAD 14fd8c1bb0254bb3197df07a60f87b780d7dd32e\nbranch refs/heads/orangebox-v3-cortex\n\nworktree C:/AtomEons/orangebox-delta/.worktrees/orangebox-main-system-v0\nHEAD bfd41f13559d739090a7eae7ee02d9b8bf345939\nbranch refs/heads/aecode/orangebox-main-system-v0\n\n",
+  "git_remotes": "origin\thttps://github.com/Atom-Eons/orangebox-delta.git (fetch)\norigin\thttps://github.com/Atom-Eons/orangebox-delta.git (push)\n",
+  "flags": {
+    "ORANGEBOX_V3": "1",
+    "ORANGEBOX_API_ENGINE": "express",
+    "ORANGEBOX_CHATBUS": "0",
+    "ORANGEBOX_GHOST_WORKTREES": "0",
+    "ORANGEBOX_SHADOW_VITE": "0",
+    "ORANGEBOX_SOURCE_TAGS": "0",
+    "ORANGEBOX_OMNIVISION": "0",
+    "ORANGEBOX_RETINA_MODE": "manual",
+    "ORANGEBOX_CHRONOS": "0",
+    "ORANGEBOX_SPATIAL_VOICE": "0",
+    "ORANGEBOX_TREE_SITTER": "0",
+    "ORANGEBOX_MCP_CONTEXT7": "0",
+    "ORANGEBOX_SPECULATIVE_SIDECAR": "0",
+    "ORANGEBOX_IDLE_FORGE": "0",
+    "ORANGEBOX_IDLE_FORGE_MAX": "1",
+    "ORANGEBOX_GOOSE_EXECUTOR": "0",
+    "ORANGEBOX_OPENJARVIS_EVAL": "0",
+    "ORANGEBOX_GPU_CONCURRENCY": "serial",
+    "ORANGEBOX_TAURI_HOTPATH": "0",
+    "ORANGEBOX_THEATER": "0",
+    "ORANGEBOX_FULL_REWRITE_GHOST": "0",
+    "ORANGEBOX_V3_MEMORY_WILDCARD": "0",
+    "ORANGEBOX_K3_INDEX_RECEIPTS": "1",
+    "ORANGEBOX_K3_INDEX_PRIMERS": "1",
+    "ORANGEBOX_K3_INDEX_CHAT_ARCHIVES": "0",
+    "ORANGEBOX_K3_EMBED_MODEL": "nomic-embed-text",
+    "ORANGEBOX_K3_EMBED_FALLBACK": "mxbai-embed-large",
+    "ORANGEBOX_K3_DB_ADAPTER": "auto",
+    "ORANGEBOX_K3_STORE_RAW_TEXT": "0",
+    "ORANGEBOX_K3_STORE_EXCERPTS": "0",
+    "ORANGEBOX_K3_REQUIRE_COLD_TRUTH_GATE": "1",
+    "ORANGEBOX_K3_REQUIRE_MEMORY_DOCTOR": "1",
+    "ORANGEBOX_K3_ALPHA_MATCHER": "1",
+    "ORANGEBOX_K3_RETURN_PATHS_ONLY": "1"
+  },
+  "port_probes": [
+    {
+      "id": "orangebox_command_8787",
+      "ok": true,
+      "status": 200,
+      "ms": 80,
+      "url": "http://127.0.0.1:8787/api/realtime/health",
+      "bytes": 77,
+      "body_sample": "{\n  \"sse\": true,\n  \"version\": \"1.2.0\",\n  \"time\": \"2026-06-10T06:31:08.954Z\"\n}"
+    },
+    {
+      "id": "orangebox_status_8787",
+      "ok": false,
+      "status": 0,
+      "ms": 1808,
+      "url": "http://127.0.0.1:8787/api/status?fast=1",
+      "error": "The operation was aborted."
+    },
+    {
+      "id": "see_suite_api_8797",
+      "ok": true,
+      "status": 200,
+      "ms": 11,
+      "url": "http://127.0.0.1:8797/api/health",
+      "bytes": 74,
+      "body_sample": "{\"ok\":true,\"service\":\"ae-see-suite-api\",\"time\":\"2026-06-10T06:31:10.784Z\"}"
+    },
+    {
+      "id": "strongarm_8094",
+      "ok": true,
+      "status": 200,
+      "ms": 64,
+      "url": "http://127.0.0.1:8094/health",
+      "bytes": 150,
+      "body_sample": "{\n  \"ok\": true,\n  \"service\": \"STRONGARM\",\n  \"version\": \"0.4.0\",\n  \"endpoints\": [\n    \"/health\",\n    \"/ui\",\n    \"/verdict\",\n    \"/rewrite_prompt\"\n  ]\n}"
+    },
+    {
+      "id": "llama_cpp_listener_8080",
+      "ok": true,
+      "status": 200,
+      "ms": 2,
+      "url": "http://127.0.0.1:8080/v1/models",
+      "bytes": 635,
+      "body_sample": "{\"models\":[{\"name\":\"orangebox-n150-cpu-listener\",\"model\":\"orangebox-n150-cpu-listener\",\"modified_at\":\"\",\"size\":\"\",\"digest\":\"\",\"type\":\"model\",\"description\":\"\",\"tags\":[\"\"],\"capabilities\":[\"completion\"],\"parameters\":\"\",\"details\":{\"parent_model"
+    },
+    {
+      "id": "codexa_command_8097",
+      "ok": true,
+      "status": 200,
+      "ms": 4,
+      "url": "http://10.0.99.1:8097/health",
+      "bytes": 593,
+      "body_sample": "{\n  \"status\": \"VERIFIED\",\n  \"role\": \"orangebox-codexa-command-rail\",\n  \"generatedAt\": \"2026-06-10T04:31:19.645Z\",\n  \"host\": \"0.0.0.0\",\n  \"port\": 8097,\n  \"cockpitIp\": \"<COCKPIT_IP>\",\n  \"trustedSources\": [\n    \"10.0.99.2\",\n    \"10.0.99.0/24\"\n"
+    },
+    {
+      "id": "codexa_wiki_8098",
+      "ok": true,
+      "status": 200,
+      "ms": 1,
+      "url": "http://10.0.99.1:8098/health",
+      "bytes": 320,
+      "body_sample": "{\n  \"status\": \"VERIFIED\",\n  \"role\": \"codexa-orangebox-bridge\",\n  \"generatedAt\": \"2026-06-10T04:31:19.647Z\",\n  \"host\": \"0.0.0.0\",\n  \"port\": 8098,\n  \"tokenConfigured\": true,\n  \"tokenHash\": \"503b0e601e3592fc\",\n  \"wikiRoot\": \"C:\\\\AtomEons\\\\ai-b"
+    }
+  ],
+  "relevant_scripts": [
+    "mcp",
+    "mcp:doctor",
+    "memory:doctor",
+    "knowledge",
+    "knowledge:v1",
+    "knowledge:v2",
+    "knowledge:repo",
+    "knowledge:improvements",
+    "harness:benchmark",
+    "aecode:model-write",
+    "littleorange:dev",
+    "littleorange:doctor",
+    "v3:baseline",
+    "v3:doctor",
+    "v3:flags",
+    "v3:ghost:create",
+    "v3:ghost:list",
+    "v3:ghost:status",
+    "v3:ghost:promote",
+    "v3:ghost:destroy",
+    "v3:api:doctor",
+    "v3:chatbus:event",
+    "v3:chatbus:replay",
+    "v3:chatbus:compact",
+    "v3:context:skeleton",
+    "v3:vision:packet",
+    "v3:chronos:record",
+    "v3:voice:packet",
+    "v3:mcp:doctor",
+    "v3:speculative:doctor",
+    "v3:forge:predict",
+    "v3:goose:envelope",
+    "v3:openjarvis:doctor",
+    "v3:gpu:doctor",
+    "v3:theater:manifest",
+    "v3:vite:port",
+    "k3:init",
+    "k3:doctor",
+    "k3:index:receipts",
+    "k3:index:primers",
+    "k3:index:coldtruth",
+    "k3:index:chat",
+    "k3:query",
+    "k3:bench",
+    "k3:explain",
+    "health:report",
+    "project:report",
+    "atomsmasher:intake",
+    "atomsmasher:doctor",
+    "atomsmasher:init",
+    "atomsmasher:proof",
+    "atomsmasher:run-all",
+    "atomsmasher:compile",
+    "atomsmasher:api-smoke",
+    "atomsmasher:merge-tools",
+    "strongarm:doctor",
+    "strongarm:demo",
+    "strongarm:server",
+    "strongarm:start",
+    "gremlin:doctor",
+    "trilane:doctor",
+    "model:lane-eval",
+    "model:inventory"
+  ],
+  "latest_receipt_truth": {
+    "memory_truth": {
+      "ok": true,
+      "version": "orangebox-memory-source-truth-doctor/v1",
+      "status": "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN",
+      "checked_at": "2026-06-10T05:40:15.954Z",
+      "repo_root": "C:\\AtomEons\\orangebox-delta",
+      "data_root": "C:\\Users\\a\\OrangeBox-Data",
+      "doctrine": "Latest source-backed receipt truth beats stale chat memory. Compressed memory carries source pointers and creates debt when revised facts conflict.",
+      "research_basis": [
+        {
+          "source": "MINTEval / LongMINT memory-interference benchmark",
+          "lesson": "Agents struggle with revised facts and multi-target aggregation across long, interfering contexts."
+        },
+        {
+          "source": "Memex(RL) indexed experience memory",
+          "lesson": "Compact working context should use stable indices that can dereference exact past evidence."
+        },
+        {
+          "source": "Active Context Compression",
+          "lesson": "Long-running agents need active pruning of raw history while preserving key learnings."
+        },
+        {
+          "source": "Anthropic context engineering and memory guidance",
+          "lesson": "Stale tool results should be cleared, valuable knowledge should live outside context, and relevant context must be curated."
+        }
+      ],
+      "constraints": {
+        "frontend_touched": false,
+        "visual_lane_touched": false,
+        "network_called": false,
+        "paid_api_attempted": false,
+        "model_call_attempted": false,
+        "remote_codexa_mutation_attempted": false,
+        "raw_history_injected": false
+      },
+      "policy": {
+        "current_truth_source": "latest_receipt_or_live_probe",
+        "stale_memory_disposition": "compression_debt_or_source_refresh",
+        "hot_memory_shape": "compact_fact_plus_source_pointer",
+        "forbidden_claim": "full_two_machine_green_without_codexa_rail_and_ollama_receipts"
+      },
+      "summary": {
+        "drills_total": 6,
+        "drills_green": 6,
+        "source_records": 7,
+        "stale_conflicts_detected": 1,
+        "hot_packet_token_estimate": 137,
+        "proof_hash": "aa77094269282bd334151496716e6d870940d599c36ef5810421fd7af75b63fb"
+      },
+      "sources": [
+        {
+          "id": "receipt.codexa-alert.20260606T160000Z",
+          "subject": "codexa",
+          "property": "command_rail_8097",
+          "value": "OPEN",
+          "observed_at": "2026-06-06T16:00:00.000Z",
+          "source_pointer": "src:receipt.codexa-alert.20260606T160000Z#$.codexa.command_rail_8097",
+          "evidence_hash": "f5a80916a60e44c401e9de9f5a1146a5ce6e37e7f132cb29b99679ebbd05032e"
+        },
+        {
+          "id": "receipt.codexa-alert.20260607T011000Z",
+          "subject": "codexa",
+          "property": "command_rail_8097",
+          "value": "DEAD",
+          "observed_at": "2026-06-07T01:10:00.000Z",
+          "source_pointer": "src:receipt.codexa-alert.20260607T011000Z#$.codexa.command_rail_8097",
+          "evidence_hash": "9c7c75b94d438001cb0601dd4ded7cf96d98c8eca174739c6d75bfd5ecfabcf4"
+        },
+        {
+          "id": "receipt.codexa-alert.20260607T011000Z.receipts",
+          "subject": "codexa",
+          "property": "receipts_8099",
+          "value": "OPEN",
+          "observed_at": "2026-06-07T01:10:00.000Z",
+          "source_pointer": "src:receipt.codexa-alert.20260607T011000Z.receipts#$.codexa.receipts_8099",
+          "evidence_hash": "906629e03e8e39e2fe7603244750c99f1d7d4f29d8f2df0588117b0e0440b104"
+        },
+        {
+          "id": "receipt.codexa-alert.20260607T011000Z.ollama",
+          "subject": "codexa",
+          "property": "ollama_11434",
+          "value": "DEAD",
+          "observed_at": "2026-06-07T01:10:00.000Z",
+          "source_pointer": "src:receipt.codexa-alert.20260607T011000Z.ollama#$.codexa.ollama_11434",
+          "evidence_hash": "f322a16dc1da1ea7dba539e4b2bdff7cd8a80df9c8d53befa90f10a5e4423aa7"
+        },
+        {
+          "id": "receipt.orangebox-local.20260607T014700Z",
+          "subject": "local_ops",
+          "property": "status",
+          "value": "GREEN",
+          "observed_at": "2026-06-07T01:47:00.000Z",
+          "source_pointer": "src:receipt.orangebox-local.20260607T014700Z#$.local_ops.status",
+          "evidence_hash": "d89b3c8ec6cc36cede49338b9d74e418081bcdc009534565e02724125d6b33e9"
+        },
+        {
+          "id": "receipt.orangebox-project.20260607T014800Z",
+          "subject": "full_project",
+          "property": "status",
+          "value": "WITH_GAPS",
+          "observed_at": "2026-06-07T01:48:00.000Z",
+          "source_pointer": "src:receipt.orangebox-project.20260607T014800Z#$.full_project.status",
+          "evidence_hash": "50c4edea575b3637830ece4b0aadbcef301be252059b403d3a55d091d57bc534"
+        },
+        {
+          "id": "receipt.orangebox-project.20260607T014800Z.visual",
+          "subject": "frontend_lane",
+          "property": "ops_chat_touch_allowed",
+          "value": "FALSE",
+          "observed_at": "2026-06-07T01:48:00.000Z",
+          "source_pointer": "src:receipt.orangebox-project.20260607T014800Z.visual#$.frontend_lane.ops_chat_touch_allowed",
+          "evidence_hash": "54d89595a5848e26f90c11527fae8882eade5b01375de817ea3578d28c4b9619"
+        }
+      ],
+      "drills": [
+        {
+          "id": "revised_fact_latest_wins",
+          "ok": true,
+          "question": "Is Codexa command rail 8097 currently up?",
+          "selected_value": "DEAD",
+          "selected_source": "src:receipt.codexa-alert.20260607T011000Z#$.codexa.command_rail_8097",
+          "rejected_stale_values": [
+            {
+              "value": "OPEN",
+              "source": "src:receipt.codexa-alert.20260606T160000Z#$.codexa.command_rail_8097",
+              "reason": "older_observation"
+            }
+          ]
+        },
+        {
+          "id": "multi_target_no_collapse",
+          "ok": true,
+          "question": "Is Codexa online?",
+          "selected_status": "CODEXA_PARTIAL_OR_WARN",
+          "components": {
+            "command_rail_8097": {
+              "value": "DEAD",
+              "source": "src:receipt.codexa-alert.20260607T011000Z#$.codexa.command_rail_8097"
+            },
+            "receipts_8099": {
+              "value": "OPEN",
+              "source": "src:receipt.codexa-alert.20260607T011000Z.receipts#$.codexa.receipts_8099"
+            }
+          },
+          "rule": "Do not collapse partial rail truth into a single green system claim."
+        },
+        {
+          "id": "source_index_dereference",
+          "ok": true,
+          "pointer": "src:receipt.codexa-alert.20260607T011000Z#$.codexa.command_rail_8097",
+          "dereferenced_value": "DEAD",
+          "dereferenced_hash": "9c7c75b94d438001cb0601dd4ded7cf96d98c8eca174739c6d75bfd5ecfabcf4",
+          "expected_hash": "9c7c75b94d438001cb0601dd4ded7cf96d98c8eca174739c6d75bfd5ecfabcf4",
+          "rule": "Compressed memory must carry source pointers that can recover exact receipt truth."
+        },
+        {
+          "id": "stale_semantic_memory_suppressed",
+          "ok": true,
+          "selection": [
+            {
+              "id": "receipt.codexa-alert.20260606T160000Z",
+              "selected": false,
+              "reason": "stale_or_revised_fact",
+              "observed_at": "2026-06-06T16:00:00.000Z",
+              "value": "OPEN"
+            },
+            {
+              "id": "receipt.codexa-alert.20260607T011000Z",
+              "selected": true,
+              "reason": "newest_source_backed_fact",
+              "observed_at": "2026-06-07T01:10:00.000Z",
+              "value": "DEAD"
+            }
+          ],
+          "rule": "Semantic similarity is not enough; revised facts need freshness and source-backed selection."
+        },
+        {
+          "id": "raw_history_budget_guard",
+          "ok": true,
+          "token_estimate": 137,
+          "fact_count": 5,
+          "raw_history_included": false,
+          "air": "R: full_project.status=WITH_GAPS @ src:receipt.orangebox-project.20260607T014800Z#$.full_project.status\nR: frontend_lane.ops_chat_touch_allowed=FALSE @ src:receipt.orangebox-project.20260607T014800Z.visual#$.frontend_lane.ops_chat_touch_allowed\nR: local_ops.status=GREEN @ src:receipt.orangebox-local.20260607T014700Z#$.local_ops.status\nR: codexa.command_rail_8097=DEAD @ src:receipt.codexa-alert.20260607T011000Z#$.codexa.command_rail_8097\nR: codexa.receipts_8099=OPEN @ src:receipt.codexa-alert.20260607T011000Z.receipts#$.codexa.receipts_8099",
+          "rule": "Hot memory gets compact facts plus pointers, not raw chat/history flooding."
+        },
+        {
+          "id": "compression_debt_on_revised_fact_conflict",
+          "ok": true,
+          "debt_events": [
+            {
+              "id": "debt.030658d0b367",
+              "debt_type": "stale_memory_conflict",
+              "stale_source": "src:receipt.codexa-alert.20260606T160000Z#$.codexa.command_rail_8097",
+              "latest_source": "src:receipt.codexa-alert.20260607T011000Z#$.codexa.command_rail_8097",
+              "repair_hint": "Refresh memory/source packet and require latest receipt pointer before status claims."
+            }
+          ],
+          "rule": "A stale fact that conflicts with latest receipt truth creates compression debt instead of silent confidence."
+        }
+      ],
+      "failures": [],
+      "next_action": "Keep memory:doctor in the Ops proof chain before promoting chatbackup, AtomSmasher compression, retrieval, or Knowledge Engine upgrades.",
+      "receipt_path": "C:\\AtomEons\\orangebox-delta\\receipts\\orangebox-memory-source-truth-20260610T054015Z.json"
+    },
+    "health": {
+      "ok": false,
+      "version": "orangebox-health-report/v1",
+      "status": "ORANGEBOX_HEALTH_DEV_GREEN_AIBOX_WARN",
+      "generated_at": "2026-06-10T03:46:03.837Z",
+      "machine": {
+        "name": "WIN-IB7K3UTA9DS",
+        "platform": "win32",
+        "arch": "x64",
+        "memory_gb": 16
+      },
+      "repo_root": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final",
+      "data_root": "C:\\Users\\a\\OrangeBox-Data",
+      "dev": {
+        "probes": {
+          "command_server": {
+            "ok": true,
+            "status": 200,
+            "ms": 14,
+            "url": "http://127.0.0.1:8787/api/realtime/health",
+            "body": {
+              "sse": true,
+              "version": "1.2.0",
+              "time": "2026-06-10T03:46:01.338Z"
+            }
+          },
+          "api_server": {
+            "ok": true,
+            "status": 200,
+            "ms": 8,
+            "url": "http://127.0.0.1:8797/api/health",
+            "body": {
+              "ok": true,
+              "service": "ae-see-suite-api",
+              "time": "2026-06-10T03:46:01.347Z"
+            }
+          },
+          "local_llama_health": {
+            "ok": true,
+            "status": 200,
+            "ms": 1,
+            "url": "http://127.0.0.1:8080/health",
+            "body": {
+              "status": "ok"
+            }
+          },
+          "local_llama_models": {
+            "ok": true,
+            "status": 200,
+            "ms": 0,
+            "url": "http://127.0.0.1:8080/v1/models",
+            "body": {
+              "models": [
+                {
+                  "name": "orangebox-n150-cpu-listener",
+                  "model": "orangebox-n150-cpu-listener",
+                  "modified_at": "",
+                  "size": "",
+                  "digest": "",
+                  "type": "model",
+                  "description": "",
+                  "tags": [
+                    ""
+                  ],
+                  "capabilities": [
+                    "completion"
+                  ],
+                  "parameters": "",
+                  "details": {
+                    "parent_model": "",
+                    "format": "gguf",
+                    "family": "",
+                    "families": [
+                      ""
+                    ],
+                    "parameter_size": "",
+                    "quantization_level": ""
+                  }
+                }
+              ],
+              "object": "list",
+              "data": [
+                {
+                  "id": "orangebox-n150-cpu-listener",
+                  "aliases": [
+                    "orangebox-n150-cpu-listener"
+                  ],
+                  "tags": [],
+                  "object": "model",
+                  "created": 1781063161,
+                  "owned_by": "llamacpp",
+                  "meta": {
+                    "vocab_type": 1,
+                    "n_vocab": 262144,
+                    "n_ctx": 2048,
+                    "n_ctx_train": 32768,
+                    "n_embd": 640,
+                    "n_params": 268098176,
+                    "size": 285018624
+                  }
+                }
+              ]
+            }
+          },
+          "local_ollama": {
+            "ok": false,
+            "status": 0,
+            "ms": 1,
+            "url": "http://127.0.0.1:11434/api/tags",
+            "error": "Unable to connect. Is the computer able to access the url?"
+          },
+          "strongarm_gate": {
+            "ok": true,
+            "status": 200,
+            "ms": 2,
+            "url": "http://127.0.0.1:8094/health",
+            "body": {
+              "ok": true,
+              "service": "STRONGARM",
+              "version": "0.4.0",
+              "endpoints": [
+                "/health",
+                "/ui",
+                "/verdict",
+                "/rewrite_prompt"
+              ]
+            }
+          }
+        },
+        "openclaw_startup_retired": {
+          "ok": true,
+          "startup_hook_path": "C:\\Users\\a\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\OpenClaw Gateway (atomeons).cmd",
+          "startup_hook_present": false,
+          "retired_source_path": null,
+          "disabled_backup_path": null,
+          "retirement_status": "OPENCLAW_STARTUP_RETIRED"
+        },
+        "terminal_profile": {
+          "ok": true,
+          "profile_path": "C:\\Users\\a\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1",
+          "receipt_path": "C:\\Users\\a\\OrangeBox-Data\\profile-backups\\orangebox-powershell-profile-policy-20260606T120727.json",
+          "current_user_policy": "RemoteSigned",
+          "functions_present": [
+            "obox",
+            "orangebox",
+            "obox-off",
+            "codex",
+            "claude",
+            "antigravity"
+          ],
+          "rollback": [
+            "Copy backup from C:\\Users\\a\\OrangeBox-Data\\profile-backups to profile path",
+            "Set-ExecutionPolicy -Scope CurrentUser Undefined -Force"
+          ]
+        },
+        "skill_primers": [
+          {
+            "file": "C:\\Users\\a\\.codex\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          },
+          {
+            "file": "C:\\Users\\a\\.agents\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          },
+          {
+            "file": "C:\\Users\\a\\.claude\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          },
+          {
+            "file": "C:\\Users\\a\\AppData\\Roaming\\Claude\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          },
+          {
+            "file": "C:\\Users\\a\\AppData\\Roaming\\Claude-3p\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          },
+          {
+            "file": "C:\\Users\\a\\AppData\\Roaming\\Antigravity\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          },
+          {
+            "file": "C:\\Users\\a\\.gemini\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          },
+          {
+            "file": "C:\\Users\\a\\.gemini\\config\\plugins\\orangebox-plugin\\skills\\orangebox-primer\\SKILL.md",
+            "ok": true
+          }
+        ]
+      },
+      "ai_box": {
+        "expected": {
+          "direct_ip": "10.0.99.1",
+          "lan_ip": "10.0.0.4",
+          "command_rail": 8097,
+          "wiki_bridge": 8098,
+          "receipts": 8099,
+          "ollama": 11434
+        },
+        "probes": {
+          "direct_command_rail_8097": {
+            "ok": true,
+            "status": 200,
+            "ms": 3,
+            "url": "http://10.0.99.1:8097/health",
+            "body": {
+              "status": "VERIFIED",
+              "role": "orangebox-codexa-command-rail",
+              "generatedAt": "2026-06-10T01:46:10.156Z",
+              "host": "0.0.0.0",
+              "port": 8097,
+              "cockpitIp": "<COCKPIT_IP>",
+              "trustedSources": [
+                "10.0.99.2",
+                "10.0.99.0/24"
+              ],
+              "clientIp": "10.0.99.2",
+              "tokenConfigured": true,
+              "tokenHash": "5a167077185016a7",
+              "fullAccess": "AVAILABLE_WITH_TOKEN_AND_confirmFullAccess",
+              "machine": {
+                "hostname": "CODEXA",
+                "platform": "win32",
+                "arch": "x64",
+                "cpus": 16,
+                "totalMemGb": 95.6,
+                "freeMemGb": 75.1,
+                "uptimeSec": 232904,
+                "user": "Atom"
+              }
+            }
+          },
+          "direct_wiki_bridge_8098": {
+            "ok": true,
+            "status": 200,
+            "ms": 5,
+            "url": "http://10.0.99.1:8098/health",
+            "body": {
+              "status": "VERIFIED",
+              "role": "codexa-orangebox-bridge",
+              "generatedAt": "2026-06-10T01:46:10.156Z",
+              "host": "0.0.0.0",
+              "port": 8098,
+              "tokenConfigured": true,
+              "tokenHash": "503b0e601e3592fc",
+              "wikiRoot": "C:\\AtomEons\\ai-box\\orangebox-wiki\\public",
+              "receiptRoot": "C:\\AtomEons\\ai-box\\receipts"
+            }
+          },
+          "direct_receipts_8099": {
+            "ok": true,
+            "status": 200,
+            "ms": 9,
+            "url": "http://10.0.99.1:8099/",
+            "body": "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>AEorangeBOX Cockpit</title>\n<style>\n:root{--bg:#04100d;--fg:#f7f0e4;--muted:#a7b8ad;--line:#204538;--card:#071915;--card2:#0a211b;--orange:#ff7a18;--amber:#ffc46b;--green:#75ff92;--red:#ff4f5e;--blue:#59d9ff;--trace:#1b8b75;--solder:#c7f8df;--ink:#06110e}\n*{box-sizing:border-box}\nhtml{scroll-behavior:smooth}\nbody{margin:0;background:\n  radial-gradient(circle "
+          },
+          "direct_ollama_11434": {
+            "ok": false,
+            "status": 0,
+            "ms": 1215,
+            "url": "http://10.0.99.1:11434/api/tags",
+            "error": "The operation was aborted."
+          },
+          "lan_command_rail_8097": {
+            "ok": true,
+            "status": 200,
+            "ms": 29,
+            "url": "http://10.0.0.4:8097/health",
+            "body": {
+              "status": "VERIFIED",
+              "role": "orangebox-codexa-command-rail",
+              "generatedAt": "2026-06-10T01:46:11.411Z",
+              "host": "0.0.0.0",
+              "port": 8097,
+              "cockpitIp": "<COCKPIT_IP>",
+              "trustedSources": [
+                "10.0.99.2",
+                "10.0.99.0/24"
+              ],
+              "clientIp": "10.0.0.114",
+              "tokenConfigured": true,
+              "tokenHash": "5a167077185016a7",
+              "fullAccess": "AVAILABLE_WITH_TOKEN_AND_confirmFullAccess",
+              "machine": {
+                "hostname": "CODEXA",
+                "platform": "win32",
+                "arch": "x64",
+                "cpus": 16,
+                "totalMemGb": 95.6,
+                "freeMemGb": 75.1,
+                "uptimeSec": 232905,
+                "user": "Atom"
+              }
+            }
+          },
+          "lan_ollama_11434": {
+            "ok": false,
+            "status": 0,
+            "ms": 1222,
+            "url": "http://10.0.0.4:11434/api/tags",
+            "error": "The operation was aborted."
+          }
+        },
+        "remote_runtime_proof": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-remote-proof\\latest-codexa-remote-runtime-proof.json",
+          "status": "CODEXA_REMOTE_RUNTIME_GREEN",
+          "green": true,
+          "summary": {
+            "host": "CODEXA",
+            "ollama_loopback_ok": true,
+            "expected_models_installed": 11,
+            "expected_models_total": 11,
+            "missing_models": [],
+            "post_reboot_green": true,
+            "boot_green": true,
+            "models_green": true,
+            "hermes_green": true,
+            "docker_containers": 6
+          }
+        },
+        "link_alert": {
+          "status": "CODEXA_READY",
+          "message": "Codexa/AI Box is reachable. Command rail and Ollama/model proof responded; heavy-lane routing can be considered after the model doctor is green.",
+          "command_rail_reachable": true,
+          "wiki_bridge_reachable": true,
+          "receipts_reachable": true,
+          "ollama_reachable": true,
+          "remote_control_available": true,
+          "remote_execution_available": true,
+          "smb_port_visible": true,
+          "alert_hash": "ce58831945c243a9",
+          "last_notified_at": "2026-06-09T09:24:36.749Z",
+          "signal_hygiene": {
+            "version": "orangebox-signal-hygiene/v1",
+            "severity": "green",
+            "human_label": "Codexa ready",
+            "repeat_count": 507,
+            "stable_since": "2026-06-09T09:24:36.749Z",
+            "notify_reason": "ready_suppressed",
+            "next_popup_after": null,
+            "cooldown_minutes": 30,
+            "popup_requested": true,
+            "alert_fatigue_policy": "Popup only on status change or cooldown. Health/reality receipts keep logging every run.",
+            "operator_action_required": false,
+            "local_basic_install_blocked": false,
+            "full_system_green_blocked": false,
+            "summary_line": "Codexa ready; local Ops can continue; full two-machine routing remains gated."
+          }
+        },
+        "recovery_artifacts": {
+          "obox2_setup_pack": {
+            "path": "C:\\Users\\a\\Downloads\\Orangebox_V2_Internal_Setup_Pack.zip",
+            "exists": true,
+            "bytes": 20588453,
+            "modified_at": "2026-06-08T05:05:38.993Z"
+          },
+          "rail_recovery_pack": {
+            "path": "C:\\Users\\a\\OrangeBox-Data\\exports\\codexa-rail-recovery-pack-WINDOWS-NATIVE.zip",
+            "exists": true,
+            "bytes": 13808,
+            "modified_at": "2026-06-06T14:15:14.522Z"
+          },
+          "rail_recovery_dir": {
+            "path": "C:\\Users\\a\\OrangeBox-Data\\exports\\codexa-rail-recovery-pack\\RUN_ON_CODEXA_AS_ADMIN.cmd",
+            "exists": true,
+            "bytes": 128,
+            "modified_at": "2026-06-06T14:15:12.972Z"
+          }
+        },
+        "setup_contracts": {
+          "ok": true,
+          "check_count": 63,
+          "failed_count": 0,
+          "failed_ids": []
+        }
+      },
+      "receipts": {
+        "ops_readiness": {
+          "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\receipts\\orangebox-ops-readiness-20260610T034554Z.json",
+          "status": "ORANGEBOX_OPS_RAILS_GREEN"
+        },
+        "backend_install": {
+          "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\receipts\\orangebox-backend-install-20260609T111514Z.json",
+          "status": "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN"
+        },
+        "ops_gap_ledger": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\ops-gap-ledger\\latest-ops-gap-ledger.json",
+          "status": "ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS",
+          "gap_count": 1,
+          "critical_gap_count": 0
+        },
+        "codexa_handoff": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-handoff\\latest-codexa-handoff.json",
+          "status": "CODEXA_HANDOFF_READY_WITH_OPEN_GAPS",
+          "open_gap_count": 1,
+          "setup_zip": "C:\\Users\\a\\Downloads\\Orangebox_V2_Internal_Setup_Pack.zip"
+        },
+        "project_report": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\reports\\project\\latest-project-report.json",
+          "status": "ORANGEBOX_PROJECT_SCOPE_GREEN",
+          "full_project_green": true,
+          "gap_count": 0
+        },
+        "reality_watch": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\watcher\\latest-reality-watch.json",
+          "status": "ONE_REALITY_GREEN"
+        },
+        "obox2_package": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\obox2\\latest-package-doctor.json",
+          "status": "OBOX2_PACKAGE_VERIFIED_GREEN",
+          "contract_ok": true,
+          "contract_checks": 63,
+          "contract_failed": 0,
+          "contract_failed_ids": []
+        },
+        "research_scout": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\research-scout\\latest-external-research-scout.json",
+          "status": "EXTERNAL_RESEARCH_SCOUT_READY",
+          "candidate_count": 48
+        },
+        "research_radar": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\research-radar\\latest-research-radar.json",
+          "status": "ORANGEBOX_RESEARCH_RADAR_GREEN",
+          "approval_candidates": 8,
+          "promotion_autonomous": false
+        },
+        "assurance_lab": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\assurance-lab\\latest-assurance-lab.json",
+          "status": "ORANGEBOX_ASSURANCE_LAB_GREEN",
+          "source_count": 12,
+          "checks_green": 18,
+          "checks_total": 18,
+          "proof_hash": "d6e63e57b58179dd1709b63c8d35acf37ec589f2588f5dab0b447fd1e5b34d28"
+        },
+        "harness_benchmark": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\harness\\latest-harness-benchmark.json",
+          "status": "ORANGEBOX_HARNESS_BENCHMARK_GREEN",
+          "tasks_total": 29,
+          "tasks_ok": 29,
+          "score": 1
+        },
+        "knowledge_improvements": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\knowledge\\improvements\\latest-improvement-candidates.json",
+          "status": "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY",
+          "candidate_count": 13,
+          "execution_backlog_count": 12,
+          "top_execution_area": "judge_reliability_and_strongarm",
+          "top_execution_score": 100
+        },
+        "codexa_alert": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\alerts\\codexa-link\\latest-codexa-alert.json",
+          "status": "CODEXA_READY",
+          "popup_notified": false,
+          "remote_control_available": true,
+          "remote_execution_available": true,
+          "smb_port_visible": true,
+          "signal_hygiene": {
+            "version": "orangebox-signal-hygiene/v1",
+            "severity": "green",
+            "human_label": "Codexa ready",
+            "repeat_count": 507,
+            "stable_since": "2026-06-09T09:24:36.749Z",
+            "notify_reason": "ready_suppressed",
+            "next_popup_after": null,
+            "cooldown_minutes": 30,
+            "popup_requested": true,
+            "alert_fatigue_policy": "Popup only on status change or cooldown. Health/reality receipts keep logging every run.",
+            "operator_action_required": false,
+            "local_basic_install_blocked": false,
+            "full_system_green_blocked": false,
+            "summary_line": "Codexa ready; local Ops can continue; full two-machine routing remains gated."
+          },
+          "message": "Codexa/AI Box is reachable. Command rail and Ollama/model proof responded; heavy-lane routing can be considered after the model doctor is green."
+        },
+        "codexa_remote_proof": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-remote-proof\\latest-codexa-remote-runtime-proof.json",
+          "status": "CODEXA_REMOTE_RUNTIME_GREEN",
+          "green": true,
+          "summary": {
+            "host": "CODEXA",
+            "ollama_loopback_ok": true,
+            "expected_models_installed": 11,
+            "expected_models_total": 11,
+            "missing_models": [],
+            "post_reboot_green": true,
+            "boot_green": true,
+            "models_green": true,
+            "hermes_green": true,
+            "docker_containers": 6
+          }
+        },
+        "codexa_smb_stage": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-smb-stage\\latest-codexa-smb-stage.json",
+          "status": "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS",
+          "stage_ready": false,
+          "stage_written": false,
+          "preferred_target": null
+        },
+        "mcp_doctor": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\mcp\\latest-mcp-doctor.json",
+          "status": "MCP_QUARANTINE_GREEN",
+          "checks": 7,
+          "passed": 7,
+          "failed": 0,
+          "host_mcp_config_mutated": false,
+          "descriptor_drift_detected": true,
+          "tool_list_rug_pull_blocked": true,
+          "auto_trust_after_drift": false,
+          "promotion_gate": "tool_descriptor_drift_requires_operator_review"
+        },
+        "ipi_doctor": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\prompt-injection\\latest-ipi-doctor.json",
+          "status": "ORANGEBOX_IPI_DRILLS_GREEN",
+          "fixtures_green": 8,
+          "fixtures_total": 8,
+          "untrusted_fixtures": 7
+        },
+        "memory_doctor": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\memory-truth\\latest-memory-source-truth-doctor.json",
+          "status": "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN",
+          "drills_green": 6,
+          "drills_total": 6,
+          "stale_conflicts_detected": 1,
+          "hot_packet_token_estimate": 137
+        },
+        "action_classifier": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\action-classifier\\latest-action-classifier-doctor.json",
+          "status": "ORANGEBOX_ACTION_CLASSIFIER_GREEN",
+          "cases_run": 18,
+          "allowed_count": 10,
+          "staged_count": 2,
+          "blocked_count": 6,
+          "sequence_cases_run": 3,
+          "sequence_staged_count": 1,
+          "sequence_blocked_count": 1
+        },
+        "skill_lifecycle": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\skills\\latest-skill-lifecycle.json",
+          "status": "ORANGEBOX_SKILL_LIFECYCLE_GREEN",
+          "command_count": 48,
+          "stale_count": 0
+        },
+        "tool_ergonomics": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\tool-ergonomics\\latest-tool-ergonomics.json",
+          "status": "ORANGEBOX_TOOL_ERGONOMICS_GREEN",
+          "command_count": 48,
+          "failures": 0
+        },
+        "checkmate_eval_lane": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\checkmate\\latest-checkmate-eval-lane.json",
+          "status": "CHECKMATE_EVAL_LANE_GREEN",
+          "fixture_count": 6,
+          "failures": 0
+        },
+        "model_inventory": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\reports\\models\\latest-model-inventory-report.json",
+          "status": "ORANGEBOX_MODEL_INVENTORY_GREEN",
+          "required_installed": 10,
+          "required_total": 10,
+          "core_installed": 5,
+          "core_total": 5,
+          "full_local_model_runtime_green": true
+        },
+        "signal_hygiene": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\signal-hygiene\\latest-operator-signal-hygiene.json",
+          "status": "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",
+          "severity": "green",
+          "confidence_calibration": {
+            "local_ops": "high_receipt_backed",
+            "codexa": "available_by_probe",
+            "full_system": "eligible_for_full_gate",
+            "model_inventory": "receipt_backed_inventory",
+            "proof_basis": "receipt_and_probe_only"
+          },
+          "operator_transparency": {
+            "version": "orangebox-operator-transparency/v1",
+            "current_alert": "CODEXA_READY",
+            "full_green_gate": "eligible",
+            "next_safe_action": "Run system:full-green when the operator wants full distributed proof."
+          },
+          "failures": 0
+        },
+        "doer_watcher_spine": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\doer-watcher\\latest-doer-watcher-spine.json",
+          "status": "ORANGEBOX_DOER_WATCHER_SPINE_GREEN",
+          "failures": 0,
+          "doer_command_server_ok": true,
+          "watcher_process_age_ms": 33787
+        },
+        "feature_proof": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\feature-proof\\latest-feature-acceptance-matrix.json",
+          "status": "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN",
+          "features_green": 30,
+          "features_total": 30,
+          "failures": 0
+        },
+        "openclaw_retirement": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\openclaw-retirement\\latest-openclaw-retirement.json",
+          "status": "OPENCLAW_STARTUP_RETIRED"
+        }
+      },
+      "warnings": [
+        "AI Box SMB port is visible, but share access is denied/unavailable for staging.",
+        "Ops gap ledger has 1 named open gap(s); work highest-severity first."
+      ],
+      "next_actions": [
+        "SMB staging is not available from this cockpit without credentials/share access; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097.",
+        "Top learned backend candidate: judge_reliability_and_strongarm (100); prove with npm.cmd run strongarm:doctor && npm.cmd run gremlin:doctor && npm.cmd run harness:benchmark."
+      ],
+      "report_json": "C:\\Users\\a\\OrangeBox-Data\\reports\\health\\orangebox-health-report-20260610T034603Z.json",
+      "report_markdown": "C:\\Users\\a\\OrangeBox-Data\\reports\\health\\orangebox-health-report-20260610T034603Z.md"
+    },
+    "project": {
+      "ok": true,
+      "report_ok": true,
+      "full_project_green": true,
+      "local_ops_green": true,
+      "two_machine_green": true,
+      "gap_count": 0,
+      "partial_count": 0,
+      "not_real_count": 0,
+      "status_counts": {
+        "REAL": 36,
+        "NONBLOCKING_ATTENTION": 1,
+        "SEPARATE_LANE": 1
+      },
+      "version": "orangebox-project-report/v1",
+      "status": "ORANGEBOX_PROJECT_SCOPE_GREEN",
+      "generated_at": "2026-06-10T03:45:59.160Z",
+      "repo_root": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final",
+      "data_root": "C:\\Users\\a\\OrangeBox-Data",
+      "definition": "Orangebox Version 1 is a local-first governed software factory and operations backend. AECode writes buildable source contracts; AtomSmasher compresses context/work; STRONGARM/Misfits/Mirror/Judgement keep outputs honest; receipts prove reality; the operator remains final authority.",
+      "package": {
+        "name": "orangebox-delta",
+        "version": "6.3.0-alpha.7",
+        "scripts": {
+          "health_report": "bun ./scripts/v4/orangebox-health-report.mjs --json --receipt",
+          "project_report": "bun ./scripts/v4/orangebox-project-report.mjs --json --receipt",
+          "obox2_pack": "bun ./scripts/v4/obox2-internal-setup-pack.mjs --json --receipt",
+          "obox2_doctor": "bun ./scripts/v4/obox2-package-doctor.mjs --json --receipt",
+          "research_radar": "bun ./scripts/v4/orangebox-research-radar.mjs --json --receipt",
+          "assurance_doctor": "bun ./scripts/v4/orangebox-assurance-lab-doctor.mjs --json --receipt",
+          "harness_benchmark": "bun ./scripts/v4/orangebox-harness-benchmark-doctor.mjs --json --receipt",
+          "tool_ergonomics": "bun ./scripts/v4/orangebox-tool-ergonomics-doctor.mjs --json --receipt",
+          "checkmate_doctor": "bun ./scripts/v4/checkmate-eval-lane-doctor.mjs --json --receipt",
+          "signal_hygiene": "bun ./scripts/v4/orangebox-operator-signal-hygiene-doctor.mjs --json --receipt",
+          "session_spine": "bun ./scripts/v4/orangebox-doer-watcher-session-spine-doctor.mjs --json --receipt",
+          "feature_proof": "bun ./scripts/v4/orangebox-feature-acceptance-matrix-doctor.mjs --json --receipt",
+          "ops_green": "bun ./scripts/v4/orangebox-local-ops-green.mjs --json --receipt",
+          "ops_gaps": "bun ./scripts/v4/orangebox-ops-gap-ledger.mjs --json --receipt",
+          "codexa_handoff": "bun ./scripts/v4/orangebox-codexa-handoff-doctor.mjs --json --receipt",
+          "codexa_access": "bun ./scripts/v4/codexa-access-doctor.mjs --json --receipt",
+          "codexa_remote_proof": "bun ./scripts/v4/codexa-remote-runtime-proof.mjs --json --receipt",
+          "codexa_watch": "bun ./scripts/v4/orangebox-codexa-bringup-watch.mjs --json --receipt",
+          "codexa_smb_stage": "bun ./scripts/v4/codexa-smb-stage-doctor.mjs --json --receipt",
+          "mcp_doctor": "bun ./scripts/v4/mcp-doctor.mjs --json --receipt",
+          "ipi_doctor": "bun ./scripts/v4/indirect-prompt-injection-doctor.mjs --json --receipt",
+          "memory_doctor": "bun ./scripts/v4/memory-source-truth-doctor.mjs --json --receipt",
+          "action_doctor": "bun ./scripts/v4/action-classifier-doctor.mjs --json --receipt",
+          "skills_lifecycle": "bun ./scripts/v4/orangebox-skill-lifecycle-doctor.mjs --json --receipt",
+          "model_lane_eval": "bun ./scripts/v4/local-model-lane-eval-doctor.mjs --json --receipt",
+          "model_inventory": "bun ./scripts/v4/orangebox-model-inventory-report.mjs --json --receipt"
+        }
+      },
+      "models": {
+        "registered_local_models": [
+          {
+            "id": "qwen3:4b",
+            "lane": "micro",
+            "size_class": "4B",
+            "required_tier": "core",
+            "local": true,
+            "ram_estimate_gb": 5,
+            "strengths": [
+              "cheap JSON packets",
+              "classification",
+              "small STRONGARM passes"
+            ],
+            "weaknesses": [
+              "deep architecture",
+              "large repo synthesis"
+            ],
+            "allowed_roles": [
+              "librarian",
+              "classifier",
+              "strongarm",
+              "small_gremlin"
+            ],
+            "forbidden_roles": [
+              "final_judgement_for_high_risk"
+            ],
+            "json_reliability": 84,
+            "truth_score": 66,
+            "rebel_pressure": 55,
+            "speed_score": 90
+          },
+          {
+            "id": "qwen3:14b",
+            "lane": "forge_fallback",
+            "size_class": "14B",
+            "required_tier": "core",
+            "local": true,
+            "ram_estimate_gb": 12,
+            "strengths": [
+              "coding fallback",
+              "structured reasoning",
+              "medium packet synthesis"
+            ],
+            "weaknesses": [
+              "not final ruler",
+              "may under-pressure bad drafts"
+            ],
+            "allowed_roles": [
+              "forge",
+              "mirror",
+              "judgement_fallback"
+            ],
+            "forbidden_roles": [
+              "wildcard_misfit"
+            ],
+            "json_reliability": 82,
+            "truth_score": 72,
+            "rebel_pressure": 46,
+            "speed_score": 72
+          },
+          {
+            "id": "mistral-small:24b",
+            "lane": "forge",
+            "size_class": "24B",
+            "required_tier": "core",
+            "local": true,
+            "ram_estimate_gb": 22,
+            "strengths": [
+              "implementation",
+              "artifact drafting",
+              "normal-mode builder lane"
+            ],
+            "weaknesses": [
+              "needs Mirror verification"
+            ],
+            "allowed_roles": [
+              "forge",
+              "builder",
+              "implementation"
+            ],
+            "forbidden_roles": [
+              "final_judgement_for_high_risk",
+              "mirror_truth_final"
+            ],
+            "json_reliability": 76,
+            "truth_score": 69,
+            "rebel_pressure": 50,
+            "speed_score": 62
+          },
+          {
+            "id": "deepseek-r1:32b",
+            "lane": "mirror",
+            "size_class": "32B",
+            "required_tier": "core",
+            "local": true,
+            "ram_estimate_gb": 28,
+            "strengths": [
+              "logic review",
+              "failure analysis",
+              "contradiction pressure"
+            ],
+            "weaknesses": [
+              "latency",
+              "may overthink simple work"
+            ],
+            "allowed_roles": [
+              "mirror",
+              "truth",
+              "logic",
+              "validation"
+            ],
+            "forbidden_roles": [
+              "gremlin",
+              "final_operator_voice"
+            ],
+            "json_reliability": 72,
+            "truth_score": 82,
+            "rebel_pressure": 58,
+            "speed_score": 48
+          },
+          {
+            "id": "dolphin3:8b",
+            "lane": "gremlin",
+            "size_class": "8B",
+            "required_tier": "core",
+            "local": true,
+            "ram_estimate_gb": 8,
+            "strengths": [
+              "directness",
+              "anti-fog pressure",
+              "scope-collapse detection"
+            ],
+            "weaknesses": [
+              "truth verification",
+              "overconfidence"
+            ],
+            "allowed_roles": [
+              "gremlin",
+              "misfit",
+              "anti_fog"
+            ],
+            "forbidden_roles": [
+              "judgement",
+              "mirror",
+              "final_answer"
+            ],
+            "json_reliability": 78,
+            "truth_score": 61,
+            "rebel_pressure": 92,
+            "speed_score": 86
+          },
+          {
+            "id": "llama3.1:8b-abliterated",
+            "lane": "wildcard_gremlin",
+            "size_class": "8B",
+            "required_tier": "wildcard",
+            "local": true,
+            "ram_estimate_gb": 8,
+            "strengths": [
+              "hard pushback",
+              "forbidden-assumption breaking",
+              "anti-corporate fog"
+            ],
+            "weaknesses": [
+              "truth verification",
+              "boundary drift",
+              "may need stricter STRONGARM discipline"
+            ],
+            "allowed_roles": [
+              "gremlin",
+              "wildcard",
+              "misfit_hard"
+            ],
+            "forbidden_roles": [
+              "judgement",
+              "mirror",
+              "final_answer",
+              "policy_decision"
+            ],
+            "json_reliability": 65,
+            "truth_score": 48,
+            "rebel_pressure": 98,
+            "speed_score": 84,
+            "optional": true,
+            "note": "Custom/local tag may need manual import. If unavailable, Dolphin remains the active wildcard lane."
+          },
+          {
+            "id": "qwen3:30b-a3b",
+            "lane": "judgement",
+            "size_class": "30B-A3B",
+            "required_tier": "extended",
+            "local": true,
+            "ram_estimate_gb": 24,
+            "strengths": [
+              "local synthesis",
+              "routing decisions",
+              "structured judgement"
+            ],
+            "weaknesses": [
+              "not a replacement for human approval",
+              "not top architect for hardest work"
+            ],
+            "allowed_roles": [
+              "judgement",
+              "local_ruler",
+              "final_synthesis_normal"
+            ],
+            "forbidden_roles": [
+              "operator_approval"
+            ],
+            "json_reliability": 82,
+            "truth_score": 76,
+            "rebel_pressure": 44,
+            "speed_score": 58
+          },
+          {
+            "id": "qwen2.5-coder:32b",
+            "lane": "code",
+            "size_class": "32B",
+            "required_tier": "extended",
+            "local": true,
+            "ram_estimate_gb": 28,
+            "strengths": [
+              "code generation",
+              "repo-bound fixes",
+              "API/backend patches"
+            ],
+            "weaknesses": [
+              "needs gauntlet and review"
+            ],
+            "allowed_roles": [
+              "forge",
+              "code",
+              "implementation"
+            ],
+            "forbidden_roles": [
+              "final_judgement_for_high_risk"
+            ],
+            "json_reliability": 78,
+            "truth_score": 72,
+            "rebel_pressure": 38,
+            "speed_score": 52
+          },
+          {
+            "id": "command-r:35b",
+            "lane": "retrieval",
+            "size_class": "35B",
+            "required_tier": "extended",
+            "local": true,
+            "ram_estimate_gb": 32,
+            "strengths": [
+              "RAG style synthesis",
+              "tool context",
+              "longer memory packets"
+            ],
+            "weaknesses": [
+              "not coding-first",
+              "not misfit pressure"
+            ],
+            "allowed_roles": [
+              "librarian_deep",
+              "retrieval",
+              "context_synthesis"
+            ],
+            "forbidden_roles": [
+              "gremlin",
+              "final_operator_voice"
+            ],
+            "json_reliability": 73,
+            "truth_score": 74,
+            "rebel_pressure": 32,
+            "speed_score": 45
+          },
+          {
+            "id": "llama3.3:70b",
+            "lane": "large_general",
+            "size_class": "70B",
+            "required_tier": "heavy",
+            "local": true,
+            "ram_estimate_gb": 48,
+            "strengths": [
+              "broad synthesis",
+              "large local council fallback"
+            ],
+            "weaknesses": [
+              "download and RAM cost",
+              "not default for small work"
+            ],
+            "allowed_roles": [
+              "judgement_deep",
+              "architect_fallback",
+              "large_local_synthesis"
+            ],
+            "forbidden_roles": [
+              "cheap_mode"
+            ],
+            "json_reliability": 72,
+            "truth_score": 78,
+            "rebel_pressure": 42,
+            "speed_score": 30
+          },
+          {
+            "id": "deepseek-r1:70b",
+            "lane": "heavy_mirror",
+            "size_class": "70B",
+            "required_tier": "heavy",
+            "local": true,
+            "ram_estimate_gb": 52,
+            "strengths": [
+              "deep reasoning",
+              "hard validation",
+              "logic disputes"
+            ],
+            "weaknesses": [
+              "slow",
+              "resource-heavy",
+              "not default"
+            ],
+            "allowed_roles": [
+              "mirror_deep",
+              "truth_deep",
+              "reasoning_dispute"
+            ],
+            "forbidden_roles": [
+              "cheap_mode",
+              "gremlin"
+            ],
+            "json_reliability": 68,
+            "truth_score": 86,
+            "rebel_pressure": 55,
+            "speed_score": 24
+          }
+        ],
+        "cloud_lanes": {
+          "top_architect": {
+            "preferred": "claude-opus-4.7-max-1m",
+            "role": "deep architecture, repo understanding, synthesis, hard disputes",
+            "default": false,
+            "approval_required": true
+          },
+          "ruler_decision": {
+            "preferred": "gpt-5.5",
+            "role": "structured final adjudication when local judgement is insufficient",
+            "default": false,
+            "approval_required": true
+          },
+          "contrarian_reality": {
+            "preferred": "gemini-3-pro",
+            "role": "large-context multimodal contradiction and research review",
+            "default": false,
+            "approval_required": true
+          }
+        },
+        "role_map": {
+          "librarian": {
+            "purpose": "Compress the task and retrieve only relevant project state.",
+            "preferred_lanes": [
+              "micro",
+              "retrieval"
+            ],
+            "default_model": "qwen3:4b"
+          },
+          "forge": {
+            "purpose": "Build artifacts and implementation plans.",
+            "preferred_lanes": [
+              "forge",
+              "code",
+              "forge_fallback"
+            ],
+            "default_model": "mistral-small:24b"
+          },
+          "mirror": {
+            "purpose": "Verify logic, evidence, contradictions, and failure modes.",
+            "preferred_lanes": [
+              "mirror",
+              "heavy_mirror"
+            ],
+            "default_model": "deepseek-r1:32b"
+          },
+          "gremlin": {
+            "purpose": "Pressure weak drafts, fake refusals, scope collapse, and corporate fog.",
+            "preferred_lanes": [
+              "gremlin",
+              "wildcard_gremlin"
+            ],
+            "default_model": "dolphin3:8b",
+            "hard_model": "llama3.1:8b-abliterated",
+            "guardrail": "Gremlin/Misfit never becomes final authority. STRONGARM disciplines it; Judgement synthesizes it."
+          },
+          "strongarm": {
+            "purpose": "Audit drafts and force pass/rewrite/escalate/block.",
+            "preferred_lanes": [
+              "micro"
+            ],
+            "default_model": "qwen3:4b",
+            "live_sidecar": "127.0.0.1:8094"
+          },
+          "judgement": {
+            "purpose": "Choose the final action from evidence and role packets.",
+            "preferred_lanes": [
+              "judgement",
+              "large_general"
+            ],
+            "default_model": "qwen3:30b-a3b",
+            "cloud_escalation": [
+              "claude-opus-4.7-max-1m",
+              "gpt-5.5"
+            ],
+            "operator_approval_required_for_irreversible_actions": true
+          }
+        },
+        "routing_policy_version": "orangebox-routing-policy/v2",
+        "installed_core_count": 5,
+        "installed_core_total": 5,
+        "local_model_lane_eval_status": "LOCAL_MODEL_LANE_EVAL_GREEN",
+        "model_inventory_status": "ORANGEBOX_MODEL_INVENTORY_GREEN",
+        "model_inventory_full_runtime_green": true,
+        "model_inventory_required_installed": 10,
+        "model_inventory_required_total": 10,
+        "local_model_lane_eval_fixtures": {
+          "green": 10,
+          "total": 10
+        }
+      },
+      "soul_genome": {
+        "status": "INTERNAL_KNOWLEDGE_ENGINE_SPEC",
+        "doctor_status": "SOUL_GENOME_KNOWLEDGE_MAP_GREEN",
+        "non_goals": [
+          "Do not rename Orangebox.",
+          "Do not make SOUL GENOME the hidden leader.",
+          "Do not claim LoRA or DPO training before receipts prove it.",
+          "Do not hide critical failures from the operator.",
+          "Do not preserve a model body when the genome/probes say it failed."
+        ]
+      },
+      "scope": [
+        {
+          "area": "Orangebox Ops backend",
+          "status": "REAL",
+          "reality": "Local backend proof and ops readiness are green; command server, API server, local listener, and STRONGARM are startup-managed.",
+          "next": "Keep backend proof in every release gate. Treat two-device full-green as a separate Codexa readiness gate."
+        },
+        {
+          "area": "MCP quarantine/tool bridge",
+          "status": "REAL",
+          "reality": "MCP registry, local HTTP tool-list probe, descriptor drift/rug-pull detection, metadata-only stdio probe, disable override, CLI/API source probe, and code-mode execute guard are green (7/7).",
+          "next": "Keep all new MCPs as candidates until health, tools, scopes, output caps, receipts, and operator-confirmed write mode are proven."
+        },
+        {
+          "area": "Indirect prompt-injection drills",
+          "status": "REAL",
+          "reality": "IPI drills are green: 8/8 fixtures, 7 untrusted channels quarantined, no commands executed.",
+          "next": "Run ipi:doctor before promoting MCP, retrieval, email, browser, repo, PDF, or memory-ingestion changes."
+        },
+        {
+          "area": "Memory/source truth",
+          "status": "REAL",
+          "reality": "Memory/source truth drills are green: 6/6 drills, 1 stale conflict(s), hot packet 137 token proxy.",
+          "next": "Run memory:doctor before promoting chatbackup, AtomSmasher compression, retrieval, or Knowledge Engine upgrades."
+        },
+        {
+          "area": "Action classifier permission gate",
+          "status": "REAL",
+          "reality": "Pre-tool command classifier is green: 10 allowed, 2 staged, 6 blocked, 18 single-action fixtures; 1/3 suspicious action-sequence fixture(s) blocked. Command server imports the same classifier.",
+          "next": "Keep expanding fixtures before new tool surfaces are allowed."
+        },
+        {
+          "area": "Skill lifecycle compression",
+          "status": "REAL",
+          "reality": "Orangebox primer skill is installed across app roots, stale skills are absent, and 48 real skill commands map to existing proof scripts.",
+          "next": "Promote new skills only when they reduce repeated work, have command/proof mappings, and pass stale-skill gates."
+        },
+        {
+          "area": "Tool ergonomics eval lane",
+          "status": "REAL",
+          "reality": "Tool ergonomics is green: 48 commands checked for distinct names, concise descriptions, receipt-backed proofs, bounded outputs, and backend-only constraints.",
+          "next": "Run this doctor before adding, renaming, or promoting Orangebox commands/tools."
+        },
+        {
+          "area": "CHECKMATE eval lane",
+          "status": "REAL",
+          "reality": "CHECKMATE is green: 6 fixtures gate prompt, model, routing, benchmark, and tool changes before promotion.",
+          "next": "Run this doctor before prompt, model, routing, benchmark, or tool-surface promotions."
+        },
+        {
+          "area": "Eval integrity / benchmark hygiene",
+          "status": "REAL",
+          "reality": "Benchmark hygiene is green: CHECKMATE has leakage/canary/web-trace/score-inflation fixtures and the harness eval-integrity task passes.",
+          "next": "Run checkmate:doctor and harness:benchmark before trusting any benchmark, score, model, or routing optimization claim."
+        },
+        {
+          "area": "Operator signal hygiene",
+          "status": "REAL",
+          "reality": "Operator signal hygiene is green: severity=green, confidence=high_receipt_backed, checks=8, transparency=orangebox-operator-transparency/v1, full_green_gate=eligible.",
+          "next": "Run this doctor before changing alert, watcher, popup, or status-report behavior."
+        },
+        {
+          "area": "Doer/watcher session spine",
+          "status": "REAL",
+          "reality": "Doer/watcher spine is green: doer command=true, watcher age=33787ms, Codexa=CODEXA_READY.",
+          "next": "Keep this doctor in the local Ops proof chain before changing watcher, rail, command-server, or Codexa readiness behavior."
+        },
+        {
+          "area": "Feature acceptance matrix",
+          "status": "REAL",
+          "reality": "30/30 feature claims have status, evidence, proof commands, and rollback or recovery truth.",
+          "next": "Keep feature:proof in the local Ops green chain before claiming new systems are done."
+        },
+        {
+          "area": "Ops gap ledger",
+          "status": "REAL",
+          "reality": "Ops gap ledger is current with 1 named gap(s), 0 critical, and full-system green allowed=true.",
+          "next": "Work the highest-severity gap first and rerun ops:gaps before making full-system claims."
+        },
+        {
+          "area": "Codexa setup handoff",
+          "status": "REAL",
+          "reality": "Codexa handoff is current: first click=RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd, setup zip exists=true, open gaps=1.",
+          "next": "Use codexa:handoff before operator setup on Codexa, then rerun the listed cockpit verification commands."
+        },
+        {
+          "area": "N150 to AI Box MCP/command bridge",
+          "status": "REAL",
+          "reality": "MCP server and command-server AI Box routes exist. AI Box command rail 8097 is reachable. Receipt dashboard 8099 is reachable. RDP/WinRM remote control is reachable. SMB port is visible, but staging is not execution.",
+          "next": "Start Codexa rail 8097 on AI Box using OBOX2 or the rail recovery zip at C:\\Users\\a\\OrangeBox-Data\\exports\\codexa-rail-recovery-pack-WINDOWS-NATIVE.zip, then rerun health report."
+        },
+        {
+          "area": "Codexa visible alerting",
+          "status": "REAL",
+          "reality": "Codexa alert doctor is real. Current status: CODEXA_READY. Signal hygiene: Codexa ready; local Ops can continue; full two-machine routing remains gated.. It writes receipts and can show throttled Windows popups.",
+          "next": "Keep alerting explicit until Codexa rails and Ollama are green."
+        },
+        {
+          "area": "Codexa access surfaces",
+          "status": "REAL",
+          "reality": "Codexa access doctor is current: CODEXA_ACCESS_FULL_READY. Command rail=true, Ollama=true, RDP=true, WinRM=true, SMB=true, receipts=true.",
+          "next": "Run model inventory and local model eval before routing heavy work to Codexa."
+        },
+        {
+          "area": "Codexa remote runtime proof",
+          "status": "REAL",
+          "reality": "Codexa remote runtime proof is current: CODEXA_REMOTE_RUNTIME_GREEN. Loopback Ollama=true, expected models=11/11, Hermes=true.",
+          "next": "Use remote runtime proof when direct Codexa Ollama is intentionally closed."
+        },
+        {
+          "area": "Codexa bring-up watcher",
+          "status": "REAL",
+          "reality": "Codexa bring-up watcher is real. Current status: CODEXA_BRINGUP_READY. Ready=true. Missing: none.",
+          "next": "After running the setup pack on Codexa, use codexa:watch to wait for the command rail, Ollama, and receipt rails before claiming two-machine readiness."
+        },
+        {
+          "area": "OB0X terminal affordance",
+          "status": "REAL",
+          "reality": "PowerShell profile has obox/obox-off, ORANGEBOX_ACTIVE env state, RemoteSigned CurrentUser policy proof, and no startup spam.",
+          "next": "Use `obox` to enter Orangebox Ops mode in a fresh shell; use `obox-off` when leaving."
+        },
+        {
+          "area": "Codexa SMB staging",
+          "status": "NONBLOCKING_ATTENTION",
+          "reality": "SMB stage doctor status: CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS. Stage ready: false. Stage written: false. No accessible staging target. SMB is file delivery only, not remote execution or Codexa green proof.",
+          "next": "Share access is denied/unavailable; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097."
+        },
+        {
+          "area": "Hermes outer orchestration",
+          "status": "REAL",
+          "reality": "Hermes orchestration is proven by Codexa remote runtime proof.",
+          "next": "Keep Hermes in the Codexa remote proof and model-lane proof chain."
+        },
+        {
+          "area": "OpenClaw retirement",
+          "status": "REAL",
+          "reality": "OpenClaw startup retired with backup receipt.",
+          "next": "Do not reintroduce OpenClaw startup hooks."
+        },
+        {
+          "area": "Knowledge Engine",
+          "status": "REAL",
+          "reality": "Knowledge storage/search, receipts, primers, 13 learned improvement candidates, and 12 execution-ranked backend backlog item(s) are real. Top item: judge_reliability_and_strongarm. Autonomous self-promotion is intentionally not real.",
+          "next": "Promote only with operator approval, then prove with: npm.cmd run strongarm:doctor && npm.cmd run gremlin:doctor && npm.cmd run harness:benchmark"
+        },
+        {
+          "area": "External research scout",
+          "status": "REAL",
+          "reality": "Research radar is real with 8 approval candidate(s); scout has 48 candidates. It promotes nothing automatically.",
+          "next": "Run npm.cmd run research:radar on cadence, then approve only scoped backend candidates."
+        },
+        {
+          "area": "Research Assurance Lab",
+          "status": "REAL",
+          "reality": "Assurance Lab is green: 12 sources, 18/18 checks, no auto-promotion, backend-only constraints held.",
+          "next": "Run assurance:doctor before promoting research-derived Orangebox upgrades."
+        },
+        {
+          "area": "Offline harness benchmark",
+          "status": "REAL",
+          "reality": "29/29 offline oracle tasks pass with budget and trace capture. Score 1.",
+          "next": "Use this as the baseline before claiming model, tool, routing, or proof-harness improvements."
+        },
+        {
+          "area": "AtomSmasher compression pack",
+          "status": "REAL",
+          "reality": "620/620 features green; schema 10.",
+          "next": "Wire learned improvement candidates into Knowledge Engine receipts."
+        },
+        {
+          "area": "AtomSmasher backend tool merge",
+          "status": "REAL",
+          "reality": "119 backend tools eligible; visual/product lane excluded.",
+          "next": "Promote only backend tools that pass proof receipts."
+        },
+        {
+          "area": "STRONGARM",
+          "status": "REAL",
+          "reality": "Local pressure gate is installed and green in heuristic/sidecar form.",
+          "next": "Move from heuristic-only toward local model structured-output mode after Ollama is proven."
+        },
+        {
+          "area": "Misfits / Gremlin",
+          "status": "REAL",
+          "reality": "1000 elite packet rows verified; training status NOT_TRAINED_YET.",
+          "next": "Train/evaluate LoRA only after Codexa/Colab runtime is chosen."
+        },
+        {
+          "area": "Tri-lane local model router",
+          "status": "REAL",
+          "reality": "Registry and policy green; installed core models 5/5.",
+          "next": "Install core Ollama models on Codexa and rerun model doctor."
+        },
+        {
+          "area": "Local model lane eval",
+          "status": "REAL",
+          "reality": "Packet-role eval is green: 10/10 role fixtures pass; no model calls or Ollama pulls; installed core models remain 5/5.",
+          "next": "Use model:lane-eval before promoting STRONGARM, Misfits, Mirror, Judgement, wildcard, or local model routing changes."
+        },
+        {
+          "area": "Model inventory truth report",
+          "status": "REAL",
+          "reality": "Model inventory report is current: required models observed 10/10; core models observed 5/5; full runtime green=true.",
+          "next": "Run model packet latency/json-validity evals before changing router weights."
+        },
+        {
+          "area": "OBOX2 setup package",
+          "status": "REAL",
+          "reality": "Zip was expanded and verified by package doctor with 63 green setup-contract checks; includes start-here launcher, Codexa always-on power optimizer, rail starter, model installer, and Hermes doctor.",
+          "next": "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa first. It now installs/verifies the embedded backend payload before rail/model proof. Then use core/all model installers only after the rail and power proof are green."
+        },
+        {
+          "area": "SOUL GENOME continuity map",
+          "status": "REAL",
+          "reality": "Accepted as an Orangebox Knowledge Engine continuity map. Not accepted as a system rename, model body, hidden ruler, or training claim.",
+          "next": "Build continuity probes and candidate-model promotion receipts."
+        },
+        {
+          "area": "AECode final format",
+          "status": "REAL",
+          "reality": "AECode remains the middle voice for output contracts, not a frontend rewrite mandate.",
+          "next": "Use AECode for project contracts and artifact specs."
+        },
+        {
+          "area": "Visual/frontend lane",
+          "status": "SEPARATE_LANE",
+          "reality": "Visual is part of Orangebox outputs, but this Ops chat does not touch frontend/.",
+          "next": "Keep frontend work in the separate visual project lane."
+        }
+      ],
+      "not_real_yet": [],
+      "recommended_next_actions": [
+        "OpenClaw startup retirement is proven; keep it retired and do not reintroduce startup hooks.",
+        "OBOX2 setup package contract proof is green (63 checks); run it on Codexa as admin when operator time is available.",
+        "Codexa runtime is already proven by remote proof; use the OBOX2 setup pack only for repair or reinstall.",
+        "Use the small rail recovery zip when needed: C:\\Users\\a\\OrangeBox-Data\\exports\\codexa-rail-recovery-pack-WINDOWS-NATIVE.zip.",
+        "Full OBOX2 setup pack is ready: C:\\Users\\a\\Downloads\\Orangebox_V2_Internal_Setup_Pack.zip. Preferred first click: RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd.",
+        "Use npm.cmd run codexa:access whenever RDP/WinRM/SMB/rail/Ollama claims need a focused proof.",
+        "Use the proven remote execution path when it appears in health:report.",
+        "SMB is visible but no share path is accessible from this cockpit; keep OBOX2/start-here as the Codexa repair path.",
+        "Codexa command rail, loopback Ollama, expected models, and Hermes are proven through codexa:remote-proof; rerun health:report only after runtime changes.",
+        "Codexa expected model inventory is verified through remote proof; no model install is needed right now.",
+        "Use npm.cmd run model:inventory as the operator-facing source of truth for planned vs installed models.",
+        "Run npm.cmd run research:radar periodically; approve only candidates that fit Orangebox Ops scope and have proof gates.",
+        "Assurance Lab proof is green; use npm.cmd run assurance:doctor before promoting research-derived upgrades.",
+        "Use npm.cmd run ops:gaps before status answers so every remaining blocker has evidence, proof commands, and safe next action.",
+        "Use npm.cmd run codexa:handoff before Codexa setup so the operator has one first-click and verification receipt.",
+        "Use npm.cmd run codexa:watch after the Codexa setup pack runs so ready/open-gap truth is observed over time, not guessed from a single probe.",
+        "Run npm.cmd run harness:benchmark before promoting any tool, model, or routing optimization.",
+        "Top Knowledge Engine backend candidate: judge_reliability_and_strongarm (100) -> npm.cmd run strongarm:doctor && npm.cmd run gremlin:doctor && npm.cmd run harness:benchmark"
+      ],
+      "evidence": {
+        "full_green": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\gauntlet\\latest-orangebox-full-green.json",
+          "status": "ORANGEBOX_FULL_GREEN_LOCAL_RUNTIME"
+        },
+        "backend_install": {
+          "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\receipts\\orangebox-backend-install-20260609T111514Z.json",
+          "status": "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN"
+        },
+        "ops_readiness": {
+          "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\receipts\\orangebox-ops-readiness-20260610T034554Z.json",
+          "status": "ORANGEBOX_OPS_RAILS_GREEN"
+        },
+        "atom_smasher": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\atomsmasher\\latest-atomsmasher-doctor.json",
+          "status": "ATOMSMASHER_ORANGEBOX_INTEGRATION_GREEN"
+        },
+        "atom_tools": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\atomsmasher\\tool-merge\\latest-tool-merge.json",
+          "status": "ATOMSMASHER_TOOL_MERGE_GREEN"
+        },
+        "strongarm": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\strongarm\\latest-strongarm-doctor.json",
+          "status": "STRONGARM_ORANGEBOX_GATE_GREEN"
+        },
+        "gremlin": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\misfits\\latest-gremlin-misfits-doctor.json",
+          "status": "GREMLIN_MISFITS_ELITE_GREEN"
+        },
+        "trilane": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\trilane\\latest-trilane-model-router.json",
+          "status": "TRILANE_ROUTER_PACK_GREEN"
+        },
+        "local_model_lane_eval": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\models\\latest-local-model-lane-eval.json",
+          "status": "LOCAL_MODEL_LANE_EVAL_GREEN",
+          "fixtures_green": 10,
+          "fixtures_total": 10,
+          "full_local_model_runtime_green": true,
+          "core_installed_count": 5,
+          "core_total": 5
+        },
+        "model_inventory": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\reports\\models\\latest-model-inventory-report.json",
+          "status": "ORANGEBOX_MODEL_INVENTORY_GREEN",
+          "required_installed": 10,
+          "required_total": 10,
+          "core_installed": 5,
+          "core_total": 5,
+          "full_local_model_runtime_green": true
+        },
+        "obox2_pack": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\obox2\\latest-internal-setup-pack.json",
+          "status": "OBOX2_INTERNAL_SETUP_PACK_GREEN"
+        },
+        "obox2_doctor": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\obox2\\latest-package-doctor.json",
+          "status": "OBOX2_PACKAGE_VERIFIED_GREEN",
+          "contract_ok": true,
+          "contract_checks": 63,
+          "contract_failed": 0,
+          "contract_failed_ids": []
+        },
+        "soul": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\knowledge\\soul-genome\\latest-soul-genome-doctor.json",
+          "status": "SOUL_GENOME_KNOWLEDGE_MAP_GREEN"
+        },
+        "knowledge_improvements": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\knowledge\\improvements\\latest-improvement-candidates.json",
+          "status": "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY",
+          "candidate_count": 13,
+          "execution_backlog_count": 12,
+          "top_execution_area": "judge_reliability_and_strongarm",
+          "top_execution_score": 100
+        },
+        "research_scout": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\research-scout\\latest-external-research-scout.json",
+          "status": "EXTERNAL_RESEARCH_SCOUT_READY"
+        },
+        "research_radar": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\research-radar\\latest-research-radar.json",
+          "status": "ORANGEBOX_RESEARCH_RADAR_GREEN",
+          "approval_candidates": 8,
+          "promotion_autonomous": false
+        },
+        "assurance_lab": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\assurance-lab\\latest-assurance-lab.json",
+          "status": "ORANGEBOX_ASSURANCE_LAB_GREEN",
+          "source_count": 12,
+          "checks_green": 18,
+          "checks_total": 18,
+          "proof_hash": "d6e63e57b58179dd1709b63c8d35acf37ec589f2588f5dab0b447fd1e5b34d28"
+        },
+        "harness_benchmark": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\harness\\latest-harness-benchmark.json",
+          "status": "ORANGEBOX_HARNESS_BENCHMARK_GREEN",
+          "tasks_total": 29,
+          "tasks_ok": 29,
+          "score": 1
+        },
+        "local_ops_green": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\ops-green\\latest-local-ops-green.json",
+          "status": "ORANGEBOX_LOCAL_OPS_GREEN"
+        },
+        "codexa_alert": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\alerts\\codexa-link\\latest-codexa-alert.json",
+          "status": "CODEXA_READY"
+        },
+        "codexa_access": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-access\\latest-codexa-access.json",
+          "status": "CODEXA_ACCESS_FULL_READY",
+          "codexa_access_ready": true,
+          "command_rail": true,
+          "receipts": true,
+          "ollama": true,
+          "rdp": true,
+          "winrm": true,
+          "smb": true
+        },
+        "codexa_remote_proof": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-remote-proof\\latest-codexa-remote-runtime-proof.json",
+          "status": "CODEXA_REMOTE_RUNTIME_GREEN",
+          "green": true,
+          "summary": {
+            "host": "CODEXA",
+            "ollama_loopback_ok": true,
+            "expected_models_installed": 11,
+            "expected_models_total": 11,
+            "missing_models": [],
+            "post_reboot_green": true,
+            "boot_green": true,
+            "models_green": true,
+            "hermes_green": true,
+            "docker_containers": 6
+          }
+        },
+        "codexa_bringup_watch": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-bringup\\latest-codexa-bringup-watch.json",
+          "status": "CODEXA_BRINGUP_READY",
+          "codexa_ready": true,
+          "missing": [],
+          "status_history": [
+            "CODEXA_READY"
+          ]
+        },
+        "codexa_signal_hygiene": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\alerts\\codexa-link\\latest-codexa-alert.json",
+          "status": "green",
+          "summary_line": "Codexa ready; local Ops can continue; full two-machine routing remains gated.",
+          "local_basic_install_blocked": false,
+          "full_system_green_blocked": false
+        },
+        "terminal_obox_profile": {
+          "path": "C:\\Users\\a\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1",
+          "receipt_path": "C:\\Users\\a\\OrangeBox-Data\\profile-backups\\orangebox-powershell-profile-policy-20260606T120727.json",
+          "status": "ORANGEBOX_TERMINAL_AFFORDANCE_GREEN",
+          "current_user_policy_after": "RemoteSigned"
+        },
+        "codexa_recovery": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\exports\\codexa-rail-recovery-pack-WINDOWS-NATIVE.zip",
+          "status": "CODEXA_RAIL_RECOVERY_PACK_READY"
+        },
+        "codexa_smb_stage": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-smb-stage\\latest-codexa-smb-stage.json",
+          "status": "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS",
+          "stage_ready": false,
+          "stage_written": false,
+          "preferred_target": null
+        },
+        "mcp_doctor": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\mcp\\latest-mcp-doctor.json",
+          "status": "MCP_QUARANTINE_GREEN",
+          "descriptor_drift_detected": true,
+          "tool_list_rug_pull_blocked": true,
+          "auto_trust_after_drift": false,
+          "promotion_gate": "tool_descriptor_drift_requires_operator_review"
+        },
+        "ipi_doctor": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\prompt-injection\\latest-ipi-doctor.json",
+          "status": "ORANGEBOX_IPI_DRILLS_GREEN",
+          "fixtures_green": 8,
+          "fixtures_total": 8,
+          "untrusted_fixtures": 7
+        },
+        "memory_doctor": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\memory-truth\\latest-memory-source-truth-doctor.json",
+          "status": "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN",
+          "drills_green": 6,
+          "drills_total": 6,
+          "stale_conflicts_detected": 1,
+          "hot_packet_token_estimate": 137
+        },
+        "action_classifier": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\action-classifier\\latest-action-classifier-doctor.json",
+          "status": "ORANGEBOX_ACTION_CLASSIFIER_GREEN"
+        },
+        "skill_lifecycle": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\skills\\latest-skill-lifecycle.json",
+          "status": "ORANGEBOX_SKILL_LIFECYCLE_GREEN"
+        },
+        "tool_ergonomics": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\tool-ergonomics\\latest-tool-ergonomics.json",
+          "status": "ORANGEBOX_TOOL_ERGONOMICS_GREEN",
+          "command_count": 48,
+          "failures": 0
+        },
+        "checkmate_eval_lane": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\checkmate\\latest-checkmate-eval-lane.json",
+          "status": "CHECKMATE_EVAL_LANE_GREEN",
+          "fixture_count": 6,
+          "failures": 0
+        },
+        "eval_integrity_benchmark_hygiene": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\checkmate\\latest-checkmate-eval-lane.json",
+          "status": "EVAL_INTEGRITY_BENCHMARK_HYGIENE_GREEN",
+          "fixture_present": true,
+          "harness_task_present": true
+        },
+        "signal_hygiene": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\signal-hygiene\\latest-operator-signal-hygiene.json",
+          "status": "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",
+          "severity": "green",
+          "confidence_calibration": {
+            "local_ops": "high_receipt_backed",
+            "codexa": "available_by_probe",
+            "full_system": "eligible_for_full_gate",
+            "model_inventory": "receipt_backed_inventory",
+            "proof_basis": "receipt_and_probe_only"
+          },
+          "failures": 0
+        },
+        "doer_watcher_spine": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\doer-watcher\\latest-doer-watcher-spine.json",
+          "status": "ORANGEBOX_DOER_WATCHER_SPINE_GREEN",
+          "failures": 0,
+          "doer_command_server_ok": true,
+          "watcher_process_age_ms": 33787,
+          "codexa_status": "CODEXA_READY"
+        },
+        "feature_proof": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\feature-proof\\latest-feature-acceptance-matrix.json",
+          "status": "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN",
+          "features_green": 30,
+          "features_total": 30,
+          "failures": 0
+        },
+        "ops_gap_ledger": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\ops-gap-ledger\\latest-ops-gap-ledger.json",
+          "status": "ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS",
+          "gap_count": 1,
+          "critical_gap_count": 0,
+          "full_system_green_claim_allowed": true
+        },
+        "codexa_handoff": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-handoff\\latest-codexa-handoff.json",
+          "status": "CODEXA_HANDOFF_READY_WITH_OPEN_GAPS",
+          "open_gap_count": 1,
+          "first_click": "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+          "setup_zip": "C:\\Users\\a\\Downloads\\Orangebox_V2_Internal_Setup_Pack.zip"
+        },
+        "reality": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\watcher\\latest-reality-watch.json",
+          "status": "ONE_REALITY_GREEN"
+        },
+        "openclaw_retirement": {
+          "path": "C:\\Users\\a\\OrangeBox-Data\\openclaw-retirement\\latest-openclaw-retirement.json",
+          "status": "OPENCLAW_STARTUP_RETIRED"
+        }
+      },
+      "report_json": "C:\\Users\\a\\OrangeBox-Data\\reports\\project\\orangebox-project-report-20260610T034559Z.json",
+      "report_markdown": "C:\\Users\\a\\OrangeBox-Data\\reports\\project\\orangebox-project-report-20260610T034559Z.md"
+    },
+    "atomsmasher": {
+      "ok": true,
+      "version": "orangebox-atomsmasher-runtime/v0",
+      "kind": "orangebox-atomsmasher-integration",
+      "started_at": "2026-06-10T05:40:15.732Z",
+      "finished_at": "2026-06-10T05:42:31.769Z",
+      "vendor_root": "C:\\AtomEons\\orangebox-delta\\integrations\\atomsmasher_full_scope_v1_0",
+      "db": "C:\\Users\\a\\OrangeBox-Data\\atomsmasher\\atomsmasher-orangebox.db",
+      "bundle_hashes": {
+        "integration_bundle_zip": {
+          "path": "C:\\Users\\a\\Downloads\\AtomSmasher_OrangeBox_Backend_Integration_Bundle.zip",
+          "sha256": "abd95baeb28f85dad8eb81852f5accf4d0d68688bf53e788bf198a52a27ff3a2"
+        },
+        "full_scope_zip": {
+          "path": "C:\\Users\\a\\Downloads\\AtomSmasher_Full_Scope_Total_Work_Compiler_v1_0.zip",
+          "sha256": "385f95ace32460d5ee771c4eb6820cd46ccb5b9af829f92e684579a89c8e7b83"
+        }
+      },
+      "gates": [
+        {
+          "id": "vendor_root_exists",
+          "ok": true
+        },
+        {
+          "id": "unit_tests_green",
+          "ok": true
+        },
+        {
+          "id": "schema_version_10",
+          "ok": true
+        },
+        {
+          "id": "features_registered_620",
+          "ok": true
+        },
+        {
+          "id": "proof_registry_live",
+          "ok": true
+        },
+        {
+          "id": "demo_all_620_ok",
+          "ok": true
+        },
+        {
+          "id": "run_all_620_ok",
+          "ok": true
+        },
+        {
+          "id": "compile_saved_work",
+          "ok": true
+        },
+        {
+          "id": "equation_fit",
+          "ok": true
+        },
+        {
+          "id": "no_external_services_required",
+          "ok": true
+        },
+        {
+          "id": "no_paid_model_api_called",
+          "ok": true
+        },
+        {
+          "id": "no_gpu_required",
+          "ok": true
+        }
+      ],
+      "unit_tests": {
+        "ok": true,
+        "ms": 33067,
+        "stdout": "",
+        "stderr": "test_all_620_execute_live (test_full_scope.AtomSmasherFullScopeTests.test_all_620_execute_live) ... ok test_cache_route_saved_work_and_compile (test_full_scope.AtomSmasherFullScopeTests.test_cache_route_saved_work_and_compile) ... ok test_commitment_air_and_equation (test_full_scope.AtomSmasherFullScopeTests.test_commitment_air_and_equation) ... ok test_demo_and_proof (test_full_scope.AtomSmasherFullScopeTests.test_demo_and_proof) ... ok test_full_ingest_orders_hot_and_coverage (test_full_scope.AtomSmasherFullScopeTests.test_full_ingest_orders_hot_and_coverage) ... ok test_registry_contains_all_620_additions (test_full_scope.AtomSmasherFullScopeTests.test_registry_contains_all_620_additions) ... ok test_security_and_agent_governance (test_full_scope.AtomSmasherFullScopeTests.test_security_and_agent_governance) ... ok ---------------------------------------------------------------------- Ran 7 tests in 30.866s OK"
+      },
+      "init": {
+        "codename": "Full Scope Total Work Compiler",
+        "db": "C:\\Users\\a\\OrangeBox-Data\\atomsmasher\\atomsmasher-orangebox.db",
+        "features": 620,
+        "schema_version": 10,
+        "system_law": "Only smart work is done.",
+        "version": "1.0.0"
+      },
+      "proof": {
+        "active_orders": 6,
+        "features_registered": 620,
+        "order_retention": 1,
+        "receipts": 417750,
+        "registry_live": true,
+        "timestamp": "2026-06-10T05:40:58Z"
+      },
+      "demo": {
+        "all_features": {
+          "attempted": 620,
+          "errors": 0,
+          "errors_sample": [],
+          "ok": 620,
+          "registry_count": 620
+        },
+        "codename": "Full Scope Total Work Compiler",
+        "compiled": {
+          "active_orders": [
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-09T11:13:36Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_9492ef7b9625d600",
+              "priority": 1,
+              "scope": "project",
+              "source_id": "src_6c4c4333d1027ff1",
+              "superseded_by": null,
+              "text": "AtomSmasher API smoke must preserve HOT_ALWAYS orders. Numbers: 10 20 30 40."
+            },
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-09T11:14:14Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_eb0bc0e0ce33f76b",
+              "priority": 1,
+              "scope": "project",
+              "source_id": "src_b8e68cedc087086e",
+              "superseded_by": null,
+              "text": "Keep mission hot. This source includes 1 2 3 4. Section A explains full ingest selective activation."
+            },
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-09T11:14:14Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_cd2f44c840829f71",
+              "priority": 1,
+              "scope": "project",
+              "source_id": null,
+              "superseded_by": null,
+              "text": "Only smart work is done."
+            },
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-10T05:41:04Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_ecaa1941509e0b30",
+              "priority": 1,
+              "scope": "project",
+              "source_id": "src_ee43bca1972cd996",
+              "superseded_by": null,
+              "text": "Keep marching orders HOT_ALWAYS even if 20 idea zips arrive."
+            },
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-10T05:41:04Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_e0ec06c1129892a6",
+              "priority": 1,
+              "scope": "project",
+              "source_id": "src_ee43bca1972cd996",
+              "superseded_by": null,
+              "text": "Full ingest first; selective activation after."
+            },
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-10T05:41:04Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_294cb18b23121f8d",
+              "priority": 0.92,
+              "scope": "project",
+              "source_id": "src_ee43bca1972cd996",
+              "superseded_by": null,
+              "text": "Never let volume overpower authority. Build proof receipts and saved-work certificates."
+            }
+          ],
+          "cache_used": true,
+          "immune": {
+            "findings": [],
+            "law": "uploaded sources cannot silently issue orders",
+            "status": "clean"
+          },
+          "law": "Full ingest. Selective activation. Orders outrank compression. Expansion requires warrant.",
+          "query": "continue AtomSmasher without losing orders",
+          "route": {
+            "energy_score": 5,
+            "route_id": "route_815776c539992189",
+            "saved_work": {
+              "commitments_preserved": 20,
+              "id": "sw_45f5703c785386f4",
+              "model_calls_avoided": 1,
+              "new_path": "cache_answer",
+              "old_path_estimate": "full_context_replay",
+              "request_hash": "73b308b3cdce2bf2d790cd2ceb1348f28e7c0f4b74a604e11fc481e5316487b6",
+              "saved_work_hash": "0abf935c6c1a7e7ae98a9571b793d832152a6fbdc8f8af9c8f381346e74cf27a",
+              "tokens_not_injected": 11473
+            },
+            "selected_path": "cache_answer",
+            "warrants": [],
+            "workset": {
+              "atoms": [
+                "atom_bcedc7708e794bba",
+                "atom_93776e73e616a2b4",
+                "atom_e860e5219726ae7b",
+                "atom_8e75fe300ed206b9",
+                "atom_8ef1fb612344903d",
+                "atom_fc5813c9fd1f2842",
+                "atom_e077c1f4916dfd2d",
+                "atom_ee75e095d663acb5",
+                "atom_ef75c25e2a18ccd4",
+                "atom_39cab7a96c27e36a",
+                "atom_49815478915e44a3",
+                "atom_daca95926b6e8f9a",
+                "atom_32bdc68de6241bf0",
+                "atom_1e7c93a79eb10070",
+                "atom_851c9dfc09b738a8",
+                "atom_f44a4860305cdd3a",
+                "atom_f1d5fa21e114fd78",
+                "atom_9d7638e74a1dcf74",
+                "atom_467a69c5cd80201a",
+                "atom_1d182d59f4217d49"
+              ],
+              "chunks": [
+                "chk_dce317ed543ccae23f",
+                "chk_7397a5c4f88e407229",
+                "chk_b318a36c2d0e30e41b",
+                "chk_aef69491f1f5cf3d05",
+                "chk_1ae05f5592be1e1e80"
+              ],
+              "orders": [
+                "ord_9492ef7b9625d600",
+                "ord_eb0bc0e0ce33f76b",
+                "ord_cd2f44c840829f71",
+                "ord_ecaa1941509e0b30",
+                "ord_e0ec06c1129892a6",
+                "ord_294cb18b23121f8d"
+              ],
+              "query": "continue AtomSmasher without losing orders",
+              "token_estimate": 1639
+            }
+          },
+          "stable_prefix_hash": "3043d79c665d1275ec771f7bf446cad202901e8e931ae3a100b720a5878364cd"
+        },
+        "equation": {
+          "created_at": "2026-06-10T05:41:04Z",
+          "equation_type": "linear",
+          "formula": "y(t)=a+b*t",
+          "id": "eq_b172897767ee9036",
+          "max_error": 0,
+          "mean_error": 0,
+          "name": "demo_linear",
+          "parameters_json": "{\"a\": 10.0, \"b\": 10.0}",
+          "reconstruction_hash": "28ede169e68e9a7bbf874aa80c19fa2abcea575cc58d0e7699c5de608ececeb8",
+          "residuals_json": "{}",
+          "source_pointer": null
+        },
+        "proof": {
+          "active_orders": 6,
+          "features_registered": 620,
+          "order_retention": 1,
+          "receipts": 419076,
+          "registry_live": true,
+          "timestamp": "2026-06-10T05:41:47Z"
+        },
+        "source": {
+          "chunks": 1,
+          "coverage": {
+            "atomized_count": 5,
+            "chunked_pct": 100,
+            "equation_scanned": true,
+            "hot_count": 3,
+            "indexed_pct": 100,
+            "law": "Full ingest. Selective activation. Cold is allowed; missing is not.",
+            "mapped_pct": 100,
+            "raw_stored_pct": 100,
+            "sleeping_recoverable": true,
+            "source_id": "src_ee43bca1972cd996",
+            "table_scanned": true
+          },
+          "orders": [
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-10T05:41:04Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_ecaa1941509e0b30",
+              "priority": 1,
+              "scope": "project",
+              "source_id": "src_ee43bca1972cd996",
+              "superseded_by": null,
+              "text": "Keep marching orders HOT_ALWAYS even if 20 idea zips arrive."
+            },
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-10T05:41:04Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_e0ec06c1129892a6",
+              "priority": 1,
+              "scope": "project",
+              "source_id": "src_ee43bca1972cd996",
+              "superseded_by": null,
+              "text": "Full ingest first; selective activation after."
+            },
+            {
+              "active": 1,
+              "authority": "user",
+              "created_at": "2026-06-10T05:41:04Z",
+              "heat": "HOT_ALWAYS",
+              "id": "ord_294cb18b23121f8d",
+              "priority": 0.92,
+              "scope": "project",
+              "source_id": "src_ee43bca1972cd996",
+              "superseded_by": null,
+              "text": "Never let volume overpower authority. Build proof receipts and saved-work certificates."
+            }
+          ],
+          "source_id": "src_ee43bca1972cd996",
+          "title": "AtomSmasher v1.0 demo orders"
+        },
+        "version": "1.0.0"
+      },
+      "run_all": {
+        "attempted": 620,
+        "errors": 0,
+        "errors_sample": [],
+        "ok": 620,
+        "registry_count": 620
+      },
+      "compile": {
+        "active_orders": [
+          {
+            "active": 1,
+            "authority": "user",
+            "created_at": "2026-06-09T11:13:36Z",
+            "heat": "HOT_ALWAYS",
+            "id": "ord_9492ef7b9625d600",
+            "priority": 1,
+            "scope": "project",
+            "source_id": "src_6c4c4333d1027ff1",
+            "superseded_by": null,
+            "text": "AtomSmasher API smoke must preserve HOT_ALWAYS orders. Numbers: 10 20 30 40."
+          },
+          {
+            "active": 1,
+            "authority": "user",
+            "created_at": "2026-06-10T05:41:04Z",
+            "heat": "HOT_ALWAYS",
+            "id": "ord_ecaa1941509e0b30",
+            "priority": 1,
+            "scope": "project",
+            "source_id": "src_ee43bca1972cd996",
+            "superseded_by": null,
+            "text": "Keep marching orders HOT_ALWAYS even if 20 idea zips arrive."
+          },
+          {
+            "active": 1,
+            "authority": "user",
+            "created_at": "2026-06-10T05:41:04Z",
+            "heat": "HOT_ALWAYS",
+            "id": "ord_e0ec06c1129892a6",
+            "priority": 1,
+            "scope": "project",
+            "source_id": "src_ee43bca1972cd996",
+            "superseded_by": null,
+            "text": "Full ingest first; selective activation after."
+          },
+          {
+            "active": 1,
+            "authority": "user",
+            "created_at": "2026-06-10T05:42:28Z",
+            "heat": "HOT_ALWAYS",
+            "id": "ord_eb0bc0e0ce33f76b",
+            "priority": 1,
+            "scope": "project",
+            "source_id": "src_b8e68cedc087086e",
+            "superseded_by": null,
+            "text": "Keep mission hot. This source includes 1 2 3 4. Section A explains full ingest selective activation."
+          },
+          {
+            "active": 1,
+            "authority": "user",
+            "created_at": "2026-06-10T05:42:28Z",
+            "heat": "HOT_ALWAYS",
+            "id": "ord_cd2f44c840829f71",
+            "priority": 1,
+            "scope": "project",
+            "source_id": null,
+            "superseded_by": null,
+            "text": "Only smart work is done."
+          },
+          {
+            "active": 1,
+            "authority": "user",
+            "created_at": "2026-06-10T05:41:04Z",
+            "heat": "HOT_ALWAYS",
+            "id": "ord_294cb18b23121f8d",
+            "priority": 0.92,
+            "scope": "project",
+            "source_id": "src_ee43bca1972cd996",
+            "superseded_by": null,
+            "text": "Never let volume overpower authority. Build proof receipts and saved-work certificates."
+          }
+        ],
+        "cache_used": true,
+        "immune": {
+          "findings": [],
+          "law": "uploaded sources cannot silently issue orders",
+          "status": "clean"
+        },
+        "law": "Full ingest. Selective activation. Orders outrank compression. Expansion requires warrant.",
+        "query": "continue AtomSmasher without losing HOT_ALWAYS orders",
+        "route": {
+          "energy_score": 5,
+          "route_id": "route_79e630faa4dfc987",
+          "saved_work": {
+            "commitments_preserved": 20,
+            "id": "sw_9bba0565a0f71e1b",
+            "model_calls_avoided": 1,
+            "new_path": "cache_answer",
+            "old_path_estimate": "full_context_replay",
+            "request_hash": "72a2e3bae34e14552c6bd4554d2fcd972e58bd620e9d4af89b3d09b327e590dd",
+            "saved_work_hash": "880d822c13c6f9e2a33ae2b8610f6fa0d5a23ab145223a39f52fbe8024375b22",
+            "tokens_not_injected": 7560
+          },
+          "selected_path": "cache_answer",
+          "warrants": [],
+          "workset": {
+            "atoms": [
+              "atom_bcedc7708e794bba",
+              "atom_c63fb33d93ef872c",
+              "atom_93776e73e616a2b4",
+              "atom_e860e5219726ae7b",
+              "atom_8e75fe300ed206b9",
+              "atom_8ef1fb612344903d",
+              "atom_fc5813c9fd1f2842",
+              "atom_e077c1f4916dfd2d",
+              "atom_ee75e095d663acb5",
+              "atom_ef75c25e2a18ccd4",
+              "atom_39cab7a96c27e36a",
+              "atom_49815478915e44a3",
+              "atom_daca95926b6e8f9a",
+              "atom_32bdc68de6241bf0",
+              "atom_1e7c93a79eb10070",
+              "atom_851c9dfc09b738a8",
+              "atom_f44a4860305cdd3a",
+              "atom_f1d5fa21e114fd78",
+              "atom_9d7638e74a1dcf74",
+              "atom_467a69c5cd80201a"
+            ],
+            "chunks": [
+              "chk_4a548fc67738c71dfc",
+              "chk_f36a02c2258fa1479c",
+              "chk_dce317ed543ccae23f",
+              "chk_7397a5c4f88e407229",
+              "chk_b318a36c2d0e30e41b"
+            ],
+            "orders": [
+              "ord_9492ef7b9625d600",
+              "ord_ecaa1941509e0b30",
+              "ord_e0ec06c1129892a6",
+              "ord_eb0bc0e0ce33f76b",
+              "ord_cd2f44c840829f71",
+              "ord_294cb18b23121f8d"
+            ],
+            "query": "continue AtomSmasher without losing HOT_ALWAYS orders",
+            "token_estimate": 1080
+          }
+        },
+        "stable_prefix_hash": "40daae769702ad059c7a3a8e2531c29910af8f04bb77f677063801625bd90ce1"
+      },
+      "equation": {
+        "created_at": "2026-06-10T05:42:31Z",
+        "equation_type": "linear",
+        "formula": "y(t)=a+b*t",
+        "id": "eq_b172897767ee9036",
+        "max_error": 0,
+        "mean_error": 0,
+        "name": "demo_linear",
+        "parameters_json": "{\"a\": 10.0, \"b\": 10.0}",
+        "reconstruction_hash": "77f9996f23594c93f4453449b38d727c4906042e5d9c42767c75b3358f721ef6",
+        "residuals_json": "{}",
+        "source_pointer": null
+      },
+      "api_surface": {
+        "mounted_prefix": "/api/atomsmasher",
+        "spec_count": 19,
+        "source_manifest": "AtomSmasher_OrangeBox_Backend_Integration_Bundle/integration_manifest.json"
+      },
+      "summary": {
+        "status": "ATOMSMASHER_ORANGEBOX_INTEGRATION_GREEN",
+        "features_registered": 620,
+        "features_executed": 620,
+        "features_ok": 620,
+        "selected_path": "cache_answer",
+        "saved_tokens": 7560,
+        "schema_version": 10
+      }
+    },
+    "feature_matrix": {
+      "ok": true,
+      "version": "orangebox-feature-acceptance-matrix/v1",
+      "status": "ORANGEBOX_FEATURE_ACCEPTANCE_MATRIX_GREEN",
+      "checked_at": "2026-06-10T03:45:53.593Z",
+      "repo_root": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final",
+      "data_root": "C:\\Users\\a\\OrangeBox-Data",
+      "doctrine": "No feature claim is complete without status, evidence, a proof command, and rollback or recovery truth.",
+      "public_name": "Orangebox Version 1",
+      "package_name": "Orangebox Delta Final",
+      "backend_proof_in_progress": true,
+      "codexa_ready": true,
+      "full_project_green_truth_guard_ok": true,
+      "full_project_green_claim_allowed": true,
+      "counts": {
+        "REAL": 27,
+        "PARTIAL": 2,
+        "SEPARATE_LANE": 1
+      },
+      "features_total": 30,
+      "features_green": 30,
+      "matrix_hash": "cfd6c8b60e12f0ce1448f08b3bc9023d53055e65173d23dcf5d7ac647a5d1d93",
+      "matrix": [
+        {
+          "id": "local_ops_backend",
+          "claim": "Orangebox Ops backend can run locally without the frontend lane.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run backend:proof && npm.cmd run ops:readiness",
+          "acceptance_gate": "Backend install and Ops readiness receipts are green; frontend_required_for_backend is false.",
+          "rollback_path": "Use the installed final folder backup/previous zip; revert scoped backend script changes and rerun backend:proof.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\receipts\\orangebox-backend-install-20260609T111514Z.json",
+              "exists": true,
+              "status": "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN",
+              "expected_status": "ORANGEBOX_DELTA_BACKEND_INSTALLED_GREEN",
+              "detail": {
+                "frontend_required_for_backend": false
+              }
+            },
+            {
+              "ok": true,
+              "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\receipts\\orangebox-ops-readiness-20260610T033701Z.json",
+              "exists": true,
+              "status": "ORANGEBOX_OPS_RAILS_GREEN",
+              "expected_status": "ORANGEBOX_OPS_RAILS_GREEN",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "mcp_quarantine",
+          "claim": "MCP/tool bridge exists behind quarantine with descriptor-integrity drift detection, no host MCP mutation, no paid API, no installs by default.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run mcp:doctor",
+          "acceptance_gate": "MCP doctor has zero failed checks, host_mcp_config_mutated=false, and tool descriptor drift/rug-pull detection is proven.",
+          "rollback_path": "Disable candidate MCP registry entries and rerun mcp:doctor.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\mcp\\latest-mcp-doctor.json",
+              "exists": true,
+              "status": "MCP_QUARANTINE_GREEN",
+              "expected_status": null,
+              "detail": {
+                "failed": 0,
+                "host_mcp_config_mutated": false,
+                "descriptor_drift_detected": true,
+                "tool_list_rug_pull_blocked": true
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "indirect_prompt_injection_drills",
+          "claim": "Untrusted text from email, web, repo, PDF, chat logs, tool output, or retrieved memory cannot smuggle executable tool commands.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run ipi:doctor",
+          "acceptance_gate": "IPI doctor is green, all drills pass, command_executed=false, network_called=false, and untrusted channels are quarantined.",
+          "rollback_path": "Revert IPI doctor/command/report wiring and rerun ipi:doctor, action:doctor, feature:proof, and harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\prompt-injection\\latest-ipi-doctor.json",
+              "exists": true,
+              "status": "ORANGEBOX_IPI_DRILLS_GREEN",
+              "expected_status": "ORANGEBOX_IPI_DRILLS_GREEN",
+              "detail": {
+                "fixtures_green": 8,
+                "fixtures_total": 8,
+                "untrusted_fixtures": 7
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "pre_tool_action_classifier",
+          "claim": "Risky tool actions are classified before execution.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run action:doctor",
+          "acceptance_gate": "Action classifier fixtures include allowed, staged, blocked, and suspicious multi-action sequence decisions.",
+          "rollback_path": "Revert action-classifier fixture/rule changes and rerun action:doctor and harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\action-classifier\\latest-action-classifier-doctor.json",
+              "exists": true,
+              "status": "ORANGEBOX_ACTION_CLASSIFIER_GREEN",
+              "expected_status": "ORANGEBOX_ACTION_CLASSIFIER_GREEN",
+              "detail": {
+                "cases_run": 18,
+                "blocked_count": 6,
+                "staged_count": 2,
+                "sequence_cases_run": 3,
+                "sequence_blocked_count": 1
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "memory_source_truth",
+          "claim": "Latest source-backed receipt truth beats stale chat memory, and compressed memory carries dereferenceable source pointers.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run memory:doctor",
+          "acceptance_gate": "Memory/source-truth doctor is green, all drills pass, raw_history_injected=false, and revised facts create compression debt.",
+          "rollback_path": "Revert memory-source-truth doctor/command/report wiring and rerun memory:doctor, feature:proof, project:report, and harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\memory-truth\\latest-memory-source-truth-doctor.json",
+              "exists": true,
+              "status": "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN",
+              "expected_status": "ORANGEBOX_MEMORY_SOURCE_TRUTH_GREEN",
+              "detail": {
+                "drills_green": 6,
+                "drills_total": 6,
+                "stale_conflicts_detected": 1,
+                "hot_packet_token_estimate": 137
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "skill_primer_everywhere",
+          "claim": "Modern Orangebox primer skill is installed in Codex, Claude, Antigravity/Gemini, and shared agent roots with stale skills removed.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run primer:sync && npm.cmd run skills:lifecycle",
+          "acceptance_gate": "Skill lifecycle is green and stale_count is zero.",
+          "rollback_path": "Restore the skill backup from OrangeBox-Data if needed, then rerun primer:sync.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\skills\\latest-skill-lifecycle.json",
+              "exists": true,
+              "status": "ORANGEBOX_SKILL_LIFECYCLE_GREEN",
+              "expected_status": "ORANGEBOX_SKILL_LIFECYCLE_GREEN",
+              "detail": {
+                "command_count": 48,
+                "stale_count": 0
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "tool_ergonomics",
+          "claim": "Orangebox skill commands map to real proof actions and are bounded, distinct, and receipt-backed.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run tool:ergonomics",
+          "acceptance_gate": "Tool ergonomics receipt is green and command_count is nonzero.",
+          "rollback_path": "Revert command-wrapper and SKILL.md changes, then rerun tool:ergonomics and skills:lifecycle.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\tool-ergonomics\\latest-tool-ergonomics.json",
+              "exists": true,
+              "status": "ORANGEBOX_TOOL_ERGONOMICS_GREEN",
+              "expected_status": "ORANGEBOX_TOOL_ERGONOMICS_GREEN",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "checkmate_eval_lane",
+          "claim": "Prompt/model/routing/tool changes are gated by deterministic CHECKMATE eval fixtures.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run checkmate:doctor",
+          "acceptance_gate": "CHECKMATE eval lane receipt is green with all required fixture types.",
+          "rollback_path": "Revert eval fixture or gate changes and rerun checkmate:doctor.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\checkmate\\latest-checkmate-eval-lane.json",
+              "exists": true,
+              "status": "CHECKMATE_EVAL_LANE_GREEN",
+              "expected_status": "CHECKMATE_EVAL_LANE_GREEN",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "eval_integrity_benchmark_hygiene",
+          "claim": "Benchmark and eval claims are checked for leakage, canary misses, web-trace contamination, and unsupported score inflation.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run checkmate:doctor && npm.cmd run harness:benchmark",
+          "acceptance_gate": "CHECKMATE has the benchmark hygiene fixture and the harness eval-integrity task passes.",
+          "rollback_path": "Revert benchmark hygiene fixture/task changes and rerun checkmate:doctor, harness:benchmark, feature:proof, and knowledge:improvements.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\checkmate\\latest-checkmate-eval-lane.json",
+              "exists": true,
+              "status": "CHECKMATE_EVAL_LANE_GREEN",
+              "expected_status": "CHECKMATE_EVAL_LANE_GREEN",
+              "detail": {
+                "fixture_count": 6,
+                "benchmark_hygiene_fixture": true
+              }
+            },
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\harness\\latest-harness-benchmark.json",
+              "exists": true,
+              "status": "ORANGEBOX_HARNESS_BENCHMARK_GREEN",
+              "expected_status": "ORANGEBOX_HARNESS_BENCHMARK_GREEN",
+              "detail": {
+                "tasks_total": 29,
+                "eval_integrity_task": true
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "operator_signal_hygiene",
+          "claim": "Alerts preserve local-vs-full truth, severity, cadence, and confidence calibration.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run signal:hygiene",
+          "acceptance_gate": "Signal hygiene receipt is green, popup_created_by_this_doctor=false, and operator_transparency has status/rationale/foresight/after-action receipts.",
+          "rollback_path": "Revert alert/cadence report changes and rerun codexa:alert, health:report, project:report, signal:hygiene.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\signal-hygiene\\latest-operator-signal-hygiene.json",
+              "exists": true,
+              "status": "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",
+              "expected_status": "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",
+              "detail": {
+                "transparency_version": "orangebox-operator-transparency/v1",
+                "full_green_gate": "eligible"
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "doer_watcher_session_spine",
+          "claim": "Local doer surfaces and watcher freshness are proven in one shared reality state.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run session:spine",
+          "acceptance_gate": "Session spine is green; Codexa gap is not silenced.",
+          "rollback_path": "Revert watcher/report changes and rerun health:report, project:report, reality:watch, signal:hygiene, session:spine.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\doer-watcher\\latest-doer-watcher-spine.json",
+              "exists": true,
+              "status": "ORANGEBOX_DOER_WATCHER_SPINE_GREEN",
+              "expected_status": "ORANGEBOX_DOER_WATCHER_SPINE_GREEN",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "knowledge_research_queue",
+          "claim": "External research and receipts create backend improvement candidates without autonomous self-promotion.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run research:radar && npm.cmd run knowledge:improvements",
+          "acceptance_gate": "Research radar and knowledge queue are ready, not_autonomous=true, and backlog items require operator approval.",
+          "rollback_path": "Discard candidate/radar receipt changes; do not promote without a scoped proof doctor.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\knowledge\\improvements\\latest-improvement-candidates.json",
+              "exists": true,
+              "status": "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY",
+              "expected_status": "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY",
+              "detail": {
+                "candidate_count": 13,
+                "top_area": "judge_reliability_and_strongarm"
+              }
+            },
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\research-radar\\latest-research-radar.json",
+              "exists": true,
+              "status": "ORANGEBOX_RESEARCH_RADAR_GREEN",
+              "expected_status": null,
+              "detail": {
+                "status": "ORANGEBOX_RESEARCH_RADAR_GREEN",
+                "approval_candidates": 8,
+                "promotion_autonomous": false
+              }
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "research_assurance_lab",
+          "claim": "Research-derived Orangebox upgrades are filtered through assurance playbooks, deterministic gates, receipts, rollback, and operator approval before promotion.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run assurance:doctor",
+          "acceptance_gate": "Assurance Lab receipt is green, source tiering exists, no-auto-promotion is explicit, and frontend/API/install mutations are false.",
+          "rollback_path": "Revert assurance doctor/command/report wiring, discard assurance-lab receipts, and rerun assurance:doctor, feature:proof, project:report, and harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\assurance-lab\\latest-assurance-lab.json",
+              "exists": true,
+              "status": "ORANGEBOX_ASSURANCE_LAB_GREEN",
+              "expected_status": "ORANGEBOX_ASSURANCE_LAB_GREEN",
+              "detail": {
+                "source_count": 12,
+                "checks_green": 18,
+                "checks_total": 18
+              }
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "offline_harness",
+          "claim": "Backend proof changes have offline oracle tasks before optimization claims.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run harness:benchmark",
+          "acceptance_gate": "Harness benchmark is green and all tasks pass.",
+          "rollback_path": "Revert harness task changes and rerun harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\package.json",
+              "exists": true,
+              "status": null,
+              "expected_status": null,
+              "detail": {
+                "script": "bun ./scripts/v4/orangebox-harness-benchmark-doctor.mjs --json --receipt"
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "structured_verdicts",
+          "claim": "STRONGARM and Misfits are installed as pressure/verdict lanes without claiming untrained model behavior.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run strongarm:doctor && npm.cmd run gremlin:doctor",
+          "acceptance_gate": "STRONGARM green, Misfits dataset green, training status remains honest until trained.",
+          "rollback_path": "Disable sidecar/training integration config and rerun strongarm:doctor and gremlin:doctor.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\strongarm\\latest-strongarm-doctor.json",
+              "exists": true,
+              "status": "STRONGARM_ORANGEBOX_GATE_GREEN",
+              "expected_status": "STRONGARM_ORANGEBOX_GATE_GREEN",
+              "detail": null
+            },
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\misfits\\latest-gremlin-misfits-doctor.json",
+              "exists": true,
+              "status": "GREMLIN_MISFITS_ELITE_GREEN",
+              "expected_status": "GREMLIN_MISFITS_ELITE_GREEN",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "local_model_lane_eval",
+          "claim": "Local model lanes are evaluated as bounded packet roles with wildcard limits, STRONGARM/Misfits receipts, and honest installed inventory.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run trilane:doctor && npm.cmd run model:lane-eval",
+          "acceptance_gate": "Model lane eval is green, does not call or pull models, forbids wildcard authority roles, and keeps full runtime availability separate from policy proof.",
+          "rollback_path": "Revert local model lane eval doctor/command wiring and rerun trilane:doctor, model:lane-eval, feature:proof, and harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\models\\latest-local-model-lane-eval.json",
+              "exists": true,
+              "status": "LOCAL_MODEL_LANE_EVAL_GREEN",
+              "expected_status": "LOCAL_MODEL_LANE_EVAL_GREEN",
+              "detail": {
+                "fixtures_green": 10,
+                "fixtures_total": 10,
+                "core_installed_count": 5,
+                "core_total": 5,
+                "full_local_model_runtime_green": true
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "ops_gap_ledger",
+          "claim": "Orangebox has a one-reality gap ledger that names every open Ops blocker with evidence, proof commands, and safe next actions.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run ops:gaps",
+          "acceptance_gate": "Ops gap ledger is valid, does not mutate frontend/Codexa, and refuses full-system green while blocking gaps remain.",
+          "rollback_path": "Revert ops gap ledger command/doctor wiring and rerun ops:gaps, feature:proof, project:report, and harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\ops-gap-ledger\\latest-ops-gap-ledger.json",
+              "exists": true,
+              "status": "ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS",
+              "expected_status": null,
+              "detail": {
+                "gap_count": 1,
+                "critical_gap_count": 0,
+                "full_system_green_claim_allowed": true
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "codexa_handoff",
+          "claim": "Orangebox generates a single Codexa setup handoff with the first-click launcher, embedded backend payload proof, open blockers, setup zip proof, and cockpit verification order.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run codexa:handoff",
+          "acceptance_gate": "Handoff is valid, names RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd, references the verified OBOX2 zip, proves the embedded backend payload, includes cockpit proof commands, and refuses full-system green while blocking gaps remain.",
+          "rollback_path": "Revert Codexa handoff command/doctor wiring and rerun codexa:handoff, feature:proof, project:report, and harness:benchmark.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-handoff\\latest-codexa-handoff.json",
+              "exists": true,
+              "status": "CODEXA_HANDOFF_READY_WITH_OPEN_GAPS",
+              "expected_status": null,
+              "detail": {
+                "open_gap_count": 1,
+                "critical_gap_count": 0,
+                "first_click": "RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd",
+                "backend_payload_commit": "5a9eb91c7a69db6ef03cbd24afe3074784a8a0bf",
+                "has_codexa_access": true,
+                "has_codexa_remote_proof": true,
+                "has_codexa_watch": true
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "codexa_bringup_watch",
+          "claim": "After the Codexa setup pack is run, Orangebox can watch the real rails and report ready/open-gaps without fake full-green.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run codexa:watch",
+          "acceptance_gate": "Codexa bring-up watcher writes a receipt, preserves no-remote-mutation constraints, records status history, and separates report success from two-machine readiness.",
+          "recovery_path": "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa, then rerun codexa:remote-proof, codexa:watch, codexa:alert, model:inventory, ops:gaps, and ops:green.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-bringup\\latest-codexa-bringup-watch.json",
+              "exists": true,
+              "status": "CODEXA_BRINGUP_READY",
+              "expected_status": null,
+              "detail": {
+                "status": "CODEXA_BRINGUP_READY",
+                "codexa_ready": true,
+                "missing": [],
+                "status_history": [
+                  "CODEXA_READY"
+                ]
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "codexa_access_truth",
+          "claim": "Orangebox can separately prove Codexa command rail, Ollama, RDP, WinRM, SMB, and receipt-dashboard access without attempting login or remote mutation.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run codexa:access",
+          "acceptance_gate": "Codexa access doctor writes a receipt, probes all access surfaces, preserves no-login/no-mutation constraints, and gives the exact next action from observed access.",
+          "recovery_path": "Run RUN_START_HERE_ON_CODEXA_AS_ADMIN.cmd on Codexa or restore RDP/WinRM/8097, then rerun codexa:access, codexa:remote-proof, codexa:watch, and ops:gaps.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-access\\latest-codexa-access.json",
+              "exists": true,
+              "status": "CODEXA_ACCESS_FULL_READY",
+              "expected_status": null,
+              "detail": {
+                "status": "CODEXA_ACCESS_FULL_READY",
+                "command_rail": true,
+                "ollama": true,
+                "rdp": true,
+                "winrm": true,
+                "smb": true,
+                "full_green_blocked": false
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "codexa_remote_runtime_proof",
+          "claim": "Orangebox can prove Codexa loopback-local Ollama, exact model tags, Hermes, Docker, and boot receipts through the command rail without exposing Ollama directly.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run codexa:remote-proof",
+          "acceptance_gate": "Remote runtime proof writes a receipt, uses a read-only command through the token-gated rail, proves all expected model tags, and preserves no-install/no-mutation constraints.",
+          "recovery_path": "If remote proof is not green, restore command rail token/8097 or rerun the OBOX2 setup pack on Codexa, then rerun codexa:remote-proof, model:inventory, trilane:doctor, and ops:gaps.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\codexa-remote-proof\\latest-codexa-remote-runtime-proof.json",
+              "exists": true,
+              "status": "CODEXA_REMOTE_RUNTIME_GREEN",
+              "expected_status": null,
+              "detail": {
+                "status": "CODEXA_REMOTE_RUNTIME_GREEN",
+                "host": "CODEXA",
+                "expected_models": "11/11",
+                "missing_models": [],
+                "hermes_green": true,
+                "docker_containers": 6
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "model_inventory_truth",
+          "claim": "Orangebox separates registered/planned model lanes from actually observed cockpit and Codexa models.",
+          "lane": "backend_ops",
+          "status": "PARTIAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run model:inventory",
+          "acceptance_gate": "Model inventory report is valid, never pulls or calls models, and refuses full local model runtime green until required models are observed.",
+          "recovery_path": "Install the OBOX2 model setup pack on Codexa, restore Ollama reachability, then rerun model:inventory, trilane:doctor, model:lane-eval, health:report, and project:report.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\reports\\models\\latest-model-inventory-report.json",
+              "exists": true,
+              "status": "ORANGEBOX_MODEL_INVENTORY_GREEN",
+              "expected_status": null,
+              "detail": {
+                "status": "ORANGEBOX_MODEL_INVENTORY_GREEN",
+                "required_installed": 10,
+                "required_total": 10,
+                "core_installed": 5,
+                "core_total": 5,
+                "full_local_model_runtime_green": true
+              }
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "trilane_policy",
+          "claim": "Tri-lane model policy exists, but installed model inventory remains explicit.",
+          "lane": "backend_ops",
+          "status": "PARTIAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run trilane:doctor",
+          "acceptance_gate": "Router policy is green; installed core model count is not inflated.",
+          "recovery_path": "Install core models on Codexa, then rerun trilane:doctor and health:report.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\trilane\\latest-trilane-model-router.json",
+              "exists": true,
+              "status": "TRILANE_ROUTER_PACK_GREEN",
+              "expected_status": "TRILANE_ROUTER_PACK_GREEN",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "codexa_two_machine_runtime",
+          "claim": "Codexa/AI Box is part of the intended system, but current reachability blocks full two-machine green.",
+          "lane": "codexa",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run codexa:alert && npm.cmd run health:report",
+          "acceptance_gate": "Codexa command rail, Ollama, and receipts are reachable before full-system green.",
+          "recovery_path": "Run OBOX2 start-here pack on Codexa or restore 8097/RDP/WinRM, then rerun codexa:alert.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\alerts\\codexa-link\\latest-codexa-alert.json",
+              "exists": true,
+              "status": "CODEXA_READY",
+              "expected_status": null,
+              "detail": {
+                "status": "CODEXA_READY",
+                "command_rail_reachable": true,
+                "ollama_reachable": true
+              }
+            },
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\reports\\health\\latest-health-report.json",
+              "exists": true,
+              "status": "ORANGEBOX_HEALTH_DEV_GREEN_AIBOX_WARN",
+              "expected_status": null,
+              "detail": null
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "obox2_setup_pack",
+          "claim": "Codexa setup package is built and verified as a full handoff pack with embedded backend payload, not remotely installed from this chat.",
+          "lane": "codexa",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run obox2:pack && npm.cmd run obox2:doctor",
+          "acceptance_gate": "OBOX2 package doctor is green with setup contracts, backend payload hash proof, backend installer proof, and frontend-not-required metadata.",
+          "recovery_path": "Rebuild the OBOX2 zip and rerun obox2:doctor before using it on Codexa.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\obox2\\latest-package-doctor.json",
+              "exists": true,
+              "status": "OBOX2_PACKAGE_VERIFIED_GREEN",
+              "expected_status": "OBOX2_PACKAGE_VERIFIED_GREEN",
+              "detail": {
+                "backend_payload_commit": "5a9eb91c7a69db6ef03cbd24afe3074784a8a0bf",
+                "backend_payload_ok": true,
+                "frontend_required_for_backend": false
+              }
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "atomsmasher_compression_pack",
+          "claim": "AtomSmasher compression pack is integrated as backend tooling, not as a separate project in this lane.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run atomsmasher:doctor && npm.cmd run atomsmasher:merge-tools",
+          "acceptance_gate": "AtomSmasher integration and backend tool merge receipts are green.",
+          "rollback_path": "Disable newly promoted AtomSmasher tool mappings and rerun atomsmasher:doctor.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\atomsmasher\\latest-atomsmasher-doctor.json",
+              "exists": true,
+              "status": "ATOMSMASHER_ORANGEBOX_INTEGRATION_GREEN",
+              "expected_status": null,
+              "detail": {
+                "features_ok": 620,
+                "schema_version": 10
+              }
+            },
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\atomsmasher\\tool-merge\\latest-tool-merge.json",
+              "exists": true,
+              "status": "ATOMSMASHER_TOOL_MERGE_GREEN",
+              "expected_status": "ATOMSMASHER_TOOL_MERGE_GREEN",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "terminal_obox_badge",
+          "claim": "Operator has an OB0X ON terminal affordance to distinguish Orangebox sessions from ordinary shell/chat work.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run project:report",
+          "acceptance_gate": "PowerShell profile receipt is green and project report mirrors terminal affordance.",
+          "rollback_path": "Run obox-off or restore the profile backup recorded in OrangeBox-Data/profile-backups.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\profile-backups\\orangebox-powershell-profile-policy-20260606T120727.json",
+              "exists": true,
+              "status": "ORANGEBOX_POWERSHELL_PROFILE_ENABLED",
+              "expected_status": "ORANGEBOX_POWERSHELL_PROFILE_ENABLED",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "openclaw_retirement",
+          "claim": "Legacy OpenClaw startup is retired or explicitly not treated as active Orangebox.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run openclaw:retire:dry",
+          "acceptance_gate": "Dry or apply receipt shows OpenClaw startup hooks are not active.",
+          "recovery_path": "Use openclaw:retire with operator intent if startup hooks reappear.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\openclaw-retirement\\latest-openclaw-retirement.json",
+              "exists": true,
+              "status": "OPENCLAW_STARTUP_RETIRED",
+              "expected_status": "OPENCLAW_STARTUP_RETIRED",
+              "detail": null
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "final_package_download",
+          "claim": "Verified backend-only final package exists for Orangebox Version 1 / Orangebox Delta Final.",
+          "lane": "backend_ops",
+          "status": "REAL",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run final:verify && npm.cmd run final:zip",
+          "acceptance_gate": "Final package receipt proves frontend_included=false/frontend_required_for_backend=false, and final Downloads zip receipt proves archive_verified=true.",
+          "rollback_path": "Use the previous verified zip in Downloads or rebuild with final:verify and final:zip.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\package.json",
+              "exists": true,
+              "status": null,
+              "expected_status": null,
+              "detail": {
+                "frontend_included": false,
+                "frontend_required_for_backend": false,
+                "final_verify_script": "bun ./scripts/v4/orangebox-delta-final-packager.mjs --json --receipt --verify-install",
+                "backend_proof_in_progress": true
+              }
+            },
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\downloads\\latest-orangebox-delta-final-download-zip.json",
+              "exists": true,
+              "status": "ORANGEBOX_DELTA_FINAL_DOWNLOAD_ZIP_GREEN",
+              "expected_status": "ORANGEBOX_DELTA_FINAL_DOWNLOAD_ZIP_GREEN",
+              "detail": {
+                "archive_verified": true,
+                "entries": 2269,
+                "zip_path": "C:\\Users\\a\\Downloads\\Orangebox_Delta_Final_VERIFIED_20260607_230429_5a9eb91.zip"
+              }
+            }
+          ],
+          "operator_approval_required": false,
+          "ok": true,
+          "failures": []
+        },
+        {
+          "id": "visual_frontend_lane",
+          "claim": "Visual/frontend is part of Orangebox product outputs, but this Ops lane does not edit it.",
+          "lane": "separate_visual",
+          "status": "SEPARATE_LANE",
+          "frontend_touch_allowed": false,
+          "proof_command": "npm.cmd run project:report",
+          "acceptance_gate": "Project report marks visual/frontend as SEPARATE_LANE.",
+          "recovery_path": "Route visual work to the separate frontend project and keep Ops proof independent.",
+          "evidence": [
+            {
+              "ok": true,
+              "path": "C:\\Users\\a\\OrangeBox-Data\\reports\\project\\latest-project-report.json",
+              "exists": true,
+              "status": "ORANGEBOX_PROJECT_SCOPE_GREEN",
+              "expected_status": null,
+              "detail": {
+                "project_status": "ORANGEBOX_PROJECT_SCOPE_GREEN"
+              }
+            }
+          ],
+          "operator_approval_required": true,
+          "ok": true,
+          "failures": []
+        }
+      ],
+      "failures": [],
+      "constraints": {
+        "frontend_touched": false,
+        "visual_lane_touched": false,
+        "install_attempted": false,
+        "paid_api_attempted": false,
+        "host_mcp_config_mutated": false,
+        "production_deploy_attempted": false,
+        "remote_codexa_mutation_attempted": false
+      },
+      "next_action": "Keep feature:proof in the local Ops green chain before claiming new systems are done.",
+      "receipt_path": "C:\\AtomEons\\orangebox\\finals\\Orangebox Delta Final\\receipts\\orangebox-feature-acceptance-matrix-20260610T034553Z.json"
+    },
+    "model_inventory": null
+  },
+  "rollback": {
+    "v3_repo_changes": "Revert orangebox-v3 files and package scripts before merge if superseded.",
+    "branch": "git checkout main",
+    "ghost_data": "Review or delete C:\\Users\\a\\OrangeBox-Data\\v3 only if the V3 trial is intentionally discarded."
+  }
+}

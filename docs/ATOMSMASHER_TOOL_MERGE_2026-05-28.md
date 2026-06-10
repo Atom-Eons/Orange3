@@ -15,10 +15,10 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 
 ## Tool Surface
 
-- Package scripts scanned: 152
-- Eligible backend tools: 119
-- Excluded visual/product tools: 20
-- Sleeping other tools: 13
+- Package scripts scanned: 196
+- Eligible backend tools: 134
+- Excluded visual/product tools: 24
+- Sleeping other tools: 38
 
 ## Top Eligible Tools
 
@@ -48,7 +48,7 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 - Feature registry: 620
 - Schema version: 10
 - Compile route: cache_answer
-- Saved tokens proxy: 5726
+- Saved tokens proxy: 1904
 - Security scan: clean
 
 ## Outputs

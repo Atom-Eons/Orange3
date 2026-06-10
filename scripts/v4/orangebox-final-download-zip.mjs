@@ -65,7 +65,8 @@ function sha256File(file) {
 }
 
 async function writeJson(file, value) {
-  await fsp.mkdir(path.dirname(file), { recursive: true });
+  const dir = path.dirname(file);
+  if (!exists(dir)) await fsp.mkdir(dir, { recursive: true });
   await fsp.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
@@ -115,7 +116,8 @@ function normalizeEntryName(name) {
 }
 
 async function buildArchive(zipPath) {
-  await fsp.mkdir(path.dirname(zipPath), { recursive: true });
+  const dir = path.dirname(zipPath);
+  if (!exists(dir)) await fsp.mkdir(dir, { recursive: true });
   if (exists(zipPath)) await fsp.rm(zipPath, { force: true });
   if (process.platform !== "win32") {
     throw new Error("final:zip currently expects Windows tar.exe for the local release pack");
