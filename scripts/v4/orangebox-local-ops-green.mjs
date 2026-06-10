@@ -226,6 +226,7 @@ async function main() {
     { script: "v3:api:doctor", timeout: 90_000 },
     { script: "v3:goose:envelope", timeout: 90_000 },
     { script: "v3:goose:runtime", timeout: 90_000 },
+    { script: "v3:goose:ghost-task", timeout: 90_000 },
     { script: "v3:openjarvis:doctor", timeout: 90_000 },
     { script: "v3:mcp:doctor", timeout: 90_000 },
     { script: "v3:api:bakeoff", timeout: 90_000 },
@@ -277,6 +278,7 @@ async function main() {
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
   const horizonReviewPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
   const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
+  const gooseGhostTaskPath = path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json");
   const toolmeshPhysicalPath = path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json");
   const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
@@ -311,6 +313,7 @@ async function main() {
   const assurance = readJson(assurancePath);
   const horizonReview = readJson(horizonReviewPath);
   const horizonBakeoff = readJson(horizonBakeoffPath);
+  const gooseGhostTask = readJson(gooseGhostTaskPath);
   const toolmeshPhysical = readJson(toolmeshPhysicalPath);
   const elysiaLatency = readJson(elysiaLatencyPath);
   const visualReadiness = readJson(visualReadinessPath);
@@ -431,8 +434,18 @@ async function main() {
       waves_total: horizonBakeoff?.summary?.waves_total ?? null,
       promotable_now: horizonBakeoff?.summary?.promotable_now ?? null,
       goose_binary_found: horizonBakeoff?.summary?.goose_binary_found ?? null,
+      goose_bounded_ghost_task_green: horizonBakeoff?.summary?.goose_bounded_ghost_task_green ?? null,
       openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
       visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+    }),
+    gate("goose_bounded_ghost_task_green", gooseGhostTask?.ok === true && gooseGhostTask?.status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN" && gooseGhostTask?.runtime?.command_surfaces_green === true && gooseGhostTask?.evidence?.strongarm?.ok === true && gooseGhostTask?.evidence?.checkmate?.ok === true && gooseGhostTask?.constraints?.live_agent_execution_attempted === false && gooseGhostTask?.constraints?.default_executor_promoted === false, {
+      status: gooseGhostTask?.status || null,
+      provider_configured: gooseGhostTask?.runtime?.provider_configured ?? null,
+      command_surfaces_green: gooseGhostTask?.runtime?.command_surfaces_green ?? null,
+      strongarm_green: gooseGhostTask?.evidence?.strongarm?.ok ?? null,
+      checkmate_green: gooseGhostTask?.evidence?.checkmate?.ok ?? null,
+      live_agent_execution_attempted: gooseGhostTask?.constraints?.live_agent_execution_attempted ?? null,
+      default_executor_promoted: gooseGhostTask?.constraints?.default_executor_promoted ?? null,
     }),
     gate("toolmesh_physical_runtime_green", toolmeshPhysical?.ok === true && toolmeshPhysical?.status === "ORANGEBOX_TOOLMESH_PHYSICAL_RUNTIME_GREEN" && toolmeshPhysical?.checks?.all_cards_physical_valid === true && toolmeshPhysical?.checks?.artifact_pointer_only_all_cards === true && toolmeshPhysical?.checks?.gui_tools_handoff_only === true, {
       status: toolmeshPhysical?.status || null,
@@ -505,6 +518,7 @@ async function main() {
     visual_readiness: visualReadinessPath,
     horizon_review: horizonReviewPath,
     horizon_bakeoff: horizonBakeoffPath,
+    goose_ghost_task: gooseGhostTaskPath,
     toolmesh_physical_runtime: toolmeshPhysicalPath,
     elysia_latency_bakeoff: elysiaLatencyPath,
     signal_hygiene: signalHygienePath,

@@ -1183,6 +1183,61 @@ const tasks = [
     },
   },
   {
+    id: "goose_bounded_ghost_task_truth",
+    category: "alpha_review",
+    oracle: "Goose must prove bounded ghost-task command surfaces and STRONGARM/Checkmate evidence before any live executor promotion.",
+    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
+    run(trace) {
+      const goose = readJson(path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const bakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const failures = [];
+      const featureRow = feature?.matrix?.find((row) => row.id === "goose_bounded_ghost_task_proof");
+      const projectRow = project?.scope?.find((row) => row.area === "Goose bounded ghost-task proof");
+      const gooseCandidate = Array.isArray(bakeoff?.candidates)
+        ? bakeoff.candidates.find((candidate) => candidate.id === "goose_executor")
+        : null;
+
+      if (!packageJson?.scripts?.["v3:goose:ghost-task"]?.includes("orangebox-v3/goose/ghost-task-doctor.ts")) failures.push("Package script v3:goose:ghost-task missing or wrong");
+      if (goose?.status !== "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN" || goose?.ok !== true) failures.push(`Goose ghost task not green: ${goose?.status || "missing"}`);
+      if (goose?.runtime?.command_surfaces_green !== true) failures.push("Goose command surfaces are not green");
+      if (goose?.ghost_task?.ready_for_bounded_live_task_after_provider_config !== true) failures.push("Goose ghost task is not ready after provider config");
+      if (!Object.values(goose?.guards || {}).every(Boolean)) failures.push("Goose ghost-task guards are not all green");
+      if (goose?.evidence?.strongarm?.ok !== true) failures.push("Goose ghost task does not cite green STRONGARM evidence");
+      if (goose?.evidence?.checkmate?.ok !== true) failures.push("Goose ghost task does not cite green Checkmate evidence");
+      if (goose?.constraints?.frontend_touched !== false) failures.push("Goose ghost task touched or failed to prove no frontend touch");
+      if (goose?.constraints?.repo_mutated_by_goose !== false) failures.push("Goose ghost task mutated or failed to prove no repo mutation");
+      if (goose?.constraints?.provider_config_mutated !== false) failures.push("Goose ghost task mutated provider config");
+      if (goose?.constraints?.live_agent_execution_attempted !== false) failures.push("Goose ghost task attempted live agent execution");
+      if (goose?.constraints?.default_executor_promoted !== false) failures.push("Goose ghost task promoted default executor");
+      if (goose?.promotion?.promotable_now !== false) failures.push("Goose ghost task made itself promotable");
+      if (featureRow?.ok !== true) failures.push("Feature matrix does not prove goose_bounded_ghost_task_proof");
+      if (projectRow?.status !== "REAL") failures.push("Project report does not list Goose bounded ghost-task proof as REAL");
+      if (bakeoff?.summary?.goose_bounded_ghost_task_green !== true) failures.push("Horizon bakeoff does not mirror bounded ghost-task green");
+      if (!gooseCandidate?.proofs?.some((proof) => proof.id === "goose_bounded_ghost_task" && proof.ok === true)) failures.push("Goose candidate lacks bounded ghost-task proof");
+      if (!gooseCandidate?.blockers?.some((blocker) => /provider\/model|true live Goose task/i.test(blocker))) failures.push("Goose candidate does not keep provider/live-task promotion blocker");
+
+      return failures.length
+        ? failTask("goose_bounded_ghost_task_truth", failures, {
+          status: goose?.status || null,
+          feature_row_ok: featureRow?.ok ?? null,
+          project_row_status: projectRow?.status || null,
+          horizon_summary_green: bakeoff?.summary?.goose_bounded_ghost_task_green ?? null,
+        })
+        : okTask("goose_bounded_ghost_task_truth", {
+          status: goose.status,
+          command_surfaces_green: goose.runtime.command_surfaces_green,
+          strongarm_green: goose.evidence.strongarm.ok,
+          checkmate_green: goose.evidence.checkmate.ok,
+          live_agent_execution_attempted: goose.constraints.live_agent_execution_attempted,
+          default_executor_promoted: goose.constraints.default_executor_promoted,
+          feature_row: "goose_bounded_ghost_task_proof",
+        });
+    },
+  },
+  {
     id: "elysia_rail_latency_bakeoff_truth",
     category: "alpha_review",
     oracle: "The Bun/Elysia rail candidate must have a measured sidecar latency bakeoff before default transport promotion.",

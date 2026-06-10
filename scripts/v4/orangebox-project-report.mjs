@@ -183,6 +183,7 @@ async function main() {
   const horizonReview = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json")) || readJson(latestReceipt("orangebox-horizon-review-"));
   const horizonBakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json")) || readJson(latestReceipt("orangebox-horizon-promotion-bakeoff-"));
   const gooseRuntime = readJson(path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json")) || readJson(latestReceipt("orangebox-v3-goose-runtime-doctor-", path.join(dataRoot, "v3", "receipts")));
+  const gooseGhostTask = readJson(path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json")) || readJson(latestReceipt("orangebox-v3-goose-ghost-task-doctor-", path.join(dataRoot, "v3", "receipts")));
   const openJarvisEval = readJson(path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json")) || readJson(latestReceipt("orangebox-v3-openjarvis-eval-doctor-", path.join(dataRoot, "v3", "receipts")));
   const elysiaLatency = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json")) || readJson(latestReceipt("orangebox-elysia-rail-latency-bakeoff-"));
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
@@ -335,6 +336,14 @@ async function main() {
     gooseRuntime?.runtime?.run_surface_ready === true &&
     gooseRuntime?.ghost_task?.ready_for_bounded_live_task === true &&
     gooseRuntime?.constraints?.default_executor_promoted === false;
+  const gooseGhostTaskReady =
+    gooseGhostTask?.ok === true &&
+    gooseGhostTask?.status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN" &&
+    gooseGhostTask?.runtime?.command_surfaces_green === true &&
+    gooseGhostTask?.evidence?.strongarm?.ok === true &&
+    gooseGhostTask?.evidence?.checkmate?.ok === true &&
+    gooseGhostTask?.constraints?.live_agent_execution_attempted === false &&
+    gooseGhostTask?.constraints?.default_executor_promoted === false;
   const openJarvisEvalGreen =
     openJarvisEval?.ok === true &&
     openJarvisEval?.status === "OPENJARVIS_EVAL_HARNESS_BASELINE_GREEN" &&
@@ -616,6 +625,16 @@ async function main() {
       next: gooseRuntimeReady
         ? "Use Goose only inside the ghost-worktree envelope after an approved provider/model rail is configured and one STRONGARM/Checkmate task proves it beats the current executor."
         : "Run npm.cmd run v3:goose:runtime and fix the exact missing binary, command surface, or guard proof.",
+    },
+    {
+      area: "Goose bounded ghost-task proof",
+      status: status(gooseGhostTaskReady, exists(path.join(repoRoot, "orangebox-v3", "goose", "ghost-task-doctor.ts"))),
+      reality: gooseGhostTaskReady
+        ? `Goose bounded ghost task is green: command_surfaces=${Boolean(gooseGhostTask?.runtime?.command_surfaces_green)}, strongarm=${Boolean(gooseGhostTask?.evidence?.strongarm?.ok)}, checkmate=${Boolean(gooseGhostTask?.evidence?.checkmate?.ok)}, live_agent_execution_attempted=${Boolean(gooseGhostTask?.constraints?.live_agent_execution_attempted)}, default_executor_promoted=${Boolean(gooseGhostTask?.constraints?.default_executor_promoted)}.`
+        : "Goose ghost-task source exists or is planned, but no current bounded ghost-task receipt proves guarded command surfaces plus STRONGARM/Checkmate evidence yet.",
+      next: gooseGhostTaskReady
+        ? "Keep Goose gated; the next promotion proof requires approved provider/model configuration and one true live task in the ghost root with diff, rollback, STRONGARM, Checkmate, and operator approval."
+        : "Run npm.cmd run v3:goose:runtime && npm.cmd run v3:goose:ghost-task and fix missing command surface, guard, STRONGARM, or Checkmate evidence.",
     },
     {
       area: "Bun/Elysia rail latency bakeoff",
@@ -968,6 +987,7 @@ async function main() {
         horizon_review: packageScript("horizon:review", packageJson),
         horizon_bakeoff: packageScript("horizon:bakeoff", packageJson),
         goose_runtime: packageScript("v3:goose:runtime", packageJson),
+        goose_ghost_task: packageScript("v3:goose:ghost-task", packageJson),
         toolmesh_physical_doctor: packageScript("toolmesh:physical-doctor", packageJson),
         elysia_latency_bakeoff: packageScript("v3:api:bakeoff", packageJson),
         visual_readiness: packageScript("visual:readiness", packageJson),
@@ -1287,6 +1307,8 @@ async function main() {
         goose_runtime_status: horizonBakeoff?.summary?.goose_runtime_status ?? null,
         goose_provider_configured: horizonBakeoff?.summary?.goose_provider_configured ?? null,
         goose_ghost_task_ready: horizonBakeoff?.summary?.goose_ghost_task_ready ?? null,
+        goose_bounded_ghost_task_green: horizonBakeoff?.summary?.goose_bounded_ghost_task_green ?? null,
+        goose_live_agent_execution_attempted: horizonBakeoff?.summary?.goose_live_agent_execution_attempted ?? null,
         openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
         openjarvis_baseline_score: horizonBakeoff?.summary?.openjarvis_baseline_score ?? null,
         openjarvis_primitive_coverage_score: horizonBakeoff?.summary?.openjarvis_primitive_coverage_score ?? null,
@@ -1316,6 +1338,16 @@ async function main() {
         ghost_task_ready: gooseRuntime?.ghost_task?.ready_for_bounded_live_task ?? null,
         default_executor_promoted: gooseRuntime?.constraints?.default_executor_promoted ?? null,
         live_agent_execution_attempted: gooseRuntime?.constraints?.live_agent_execution_attempted ?? null,
+      },
+      goose_ghost_task: {
+        path: path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json"),
+        status: gooseGhostTask?.status || null,
+        command_surfaces_green: gooseGhostTask?.runtime?.command_surfaces_green ?? null,
+        provider_configured: gooseGhostTask?.runtime?.provider_configured ?? null,
+        strongarm_green: gooseGhostTask?.evidence?.strongarm?.ok ?? null,
+        checkmate_green: gooseGhostTask?.evidence?.checkmate?.ok ?? null,
+        live_agent_execution_attempted: gooseGhostTask?.constraints?.live_agent_execution_attempted ?? null,
+        default_executor_promoted: gooseGhostTask?.constraints?.default_executor_promoted ?? null,
       },
       elysia_latency_bakeoff: {
         path: elysiaLatency?.latest_path || path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json"),

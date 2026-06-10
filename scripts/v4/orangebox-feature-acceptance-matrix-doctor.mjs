@@ -715,6 +715,44 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "goose_bounded_ghost_task_proof",
+      claim: "Goose proves a bounded ghost task with safe command surfaces, path/command guards, STRONGARM evidence, Checkmate evidence, and no live execution or default promotion.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run v3:goose:runtime && npm.cmd run v3:goose:ghost-task && npm.cmd run horizon:bakeoff",
+      acceptance_gate: "Goose ghost-task receipt is green, command surfaces are green, guard probes pass, STRONGARM and Checkmate evidence are green, and live/default execution remain false.",
+      rollback_path: "Remove v3:goose:ghost-task script wiring and generated Goose ghost-task data; rerun horizon:bakeoff, feature:proof, project:report, harness:benchmark, and ops:green.",
+      evidence: [
+        evidence(path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json"), "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN", {
+          accept: (parsed, status) => status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN"
+            && parsed?.ok === true
+            && parsed?.runtime?.command_surfaces_green === true
+            && parsed?.ghost_task?.ready_for_bounded_live_task_after_provider_config === true
+            && Object.values(parsed?.guards || {}).every(Boolean)
+            && parsed?.evidence?.strongarm?.ok === true
+            && parsed?.evidence?.checkmate?.ok === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.repo_mutated_by_goose === false
+            && parsed?.constraints?.provider_config_mutated === false
+            && parsed?.constraints?.live_agent_execution_attempted === false
+            && parsed?.constraints?.default_executor_promoted === false
+            && parsed?.promotion?.promotable_now === false,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            version: parsed?.runtime?.version || null,
+            provider_configured: parsed?.runtime?.provider_configured ?? null,
+            command_surfaces_green: parsed?.runtime?.command_surfaces_green ?? null,
+            strongarm_green: parsed?.evidence?.strongarm?.ok ?? null,
+            checkmate_green: parsed?.evidence?.checkmate?.ok ?? null,
+            live_agent_execution_attempted: parsed?.constraints?.live_agent_execution_attempted ?? null,
+            default_executor_promoted: parsed?.constraints?.default_executor_promoted ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "elysia_rail_latency_bakeoff",
       claim: "The Bun/Elysia API bridge is benchmarked as a temporary sidecar against the current live rails before any default transport switch.",
       lane: "backend_ops",

@@ -157,6 +157,7 @@ async function main() {
   const headlessAudioPath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-audio", "latest-headless-audio-runtime.json");
   const headlessAnimationPath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-animation", "latest-headless-animation-runtime.json");
   const gooseRuntimePath = path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json");
+  const gooseGhostTaskPath = path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json");
   const openJarvisEvalPath = path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json");
   const toolmeshPath = path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json");
   const projectPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
@@ -169,6 +170,7 @@ async function main() {
   const headlessAudio = readJson(headlessAudioPath, null);
   const headlessAnimation = readJson(headlessAnimationPath, null);
   const gooseRuntime = readJson(gooseRuntimePath, null);
+  const gooseGhostTask = readJson(gooseGhostTaskPath, null);
   const openJarvisEval = readJson(openJarvisEvalPath, null);
   const toolmesh = readJson(toolmeshPath, null);
   const project = readJson(projectPath, null);
@@ -179,6 +181,7 @@ async function main() {
     elysiaLatency: receiptEvidence(elysiaLatencyPath),
     goose: receiptEvidence(latestV3Receipt("goose-envelope")),
     gooseRuntime: receiptEvidence(latestV3Receipt("goose-runtime-doctor")),
+    gooseGhostTask: receiptEvidence(gooseGhostTaskPath),
     openjarvis: receiptEvidence(latestV3Receipt("openjarvis-eval-doctor")),
     openjarvisLatest: receiptEvidence(openJarvisEvalPath),
     context7: receiptEvidence(latestV3Receipt("mcp-context7-docs-lane")),
@@ -250,9 +253,13 @@ async function main() {
     candidate({
       id: "goose_executor",
       wave: "wave_1_hands_executor_bakeoff",
-      status: binaries.goose.found ? "RUNTIME_FOUND_ENVELOPE_READY_NEEDS_GHOST_TASK" : "ENVELOPE_READY_RUNTIME_MISSING",
+      status: gooseGhostTask?.status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN"
+        ? "RUNTIME_FOUND_BOUNDED_GHOST_TASK_GREEN_PROVIDER_GATED"
+        : binaries.goose.found
+          ? "RUNTIME_FOUND_ENVELOPE_READY_NEEDS_GHOST_TASK"
+          : "ENVELOPE_READY_RUNTIME_MISSING",
       current_role: "Possible executor hands behind ghost worktree/path/command/receipt envelope.",
-      next_proof_command: "npm.cmd run v3:goose:envelope && npm.cmd run v3:goose:runtime",
+      next_proof_command: "npm.cmd run v3:goose:envelope && npm.cmd run v3:goose:runtime && npm.cmd run v3:goose:ghost-task",
       proofs: [
         { id: "toolmesh_card", ok: Boolean(card(cards, "goose")), detail: card(cards, "goose")?.lab || null },
         { id: "goose_envelope_receipt", ok: receipts.goose.ok, detail: receipts.goose.status },
@@ -260,13 +267,16 @@ async function main() {
         { id: "goose_runtime_receipt", ok: receipts.gooseRuntime.ok, detail: receipts.gooseRuntime.status },
         { id: "goose_run_surface", ok: gooseRuntime?.runtime?.run_surface_ready === true, detail: gooseRuntime?.runtime?.version || null },
         { id: "goose_ghost_guards", ok: gooseRuntime?.ghost_task?.ready_for_bounded_live_task === true, detail: gooseRuntime?.ghost_task?.path || null },
+        { id: "goose_bounded_ghost_task", ok: gooseGhostTask?.status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN", detail: gooseGhostTask?.ghost_task?.task_path || null },
+        { id: "goose_strongarm_checkmate_evidence", ok: gooseGhostTask?.evidence?.strongarm?.ok === true && gooseGhostTask?.evidence?.checkmate?.ok === true, detail: gooseGhostTask?.status || null },
       ],
       blockers: [
         binaries.goose.found ? null : "Goose binary is not proven on this machine.",
         receipts.goose.ok ? null : "Goose envelope receipt is missing.",
         receipts.gooseRuntime.ok ? null : "Goose runtime doctor receipt is missing.",
         gooseRuntime?.runtime?.provider_configured === true ? null : "Goose provider/model is not configured through an Orangebox-approved rail.",
-        "Needs one bounded ghost-worktree task with STRONGARM/Checkmate receipts before execution promotion.",
+        gooseGhostTask?.status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN" ? null : "Needs one bounded ghost-worktree task with STRONGARM/Checkmate receipts before execution promotion.",
+        "Needs one true live Goose task after approved provider/model configuration before execution promotion.",
       ],
       intentional_non_promotion: true,
     }),
@@ -456,6 +466,7 @@ async function main() {
       horizon_review: horizonPath,
       elysia_latency_bakeoff: elysiaLatencyPath,
       goose_runtime: gooseRuntimePath,
+      goose_ghost_task: gooseGhostTaskPath,
       openjarvis_eval: openJarvisEvalPath,
       headless_design_runtime: headlessDesignPath,
       headless_audio_runtime: headlessAudioPath,
@@ -485,6 +496,8 @@ async function main() {
       goose_runtime_status: gooseRuntime?.status || null,
       goose_provider_configured: gooseRuntime?.runtime?.provider_configured ?? null,
       goose_ghost_task_ready: gooseRuntime?.ghost_task?.ready_for_bounded_live_task ?? null,
+      goose_bounded_ghost_task_green: gooseGhostTask?.status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN",
+      goose_live_agent_execution_attempted: gooseGhostTask?.constraints?.live_agent_execution_attempted ?? null,
       openjarvis_baseline_score: openJarvisEval?.comparison?.baseline_score ?? null,
       openjarvis_primitive_coverage_score: openJarvisEval?.comparison?.primitive_coverage_score ?? null,
       openjarvis_runtime_installed: openJarvisEval?.runtime_truth?.openjarvis_runtime_installed ?? null,

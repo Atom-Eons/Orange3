@@ -149,6 +149,7 @@
     "v3:forge:predict": "bun ./orangebox-v3/forge/predict-next-actions.ts",
     "v3:goose:envelope": "bun ./orangebox-v3/goose/goose-envelope.ts",
     "v3:goose:runtime": "bun ./orangebox-v3/goose/runtime-doctor.ts",
+    "v3:goose:ghost-task": "bun ./orangebox-v3/goose/ghost-task-doctor.ts",
     "v3:openjarvis:doctor": "bun ./orangebox-v3/openjarvis/eval-runner.ts",
     "v3:gpu:doctor": "bun ./orangebox-v3/gpu/gpu-budget.ts",
     "v3:theater:manifest": "bun ./orangebox-v3/theater/theater-manifest.ts",
