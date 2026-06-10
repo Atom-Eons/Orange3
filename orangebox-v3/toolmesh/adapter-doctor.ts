@@ -38,7 +38,7 @@ type BinaryProbe = {
 async function probeBinaries(id: string, names: string[] = []): Promise<BinaryProbe> {
   for (const name of names) {
     const result = await run("where.exe", [name], { timeoutMs: 3000 });
-    if (result.code === 0) {
+    if (result.exit_code === 0) {
       return { id, binaryNames: names, installed: true, firstFound: name };
     }
   }

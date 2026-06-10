@@ -113,6 +113,10 @@ function main() {
   const checkmate = readJson(checkmatePath);
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
   const assurance = readJson(assurancePath);
+  const horizonReviewPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
+  const horizonReview = readJson(horizonReviewPath);
+  const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
+  const visualReadiness = readJson(visualReadinessPath);
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const signalHygiene = readJson(signalHygienePath);
   const doerWatcherPath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
@@ -259,6 +263,26 @@ function main() {
       checks_green: assurance?.summary?.checks_green ?? null,
       checks_total: assurance?.summary?.checks_total ?? null,
       note: "Proves research-derived upgrade ideas become scoped backend playbooks, gates, receipts, and rollback proof before promotion.",
+    },
+    horizon_review: {
+      ok: horizonReview?.ok === true && horizonReview?.status === "ORANGEBOX_HORIZON_REVIEW_READY",
+      path: horizonReviewPath,
+      status: horizonReview?.status || null,
+      candidates_reviewed: horizonReview?.summary?.candidates_reviewed ?? null,
+      active_contracts: horizonReview?.summary?.active_contracts ?? null,
+      elysia_dependency_present: horizonReview?.summary?.elysia_dependency_present ?? null,
+      goose_card_present: horizonReview?.summary?.goose_card_present ?? null,
+      note: "Reviews OpenJarvis/OBOX Jarvis, Goose, Context7, Elysia, AI SDK/Ollama, libSQL, Mastra, and GPU acceleration candidates without auto-promoting them.",
+    },
+    visual_production_readiness: {
+      ok: visualReadiness?.ok === true && visualReadiness?.control_plane_green === true,
+      path: visualReadinessPath,
+      status: visualReadiness?.status || null,
+      visual_ready: visualReadiness?.visual_ready ?? null,
+      control_plane_green: visualReadiness?.control_plane_green ?? null,
+      runtime_ready_lanes: visualReadiness?.summary?.runtime_ready_lanes ?? null,
+      visual_tool_cards: visualReadiness?.summary?.visual_tool_cards ?? null,
+      note: "Reports visual/media/design runtime truth. It may be green as a readiness doctor while visual_ready remains false until runtime tools are promoted.",
     },
     operator_signal_hygiene: {
       ok: signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",

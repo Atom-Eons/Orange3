@@ -179,6 +179,8 @@ async function main() {
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
   const toolmesh = readJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"));
+  const horizonReview = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json")) || readJson(latestReceipt("orangebox-horizon-review-"));
+  const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
   const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
   const doerWatcherSpine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(latestReceipt("orangebox-doer-watcher-spine-"));
@@ -294,6 +296,11 @@ async function main() {
     toolmesh?.checks?.immutable_templates_for_workflow_tools === true &&
     toolmesh?.waveValidation?.preservedV3Count === 16 &&
     toolmesh?.waveValidation?.toolmeshCount === 10;
+  const horizonReviewReady = horizonReview?.status === "ORANGEBOX_HORIZON_REVIEW_READY" && horizonReview?.ok === true;
+  const visualReadinessReported =
+    visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" ||
+    visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY";
+  const visualReadinessDoctorGreen = visualReadinessReported && visualReadiness?.ok === true && visualReadiness?.control_plane_green === true;
   const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const evalIntegrityGreen = checkmateEvalGreen
     && Array.isArray(checkmateEval?.fixtures)
@@ -418,6 +425,26 @@ async function main() {
       next: toolmeshGreen
         ? "Use lab doctors and benchmark gates before installing, executing, or promoting candidate tools."
         : "Run npm.cmd run toolmesh:doctor and fix the exact registry/card/wave failure.",
+    },
+    {
+      area: "Visual production readiness",
+      status: status(visualReadinessDoctorGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-visual-production-readiness-doctor.mjs"))),
+      reality: visualReadinessDoctorGreen
+        ? `Visual production control plane is reported: ${visualReadiness?.summary?.visual_tool_cards || 0} visual/media/design cards, ${visualReadiness?.summary?.control_green_lanes || 0}/4 lanes control-green, ${visualReadiness?.summary?.runtime_ready_lanes || 0}/4 runtime-ready, visual_ready=${Boolean(visualReadiness?.visual_ready)}.`
+        : "Visual production readiness doctor source exists or is planned, but no current readiness receipt is available yet.",
+      next: visualReadinessDoctorGreen
+        ? "Do not call visual runtime ready until artifact vault, sample generation receipts, hardware locks, and promotion gates are green."
+        : "Run npm.cmd run visual:readiness so visual/media/design runtime truth is visible in Ops reports.",
+    },
+    {
+      area: "Horizon review / new alpha stack",
+      status: status(horizonReviewReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-horizon-review-doctor.mjs"))),
+      reality: horizonReviewReady
+        ? `Horizon review is current: ${horizonReview?.summary?.candidates_reviewed || 0} candidates reviewed, Elysia dependency=${Boolean(horizonReview?.summary?.elysia_dependency_present)}, Goose card=${Boolean(horizonReview?.summary?.goose_card_present)}; no candidate auto-promoted.`
+        : "Horizon review source exists or is planned, but no current review receipt is green yet.",
+      next: horizonReviewReady
+        ? "Use horizon:review before adopting OpenJarvis/OBOX Jarvis, Goose, Context7, AI SDK/Ollama, libSQL, Mastra, or GPU acceleration candidates."
+        : "Run npm.cmd run horizon:review and fix missing candidate evidence.",
     },
     {
       area: "CHECKMATE eval lane",
@@ -757,6 +784,8 @@ async function main() {
         obox2_pack: packageScript("obox2:pack", packageJson),
         obox2_doctor: packageScript("obox2:doctor", packageJson),
         research_radar: packageScript("research:radar", packageJson),
+        horizon_review: packageScript("horizon:review", packageJson),
+        visual_readiness: packageScript("visual:readiness", packageJson),
         assurance_doctor: packageScript("assurance:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
         tool_ergonomics: packageScript("tool:ergonomics", packageJson),

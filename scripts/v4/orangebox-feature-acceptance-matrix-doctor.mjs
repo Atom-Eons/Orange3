@@ -320,6 +320,60 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "visual_production_readiness",
+      claim: "Orangebox reports visual/media/design runtime truth without touching the living frontend dashboard or mistaking candidate tool cards for promoted tools.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run visual:readiness",
+      acceptance_gate: "Visual readiness receipt is present, control_plane_green=true, visual_tool_cards >= 19, and visual_ready remains explicit.",
+      rollback_path: "Remove the visual readiness package script and doctor, then rerun package-script-doctor and feature:proof.",
+      evidence: [
+        evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED", {
+          accept: (parsed, status) => (
+            status === "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" ||
+            status === "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY"
+          ) && parsed?.ok === true
+            && parsed?.control_plane_green === true
+            && Number(parsed?.summary?.visual_tool_cards || 0) >= 19
+            && typeof parsed?.visual_ready === "boolean",
+          detail: (parsed) => ({
+            visual_ready: parsed?.visual_ready ?? null,
+            control_plane_green: parsed?.control_plane_green ?? null,
+            runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
+            visual_tool_cards: parsed?.summary?.visual_tool_cards ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "horizon_review_new_alpha_stack",
+      claim: "Orangebox reviews OBOX Jarvis/OpenJarvis, Goose, Context7, Elysia, AI SDK/Ollama, libSQL, Mastra, and GPU acceleration candidates before promotion.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run horizon:review",
+      acceptance_gate: "Horizon review receipt is green with at least 8 candidates, Elysia dependency truth, Goose card truth, and no auto-promotion.",
+      rollback_path: "Remove the horizon review package script and doctor, then rerun package-script-doctor and feature:proof.",
+      evidence: [
+        evidence(path.join(dataRoot, "horizon-review", "latest-horizon-review.json"), "ORANGEBOX_HORIZON_REVIEW_READY", {
+          accept: (parsed, status) => status === "ORANGEBOX_HORIZON_REVIEW_READY"
+            && parsed?.ok === true
+            && Number(parsed?.summary?.candidates_reviewed || 0) >= 8
+            && parsed?.summary?.elysia_dependency_present === true
+            && parsed?.summary?.goose_card_present === true,
+          detail: (parsed) => ({
+            candidates_reviewed: parsed?.summary?.candidates_reviewed ?? null,
+            active_contracts: parsed?.summary?.active_contracts ?? null,
+            elysia_dependency_present: parsed?.summary?.elysia_dependency_present ?? null,
+            goose_card_present: parsed?.summary?.goose_card_present ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "checkmate_eval_lane",
       claim: "Prompt/model/routing/tool changes are gated by deterministic CHECKMATE eval fixtures.",
       lane: "backend_ops",

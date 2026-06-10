@@ -42,6 +42,8 @@
     "knowledge:improvements": "bun ./scripts/v4/orangebox-knowledge-improvement-queue.mjs --json --receipt",
     "research:scout": "bun ./scripts/v4/orangebox-external-research-scout.mjs --json --receipt",
     "research:radar": "bun ./scripts/v4/orangebox-research-radar.mjs --json --receipt",
+    "horizon:review": "bun ./scripts/v4/orangebox-horizon-review-doctor.mjs --json --receipt",
+    "visual:readiness": "bun ./scripts/v4/orangebox-visual-production-readiness-doctor.mjs --json --receipt",
     "assurance:doctor": "bun ./scripts/v4/orangebox-assurance-lab-doctor.mjs --json --receipt",
     "tool:ergonomics": "bun ./scripts/v4/orangebox-tool-ergonomics-doctor.mjs --json --receipt",
     "checkmate:doctor": "bun ./scripts/v4/checkmate-eval-lane-doctor.mjs --json --receipt",
