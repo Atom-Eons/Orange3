@@ -356,27 +356,32 @@ async function main() {
     }),
     matrixRow({
       id: "horizon_review_new_alpha_stack",
-      claim: "Orangebox reviews OBOX Jarvis/OpenJarvis, Goose, Context7, Elysia, LittleOrange/Cortex, AI SDK/Ollama, libSQL, Mastra, and GPU acceleration candidates before promotion.",
+      claim: "Orangebox reviews OBOX Jarvis/OpenJarvis, Goose, Context7, Elysia, Hermes/OpenClaw, Void/LittleOrange, Continue, AI SDK/Ollama, libSQL, Mastra, visual runtimes, and GPU acceleration candidates before promotion.",
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run horizon:review",
-      acceptance_gate: "Horizon review receipt is green with at least 9 candidates, Elysia dependency truth, Goose card truth, LittleOrange doctor truth, and no auto-promotion.",
+      acceptance_gate: "Horizon review receipt is green with at least 13 candidates, Elysia dependency truth, Goose card truth, Hermes/OpenClaw truth, LittleOrange doctor truth, visual artifact pipeline truth, and no auto-promotion.",
       rollback_path: "Remove the horizon review package script and doctor, then rerun package-script-doctor and feature:proof.",
       evidence: [
         evidence(path.join(dataRoot, "horizon-review", "latest-horizon-review.json"), "ORANGEBOX_HORIZON_REVIEW_READY", {
           accept: (parsed, status) => status === "ORANGEBOX_HORIZON_REVIEW_READY"
             && parsed?.ok === true
-            && Number(parsed?.summary?.candidates_reviewed || 0) >= 9
+            && Number(parsed?.summary?.candidates_reviewed || 0) >= 13
             && parsed?.summary?.elysia_dependency_present === true
             && parsed?.summary?.goose_card_present === true
+            && typeof parsed?.summary?.hermes_pack_present === "boolean"
+            && typeof parsed?.summary?.openclaw_retired === "boolean"
             && parsed?.summary?.littleorange_doctor_present === true,
           detail: (parsed) => ({
             candidates_reviewed: parsed?.summary?.candidates_reviewed ?? null,
             active_contracts: parsed?.summary?.active_contracts ?? null,
             elysia_dependency_present: parsed?.summary?.elysia_dependency_present ?? null,
             goose_card_present: parsed?.summary?.goose_card_present ?? null,
+            hermes_pack_present: parsed?.summary?.hermes_pack_present ?? null,
+            openclaw_retired: parsed?.summary?.openclaw_retired ?? null,
             littleorange_doctor_present: parsed?.summary?.littleorange_doctor_present ?? null,
+            visual_artifact_pipeline_ready: parsed?.summary?.visual_artifact_pipeline_ready ?? null,
           }),
         }),
       ],

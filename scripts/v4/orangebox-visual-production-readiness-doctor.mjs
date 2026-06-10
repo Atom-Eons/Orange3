@@ -132,6 +132,7 @@ async function main() {
       "This Ops lane may prove visual production readiness without editing the living frontend/dashboard.",
       "Tool cards are not execution permission.",
       "A visual tool is real only after install proof, sample artifact receipt, hardware lock, rollback path, and promotion gate.",
+      "Visual-ready in Ops means routes, artifact vaults, locks, receipts, rollback, and truth reporting are ready; it does not mean the separate living frontend has been edited here.",
     ],
     source_files: {
       tool_cards: cardsFile,
@@ -170,6 +171,42 @@ async function main() {
       artifactSmokeReady ? null : "No deterministic visual artifact smoke receipt is present in this doctor.",
       "No promoted AI generator sample receipt proves a real generated image/video/design/audio artifact yet.",
     ].filter(Boolean),
+    readiness_levels: {
+      control_plane: allControlGreen,
+      artifact_pipeline: artifactVaultReady && artifactSmokeReady,
+      ai_runtime_promoted: allRuntimeReady,
+      separate_frontend_release: "separate_visual_lane",
+    },
+    recommended_promotion_order: [
+      {
+        rank: 1,
+        lane: "image-lab",
+        first_runtime: "ComfyUI + one baseline local model",
+        why: "Lowest blast radius for proving prompt -> artifact pointer -> hash -> preview -> rollback.",
+        pass_gate: "Install proof, immutable template, one sample image artifact receipt, GPU lock, timeout, cleanup policy.",
+      },
+      {
+        rank: 2,
+        lane: "design-lab",
+        first_runtime: "Inkscape or Blender headless/export path before GUI automation",
+        why: "Design/export can prove deterministic files without relying on fragile GUI control.",
+        pass_gate: "Install proof, sample export receipt, artifact pointer, rollback, no repo mutation.",
+      },
+      {
+        rank: 3,
+        lane: "audio-lab",
+        first_runtime: "Whisper transcription",
+        why: "CPU-friendly and easy to verify with a short known sample.",
+        pass_gate: "Install proof, sample transcript receipt, output hash, privacy boundary.",
+      },
+      {
+        rank: 4,
+        lane: "video-lab",
+        first_runtime: "OBS capture or Kdenlive/ffmpeg export before generative video",
+        why: "Video generation is heavier; start with proof capture/export before Wan/LTX.",
+        pass_gate: "Install proof, short clip artifact receipt, GPU/media lock, LLM unload policy, timeout, cleanup.",
+      },
+    ],
     next_waves: [
       {
         wave: "V0 truth hardening",

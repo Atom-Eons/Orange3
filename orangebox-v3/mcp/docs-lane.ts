@@ -9,6 +9,17 @@ export async function docsLaneDoctor() {
     forbidden_initial_tools: ["arbitrary shell", "repo mutation", "write tools", "secrets access"],
     promoted_by_default: false,
     proof_required: ["MCP quarantine doctor", "output cap", "localhost binding or approved connector", "receipt"],
+    context7_contract: {
+      role: "fresh versioned documentation hydration for coding tasks",
+      accepted_modes: ["CLI + skill", "MCP server"],
+      authority_limit: "Context7 may provide source pointers and docs snippets; it cannot mutate the repo, run shell commands, or decide routes.",
+      promotion_blockers: [
+        "API-key/rate-limit behavior must be explicit",
+        "Output caps must prevent context flooding",
+        "Every hydrated doc packet needs source metadata",
+        "MCP quarantine must remain green",
+      ],
+    },
   };
   const receipt = await writeReceipt("mcp-context7-docs-lane", report);
   return { ...report, receipt_path: receipt.receipt_path };

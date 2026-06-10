@@ -61,3 +61,14 @@ Alpha. Watchlist
 ## Current Status
 
 Initialized with feature flags and proof-first implementation lanes. V2 remains the working baseline while V3 features prove parity behind flags. ToolMesh Y0 is active as a registry and doctor layer; Y1-Y9 labs remain scoped behind promotion gates.
+
+## Horizon Truth
+
+- OBOX Jarvis/OpenJarvis is an efficiency/spec-eval candidate, not the active router. Its useful idea is decomposing local AI into measurable primitives: model, engine, agents, tools/memory, and learning.
+- Goose is a candidate executor/hands layer only. It must run inside ghost-worktree, path, command, STRONGARM/Checkmate, receipt, and rollback envelopes before it can touch real work.
+- Hermes Agent is the preferred optional outer personal-agent candidate over legacy OpenClaw, but it cannot become hidden authority. Orangebox/TriLane/STRONGARM/Judgement/receipts remain the authority chain.
+- OpenClaw is retirement/recovery only. If it appears on startup, retire it surgically and keep rollback receipts.
+- Context7 is a read-only docs hydration candidate. It must stay output-capped and MCP-quarantined.
+- Void is a reference architecture for open-source AI IDE patterns; LittleOrange remains the Orangebox surface path unless the separate visual lane explicitly chooses a fork migration.
+- Continue is a coding-lab candidate for source-controlled AI checks, not a Checkmate replacement until it wins a bakeoff.
+- Visual runtime readiness is a staged Ops truth: control plane, artifact vault, deterministic smoke artifact, then one promoted runtime at a time. AI media/design/video/audio tools are not real until sample artifact receipts prove them.

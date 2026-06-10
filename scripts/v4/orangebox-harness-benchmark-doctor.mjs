@@ -878,18 +878,23 @@ const tasks = [
         "bun_elysia_api_bridge",
         "goose_executor",
         "openjarvis_eval",
+        "hermes_agent_outer_orchestration",
+        "openclaw_retired_path",
         "context7_mcp_docs_lane",
         "ai_sdk_ollama_transport",
         "littleorange_cortex_surface",
+        "void_editor_reference",
+        "continue_ai_checks",
         "libsql_vector_memory",
         "mastra_agent_framework",
         "tilelang_tilekernels_dflash",
+        "visual_runtime_toolmesh",
       ];
       const featureRow = feature?.matrix?.find((row) => row.id === "horizon_review_new_alpha_stack");
       const projectRow = project?.scope?.find((row) => row.area === "Horizon review / new alpha stack");
       if (!packageJson?.scripts?.["horizon:review"]?.includes("orangebox-horizon-review-doctor.mjs")) failures.push("Package script horizon:review missing or wrong");
       if (horizon?.status !== "ORANGEBOX_HORIZON_REVIEW_READY" || horizon?.ok !== true) failures.push(`Horizon review not green: ${horizon?.status || "missing"}`);
-      if ((horizon?.summary?.candidates_reviewed || 0) < 8) failures.push(`Horizon candidate count too low: ${horizon?.summary?.candidates_reviewed || 0}`);
+      if ((horizon?.summary?.candidates_reviewed || 0) < 13) failures.push(`Horizon candidate count too low: ${horizon?.summary?.candidates_reviewed || 0}`);
       for (const id of required) {
         if (!ids.has(id)) failures.push(`Horizon review missing candidate ${id}`);
       }
@@ -898,18 +903,28 @@ const tasks = [
       const context7 = candidates.find((candidate) => candidate.id === "context7_mcp_docs_lane");
       const elysia = candidates.find((candidate) => candidate.id === "bun_elysia_api_bridge");
       const littleOrange = candidates.find((candidate) => candidate.id === "littleorange_cortex_surface");
+      const hermes = candidates.find((candidate) => candidate.id === "hermes_agent_outer_orchestration");
+      const openclaw = candidates.find((candidate) => candidate.id === "openclaw_retired_path");
+      const visualRuntime = candidates.find((candidate) => candidate.id === "visual_runtime_toolmesh");
       if (!String(horizon?.doctrine || "").includes("TriLane remains strategy authority")) failures.push("Horizon doctrine does not preserve TriLane authority");
       if (horizon?.summary?.elysia_dependency_present !== true) failures.push("Horizon review does not prove Elysia dependency presence");
       if (horizon?.summary?.goose_card_present !== true) failures.push("Horizon review does not prove Goose card presence");
       if (horizon?.summary?.littleorange_doctor_present !== true) failures.push("Horizon review does not prove LittleOrange doctor presence");
+      if (typeof horizon?.summary?.hermes_pack_present !== "boolean") failures.push("Horizon review does not expose Hermes pack truth");
+      if (typeof horizon?.summary?.openclaw_retired !== "boolean") failures.push("Horizon review does not expose OpenClaw retirement truth");
+      if (typeof horizon?.summary?.visual_artifact_pipeline_ready !== "boolean") failures.push("Horizon review does not expose visual artifact pipeline truth");
       if (!String(goose?.horizon_decision || "").includes("CANDIDATE")) failures.push("Goose is not kept as a candidate");
       if (!String(goose?.promotion_blocker || "").includes("Must not replace TriLane")) failures.push("Goose promotion blocker does not protect TriLane");
       if (!String(openJarvis?.orangebox_state || "").includes("eval_harness")) failures.push("OpenJarvis is not stated as eval harness only");
       if (openJarvis?.installed_or_present !== false) failures.push("OpenJarvis runtime is incorrectly marked installed/present");
+      if (!String(hermes?.horizon_decision || "").includes("CANDIDATE")) failures.push("Hermes is not kept as a gated candidate");
+      if (!String(hermes?.promotion_blocker || "").includes("must not become hidden authority")) failures.push("Hermes blocker does not reject hidden authority");
+      if (!String(openclaw?.horizon_decision || "").includes("RETIRED")) failures.push("OpenClaw is not marked retired");
       if (!String(context7?.orangebox_state || "").includes("not_installed")) failures.push("Context7 is not stated as not installed");
       if (!String(elysia?.horizon_decision || "").includes("ACTIVE_CONTRACT")) failures.push("Elysia bridge is not kept as active contract");
       if (!String(littleOrange?.orangebox_state || "").includes("separate_visual_lane")) failures.push("LittleOrange/Cortex is not stated as separate visual lane");
       if (littleOrange?.installed_or_present !== true) failures.push("LittleOrange doctor is not marked present");
+      if (!String(visualRuntime?.horizon_decision || "").includes("CONTROL_PLANE_GREEN")) failures.push("Visual runtime ToolMesh is not control-plane truth-gated");
       if (!featureRow?.ok) failures.push("Feature matrix does not prove horizon_review_new_alpha_stack");
       if (projectRow?.status !== "REAL") failures.push("Project report does not list horizon review as REAL");
       return failures.length

@@ -15,7 +15,21 @@ export async function gooseEnvelope(args = process.argv.slice(2)) {
     receipt_required: true,
     strategy_authority: "TriLane only",
     direct_main_write_allowed: false,
-  };
+    role_contract: {
+      role: "hands/executor candidate",
+      not_role: "ruler, planner, permission authority, or replacement for TriLane/STRONGARM/Judgement",
+      doer_watcher_fit: "Goose may act as bounded doer inside a ghost worktree while Orangebox watcher receipts verify freshness, scope, diff, tests, and rollback.",
+      promotion_required_evidence: [
+        "actual Goose install proof",
+        "one bounded ghost-worktree task",
+        "path escape refusal",
+        "command denylist enforcement",
+        "STRONGARM or Checkmate review receipt",
+        "rollback proof",
+        "latency and success comparison against current executor",
+      ],
+    },
+    };
   const receipt = await writeReceipt("goose-envelope", envelope);
   return { ...envelope, receipt_path: receipt.receipt_path };
 }

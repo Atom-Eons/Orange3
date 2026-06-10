@@ -273,7 +273,10 @@ function main() {
       elysia_dependency_present: horizonReview?.summary?.elysia_dependency_present ?? null,
       goose_card_present: horizonReview?.summary?.goose_card_present ?? null,
       littleorange_doctor_present: horizonReview?.summary?.littleorange_doctor_present ?? null,
-      note: "Reviews OpenJarvis/OBOX Jarvis, Goose, Context7, Elysia, LittleOrange/Cortex, AI SDK/Ollama, libSQL, Mastra, and GPU acceleration candidates without auto-promoting them.",
+      hermes_pack_present: horizonReview?.summary?.hermes_pack_present ?? null,
+      openclaw_retired: horizonReview?.summary?.openclaw_retired ?? null,
+      visual_artifact_pipeline_ready: horizonReview?.summary?.visual_artifact_pipeline_ready ?? null,
+      note: "Reviews OpenJarvis/OBOX Jarvis, Goose, Context7, Elysia, Hermes/OpenClaw, Void/LittleOrange/Cortex, Continue, AI SDK/Ollama, libSQL, Mastra, visual runtimes, and GPU acceleration candidates without auto-promoting them.",
     },
     visual_production_readiness: {
       ok: visualReadiness?.ok === true && visualReadiness?.control_plane_green === true && visualReadiness?.summary?.visual_artifact_pipeline_ready === true,

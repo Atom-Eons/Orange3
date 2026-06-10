@@ -15,10 +15,10 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 
 ## Tool Surface
 
-- Package scripts scanned: 196
-- Eligible backend tools: 134
-- Excluded visual/product tools: 24
-- Sleeping other tools: 38
+- Package scripts scanned: 216
+- Eligible backend tools: 148
+- Excluded visual/product tools: 27
+- Sleeping other tools: 41
 
 ## Top Eligible Tools
 
@@ -35,13 +35,13 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 - `knowledge:improvements` -> commitment_atom
 - `research:scout` -> commitment_atom
 - `research:radar` -> commitment_atom
+- `horizon:review` -> proof_receipt, coverage_receipt
 - `assurance:doctor` -> proof_receipt, coverage_receipt
 - `tool:ergonomics` -> proof_receipt, coverage_receipt
 - `checkmate:doctor` -> proof_receipt, coverage_receipt
 - `signal:hygiene` -> proof_receipt, coverage_receipt
 - `session:spine` -> proof_receipt, coverage_receipt
 - `feature:proof` -> proof_receipt, coverage_receipt
-- `harness:benchmark` -> proof_receipt, coverage_receipt
 
 ## AtomSmasher Proof
 

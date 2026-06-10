@@ -443,10 +443,10 @@ async function main() {
       area: "Horizon review / new alpha stack",
       status: status(horizonReviewReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-horizon-review-doctor.mjs"))),
       reality: horizonReviewReady
-        ? `Horizon review is current: ${horizonReview?.summary?.candidates_reviewed || 0} candidates reviewed, Elysia dependency=${Boolean(horizonReview?.summary?.elysia_dependency_present)}, Goose card=${Boolean(horizonReview?.summary?.goose_card_present)}, LittleOrange doctor=${Boolean(horizonReview?.summary?.littleorange_doctor_present)}; no candidate auto-promoted.`
+        ? `Horizon review is current: ${horizonReview?.summary?.candidates_reviewed || 0} candidates reviewed, Elysia dependency=${Boolean(horizonReview?.summary?.elysia_dependency_present)}, Goose card=${Boolean(horizonReview?.summary?.goose_card_present)}, Hermes pack=${Boolean(horizonReview?.summary?.hermes_pack_present)}, OpenClaw retired=${Boolean(horizonReview?.summary?.openclaw_retired)}, LittleOrange doctor=${Boolean(horizonReview?.summary?.littleorange_doctor_present)}, visual artifact pipeline=${Boolean(horizonReview?.summary?.visual_artifact_pipeline_ready)}; no candidate auto-promoted.`
         : "Horizon review source exists or is planned, but no current review receipt is green yet.",
       next: horizonReviewReady
-        ? "Use horizon:review before adopting OpenJarvis/OBOX Jarvis, Goose, Context7, LittleOrange/Cortex changes, AI SDK/Ollama, libSQL, Mastra, or GPU acceleration candidates."
+        ? "Use horizon:review before adopting OpenJarvis/OBOX Jarvis, Goose, Context7, Hermes, Void/LittleOrange/Cortex changes, Continue, AI SDK/Ollama, libSQL, Mastra, visual runtime tools, or GPU acceleration candidates."
         : "Run npm.cmd run horizon:review and fix missing candidate evidence.",
     },
     {
