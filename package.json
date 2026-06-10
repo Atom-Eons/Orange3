@@ -98,6 +98,8 @@
     "antigravity:doctor": "bun ./scripts/v4/orangebox-antigravity-doctor.mjs --json --receipt",
     "antigravity:launch": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/start-antigravity-orangebox.ps1",
     "antigravity:launch:dry": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/v4/start-antigravity-orangebox.ps1 -NoStart",
+    "littleorange:dev": "npm.cmd run dev -w @ae-see-suite/web -- --host 127.0.0.1 --open /?surface=littleorange",
+    "littleorange:doctor": "bun ./scripts/v4/littleorange-doctor.mjs --json --receipt",
     "restart:lock": "bun ./scripts/v4/orangebox-restart-lock-doctor.mjs --json --receipt",
     "codexa:sync-config": "bun ./scripts/v4/orangebox-codexa-config-sync-doctor.mjs --json --receipt",
     "codexa:rail-pack": "bun ./scripts/v4/codexa-rail-recovery-pack.mjs --json --receipt",

@@ -12,7 +12,17 @@ import { optionalAuth } from "./security/auth.js";
 
 const app = express();
 
-app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
+const allowedOrigins = new Set([env.WEB_ORIGIN, "http://127.0.0.1:5173", "http://localhost:5173"]);
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Origin not allowed by AE See-Suite API CORS"));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: "5mb" }));
 app.use(optionalAuth);
 

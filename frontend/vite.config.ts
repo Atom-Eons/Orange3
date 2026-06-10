@@ -7,6 +7,18 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    proxy: {
+      "/littleorange-api": {
+        target: "http://127.0.0.1:8797",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/littleorange-api/, ""),
+      },
+      "/littleorange-command": {
+        target: "http://127.0.0.1:8787",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/littleorange-command/, ""),
+      },
+    },
   },
   build: {
     outDir: "dist",

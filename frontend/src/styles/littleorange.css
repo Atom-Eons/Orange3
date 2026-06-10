@@ -1,0 +1,586 @@
+.littleorange {
+  --lo-bg: #070807;
+  --lo-panel: #111315;
+  --lo-panel-2: #17191d;
+  --lo-line: rgba(255, 255, 255, 0.11);
+  --lo-text: #f7f4ef;
+  --lo-muted: #a9b0b6;
+  --lo-soft: #d7d0c6;
+  --lo-orange: #ff8a21;
+  --lo-cyan: #51d7ff;
+  --lo-green: #65e890;
+  --lo-red: #ff5b6f;
+  --lo-gold: #f6cc68;
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--lo-text);
+  background:
+    linear-gradient(90deg, rgba(255, 138, 33, 0.08), transparent 31%),
+    linear-gradient(180deg, #070807 0%, #0d1012 54%, #080909 100%);
+}
+
+.littleorange button,
+.littleorange textarea {
+  font: inherit;
+}
+
+.littleorange button {
+  cursor: pointer;
+}
+
+.littleorange__projects {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  height: 100%;
+  border-right: 1px solid var(--lo-line);
+  background:
+    linear-gradient(180deg, rgba(255, 138, 33, 0.08), transparent 36%),
+    rgba(9, 10, 10, 0.96);
+  padding: 14px;
+}
+
+.littleorange__brand {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  border-bottom: 1px solid var(--lo-line);
+  padding-bottom: 13px;
+}
+
+.littleorange__brand > span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 138, 33, 0.48);
+  border-radius: 8px;
+  color: #111;
+  background: linear-gradient(135deg, #ffb25c, #ff751c);
+  font-weight: 900;
+  box-shadow: 0 0 24px rgba(255, 138, 33, 0.28);
+}
+
+.littleorange__brand strong,
+.littleorange__brand em {
+  display: block;
+  min-width: 0;
+}
+
+.littleorange__brand strong {
+  font-size: 16px;
+}
+
+.littleorange__brand em {
+  margin-top: 2px;
+  color: var(--lo-muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.littleorange__project-list {
+  min-height: 0;
+  overflow: auto;
+  padding-top: 16px;
+}
+
+.littleorange__project-list header,
+.littleorange__rail-card header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  color: var(--lo-soft);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.littleorange__project-list button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 58px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--lo-soft);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 10px;
+  text-align: left;
+}
+
+.littleorange__project-list button:hover,
+.littleorange__project-list button.is-active {
+  border-color: rgba(255, 138, 33, 0.48);
+  background:
+    linear-gradient(90deg, rgba(255, 138, 33, 0.13), rgba(81, 215, 255, 0.04)),
+    rgba(255, 255, 255, 0.045);
+}
+
+.littleorange__project-list strong,
+.littleorange__project-list span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.littleorange__project-list strong {
+  color: var(--lo-text);
+  font-size: 13px;
+}
+
+.littleorange__project-list span {
+  color: var(--lo-muted);
+  font-size: 11px;
+}
+
+.littleorange__rail-card {
+  border: 1px solid var(--lo-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 10px;
+}
+
+.littleorange__rail-card header {
+  justify-content: space-between;
+}
+
+.littleorange__rail-card header span {
+  margin-right: auto;
+}
+
+.littleorange__rail-card header button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--lo-muted);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.littleorange__rail {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--lo-muted);
+  font-size: 12px;
+}
+
+.littleorange__rail span,
+.littleorange__rail em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.littleorange__rail em {
+  max-width: 96px;
+  font-style: normal;
+}
+
+.littleorange__rail.is-online svg {
+  color: var(--lo-green);
+}
+
+.littleorange__rail.is-offline svg {
+  color: var(--lo-red);
+}
+
+.littleorange__rail.is-checking svg {
+  color: var(--lo-gold);
+}
+
+.littleorange__main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  height: 100vh;
+}
+
+.littleorange__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 82px;
+  border-bottom: 1px solid var(--lo-line);
+  background: rgba(10, 12, 14, 0.88);
+  padding: 14px 20px;
+}
+
+.littleorange__eyebrow {
+  display: block;
+  color: var(--lo-orange);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.littleorange__topbar h1 {
+  margin: 4px 0 0;
+  color: var(--lo-text);
+  font-size: 28px;
+  line-height: 1.05;
+}
+
+.littleorange__status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.littleorange__status-strip span,
+.littleorange__status-strip button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--lo-muted);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.littleorange__status-strip button {
+  color: var(--lo-text);
+}
+
+.littleorange__status-strip .is-good {
+  border-color: rgba(101, 232, 144, 0.35);
+  color: var(--lo-green);
+}
+
+.littleorange__status-strip .is-warn {
+  border-color: rgba(246, 204, 104, 0.42);
+  color: var(--lo-gold);
+}
+
+.littleorange__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  min-height: 0;
+}
+
+.littleorange__chat-wrap {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.littleorange__chat {
+  height: 100%;
+  overflow: auto;
+  scroll-behavior: smooth;
+  padding: 26px 98px 26px 28px;
+}
+
+.littleorange__scroll-controls {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  right: 22px;
+  display: grid;
+  gap: 14px;
+  transform: translateY(-50%);
+}
+
+.littleorange__scroll-controls button {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px solid rgba(255, 138, 33, 0.48);
+  border-radius: 8px;
+  color: #15100b;
+  background: linear-gradient(135deg, #ffc277, #ff8126);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    0 16px 34px rgba(0, 0, 0, 0.28),
+    0 0 28px rgba(255, 138, 33, 0.22);
+}
+
+.littleorange__scroll-controls button:hover {
+  filter: brightness(1.08);
+}
+
+.littleorange__message {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  max-width: 940px;
+  margin-bottom: 18px;
+}
+
+.littleorange__message--user {
+  margin-left: auto;
+}
+
+.littleorange__message--user > div:last-child {
+  border-color: rgba(81, 215, 255, 0.24);
+  background: rgba(81, 215, 255, 0.055);
+}
+
+.littleorange__message--assistant > div:last-child {
+  border-color: rgba(255, 138, 33, 0.22);
+  background: rgba(255, 138, 33, 0.05);
+}
+
+.littleorange__message.is-error > div:last-child {
+  border-color: rgba(255, 91, 111, 0.38);
+  background: rgba(255, 91, 111, 0.06);
+}
+
+.littleorange__avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--lo-orange);
+  background: rgba(255, 255, 255, 0.035);
+  font-weight: 900;
+}
+
+.littleorange__message > div:last-child {
+  min-width: 0;
+  border: 1px solid var(--lo-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 14px 15px;
+}
+
+.littleorange__message header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.littleorange__message header strong {
+  color: var(--lo-text);
+  font-size: 13px;
+}
+
+.littleorange__message header span,
+.littleorange__message em {
+  color: var(--lo-muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.littleorange__message em {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.littleorange__message p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--lo-soft);
+  font-size: 15px;
+  line-height: 1.58;
+}
+
+.littleorange__side {
+  min-width: 0;
+  overflow: auto;
+  border-left: 1px solid var(--lo-line);
+  background: rgba(9, 10, 10, 0.66);
+  padding: 18px;
+}
+
+.littleorange__side section + section {
+  margin-top: 18px;
+}
+
+.littleorange__side h2 {
+  margin: 0 0 10px;
+  color: var(--lo-text);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.littleorange__presets {
+  display: grid;
+  gap: 8px;
+}
+
+.littleorange__presets button {
+  min-height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--lo-text);
+  background: rgba(255, 255, 255, 0.04);
+  text-align: left;
+  padding: 0 10px;
+}
+
+.littleorange__presets button:hover {
+  border-color: rgba(81, 215, 255, 0.32);
+  background: rgba(81, 215, 255, 0.055);
+}
+
+.littleorange__side dl,
+.littleorange__side dd {
+  margin: 0;
+}
+
+.littleorange__side dl {
+  display: grid;
+  gap: 10px;
+}
+
+.littleorange__side dt {
+  margin-bottom: 4px;
+  color: var(--lo-orange);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.littleorange__side dd {
+  color: var(--lo-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.littleorange__composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 9px;
+  border-top: 1px solid var(--lo-line);
+  background: rgba(10, 12, 14, 0.94);
+  padding: 14px 20px;
+}
+
+.littleorange__composer textarea {
+  width: 100%;
+  min-height: 68px;
+  max-height: 140px;
+  resize: vertical;
+  border: 1px solid rgba(255, 138, 33, 0.26);
+  border-radius: 8px;
+  color: var(--lo-text);
+  background:
+    linear-gradient(90deg, rgba(255, 138, 33, 0.06), rgba(81, 215, 255, 0.035)),
+    rgba(255, 255, 255, 0.04);
+  padding: 14px;
+  outline: 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.littleorange__composer textarea:focus {
+  border-color: rgba(255, 138, 33, 0.78);
+  box-shadow: 0 0 0 3px rgba(255, 138, 33, 0.12);
+}
+
+.littleorange__composer > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.littleorange__composer > div > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--lo-muted);
+  font-size: 12px;
+}
+
+.littleorange__composer > div > div {
+  display: flex;
+  gap: 8px;
+}
+
+.littleorange__send,
+.littleorange__stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 92px;
+  min-height: 40px;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.littleorange__send {
+  border: 1px solid rgba(255, 138, 33, 0.6);
+  color: #14100b;
+  background: linear-gradient(135deg, #ffc277, #ff8126);
+}
+
+.littleorange__stop {
+  border: 1px solid rgba(255, 91, 111, 0.38);
+  color: var(--lo-red);
+  background: rgba(255, 91, 111, 0.055);
+}
+
+.littleorange__send:disabled,
+.littleorange__stop:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1040px) {
+  .littleorange {
+    grid-template-columns: 196px minmax(0, 1fr);
+  }
+
+  .littleorange__workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .littleorange__side {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .littleorange {
+    grid-template-columns: 1fr;
+  }
+
+  .littleorange__projects {
+    display: none;
+  }
+
+  .littleorange__topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    min-height: 118px;
+  }
+
+  .littleorange__chat {
+    padding: 18px 86px 18px 16px;
+  }
+
+  .littleorange__scroll-controls button {
+    width: 60px;
+    height: 60px;
+  }
+}
