@@ -148,7 +148,9 @@ const requiredOpsScripts = [
   "research:scout",
   "research:radar",
   "horizon:review",
+  "littleorange:doctor",
   "visual:artifact-vault",
+  "visual:artifact-smoke",
   "visual:readiness",
   "knowledge:improvements",
   "assurance:doctor",
@@ -784,10 +786,11 @@ const tasks = [
     id: "visual_production_readiness_truth",
     category: "visual_runtime_truth",
     oracle: "Visual/media/design readiness must distinguish control-plane proof from promoted runtime power and must not touch the living frontend lane.",
-    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 6, max_tool_calls: 0 },
     run(trace) {
       const visual = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), trace);
       const vault = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-vault.json"), trace);
+      const smoke = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-smoke.json"), trace);
       const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
@@ -796,16 +799,26 @@ const tasks = [
       const visualRow = feature?.matrix?.find((row) => row.id === "visual_production_readiness");
       const visualProjectRow = project?.scope?.find((row) => row.area === "Visual production readiness");
       if (!packageJson?.scripts?.["visual:artifact-vault"]?.includes("orangebox-visual-artifact-vault-doctor.mjs")) failures.push("Package script visual:artifact-vault missing or wrong");
+      if (!packageJson?.scripts?.["visual:artifact-smoke"]?.includes("orangebox-visual-artifact-smoke-doctor.mjs")) failures.push("Package script visual:artifact-smoke missing or wrong");
       if (!packageJson?.scripts?.["visual:readiness"]?.includes("orangebox-visual-production-readiness-doctor.mjs")) failures.push("Package script visual:readiness missing or wrong");
       if (vault?.status !== "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN" || vault?.vault_ready !== true) failures.push(`Visual artifact vault not green: ${vault?.status || "missing"}`);
       if (vault?.vault?.pointer_only !== true) failures.push("Visual artifact vault does not preserve pointer_only=true");
       if (vault?.vault?.receipt_binary_payload_allowed !== false) failures.push("Visual artifact vault does not forbid receipt binary payloads");
       if (!vault?.proof_artifact?.manifest_path) failures.push("Visual artifact vault does not expose proof manifest path");
+      if (smoke?.status !== "ORANGEBOX_VISUAL_ARTIFACT_SMOKE_GREEN" || smoke?.smoke_ready !== true) failures.push(`Visual artifact smoke not green: ${smoke?.status || "missing"}`);
+      if (smoke?.artifact?.mime_type !== "image/png") failures.push(`Visual artifact smoke mime wrong: ${smoke?.artifact?.mime_type || "missing"}`);
+      if (smoke?.artifact?.runtime_generated_media !== false) failures.push("Visual artifact smoke incorrectly claims runtime_generated_media");
+      if (smoke?.vault?.receipt_binary_payload_allowed !== false) failures.push("Visual artifact smoke does not forbid receipt binary payloads");
+      if (!/^[a-f0-9]{64}$/.test(smoke?.artifact?.sha256 || "")) failures.push("Visual artifact smoke sha256 missing/invalid");
       if (visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY") failures.push(`Visual readiness status wrong/missing: ${visual?.status || "missing"}`);
       if (visual?.ok !== true) failures.push("Visual readiness ok=true missing");
       if (visual?.control_plane_green !== true) failures.push("Visual readiness control_plane_green=true missing");
       if (visual?.summary?.artifact_vault_ready !== true) failures.push("Visual readiness does not mirror artifact_vault_ready=true");
+      if (visual?.summary?.artifact_smoke_ready !== true) failures.push("Visual readiness does not mirror artifact_smoke_ready=true");
+      if (visual?.summary?.visual_artifact_pipeline_ready !== true) failures.push("Visual readiness does not mirror visual_artifact_pipeline_ready=true");
       if (!visual?.summary?.artifact_manifest_path) failures.push("Visual readiness does not mirror artifact manifest path");
+      if (visual?.summary?.smoke_artifact_path !== smoke?.artifact?.artifact_path) failures.push("Visual readiness does not mirror smoke artifact path");
+      if (visual?.summary?.smoke_artifact_sha256 !== smoke?.artifact?.sha256) failures.push("Visual readiness does not mirror smoke artifact hash");
       if (typeof visual?.visual_ready !== "boolean") failures.push("Visual readiness does not expose boolean visual_ready");
       if ((visual?.summary?.visual_tool_cards || 0) < 19) failures.push(`Visual tool card count too low: ${visual?.summary?.visual_tool_cards || 0}`);
       if ((visual?.summary?.control_green_lanes || 0) !== 4) failures.push(`Control-green lane count is not 4: ${visual?.summary?.control_green_lanes || 0}`);
@@ -829,6 +842,7 @@ const tasks = [
           control_green_lanes: visual?.summary?.control_green_lanes ?? null,
           runtime_ready_lanes: visual?.summary?.runtime_ready_lanes ?? null,
           artifact_vault_status: vault?.status || null,
+          artifact_smoke_status: smoke?.status || null,
         })
         : okTask("visual_production_readiness_truth", {
           status: visual.status,
@@ -836,6 +850,10 @@ const tasks = [
           control_plane_green: visual.control_plane_green,
           artifact_vault_ready: visual.summary.artifact_vault_ready,
           artifact_manifest_path: visual.summary.artifact_manifest_path,
+          artifact_smoke_ready: visual.summary.artifact_smoke_ready,
+          smoke_artifact_path: visual.summary.smoke_artifact_path,
+          smoke_artifact_sha256: visual.summary.smoke_artifact_sha256,
+          visual_artifact_pipeline_ready: visual.summary.visual_artifact_pipeline_ready,
           visual_tool_cards: visual.summary.visual_tool_cards,
           control_green_lanes: visual.summary.control_green_lanes,
           runtime_ready_lanes: visual.summary.runtime_ready_lanes,
@@ -862,6 +880,7 @@ const tasks = [
         "openjarvis_eval",
         "context7_mcp_docs_lane",
         "ai_sdk_ollama_transport",
+        "littleorange_cortex_surface",
         "libsql_vector_memory",
         "mastra_agent_framework",
         "tilelang_tilekernels_dflash",
@@ -878,15 +897,19 @@ const tasks = [
       const openJarvis = candidates.find((candidate) => candidate.id === "openjarvis_eval");
       const context7 = candidates.find((candidate) => candidate.id === "context7_mcp_docs_lane");
       const elysia = candidates.find((candidate) => candidate.id === "bun_elysia_api_bridge");
+      const littleOrange = candidates.find((candidate) => candidate.id === "littleorange_cortex_surface");
       if (!String(horizon?.doctrine || "").includes("TriLane remains strategy authority")) failures.push("Horizon doctrine does not preserve TriLane authority");
       if (horizon?.summary?.elysia_dependency_present !== true) failures.push("Horizon review does not prove Elysia dependency presence");
       if (horizon?.summary?.goose_card_present !== true) failures.push("Horizon review does not prove Goose card presence");
+      if (horizon?.summary?.littleorange_doctor_present !== true) failures.push("Horizon review does not prove LittleOrange doctor presence");
       if (!String(goose?.horizon_decision || "").includes("CANDIDATE")) failures.push("Goose is not kept as a candidate");
       if (!String(goose?.promotion_blocker || "").includes("Must not replace TriLane")) failures.push("Goose promotion blocker does not protect TriLane");
       if (!String(openJarvis?.orangebox_state || "").includes("eval_harness")) failures.push("OpenJarvis is not stated as eval harness only");
       if (openJarvis?.installed_or_present !== false) failures.push("OpenJarvis runtime is incorrectly marked installed/present");
       if (!String(context7?.orangebox_state || "").includes("not_installed")) failures.push("Context7 is not stated as not installed");
       if (!String(elysia?.horizon_decision || "").includes("ACTIVE_CONTRACT")) failures.push("Elysia bridge is not kept as active contract");
+      if (!String(littleOrange?.orangebox_state || "").includes("separate_visual_lane")) failures.push("LittleOrange/Cortex is not stated as separate visual lane");
+      if (littleOrange?.installed_or_present !== true) failures.push("LittleOrange doctor is not marked present");
       if (!featureRow?.ok) failures.push("Feature matrix does not prove horizon_review_new_alpha_stack");
       if (projectRow?.status !== "REAL") failures.push("Project report does not list horizon review as REAL");
       return failures.length
@@ -900,6 +923,7 @@ const tasks = [
           candidates_reviewed: horizon.summary.candidates_reviewed,
           elysia_dependency_present: horizon.summary.elysia_dependency_present,
           goose_card_present: horizon.summary.goose_card_present,
+          littleorange_doctor_present: horizon.summary.littleorange_doctor_present,
           feature_row: "horizon_review_new_alpha_stack",
           candidates: required,
         });

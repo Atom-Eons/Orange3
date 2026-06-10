@@ -325,9 +325,9 @@ async function main() {
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
-      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:readiness",
-      acceptance_gate: "Visual readiness receipt is present, control_plane_green=true, artifact_vault_ready=true, visual_tool_cards >= 19, and visual_ready remains explicit.",
-      rollback_path: "Remove the visual artifact vault/readiness package scripts and doctors, then rerun package-script-doctor and feature:proof.",
+      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:readiness",
+      acceptance_gate: "Visual readiness receipt is present, control_plane_green=true, artifact_vault_ready=true, artifact_smoke_ready=true, visual_tool_cards >= 19, and visual_ready remains explicit.",
+      rollback_path: "Remove the visual artifact vault/smoke/readiness package scripts and doctors, then rerun package-script-doctor and feature:proof.",
       evidence: [
         evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED", {
           accept: (parsed, status) => (
@@ -336,13 +336,17 @@ async function main() {
           ) && parsed?.ok === true
             && parsed?.control_plane_green === true
             && parsed?.summary?.artifact_vault_ready === true
+            && parsed?.summary?.artifact_smoke_ready === true
             && Number(parsed?.summary?.visual_tool_cards || 0) >= 19
             && typeof parsed?.visual_ready === "boolean",
           detail: (parsed) => ({
             visual_ready: parsed?.visual_ready ?? null,
             control_plane_green: parsed?.control_plane_green ?? null,
             artifact_vault_ready: parsed?.summary?.artifact_vault_ready ?? null,
+            artifact_smoke_ready: parsed?.summary?.artifact_smoke_ready ?? null,
             artifact_manifest_path: parsed?.summary?.artifact_manifest_path ?? null,
+            smoke_artifact_path: parsed?.summary?.smoke_artifact_path ?? null,
+            smoke_artifact_sha256: parsed?.summary?.smoke_artifact_sha256 ?? null,
             runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
             visual_tool_cards: parsed?.summary?.visual_tool_cards ?? null,
           }),
@@ -352,25 +356,27 @@ async function main() {
     }),
     matrixRow({
       id: "horizon_review_new_alpha_stack",
-      claim: "Orangebox reviews OBOX Jarvis/OpenJarvis, Goose, Context7, Elysia, AI SDK/Ollama, libSQL, Mastra, and GPU acceleration candidates before promotion.",
+      claim: "Orangebox reviews OBOX Jarvis/OpenJarvis, Goose, Context7, Elysia, LittleOrange/Cortex, AI SDK/Ollama, libSQL, Mastra, and GPU acceleration candidates before promotion.",
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
       proof_command: "npm.cmd run horizon:review",
-      acceptance_gate: "Horizon review receipt is green with at least 8 candidates, Elysia dependency truth, Goose card truth, and no auto-promotion.",
+      acceptance_gate: "Horizon review receipt is green with at least 9 candidates, Elysia dependency truth, Goose card truth, LittleOrange doctor truth, and no auto-promotion.",
       rollback_path: "Remove the horizon review package script and doctor, then rerun package-script-doctor and feature:proof.",
       evidence: [
         evidence(path.join(dataRoot, "horizon-review", "latest-horizon-review.json"), "ORANGEBOX_HORIZON_REVIEW_READY", {
           accept: (parsed, status) => status === "ORANGEBOX_HORIZON_REVIEW_READY"
             && parsed?.ok === true
-            && Number(parsed?.summary?.candidates_reviewed || 0) >= 8
+            && Number(parsed?.summary?.candidates_reviewed || 0) >= 9
             && parsed?.summary?.elysia_dependency_present === true
-            && parsed?.summary?.goose_card_present === true,
+            && parsed?.summary?.goose_card_present === true
+            && parsed?.summary?.littleorange_doctor_present === true,
           detail: (parsed) => ({
             candidates_reviewed: parsed?.summary?.candidates_reviewed ?? null,
             active_contracts: parsed?.summary?.active_contracts ?? null,
             elysia_dependency_present: parsed?.summary?.elysia_dependency_present ?? null,
             goose_card_present: parsed?.summary?.goose_card_present ?? null,
+            littleorange_doctor_present: parsed?.summary?.littleorange_doctor_present ?? null,
           }),
         }),
       ],

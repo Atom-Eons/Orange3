@@ -300,7 +300,10 @@ async function main() {
   const visualReadinessReported =
     visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" ||
     visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY";
-  const visualReadinessDoctorGreen = visualReadinessReported && visualReadiness?.ok === true && visualReadiness?.control_plane_green === true;
+  const visualReadinessDoctorGreen = visualReadinessReported
+    && visualReadiness?.ok === true
+    && visualReadiness?.control_plane_green === true
+    && visualReadiness?.summary?.visual_artifact_pipeline_ready === true;
   const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const evalIntegrityGreen = checkmateEvalGreen
     && Array.isArray(checkmateEval?.fixtures)
@@ -430,7 +433,7 @@ async function main() {
       area: "Visual production readiness",
       status: status(visualReadinessDoctorGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-visual-production-readiness-doctor.mjs"))),
       reality: visualReadinessDoctorGreen
-        ? `Visual production control plane is reported: ${visualReadiness?.summary?.visual_tool_cards || 0} visual/media/design cards, ${visualReadiness?.summary?.control_green_lanes || 0}/4 lanes control-green, ${visualReadiness?.summary?.runtime_ready_lanes || 0}/4 runtime-ready, artifact_vault_ready=${Boolean(visualReadiness?.summary?.artifact_vault_ready)}, visual_ready=${Boolean(visualReadiness?.visual_ready)}.`
+        ? `Visual production control plane is reported: ${visualReadiness?.summary?.visual_tool_cards || 0} visual/media/design cards, ${visualReadiness?.summary?.control_green_lanes || 0}/4 lanes control-green, ${visualReadiness?.summary?.runtime_ready_lanes || 0}/4 runtime-ready, artifact_vault_ready=${Boolean(visualReadiness?.summary?.artifact_vault_ready)}, artifact_smoke_ready=${Boolean(visualReadiness?.summary?.artifact_smoke_ready)}, smoke_artifact=${visualReadiness?.summary?.smoke_artifact_path || "missing"}, visual_ready=${Boolean(visualReadiness?.visual_ready)}.`
         : "Visual production readiness doctor source exists or is planned, but no current readiness receipt is available yet.",
       next: visualReadinessDoctorGreen
         ? "Do not call visual runtime ready until sample generation receipts, hardware locks, and promotion gates are green."
@@ -440,10 +443,10 @@ async function main() {
       area: "Horizon review / new alpha stack",
       status: status(horizonReviewReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-horizon-review-doctor.mjs"))),
       reality: horizonReviewReady
-        ? `Horizon review is current: ${horizonReview?.summary?.candidates_reviewed || 0} candidates reviewed, Elysia dependency=${Boolean(horizonReview?.summary?.elysia_dependency_present)}, Goose card=${Boolean(horizonReview?.summary?.goose_card_present)}; no candidate auto-promoted.`
+        ? `Horizon review is current: ${horizonReview?.summary?.candidates_reviewed || 0} candidates reviewed, Elysia dependency=${Boolean(horizonReview?.summary?.elysia_dependency_present)}, Goose card=${Boolean(horizonReview?.summary?.goose_card_present)}, LittleOrange doctor=${Boolean(horizonReview?.summary?.littleorange_doctor_present)}; no candidate auto-promoted.`
         : "Horizon review source exists or is planned, but no current review receipt is green yet.",
       next: horizonReviewReady
-        ? "Use horizon:review before adopting OpenJarvis/OBOX Jarvis, Goose, Context7, AI SDK/Ollama, libSQL, Mastra, or GPU acceleration candidates."
+        ? "Use horizon:review before adopting OpenJarvis/OBOX Jarvis, Goose, Context7, LittleOrange/Cortex changes, AI SDK/Ollama, libSQL, Mastra, or GPU acceleration candidates."
         : "Run npm.cmd run horizon:review and fix missing candidate evidence.",
     },
     {

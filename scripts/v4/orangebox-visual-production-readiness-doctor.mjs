@@ -50,6 +50,11 @@ function latestArtifactVault() {
   return { file, report: readJson(file, null) };
 }
 
+function latestArtifactSmoke() {
+  const file = path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-smoke.json");
+  return { file, report: readJson(file, null) };
+}
+
 function summarizeLane(lab, cards, doctor) {
   const laneCards = cards.filter((card) => card.lab === lab);
   const installedProbes = doctor?.summary?.installed_probe_count ?? 0;
@@ -75,7 +80,7 @@ function summarizeLane(lab, cards, doctor) {
     not_runtime_ready_because: [
       promoted === 0 ? "No visual tool card is promoted or installed." : null,
       installedProbes === 0 ? "No useful runtime binary/model install is proven by the latest lab doctor." : null,
-      "No sample generation/edit/render artifact receipt is required or present at this readiness layer yet.",
+      "No promoted lab-specific generation/edit/render artifact receipt is present at this runtime layer yet.",
     ].filter(Boolean),
     cards_by_id: laneCards.map((card) => ({
       id: card.id,
@@ -99,9 +104,15 @@ async function main() {
     return [lab, latest];
   }));
   const artifactVault = latestArtifactVault();
+  const artifactSmoke = latestArtifactSmoke();
   const artifactVaultReady = artifactVault.report?.ok === true
     && artifactVault.report?.status === "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN"
     && artifactVault.report?.vault_ready === true;
+  const artifactSmokeReady = artifactSmoke.report?.ok === true
+    && artifactSmoke.report?.status === "ORANGEBOX_VISUAL_ARTIFACT_SMOKE_GREEN"
+    && artifactSmoke.report?.smoke_ready === true
+    && artifactSmoke.report?.artifact?.mime_type === "image/png"
+    && artifactSmoke.report?.artifact?.runtime_generated_media === false;
   const lanes = visualLabs.map((lab) => summarizeLane(lab, cards, doctors[lab].report));
   const allControlGreen = lanes.every((lane) => lane.control_plane_green);
   const anyRuntimeReady = lanes.some((lane) => lane.runtime_ready);
@@ -126,6 +137,7 @@ async function main() {
       tool_cards: cardsFile,
       lab_doctors: Object.fromEntries(Object.entries(doctors).map(([lab, value]) => [lab, value.file])),
       artifact_vault: artifactVault.file,
+      artifact_smoke: artifactSmoke.file,
     },
     summary: {
       visual_labs: visualLabs.length,
@@ -140,6 +152,12 @@ async function main() {
       artifact_manifest_path: artifactVault.report?.proof_artifact?.manifest_path || null,
       artifact_pointer_only: artifactVault.report?.vault?.pointer_only === true,
       artifact_cleanup_policy_declared: Boolean(artifactVault.report?.vault?.cleanup_policy),
+      artifact_smoke_ready: artifactSmokeReady,
+      artifact_smoke_status: artifactSmoke.report?.status || "missing",
+      smoke_artifact_path: artifactSmoke.report?.artifact?.artifact_path || null,
+      smoke_artifact_sha256: artifactSmoke.report?.artifact?.sha256 || null,
+      smoke_artifact_mime_type: artifactSmoke.report?.artifact?.mime_type || null,
+      visual_artifact_pipeline_ready: artifactVaultReady && artifactSmokeReady,
       cards_hash: sha256(JSON.stringify(visualCards)),
     },
     lanes,
@@ -149,7 +167,8 @@ async function main() {
       "Whisper/Audacity/Demucs/UVR are registered candidates, not promoted audio runtimes.",
       "Penpot/Inkscape/Krita/GIMP/Blender are registered candidates, not promoted design runtimes.",
       artifactVaultReady ? null : "No visual artifact vault promotion receipt is present in this doctor.",
-      "No template execution receipt proves a real generated image/video/design/audio artifact yet.",
+      artifactSmokeReady ? null : "No deterministic visual artifact smoke receipt is present in this doctor.",
+      "No promoted AI generator sample receipt proves a real generated image/video/design/audio artifact yet.",
     ].filter(Boolean),
     next_waves: [
       {
@@ -158,11 +177,11 @@ async function main() {
         proof: "npm.cmd run visual:readiness",
       },
       {
-        wave: "V1 artifact vault",
-        action: artifactVaultReady
-          ? "Artifact vault is green; use it for first promoted visual sample receipts."
-          : "Promote pointer-only artifact vault, SHA-256 manifests, cleanup policy, and human-preview links before any generator runs.",
-        proof: "npm.cmd run visual:artifact-vault",
+        wave: "V1 artifact pipeline",
+        action: artifactVaultReady && artifactSmokeReady
+          ? "Artifact vault and deterministic PNG smoke are green; use this path for first promoted visual runtime sample receipts."
+          : "Promote pointer-only artifact vault, deterministic smoke artifact, SHA-256 manifests, cleanup policy, and human-preview links before any generator runs.",
+        proof: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke",
       },
       {
         wave: "V2 image runtime",
@@ -182,8 +201,10 @@ async function main() {
     ],
     result_line: allRuntimeReady
       ? "Visual production runtime is promoted."
-      : artifactVaultReady
-        ? "Visual production control plane and artifact vault are green, but runtime tools are not promoted yet."
+      : artifactVaultReady && artifactSmokeReady
+        ? "Visual production control plane, artifact vault, and deterministic artifact smoke are green, but AI runtime tools are not promoted yet."
+        : artifactVaultReady
+          ? "Visual production control plane and artifact vault are green, but runtime tools are not promoted yet."
         : "Visual production control plane is green, but runtime tools are not promoted yet.",
   };
 
