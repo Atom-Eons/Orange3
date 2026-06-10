@@ -221,6 +221,16 @@ async function main() {
     { script: "tool:ergonomics", timeout: 60_000 },
     { script: "checkmate:doctor", timeout: 60_000 },
     { script: "assurance:doctor", timeout: 60_000 },
+    { script: "toolmesh:doctor", timeout: 90_000 },
+    { script: "v3:api:doctor", timeout: 90_000 },
+    { script: "v3:goose:envelope", timeout: 90_000 },
+    { script: "v3:openjarvis:doctor", timeout: 90_000 },
+    { script: "v3:mcp:doctor", timeout: 90_000 },
+    { script: "visual:artifact-vault", timeout: 90_000 },
+    { script: "visual:artifact-smoke", timeout: 90_000 },
+    { script: "visual:readiness", timeout: 90_000 },
+    { script: "horizon:review", timeout: 90_000 },
+    { script: "horizon:bakeoff", timeout: 90_000 },
     { script: "signal:hygiene", timeout: 60_000 },
     { script: "session:spine", timeout: 60_000 },
     { script: "feature:proof", timeout: 90_000 },
@@ -258,6 +268,9 @@ async function main() {
   const toolErgonomicsPath = path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json");
   const checkmatePath = path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json");
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
+  const horizonReviewPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
+  const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
+  const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const sessionSpinePath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
   const opsGapLedgerPath = path.join(dataRoot, "ops-gap-ledger", "latest-ops-gap-ledger.json");
@@ -287,6 +300,9 @@ async function main() {
   const toolErgonomics = readJson(toolErgonomicsPath);
   const checkmate = readJson(checkmatePath);
   const assurance = readJson(assurancePath);
+  const horizonReview = readJson(horizonReviewPath);
+  const horizonBakeoff = readJson(horizonBakeoffPath);
+  const visualReadiness = readJson(visualReadinessPath);
   const signalHygiene = readJson(signalHygienePath);
   const sessionSpine = readJson(sessionSpinePath);
   const opsGapLedger = readJson(opsGapLedgerPath);
@@ -384,6 +400,29 @@ async function main() {
     gate("tool_ergonomics_green", toolErgonomics?.ok === true && toolErgonomics?.status === "ORANGEBOX_TOOL_ERGONOMICS_GREEN", { status: toolErgonomics?.status || null, command_count: toolErgonomics?.command_surface?.command_count ?? null }),
     gate("checkmate_eval_lane_green", checkmate?.ok === true && checkmate?.status === "CHECKMATE_EVAL_LANE_GREEN", { status: checkmate?.status || null, fixtures_total: checkmate?.fixtures?.length ?? null }),
     gate("assurance_lab_green", assurance?.ok === true && assurance?.status === "ORANGEBOX_ASSURANCE_LAB_GREEN", { status: assurance?.status || null, source_count: assurance?.summary?.source_count ?? null }),
+    gate("visual_production_readiness_green", visualReadiness?.ok === true && visualReadiness?.control_plane_green === true && visualReadiness?.summary?.visual_artifact_pipeline_ready === true, {
+      status: visualReadiness?.status || null,
+      visual_ready: visualReadiness?.visual_ready ?? null,
+      visual_tool_cards: visualReadiness?.summary?.visual_tool_cards ?? null,
+      runtime_ready_lanes: visualReadiness?.summary?.runtime_ready_lanes ?? null,
+      smoke_artifact_path: visualReadiness?.summary?.smoke_artifact_path ?? null,
+    }),
+    gate("horizon_review_green", horizonReview?.ok === true && horizonReview?.status === "ORANGEBOX_HORIZON_REVIEW_READY", {
+      status: horizonReview?.status || null,
+      candidates_reviewed: horizonReview?.summary?.candidates_reviewed ?? null,
+      hermes_pack_present: horizonReview?.summary?.hermes_pack_present ?? null,
+      openclaw_retired: horizonReview?.summary?.openclaw_retired ?? null,
+      visual_artifact_pipeline_ready: horizonReview?.summary?.visual_artifact_pipeline_ready ?? null,
+    }),
+    gate("horizon_promotion_bakeoff_green", horizonBakeoff?.ok === true && horizonBakeoff?.status === "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY", {
+      status: horizonBakeoff?.status || null,
+      candidates_total: horizonBakeoff?.summary?.candidates_total ?? null,
+      waves_total: horizonBakeoff?.summary?.waves_total ?? null,
+      promotable_now: horizonBakeoff?.summary?.promotable_now ?? null,
+      goose_binary_found: horizonBakeoff?.summary?.goose_binary_found ?? null,
+      openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
+      visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+    }),
     gate("operator_signal_hygiene_green", signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", { status: signalHygiene?.status || null, severity: signalHygiene?.signal_hygiene?.severity || null }),
     gate("doer_watcher_spine_green", sessionSpine?.ok === true && sessionSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN", { status: sessionSpine?.status || null, failures: sessionSpine?.failures?.length ?? null }),
     gate("ops_gap_ledger_current", opsGapLedger?.ok === true && ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(opsGapLedger?.status), {
@@ -436,9 +475,12 @@ async function main() {
       local_model_lane_eval: localModelLanePath,
       active_council: activeCouncilPath,
       tool_ergonomics: toolErgonomicsPath,
-      checkmate_eval_lane: checkmatePath,
-      assurance_lab: assurancePath,
-      signal_hygiene: signalHygienePath,
+    checkmate_eval_lane: checkmatePath,
+    assurance_lab: assurancePath,
+    visual_readiness: visualReadinessPath,
+    horizon_review: horizonReviewPath,
+    horizon_bakeoff: horizonBakeoffPath,
+    signal_hygiene: signalHygienePath,
       doer_watcher_spine: sessionSpinePath,
       ops_gap_ledger: opsGapLedgerPath,
       codexa_handoff: codexaHandoffPath,

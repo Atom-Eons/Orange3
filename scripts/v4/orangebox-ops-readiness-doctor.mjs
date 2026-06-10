@@ -115,6 +115,8 @@ function main() {
   const assurance = readJson(assurancePath);
   const horizonReviewPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
   const horizonReview = readJson(horizonReviewPath);
+  const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
+  const horizonBakeoff = readJson(horizonBakeoffPath);
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const visualReadiness = readJson(visualReadinessPath);
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
@@ -277,6 +279,26 @@ function main() {
       openclaw_retired: horizonReview?.summary?.openclaw_retired ?? null,
       visual_artifact_pipeline_ready: horizonReview?.summary?.visual_artifact_pipeline_ready ?? null,
       note: "Reviews OpenJarvis/OBOX Jarvis, Goose, Context7, Elysia, Hermes/OpenClaw, Void/LittleOrange/Cortex, Continue, AI SDK/Ollama, libSQL, Mastra, visual runtimes, and GPU acceleration candidates without auto-promoting them.",
+    },
+    horizon_promotion_bakeoff: {
+      ok:
+        horizonBakeoff?.ok === true &&
+        horizonBakeoff?.status === "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY" &&
+        Number(horizonBakeoff?.summary?.candidates_total || 0) >= 10 &&
+        Number(horizonBakeoff?.summary?.promotable_now || 0) === 0 &&
+        horizonBakeoff?.summary?.horizon_review_green === true &&
+        horizonBakeoff?.summary?.toolmesh_execution_blocked_until_promoted === true &&
+        horizonBakeoff?.summary?.visual_artifact_pipeline_ready === true,
+      path: horizonBakeoffPath,
+      status: horizonBakeoff?.status || null,
+      candidates_total: horizonBakeoff?.summary?.candidates_total ?? null,
+      waves_total: horizonBakeoff?.summary?.waves_total ?? null,
+      promotable_now: horizonBakeoff?.summary?.promotable_now ?? null,
+      goose_binary_found: horizonBakeoff?.summary?.goose_binary_found ?? null,
+      openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
+      hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
+      visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+      note: "Turns reviewed alpha candidates into a proof-ranked bakeoff matrix with binary/dependency probes, blockers, and no automatic promotion.",
     },
     visual_production_readiness: {
       ok: visualReadiness?.ok === true && visualReadiness?.control_plane_green === true && visualReadiness?.summary?.visual_artifact_pipeline_ready === true,

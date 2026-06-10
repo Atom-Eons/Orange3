@@ -148,6 +148,7 @@ const requiredOpsScripts = [
   "research:scout",
   "research:radar",
   "horizon:review",
+  "horizon:bakeoff",
   "littleorange:doctor",
   "visual:artifact-vault",
   "visual:artifact-smoke",
@@ -940,6 +941,79 @@ const tasks = [
           goose_card_present: horizon.summary.goose_card_present,
           littleorange_doctor_present: horizon.summary.littleorange_doctor_present,
           feature_row: "horizon_review_new_alpha_stack",
+          candidates: required,
+        });
+    },
+  },
+  {
+    id: "horizon_promotion_bakeoff_truth",
+    category: "alpha_review",
+    oracle: "Reviewed alpha tools must pass a promotion bakeoff matrix before they can be called active; no candidate auto-promotes.",
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    run(trace) {
+      const bakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const failures = [];
+      const candidates = Array.isArray(bakeoff?.candidates) ? bakeoff.candidates : [];
+      const ids = new Set(candidates.map((candidate) => candidate.id));
+      const featureRow = feature?.matrix?.find((row) => row.id === "horizon_promotion_bakeoff");
+      const projectRow = project?.scope?.find((row) => row.area === "Horizon promotion bakeoff");
+      const required = [
+        "bun_elysia_api_bridge",
+        "goose_executor",
+        "obox_jarvis_openjarvis",
+        "context7_docs_hydration",
+        "hermes_outer_orchestrator",
+        "openclaw_retirement",
+        "visual_runtime_toolmesh",
+        "littleorange_void_continue_surface",
+        "memory_and_agent_framework_candidates",
+        "codexa_gpu_acceleration_candidates",
+      ];
+      if (!packageJson?.scripts?.["horizon:bakeoff"]?.includes("orangebox-horizon-promotion-bakeoff-doctor.mjs")) failures.push("Package script horizon:bakeoff missing or wrong");
+      if (bakeoff?.status !== "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY" || bakeoff?.ok !== true) failures.push(`Horizon bakeoff not green: ${bakeoff?.status || "missing"}`);
+      if ((bakeoff?.summary?.candidates_total || 0) < 10) failures.push(`Bakeoff candidate count too low: ${bakeoff?.summary?.candidates_total || 0}`);
+      if ((bakeoff?.summary?.waves_total || 0) < 5) failures.push(`Bakeoff wave count too low: ${bakeoff?.summary?.waves_total || 0}`);
+      if ((bakeoff?.summary?.promotable_now || 0) !== 0) failures.push(`Bakeoff auto-promoted candidates: ${bakeoff?.summary?.promotable_now || 0}`);
+      if (bakeoff?.summary?.horizon_review_green !== true) failures.push("Bakeoff does not prove horizon review green");
+      if (bakeoff?.summary?.toolmesh_execution_blocked_until_promoted !== true) failures.push("Bakeoff does not prove ToolMesh execution is blocked until promotion");
+      if (bakeoff?.summary?.visual_artifact_pipeline_ready !== true) failures.push("Bakeoff does not prove visual artifact pipeline ready");
+      if (bakeoff?.summary?.openclaw_retired !== true) failures.push("Bakeoff does not prove OpenClaw retired");
+      if (!Array.isArray(bakeoff?.failures) || bakeoff.failures.length !== 0) failures.push("Bakeoff has failures");
+      for (const id of required) {
+        if (!ids.has(id)) failures.push(`Bakeoff missing candidate ${id}`);
+      }
+      const goose = candidates.find((candidate) => candidate.id === "goose_executor");
+      const jarvis = candidates.find((candidate) => candidate.id === "obox_jarvis_openjarvis");
+      const visual = candidates.find((candidate) => candidate.id === "visual_runtime_toolmesh");
+      const hermes = candidates.find((candidate) => candidate.id === "hermes_outer_orchestrator");
+      if (!String(goose?.current_role || "").includes("executor hands")) failures.push("Goose current role does not say executor hands");
+      if (!String(goose?.status || "").includes("RUNTIME") && !String(goose?.status || "").includes("ENVELOPE")) failures.push("Goose bakeoff status is not envelope/runtime truth");
+      if (!String(jarvis?.current_role || "").includes("not router authority")) failures.push("OBOX Jarvis current role does not reject router authority");
+      if (!String(visual?.status || "").includes("RUNTIME") && !String(visual?.status || "").includes("CONTROL_READY")) failures.push("Visual runtime candidate is not status-gated");
+      if (!String(hermes?.current_role || "").includes("cannot own Orangebox authority")) failures.push("Hermes candidate does not reject hidden authority");
+      if (!featureRow?.ok) failures.push("Feature matrix does not prove horizon_promotion_bakeoff");
+      if (projectRow?.status !== "REAL") failures.push("Project report does not list horizon promotion bakeoff as REAL");
+      return failures.length
+        ? failTask("horizon_promotion_bakeoff_truth", failures, {
+          status: bakeoff?.status || null,
+          candidates_total: bakeoff?.summary?.candidates_total ?? null,
+          waves_total: bakeoff?.summary?.waves_total ?? null,
+          promotable_now: bakeoff?.summary?.promotable_now ?? null,
+          ids: [...ids],
+        })
+        : okTask("horizon_promotion_bakeoff_truth", {
+          status: bakeoff.status,
+          candidates_total: bakeoff.summary.candidates_total,
+          waves_total: bakeoff.summary.waves_total,
+          promotable_now: bakeoff.summary.promotable_now,
+          goose_binary_found: bakeoff.summary.goose_binary_found,
+          openjarvis_eval_receipt_green: bakeoff.summary.openjarvis_eval_receipt_green,
+          hermes_pack_present: bakeoff.summary.hermes_pack_present,
+          visual_ready: bakeoff.summary.visual_ready,
+          feature_row: "horizon_promotion_bakeoff",
           candidates: required,
         });
     },

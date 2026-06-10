@@ -72,3 +72,4 @@ Initialized with feature flags and proof-first implementation lanes. V2 remains 
 - Void is a reference architecture for open-source AI IDE patterns; LittleOrange remains the Orangebox surface path unless the separate visual lane explicitly chooses a fork migration.
 - Continue is a coding-lab candidate for source-controlled AI checks, not a Checkmate replacement until it wins a bakeoff.
 - Visual runtime readiness is a staged Ops truth: control plane, artifact vault, deterministic smoke artifact, then one promoted runtime at a time. AI media/design/video/audio tools are not real until sample artifact receipts prove them.
+- `horizon:review` maps the candidate field; `horizon:bakeoff` turns it into promotion evidence. No Jarvis, Goose, Hermes, Context7, Continue, visual runtime, vector-memory, framework, or GPU acceleration candidate may be called active from review alone.

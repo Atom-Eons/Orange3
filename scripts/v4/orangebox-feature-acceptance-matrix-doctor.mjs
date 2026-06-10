@@ -388,6 +388,41 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "horizon_promotion_bakeoff",
+      claim: "New alpha tools become promotion candidates only through a bakeoff matrix with binary/dependency probes, receipt evidence, blockers, and next proof commands.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run horizon:bakeoff",
+      acceptance_gate: "Bakeoff receipt is green, covers at least 10 candidates and 5 waves, keeps automatic promotion at zero, proves visual artifact pipeline truth, and names Goose/OBOX Jarvis/Hermes/OpenClaw blockers.",
+      rollback_path: "Remove horizon:bakeoff package script and doctor, then rerun package-script-doctor, feature:proof, project:report, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json"), "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY", {
+          accept: (parsed, status) => status === "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY"
+            && parsed?.ok === true
+            && Number(parsed?.summary?.candidates_total || 0) >= 10
+            && Number(parsed?.summary?.waves_total || 0) >= 5
+            && Number(parsed?.summary?.promotable_now || 0) === 0
+            && parsed?.summary?.horizon_review_green === true
+            && parsed?.summary?.toolmesh_execution_blocked_until_promoted === true
+            && parsed?.summary?.visual_artifact_pipeline_ready === true
+            && parsed?.summary?.openclaw_retired === true
+            && Array.isArray(parsed?.candidates)
+            && ["goose_executor", "obox_jarvis_openjarvis", "hermes_outer_orchestrator", "visual_runtime_toolmesh"].every((id) => parsed.candidates.some((candidate) => candidate.id === id && Array.isArray(candidate.blockers))),
+          detail: (parsed) => ({
+            candidates_total: parsed?.summary?.candidates_total ?? null,
+            waves_total: parsed?.summary?.waves_total ?? null,
+            promotable_now: parsed?.summary?.promotable_now ?? null,
+            goose_binary_found: parsed?.summary?.goose_binary_found ?? null,
+            openjarvis_eval_receipt_green: parsed?.summary?.openjarvis_eval_receipt_green ?? null,
+            hermes_pack_present: parsed?.summary?.hermes_pack_present ?? null,
+            visual_ready: parsed?.summary?.visual_ready ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "checkmate_eval_lane",
       claim: "Prompt/model/routing/tool changes are gated by deterministic CHECKMATE eval fixtures.",
       lane: "backend_ops",

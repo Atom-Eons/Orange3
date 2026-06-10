@@ -180,6 +180,7 @@ async function main() {
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
   const toolmesh = readJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"));
   const horizonReview = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json")) || readJson(latestReceipt("orangebox-horizon-review-"));
+  const horizonBakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json")) || readJson(latestReceipt("orangebox-horizon-promotion-bakeoff-"));
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
   const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
@@ -297,6 +298,14 @@ async function main() {
     toolmesh?.waveValidation?.preservedV3Count === 16 &&
     toolmesh?.waveValidation?.toolmeshCount === 10;
   const horizonReviewReady = horizonReview?.status === "ORANGEBOX_HORIZON_REVIEW_READY" && horizonReview?.ok === true;
+  const horizonBakeoffReady =
+    horizonBakeoff?.status === "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY" &&
+    horizonBakeoff?.ok === true &&
+    Number(horizonBakeoff?.summary?.candidates_total || 0) >= 10 &&
+    Number(horizonBakeoff?.summary?.promotable_now || 0) === 0 &&
+    horizonBakeoff?.summary?.horizon_review_green === true &&
+    horizonBakeoff?.summary?.toolmesh_execution_blocked_until_promoted === true &&
+    horizonBakeoff?.summary?.visual_artifact_pipeline_ready === true;
   const visualReadinessReported =
     visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" ||
     visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY";
@@ -448,6 +457,16 @@ async function main() {
       next: horizonReviewReady
         ? "Use horizon:review before adopting OpenJarvis/OBOX Jarvis, Goose, Context7, Hermes, Void/LittleOrange/Cortex changes, Continue, AI SDK/Ollama, libSQL, Mastra, visual runtime tools, or GPU acceleration candidates."
         : "Run npm.cmd run horizon:review and fix missing candidate evidence.",
+    },
+    {
+      area: "Horizon promotion bakeoff",
+      status: status(horizonBakeoffReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-horizon-promotion-bakeoff-doctor.mjs"))),
+      reality: horizonBakeoffReady
+        ? `Promotion bakeoff is current: ${horizonBakeoff?.summary?.candidates_total || 0} candidates across ${horizonBakeoff?.summary?.waves_total || 0} waves, promotable_now=${horizonBakeoff?.summary?.promotable_now ?? "unknown"}, Goose binary=${Boolean(horizonBakeoff?.summary?.goose_binary_found)}, OBOX Jarvis eval=${Boolean(horizonBakeoff?.summary?.openjarvis_eval_receipt_green)}, Hermes pack=${Boolean(horizonBakeoff?.summary?.hermes_pack_present)}, visual_ready=${Boolean(horizonBakeoff?.summary?.visual_ready)}. No candidate is promoted by review alone.`
+        : "Horizon bakeoff source exists or is planned, but no current bakeoff receipt is green yet.",
+      next: horizonBakeoffReady
+        ? "Use horizon:bakeoff before promoting OBOX Jarvis/OpenJarvis, Goose, Context7, Hermes, visual runtimes, Continue, libSQL, Mastra, or GPU acceleration candidates."
+        : "Run npm.cmd run horizon:bakeoff after horizon:review and fix the exact failed probe or receipt gate.",
     },
     {
       area: "CHECKMATE eval lane",
@@ -788,6 +807,7 @@ async function main() {
         obox2_doctor: packageScript("obox2:doctor", packageJson),
         research_radar: packageScript("research:radar", packageJson),
         horizon_review: packageScript("horizon:review", packageJson),
+        horizon_bakeoff: packageScript("horizon:bakeoff", packageJson),
         visual_readiness: packageScript("visual:readiness", packageJson),
         assurance_doctor: packageScript("assurance:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
@@ -1057,6 +1077,27 @@ async function main() {
         hardware_profiles_declared: toolmesh?.checks?.hardware_profiles_declared ?? null,
         artifact_pointer_policy_declared: toolmesh?.checks?.artifact_pointer_policy_declared ?? null,
         immutable_templates_for_workflow_tools: toolmesh?.checks?.immutable_templates_for_workflow_tools ?? null,
+      },
+      horizon_review: {
+        path: path.join(dataRoot, "horizon-review", "latest-horizon-review.json"),
+        status: horizonReview?.status || null,
+        candidates_reviewed: horizonReview?.summary?.candidates_reviewed ?? null,
+        active_contracts: horizonReview?.summary?.active_contracts ?? null,
+        goose_card_present: horizonReview?.summary?.goose_card_present ?? null,
+        hermes_pack_present: horizonReview?.summary?.hermes_pack_present ?? null,
+        openclaw_retired: horizonReview?.summary?.openclaw_retired ?? null,
+        visual_artifact_pipeline_ready: horizonReview?.summary?.visual_artifact_pipeline_ready ?? null,
+      },
+      horizon_bakeoff: {
+        path: path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json"),
+        status: horizonBakeoff?.status || null,
+        candidates_total: horizonBakeoff?.summary?.candidates_total ?? null,
+        waves_total: horizonBakeoff?.summary?.waves_total ?? null,
+        promotable_now: horizonBakeoff?.summary?.promotable_now ?? null,
+        goose_binary_found: horizonBakeoff?.summary?.goose_binary_found ?? null,
+        openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
+        hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
+        visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
       },
       checkmate_eval_lane: {
         path: path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"),
