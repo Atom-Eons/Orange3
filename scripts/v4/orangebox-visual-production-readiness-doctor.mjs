@@ -45,6 +45,11 @@ function latestLabDoctor(lab) {
   return { file, report: readJson(file, null) };
 }
 
+function latestArtifactVault() {
+  const file = path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-vault.json");
+  return { file, report: readJson(file, null) };
+}
+
 function summarizeLane(lab, cards, doctor) {
   const laneCards = cards.filter((card) => card.lab === lab);
   const installedProbes = doctor?.summary?.installed_probe_count ?? 0;
@@ -93,6 +98,10 @@ async function main() {
     const latest = latestLabDoctor(lab);
     return [lab, latest];
   }));
+  const artifactVault = latestArtifactVault();
+  const artifactVaultReady = artifactVault.report?.ok === true
+    && artifactVault.report?.status === "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN"
+    && artifactVault.report?.vault_ready === true;
   const lanes = visualLabs.map((lab) => summarizeLane(lab, cards, doctors[lab].report));
   const allControlGreen = lanes.every((lane) => lane.control_plane_green);
   const anyRuntimeReady = lanes.some((lane) => lane.runtime_ready);
@@ -116,6 +125,7 @@ async function main() {
     source_files: {
       tool_cards: cardsFile,
       lab_doctors: Object.fromEntries(Object.entries(doctors).map(([lab, value]) => [lab, value.file])),
+      artifact_vault: artifactVault.file,
     },
     summary: {
       visual_labs: visualLabs.length,
@@ -125,6 +135,11 @@ async function main() {
       installed_probe_count: lanes.reduce((sum, lane) => sum + lane.installed_probe_count, 0),
       promoted_or_installed_cards: lanes.reduce((sum, lane) => sum + lane.promoted_or_installed_cards, 0),
       any_runtime_ready: anyRuntimeReady,
+      artifact_vault_ready: artifactVaultReady,
+      artifact_vault_status: artifactVault.report?.status || "missing",
+      artifact_manifest_path: artifactVault.report?.proof_artifact?.manifest_path || null,
+      artifact_pointer_only: artifactVault.report?.vault?.pointer_only === true,
+      artifact_cleanup_policy_declared: Boolean(artifactVault.report?.vault?.cleanup_policy),
       cards_hash: sha256(JSON.stringify(visualCards)),
     },
     lanes,
@@ -133,9 +148,9 @@ async function main() {
       "Wan/LTX/DaVinci Resolve/Kdenlive/OBS are registered candidates, not promoted video runtimes.",
       "Whisper/Audacity/Demucs/UVR are registered candidates, not promoted audio runtimes.",
       "Penpot/Inkscape/Krita/GIMP/Blender are registered candidates, not promoted design runtimes.",
-      "No visual artifact vault promotion receipt is present in this doctor.",
+      artifactVaultReady ? null : "No visual artifact vault promotion receipt is present in this doctor.",
       "No template execution receipt proves a real generated image/video/design/audio artifact yet.",
-    ],
+    ].filter(Boolean),
     next_waves: [
       {
         wave: "V0 truth hardening",
@@ -144,8 +159,10 @@ async function main() {
       },
       {
         wave: "V1 artifact vault",
-        action: "Promote pointer-only artifact vault, SHA-256 manifests, cleanup policy, and human-preview links before any generator runs.",
-        proof: "future artifact-vault doctor with create/read/gc receipts",
+        action: artifactVaultReady
+          ? "Artifact vault is green; use it for first promoted visual sample receipts."
+          : "Promote pointer-only artifact vault, SHA-256 manifests, cleanup policy, and human-preview links before any generator runs.",
+        proof: "npm.cmd run visual:artifact-vault",
       },
       {
         wave: "V2 image runtime",
@@ -165,7 +182,9 @@ async function main() {
     ],
     result_line: allRuntimeReady
       ? "Visual production runtime is promoted."
-      : "Visual production control plane is green, but runtime tools are not promoted yet.",
+      : artifactVaultReady
+        ? "Visual production control plane and artifact vault are green, but runtime tools are not promoted yet."
+        : "Visual production control plane is green, but runtime tools are not promoted yet.",
   };
 
   const latestPath = path.join(outDir, "latest-visual-production-readiness.json");

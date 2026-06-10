@@ -280,9 +280,11 @@ function main() {
       status: visualReadiness?.status || null,
       visual_ready: visualReadiness?.visual_ready ?? null,
       control_plane_green: visualReadiness?.control_plane_green ?? null,
+      artifact_vault_ready: visualReadiness?.summary?.artifact_vault_ready ?? null,
+      artifact_manifest_path: visualReadiness?.summary?.artifact_manifest_path ?? null,
       runtime_ready_lanes: visualReadiness?.summary?.runtime_ready_lanes ?? null,
       visual_tool_cards: visualReadiness?.summary?.visual_tool_cards ?? null,
-      note: "Reports visual/media/design runtime truth. It may be green as a readiness doctor while visual_ready remains false until runtime tools are promoted.",
+      note: "Reports visual/media/design runtime truth and artifact vault readiness. It may be green as a readiness doctor while visual_ready remains false until runtime tools are promoted.",
     },
     operator_signal_hygiene: {
       ok: signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",

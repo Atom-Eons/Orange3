@@ -325,9 +325,9 @@ async function main() {
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
-      proof_command: "npm.cmd run visual:readiness",
-      acceptance_gate: "Visual readiness receipt is present, control_plane_green=true, visual_tool_cards >= 19, and visual_ready remains explicit.",
-      rollback_path: "Remove the visual readiness package script and doctor, then rerun package-script-doctor and feature:proof.",
+      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:readiness",
+      acceptance_gate: "Visual readiness receipt is present, control_plane_green=true, artifact_vault_ready=true, visual_tool_cards >= 19, and visual_ready remains explicit.",
+      rollback_path: "Remove the visual artifact vault/readiness package scripts and doctors, then rerun package-script-doctor and feature:proof.",
       evidence: [
         evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED", {
           accept: (parsed, status) => (
@@ -335,11 +335,14 @@ async function main() {
             status === "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY"
           ) && parsed?.ok === true
             && parsed?.control_plane_green === true
+            && parsed?.summary?.artifact_vault_ready === true
             && Number(parsed?.summary?.visual_tool_cards || 0) >= 19
             && typeof parsed?.visual_ready === "boolean",
           detail: (parsed) => ({
             visual_ready: parsed?.visual_ready ?? null,
             control_plane_green: parsed?.control_plane_green ?? null,
+            artifact_vault_ready: parsed?.summary?.artifact_vault_ready ?? null,
+            artifact_manifest_path: parsed?.summary?.artifact_manifest_path ?? null,
             runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
             visual_tool_cards: parsed?.summary?.visual_tool_cards ?? null,
           }),

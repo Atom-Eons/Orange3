@@ -430,10 +430,10 @@ async function main() {
       area: "Visual production readiness",
       status: status(visualReadinessDoctorGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-visual-production-readiness-doctor.mjs"))),
       reality: visualReadinessDoctorGreen
-        ? `Visual production control plane is reported: ${visualReadiness?.summary?.visual_tool_cards || 0} visual/media/design cards, ${visualReadiness?.summary?.control_green_lanes || 0}/4 lanes control-green, ${visualReadiness?.summary?.runtime_ready_lanes || 0}/4 runtime-ready, visual_ready=${Boolean(visualReadiness?.visual_ready)}.`
+        ? `Visual production control plane is reported: ${visualReadiness?.summary?.visual_tool_cards || 0} visual/media/design cards, ${visualReadiness?.summary?.control_green_lanes || 0}/4 lanes control-green, ${visualReadiness?.summary?.runtime_ready_lanes || 0}/4 runtime-ready, artifact_vault_ready=${Boolean(visualReadiness?.summary?.artifact_vault_ready)}, visual_ready=${Boolean(visualReadiness?.visual_ready)}.`
         : "Visual production readiness doctor source exists or is planned, but no current readiness receipt is available yet.",
       next: visualReadinessDoctorGreen
-        ? "Do not call visual runtime ready until artifact vault, sample generation receipts, hardware locks, and promotion gates are green."
+        ? "Do not call visual runtime ready until sample generation receipts, hardware locks, and promotion gates are green."
         : "Run npm.cmd run visual:readiness so visual/media/design runtime truth is visible in Ops reports.",
     },
     {

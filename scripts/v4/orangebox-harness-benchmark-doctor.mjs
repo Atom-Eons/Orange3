@@ -147,6 +147,9 @@ const requiredOpsScripts = [
   "codexa:handoff",
   "research:scout",
   "research:radar",
+  "horizon:review",
+  "visual:artifact-vault",
+  "visual:readiness",
   "knowledge:improvements",
   "assurance:doctor",
   "tool:ergonomics",
@@ -774,6 +777,131 @@ const tasks = [
           artifact_pointer_policy_declared: toolmesh.checks.artifact_pointer_policy_declared,
           immutable_templates_for_workflow_tools: toolmesh.checks.immutable_templates_for_workflow_tools,
           feature_row: "v3_free_alpha_toolmesh",
+        });
+    },
+  },
+  {
+    id: "visual_production_readiness_truth",
+    category: "visual_runtime_truth",
+    oracle: "Visual/media/design readiness must distinguish control-plane proof from promoted runtime power and must not touch the living frontend lane.",
+    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
+    run(trace) {
+      const visual = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), trace);
+      const vault = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-vault.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const failures = [];
+      const lanes = Array.isArray(visual?.lanes) ? visual.lanes : [];
+      const visualRow = feature?.matrix?.find((row) => row.id === "visual_production_readiness");
+      const visualProjectRow = project?.scope?.find((row) => row.area === "Visual production readiness");
+      if (!packageJson?.scripts?.["visual:artifact-vault"]?.includes("orangebox-visual-artifact-vault-doctor.mjs")) failures.push("Package script visual:artifact-vault missing or wrong");
+      if (!packageJson?.scripts?.["visual:readiness"]?.includes("orangebox-visual-production-readiness-doctor.mjs")) failures.push("Package script visual:readiness missing or wrong");
+      if (vault?.status !== "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN" || vault?.vault_ready !== true) failures.push(`Visual artifact vault not green: ${vault?.status || "missing"}`);
+      if (vault?.vault?.pointer_only !== true) failures.push("Visual artifact vault does not preserve pointer_only=true");
+      if (vault?.vault?.receipt_binary_payload_allowed !== false) failures.push("Visual artifact vault does not forbid receipt binary payloads");
+      if (!vault?.proof_artifact?.manifest_path) failures.push("Visual artifact vault does not expose proof manifest path");
+      if (visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY") failures.push(`Visual readiness status wrong/missing: ${visual?.status || "missing"}`);
+      if (visual?.ok !== true) failures.push("Visual readiness ok=true missing");
+      if (visual?.control_plane_green !== true) failures.push("Visual readiness control_plane_green=true missing");
+      if (visual?.summary?.artifact_vault_ready !== true) failures.push("Visual readiness does not mirror artifact_vault_ready=true");
+      if (!visual?.summary?.artifact_manifest_path) failures.push("Visual readiness does not mirror artifact manifest path");
+      if (typeof visual?.visual_ready !== "boolean") failures.push("Visual readiness does not expose boolean visual_ready");
+      if ((visual?.summary?.visual_tool_cards || 0) < 19) failures.push(`Visual tool card count too low: ${visual?.summary?.visual_tool_cards || 0}`);
+      if ((visual?.summary?.control_green_lanes || 0) !== 4) failures.push(`Control-green lane count is not 4: ${visual?.summary?.control_green_lanes || 0}`);
+      if (lanes.length !== 4) failures.push(`Visual lane count is not 4: ${lanes.length}`);
+      for (const lab of ["image-lab", "video-lab", "audio-lab", "design-lab"]) {
+        const lane = lanes.find((item) => item.lab === lab);
+        if (!lane) failures.push(`Missing visual readiness lane ${lab}`);
+        if (lane && lane.control_plane_green !== true) failures.push(`${lab} control plane is not green`);
+        if (lane && lane.execution_blocked_until_promoted !== true) failures.push(`${lab} does not preserve execution_blocked_until_promoted`);
+        if (lane && lane.artifact_pointer_policy_declared !== true) failures.push(`${lab} does not preserve artifact pointer policy`);
+      }
+      if (visual?.visual_ready === true && (visual?.summary?.runtime_ready_lanes || 0) < 4) failures.push("visual_ready=true without all runtime lanes ready");
+      if (!visualRow?.ok) failures.push("Feature matrix does not prove visual_production_readiness");
+      if (visualRow?.frontend_touch_allowed !== false) failures.push("Feature row must forbid frontend touch");
+      if (visualProjectRow?.status !== "REAL") failures.push("Project report does not list visual production readiness as REAL control-plane truth");
+      if (!String(visualProjectRow?.reality || "").includes("visual_ready=false") && visual?.visual_ready === false) failures.push("Project report does not surface visual_ready=false");
+      return failures.length
+        ? failTask("visual_production_readiness_truth", failures, {
+          status: visual?.status || null,
+          visual_ready: visual?.visual_ready ?? null,
+          control_green_lanes: visual?.summary?.control_green_lanes ?? null,
+          runtime_ready_lanes: visual?.summary?.runtime_ready_lanes ?? null,
+          artifact_vault_status: vault?.status || null,
+        })
+        : okTask("visual_production_readiness_truth", {
+          status: visual.status,
+          visual_ready: visual.visual_ready,
+          control_plane_green: visual.control_plane_green,
+          artifact_vault_ready: visual.summary.artifact_vault_ready,
+          artifact_manifest_path: visual.summary.artifact_manifest_path,
+          visual_tool_cards: visual.summary.visual_tool_cards,
+          control_green_lanes: visual.summary.control_green_lanes,
+          runtime_ready_lanes: visual.summary.runtime_ready_lanes,
+          feature_row: "visual_production_readiness",
+        });
+    },
+  },
+  {
+    id: "horizon_review_alpha_stack_truth",
+    category: "alpha_review",
+    oracle: "New alpha stack candidates must be reviewed with promotion blockers before adoption; TriLane stays strategy authority.",
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    run(trace) {
+      const horizon = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const failures = [];
+      const candidates = Array.isArray(horizon?.candidates) ? horizon.candidates : [];
+      const ids = new Set(candidates.map((candidate) => candidate.id));
+      const required = [
+        "bun_elysia_api_bridge",
+        "goose_executor",
+        "openjarvis_eval",
+        "context7_mcp_docs_lane",
+        "ai_sdk_ollama_transport",
+        "libsql_vector_memory",
+        "mastra_agent_framework",
+        "tilelang_tilekernels_dflash",
+      ];
+      const featureRow = feature?.matrix?.find((row) => row.id === "horizon_review_new_alpha_stack");
+      const projectRow = project?.scope?.find((row) => row.area === "Horizon review / new alpha stack");
+      if (!packageJson?.scripts?.["horizon:review"]?.includes("orangebox-horizon-review-doctor.mjs")) failures.push("Package script horizon:review missing or wrong");
+      if (horizon?.status !== "ORANGEBOX_HORIZON_REVIEW_READY" || horizon?.ok !== true) failures.push(`Horizon review not green: ${horizon?.status || "missing"}`);
+      if ((horizon?.summary?.candidates_reviewed || 0) < 8) failures.push(`Horizon candidate count too low: ${horizon?.summary?.candidates_reviewed || 0}`);
+      for (const id of required) {
+        if (!ids.has(id)) failures.push(`Horizon review missing candidate ${id}`);
+      }
+      const goose = candidates.find((candidate) => candidate.id === "goose_executor");
+      const openJarvis = candidates.find((candidate) => candidate.id === "openjarvis_eval");
+      const context7 = candidates.find((candidate) => candidate.id === "context7_mcp_docs_lane");
+      const elysia = candidates.find((candidate) => candidate.id === "bun_elysia_api_bridge");
+      if (!String(horizon?.doctrine || "").includes("TriLane remains strategy authority")) failures.push("Horizon doctrine does not preserve TriLane authority");
+      if (horizon?.summary?.elysia_dependency_present !== true) failures.push("Horizon review does not prove Elysia dependency presence");
+      if (horizon?.summary?.goose_card_present !== true) failures.push("Horizon review does not prove Goose card presence");
+      if (!String(goose?.horizon_decision || "").includes("CANDIDATE")) failures.push("Goose is not kept as a candidate");
+      if (!String(goose?.promotion_blocker || "").includes("Must not replace TriLane")) failures.push("Goose promotion blocker does not protect TriLane");
+      if (!String(openJarvis?.orangebox_state || "").includes("eval_harness")) failures.push("OpenJarvis is not stated as eval harness only");
+      if (openJarvis?.installed_or_present !== false) failures.push("OpenJarvis runtime is incorrectly marked installed/present");
+      if (!String(context7?.orangebox_state || "").includes("not_installed")) failures.push("Context7 is not stated as not installed");
+      if (!String(elysia?.horizon_decision || "").includes("ACTIVE_CONTRACT")) failures.push("Elysia bridge is not kept as active contract");
+      if (!featureRow?.ok) failures.push("Feature matrix does not prove horizon_review_new_alpha_stack");
+      if (projectRow?.status !== "REAL") failures.push("Project report does not list horizon review as REAL");
+      return failures.length
+        ? failTask("horizon_review_alpha_stack_truth", failures, {
+          status: horizon?.status || null,
+          candidates_reviewed: horizon?.summary?.candidates_reviewed ?? null,
+          ids: [...ids],
+        })
+        : okTask("horizon_review_alpha_stack_truth", {
+          status: horizon.status,
+          candidates_reviewed: horizon.summary.candidates_reviewed,
+          elysia_dependency_present: horizon.summary.elysia_dependency_present,
+          goose_card_present: horizon.summary.goose_card_present,
+          feature_row: "horizon_review_new_alpha_stack",
+          candidates: required,
         });
     },
   },
