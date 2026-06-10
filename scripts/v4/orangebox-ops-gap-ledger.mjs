@@ -85,6 +85,13 @@ function statusText(value) {
   return "unknown";
 }
 
+function projectOnlyBlockedByHarness(project) {
+  const blockers = Array.isArray(project?.not_real_yet) ? project.not_real_yet : [];
+  return project?.full_project_green === false &&
+    blockers.length === 1 &&
+    /harness benchmark/i.test(typeof blockers[0] === "string" ? blockers[0] : JSON.stringify(blockers[0]));
+}
+
 function renderMarkdown(result) {
   const lines = [];
   lines.push("# Orangebox Ops Gap Ledger");
@@ -303,7 +310,8 @@ async function main() {
     Array.isArray(gap.proof_commands) &&
     gap.proof_commands.length > 0
   );
-  const fullSystemGreenClaimAllowed = localOpsGreen && gaps.every((gap) => gap.blocks_full_system_green !== true);
+  const projectGreenEnough = project?.full_project_green === true || projectOnlyBlockedByHarness(project);
+  const fullSystemGreenClaimAllowed = localOpsGreen && projectGreenEnough && gaps.every((gap) => gap.blocks_full_system_green !== true);
   const status = ledgerOk
     ? gaps.length === 0
       ? "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"

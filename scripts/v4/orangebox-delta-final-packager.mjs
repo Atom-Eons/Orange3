@@ -286,8 +286,9 @@ function backendPackageJson() {
     dependencies: sourcePkg.dependencies || {},
     engines: sourcePkg.engines || undefined,
   };
+  const finalScriptCopyAllowlist = /^(antigravity:|v3:|k3:|toolmesh:|image-lab:|video-lab:|audio-lab:|design-lab:|coding-lab:|automation-lab:|analytics-lab:|public-agent:|observability:|security:|releaseops:|alpha-watchlist:)/;
   for (const [name, script] of Object.entries(sourcePkg.scripts || {})) {
-    if (/^(antigravity:|v3:|k3:)/.test(name)) pkg.scripts[name] = script;
+    if (finalScriptCopyAllowlist.test(name)) pkg.scripts[name] = script;
   }
   return pkg;
 }

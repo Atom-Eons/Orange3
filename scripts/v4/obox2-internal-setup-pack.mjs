@@ -50,6 +50,16 @@ async function writeJson(file, value) {
   await writeFile(file, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+async function ensureDir(dir) {
+  try {
+    await fsp.mkdir(dir, { recursive: true });
+  } catch (error) {
+    if (error?.code !== "EEXIST" || !fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
+      throw error;
+    }
+  }
+}
+
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
 }
@@ -752,8 +762,8 @@ if (-not $ok) { exit 1 }
 
 async function main() {
   await fsp.rm(outDir, { recursive: true, force: true });
-  await fsp.mkdir(outDir, { recursive: true });
-  await fsp.mkdir(downloads, { recursive: true });
+  await ensureDir(outDir);
+  await ensureDir(downloads);
 
   const registry = readJson(path.join(repoRoot, "config", "model_registry.json"));
   const roleMap = readJson(path.join(repoRoot, "config", "role_map.json"));
