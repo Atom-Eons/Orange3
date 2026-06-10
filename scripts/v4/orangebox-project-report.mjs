@@ -183,6 +183,7 @@ async function main() {
   const horizonReview = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json")) || readJson(latestReceipt("orangebox-horizon-review-"));
   const horizonBakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json")) || readJson(latestReceipt("orangebox-horizon-promotion-bakeoff-"));
   const gooseRuntime = readJson(path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json")) || readJson(latestReceipt("orangebox-v3-goose-runtime-doctor-", path.join(dataRoot, "v3", "receipts")));
+  const openJarvisEval = readJson(path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json")) || readJson(latestReceipt("orangebox-v3-openjarvis-eval-doctor-", path.join(dataRoot, "v3", "receipts")));
   const elysiaLatency = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json")) || readJson(latestReceipt("orangebox-elysia-rail-latency-bakeoff-"));
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
   const headlessImageRuntime = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json")) || readJson(latestReceipt("orangebox-headless-image-runtime-"));
@@ -331,6 +332,14 @@ async function main() {
     gooseRuntime?.runtime?.run_surface_ready === true &&
     gooseRuntime?.ghost_task?.ready_for_bounded_live_task === true &&
     gooseRuntime?.constraints?.default_executor_promoted === false;
+  const openJarvisEvalGreen =
+    openJarvisEval?.ok === true &&
+    openJarvisEval?.status === "OPENJARVIS_EVAL_HARNESS_BASELINE_GREEN" &&
+    openJarvisEval?.comparison?.measured_from_receipts === true &&
+    Number(openJarvisEval?.comparison?.baseline_score || 0) >= 0.85 &&
+    Number(openJarvisEval?.comparison?.primitive_coverage_score || 0) >= 0.8 &&
+    openJarvisEval?.runtime_truth?.default_router_approved === false &&
+    openJarvisEval?.promotion?.promotable_now === false;
   const elysiaLatencyGreen =
     elysiaLatency?.ok === true &&
     elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" &&
@@ -526,6 +535,16 @@ async function main() {
       next: horizonBakeoffReady
         ? "Use horizon:bakeoff before promoting OBOX Jarvis/OpenJarvis, Goose, Context7, Hermes, visual runtimes, Continue, libSQL, Mastra, or GPU acceleration candidates."
         : "Run npm.cmd run horizon:bakeoff after horizon:review and fix the exact failed probe or receipt gate.",
+    },
+    {
+      area: "OBOX Jarvis / OpenJarvis scorecard",
+      status: status(openJarvisEvalGreen, exists(path.join(repoRoot, "orangebox-v3", "openjarvis", "eval-runner.ts"))),
+      reality: openJarvisEvalGreen
+        ? `OBOX Jarvis is a measured spec/eval layer: baseline_score=${openJarvisEval?.comparison?.baseline_score ?? "unknown"}, primitive_coverage=${openJarvisEval?.comparison?.primitive_coverage_score ?? "unknown"}, task_card_score=${openJarvisEval?.comparison?.task_card_score ?? "unknown"}, runtime_installed=${Boolean(openJarvisEval?.runtime_truth?.openjarvis_runtime_installed)}, router_approved=${Boolean(openJarvisEval?.runtime_truth?.default_router_approved)}, promotable_now=${Boolean(openJarvisEval?.promotion?.promotable_now)}.`
+        : "OBOX Jarvis/OpenJarvis source exists or is planned, but no current receipt proves it as an evidence-backed scorecard against TriLane yet.",
+      next: openJarvisEvalGreen
+        ? "Use OBOX Jarvis as an efficiency/spec evaluator only; direct runtime promotion still needs an isolated same-task bakeoff against TriLane."
+        : "Run npm.cmd run v3:openjarvis:doctor && npm.cmd run horizon:bakeoff and fix the exact missing scorecard or router-boundary gate.",
     },
     {
       area: "Goose runtime install proof",
@@ -1205,8 +1224,23 @@ async function main() {
         goose_provider_configured: horizonBakeoff?.summary?.goose_provider_configured ?? null,
         goose_ghost_task_ready: horizonBakeoff?.summary?.goose_ghost_task_ready ?? null,
         openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
+        openjarvis_baseline_score: horizonBakeoff?.summary?.openjarvis_baseline_score ?? null,
+        openjarvis_primitive_coverage_score: horizonBakeoff?.summary?.openjarvis_primitive_coverage_score ?? null,
+        openjarvis_runtime_installed: horizonBakeoff?.summary?.openjarvis_runtime_installed ?? null,
+        openjarvis_router_approved: horizonBakeoff?.summary?.openjarvis_router_approved ?? null,
         hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
         visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+      },
+      openjarvis_eval: {
+        path: path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json"),
+        status: openJarvisEval?.status || null,
+        baseline_score: openJarvisEval?.comparison?.baseline_score ?? null,
+        primitive_coverage_score: openJarvisEval?.comparison?.primitive_coverage_score ?? null,
+        task_card_score: openJarvisEval?.comparison?.task_card_score ?? null,
+        measured_from_receipts: openJarvisEval?.comparison?.measured_from_receipts ?? null,
+        runtime_installed: openJarvisEval?.runtime_truth?.openjarvis_runtime_installed ?? null,
+        default_router_approved: openJarvisEval?.runtime_truth?.default_router_approved ?? null,
+        promotable_now: openJarvisEval?.promotion?.promotable_now ?? null,
       },
       goose_runtime: {
         path: path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json"),

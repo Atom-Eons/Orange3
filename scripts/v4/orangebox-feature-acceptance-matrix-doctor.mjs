@@ -498,8 +498,45 @@ async function main() {
             promotable_now: parsed?.summary?.promotable_now ?? null,
             goose_binary_found: parsed?.summary?.goose_binary_found ?? null,
             openjarvis_eval_receipt_green: parsed?.summary?.openjarvis_eval_receipt_green ?? null,
+            openjarvis_baseline_score: parsed?.summary?.openjarvis_baseline_score ?? null,
+            openjarvis_primitive_coverage_score: parsed?.summary?.openjarvis_primitive_coverage_score ?? null,
+            openjarvis_router_approved: parsed?.summary?.openjarvis_router_approved ?? null,
             hermes_pack_present: parsed?.summary?.hermes_pack_present ?? null,
             visual_ready: parsed?.summary?.visual_ready ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "obox_jarvis_openjarvis_eval_scorecard",
+      claim: "OBOX Jarvis/OpenJarvis is a measured efficiency/spec evaluator for TriLane, not a hidden router replacement.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run v3:openjarvis:doctor && npm.cmd run horizon:bakeoff",
+      acceptance_gate: "OpenJarvis scorecard is green, reads TriLane/current-lane receipts, scores five primitives, keeps default router approval false, and leaves promotion closed.",
+      rollback_path: "Revert orangebox-v3/openjarvis/eval-runner.ts and horizon/bakeoff scorecard wiring; rerun v3:openjarvis:doctor, horizon:bakeoff, feature:proof, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json"), "OPENJARVIS_EVAL_HARNESS_BASELINE_GREEN", {
+          accept: (parsed, status) => status === "OPENJARVIS_EVAL_HARNESS_BASELINE_GREEN"
+            && parsed?.ok === true
+            && parsed?.comparison?.measured_from_receipts === true
+            && Number(parsed?.comparison?.baseline_score || 0) >= 0.85
+            && Number(parsed?.comparison?.primitive_coverage_score || 0) >= 0.8
+            && parsed?.runtime_truth?.default_router_approved === false
+            && parsed?.runtime_truth?.no_router_replacement === true
+            && parsed?.runtime_truth?.frontend_touched === false
+            && parsed?.runtime_truth?.paid_api_attempted === false
+            && parsed?.promotion?.promotable_now === false,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            baseline_score: parsed?.comparison?.baseline_score ?? null,
+            primitive_coverage_score: parsed?.comparison?.primitive_coverage_score ?? null,
+            task_card_score: parsed?.comparison?.task_card_score ?? null,
+            openjarvis_runtime_installed: parsed?.runtime_truth?.openjarvis_runtime_installed ?? null,
+            default_router_approved: parsed?.runtime_truth?.default_router_approved ?? null,
+            promotable_now: parsed?.promotion?.promotable_now ?? null,
           }),
         }),
       ],

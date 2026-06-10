@@ -1032,12 +1032,13 @@ const tasks = [
     id: "horizon_promotion_bakeoff_truth",
     category: "alpha_review",
     oracle: "Reviewed alpha tools must pass a promotion bakeoff matrix before they can be called active; no candidate auto-promotes.",
-    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
     run(trace) {
       const bakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json"), trace);
       const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const openJarvisEval = readJson(path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json"), trace);
       const failures = [];
       const candidates = Array.isArray(bakeoff?.candidates) ? bakeoff.candidates : [];
       const ids = new Set(candidates.map((candidate) => candidate.id));
@@ -1068,6 +1069,12 @@ const tasks = [
       if (bakeoff?.summary?.goose_binary_found !== true) failures.push("Bakeoff does not prove Goose binary found");
       if (!String(bakeoff?.summary?.goose_runtime_status || "").includes("GOOSE_RUNTIME")) failures.push("Bakeoff does not surface Goose runtime status");
       if (bakeoff?.summary?.goose_ghost_task_ready !== true) failures.push("Bakeoff does not prove Goose ghost task guard ready");
+      if (Number(bakeoff?.summary?.openjarvis_baseline_score || 0) < 0.85) failures.push("Bakeoff does not prove OBOX Jarvis baseline score");
+      if (Number(bakeoff?.summary?.openjarvis_primitive_coverage_score || 0) < 0.8) failures.push("Bakeoff does not prove OBOX Jarvis primitive coverage");
+      if (bakeoff?.summary?.openjarvis_router_approved !== false) failures.push("Bakeoff does not keep OBOX Jarvis router approval false");
+      if (openJarvisEval?.status !== "OPENJARVIS_EVAL_HARNESS_BASELINE_GREEN") failures.push(`OpenJarvis scorecard not green: ${openJarvisEval?.status || "missing"}`);
+      if (openJarvisEval?.runtime_truth?.default_router_approved !== false) failures.push("OpenJarvis eval does not keep default router approval false");
+      if (openJarvisEval?.promotion?.promotable_now !== false) failures.push("OpenJarvis eval promotion gate is not closed");
       if (!Array.isArray(bakeoff?.failures) || bakeoff.failures.length !== 0) failures.push("Bakeoff has failures");
       for (const id of required) {
         if (!ids.has(id)) failures.push(`Bakeoff missing candidate ${id}`);
@@ -1079,6 +1086,8 @@ const tasks = [
       if (!String(goose?.current_role || "").includes("executor hands")) failures.push("Goose current role does not say executor hands");
       if (!String(goose?.status || "").includes("RUNTIME") && !String(goose?.status || "").includes("ENVELOPE")) failures.push("Goose bakeoff status is not envelope/runtime truth");
       if (!String(jarvis?.current_role || "").includes("not router authority")) failures.push("OBOX Jarvis current role does not reject router authority");
+      if (!jarvis?.proofs?.some((proof) => proof.id === "trilane_baseline_comparison" && proof.ok === true)) failures.push("OBOX Jarvis candidate lacks green TriLane baseline comparison proof");
+      if (!jarvis?.proofs?.some((proof) => proof.id === "router_not_promoted" && proof.ok === true)) failures.push("OBOX Jarvis candidate lacks router-not-promoted proof");
       if (!String(visual?.status || "").includes("RUNTIME") && !String(visual?.status || "").includes("CONTROL_READY")) failures.push("Visual runtime candidate is not status-gated");
       if (!String(hermes?.current_role || "").includes("cannot own Orangebox authority")) failures.push("Hermes candidate does not reject hidden authority");
       if (!featureRow?.ok) failures.push("Feature matrix does not prove horizon_promotion_bakeoff");
@@ -1098,6 +1107,9 @@ const tasks = [
           promotable_now: bakeoff.summary.promotable_now,
           goose_binary_found: bakeoff.summary.goose_binary_found,
           openjarvis_eval_receipt_green: bakeoff.summary.openjarvis_eval_receipt_green,
+          openjarvis_baseline_score: bakeoff.summary.openjarvis_baseline_score,
+          openjarvis_primitive_coverage_score: bakeoff.summary.openjarvis_primitive_coverage_score,
+          openjarvis_router_approved: bakeoff.summary.openjarvis_router_approved,
           hermes_pack_present: bakeoff.summary.hermes_pack_present,
           visual_ready: bakeoff.summary.visual_ready,
           feature_row: "horizon_promotion_bakeoff",

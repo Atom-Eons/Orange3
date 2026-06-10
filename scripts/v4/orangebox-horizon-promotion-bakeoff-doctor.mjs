@@ -154,6 +154,7 @@ async function main() {
   const visualPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const headlessImagePath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json");
   const gooseRuntimePath = path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json");
+  const openJarvisEvalPath = path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json");
   const toolmeshPath = path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json");
   const projectPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
@@ -162,6 +163,7 @@ async function main() {
   const visual = readJson(visualPath, null);
   const headlessImage = readJson(headlessImagePath, null);
   const gooseRuntime = readJson(gooseRuntimePath, null);
+  const openJarvisEval = readJson(openJarvisEvalPath, null);
   const toolmesh = readJson(toolmeshPath, null);
   const project = readJson(projectPath, null);
   const openclaw = readJson(openclawPath, null);
@@ -172,6 +174,7 @@ async function main() {
     goose: receiptEvidence(latestV3Receipt("goose-envelope")),
     gooseRuntime: receiptEvidence(latestV3Receipt("goose-runtime-doctor")),
     openjarvis: receiptEvidence(latestV3Receipt("openjarvis-eval-doctor")),
+    openjarvisLatest: receiptEvidence(openJarvisEvalPath),
     context7: receiptEvidence(latestV3Receipt("mcp-context7-docs-lane")),
     visual: receiptEvidence(visualPath),
     headlessImage: receiptEvidence(headlessImagePath),
@@ -263,11 +266,18 @@ async function main() {
       next_proof_command: "npm.cmd run v3:openjarvis:doctor",
       proofs: [
         { id: "openjarvis_eval_receipt", ok: receipts.openjarvis.ok, detail: receipts.openjarvis.status },
+        { id: "openjarvis_latest_scorecard", ok: receipts.openjarvisLatest.ok, detail: receipts.openjarvisLatest.status },
+        { id: "trilane_baseline_comparison", ok: openJarvisEval?.comparison?.baseline_score >= 0.85, detail: openJarvisEval?.comparison?.status || null },
+        { id: "five_primitive_coverage", ok: openJarvisEval?.comparison?.primitive_coverage_score >= 0.8, detail: openJarvisEval?.comparison?.primitive_coverage_score ?? null },
+        { id: "router_not_promoted", ok: openJarvisEval?.runtime_truth?.default_router_approved === false && openJarvisEval?.promotion?.promotable_now === false, detail: "promotion remains gated" },
         { id: "five_primitive_mapping_present", ok: horizon?.candidates?.some((item) => item.id === "openjarvis_eval" && item.orangebox_mapping), detail: "horizon candidate mapping" },
       ],
       blockers: [
         receipts.openjarvis.ok ? null : "Run v3:openjarvis:doctor.",
-        "Needs measured comparison against current TriLane route on a real Orangebox task.",
+        receipts.openjarvisLatest.ok ? null : "OpenJarvis latest scorecard is missing.",
+        openJarvisEval?.comparison?.baseline_score >= 0.85 ? null : "Current TriLane baseline score is not strong enough for a useful OpenJarvis comparison.",
+        openJarvisEval?.runtime_truth?.openjarvis_runtime_installed === true ? null : "OpenJarvis runtime itself is not installed/configured; current proof is spec/eval only.",
+        "Needs one direct same-task runtime bakeoff before any routing promotion.",
       ],
       intentional_non_promotion: true,
     }),
@@ -431,6 +441,7 @@ async function main() {
       horizon_review: horizonPath,
       elysia_latency_bakeoff: elysiaLatencyPath,
       goose_runtime: gooseRuntimePath,
+      openjarvis_eval: openJarvisEvalPath,
       visual_readiness: visualPath,
       toolmesh_doctor: toolmeshPath,
     },
@@ -453,6 +464,10 @@ async function main() {
       goose_runtime_status: gooseRuntime?.status || null,
       goose_provider_configured: gooseRuntime?.runtime?.provider_configured ?? null,
       goose_ghost_task_ready: gooseRuntime?.ghost_task?.ready_for_bounded_live_task ?? null,
+      openjarvis_baseline_score: openJarvisEval?.comparison?.baseline_score ?? null,
+      openjarvis_primitive_coverage_score: openJarvisEval?.comparison?.primitive_coverage_score ?? null,
+      openjarvis_runtime_installed: openJarvisEval?.runtime_truth?.openjarvis_runtime_installed ?? null,
+      openjarvis_router_approved: openJarvisEval?.runtime_truth?.default_router_approved ?? null,
       openjarvis_eval_receipt_green: receipts.openjarvis.ok,
       hermes_pack_present: hermesPackPresent,
       openclaw_retired: openclaw?.status === "OPENCLAW_STARTUP_RETIRED",
