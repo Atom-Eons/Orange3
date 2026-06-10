@@ -149,6 +149,7 @@ const requiredOpsScripts = [
   "research:radar",
   "horizon:review",
   "horizon:bakeoff",
+  "v3:goose:runtime",
   "v3:api:bakeoff",
   "littleorange:doctor",
   "visual:artifact-vault",
@@ -1055,6 +1056,7 @@ const tasks = [
         "codexa_gpu_acceleration_candidates",
       ];
       if (!packageJson?.scripts?.["horizon:bakeoff"]?.includes("orangebox-horizon-promotion-bakeoff-doctor.mjs")) failures.push("Package script horizon:bakeoff missing or wrong");
+      if (!packageJson?.scripts?.["v3:goose:runtime"]?.includes("orangebox-v3/goose/runtime-doctor.ts")) failures.push("Package script v3:goose:runtime missing or wrong");
       if (bakeoff?.status !== "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY" || bakeoff?.ok !== true) failures.push(`Horizon bakeoff not green: ${bakeoff?.status || "missing"}`);
       if ((bakeoff?.summary?.candidates_total || 0) < 10) failures.push(`Bakeoff candidate count too low: ${bakeoff?.summary?.candidates_total || 0}`);
       if ((bakeoff?.summary?.waves_total || 0) < 5) failures.push(`Bakeoff wave count too low: ${bakeoff?.summary?.waves_total || 0}`);
@@ -1063,6 +1065,9 @@ const tasks = [
       if (bakeoff?.summary?.toolmesh_execution_blocked_until_promoted !== true) failures.push("Bakeoff does not prove ToolMesh execution is blocked until promotion");
       if (bakeoff?.summary?.visual_artifact_pipeline_ready !== true) failures.push("Bakeoff does not prove visual artifact pipeline ready");
       if (bakeoff?.summary?.openclaw_retired !== true) failures.push("Bakeoff does not prove OpenClaw retired");
+      if (bakeoff?.summary?.goose_binary_found !== true) failures.push("Bakeoff does not prove Goose binary found");
+      if (!String(bakeoff?.summary?.goose_runtime_status || "").includes("GOOSE_RUNTIME")) failures.push("Bakeoff does not surface Goose runtime status");
+      if (bakeoff?.summary?.goose_ghost_task_ready !== true) failures.push("Bakeoff does not prove Goose ghost task guard ready");
       if (!Array.isArray(bakeoff?.failures) || bakeoff.failures.length !== 0) failures.push("Bakeoff has failures");
       for (const id of required) {
         if (!ids.has(id)) failures.push(`Bakeoff missing candidate ${id}`);

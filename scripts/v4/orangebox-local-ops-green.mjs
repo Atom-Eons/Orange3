@@ -225,6 +225,7 @@ async function main() {
     { script: "toolmesh:physical-doctor", timeout: 90_000 },
     { script: "v3:api:doctor", timeout: 90_000 },
     { script: "v3:goose:envelope", timeout: 90_000 },
+    { script: "v3:goose:runtime", timeout: 90_000 },
     { script: "v3:openjarvis:doctor", timeout: 90_000 },
     { script: "v3:mcp:doctor", timeout: 90_000 },
     { script: "v3:api:bakeoff", timeout: 90_000 },

@@ -117,6 +117,8 @@ function main() {
   const horizonReview = readJson(horizonReviewPath);
   const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
   const horizonBakeoff = readJson(horizonBakeoffPath);
+  const gooseRuntimePath = path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json");
+  const gooseRuntime = readJson(gooseRuntimePath);
   const toolmeshPhysicalPath = path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json");
   const toolmeshPhysical = readJson(toolmeshPhysicalPath);
   const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
@@ -307,6 +309,22 @@ function main() {
       visual_runtime_ready_lanes: horizonBakeoff?.summary?.visual_runtime_ready_lanes ?? null,
       headless_image_runtime_ready: horizonBakeoff?.summary?.headless_image_runtime_ready ?? null,
       note: "Turns reviewed alpha candidates into a proof-ranked bakeoff matrix with binary/dependency probes, blockers, and no automatic promotion.",
+    },
+    goose_runtime: {
+      ok:
+        gooseRuntime?.ok === true &&
+        ["GOOSE_RUNTIME_INSTALLED_UNCONFIGURED_GATED", "GOOSE_RUNTIME_CONFIGURED_GATED"].includes(gooseRuntime?.status) &&
+        gooseRuntime?.runtime?.run_surface_ready === true &&
+        gooseRuntime?.ghost_task?.ready_for_bounded_live_task === true &&
+        gooseRuntime?.constraints?.default_executor_promoted === false,
+      path: gooseRuntimePath,
+      status: gooseRuntime?.status || null,
+      version: gooseRuntime?.runtime?.version || null,
+      provider_configured: gooseRuntime?.runtime?.provider_configured ?? null,
+      provider_missing_expected_gate: gooseRuntime?.runtime?.provider_missing_expected_gate ?? null,
+      ghost_task_ready: gooseRuntime?.ghost_task?.ready_for_bounded_live_task ?? null,
+      default_executor_promoted: gooseRuntime?.constraints?.default_executor_promoted ?? null,
+      note: "Goose runtime is allowed to exist as bounded hands only; it cannot own planning, routing, approval, or main-repo mutation.",
     },
     toolmesh_physical_runtime: {
       ok:

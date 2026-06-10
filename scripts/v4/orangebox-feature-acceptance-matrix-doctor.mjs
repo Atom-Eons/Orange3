@@ -506,6 +506,41 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "goose_runtime_install_proof",
+      claim: "Goose is installed and visible to Orangebox as a gated executor candidate, but it is not promoted as default hands or route authority.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run v3:goose:runtime && npm.cmd run horizon:bakeoff",
+      acceptance_gate: "Goose runtime receipt is green, run surface is proven, ghost-task guards are green, no live Goose agent execution occurs, and default executor promotion remains false.",
+      rollback_path: "Remove v3:goose:runtime script wiring and delete the user-local goose.exe only if Goose is no longer wanted; rerun horizon:bakeoff, feature:proof, project:report, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json"), "GOOSE_RUNTIME_INSTALLED_UNCONFIGURED_GATED", {
+          accept: (parsed, status) => (
+            status === "GOOSE_RUNTIME_INSTALLED_UNCONFIGURED_GATED" ||
+            status === "GOOSE_RUNTIME_CONFIGURED_GATED"
+          )
+            && parsed?.ok === true
+            && parsed?.runtime?.run_surface_ready === true
+            && parsed?.ghost_task?.ready_for_bounded_live_task === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.repo_mutated_by_goose === false
+            && parsed?.constraints?.live_agent_execution_attempted === false
+            && parsed?.constraints?.default_executor_promoted === false,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            version: parsed?.runtime?.version || null,
+            provider_configured: parsed?.runtime?.provider_configured ?? null,
+            provider_missing_expected_gate: parsed?.runtime?.provider_missing_expected_gate ?? null,
+            run_surface_ready: parsed?.runtime?.run_surface_ready ?? null,
+            ghost_task_ready: parsed?.ghost_task?.ready_for_bounded_live_task ?? null,
+            default_executor_promoted: parsed?.constraints?.default_executor_promoted ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "elysia_rail_latency_bakeoff",
       claim: "The Bun/Elysia API bridge is benchmarked as a temporary sidecar against the current live rails before any default transport switch.",
       lane: "backend_ops",

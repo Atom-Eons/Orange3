@@ -153,6 +153,7 @@ async function main() {
   const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const visualPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const headlessImagePath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json");
+  const gooseRuntimePath = path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json");
   const toolmeshPath = path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json");
   const projectPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
@@ -160,6 +161,7 @@ async function main() {
   const horizon = readJson(horizonPath, null);
   const visual = readJson(visualPath, null);
   const headlessImage = readJson(headlessImagePath, null);
+  const gooseRuntime = readJson(gooseRuntimePath, null);
   const toolmesh = readJson(toolmeshPath, null);
   const project = readJson(projectPath, null);
   const openclaw = readJson(openclawPath, null);
@@ -168,6 +170,7 @@ async function main() {
     elysia: receiptEvidence(latestV3Receipt("api-bridge-doctor")),
     elysiaLatency: receiptEvidence(elysiaLatencyPath),
     goose: receiptEvidence(latestV3Receipt("goose-envelope")),
+    gooseRuntime: receiptEvidence(latestV3Receipt("goose-runtime-doctor")),
     openjarvis: receiptEvidence(latestV3Receipt("openjarvis-eval-doctor")),
     context7: receiptEvidence(latestV3Receipt("mcp-context7-docs-lane")),
     visual: receiptEvidence(visualPath),
@@ -234,15 +237,20 @@ async function main() {
       wave: "wave_1_hands_executor_bakeoff",
       status: binaries.goose.found ? "RUNTIME_FOUND_ENVELOPE_READY_NEEDS_GHOST_TASK" : "ENVELOPE_READY_RUNTIME_MISSING",
       current_role: "Possible executor hands behind ghost worktree/path/command/receipt envelope.",
-      next_proof_command: "npm.cmd run v3:goose:envelope",
+      next_proof_command: "npm.cmd run v3:goose:envelope && npm.cmd run v3:goose:runtime",
       proofs: [
         { id: "toolmesh_card", ok: Boolean(card(cards, "goose")), detail: card(cards, "goose")?.lab || null },
         { id: "goose_envelope_receipt", ok: receipts.goose.ok, detail: receipts.goose.status },
         { id: "goose_binary", ok: binaries.goose.found, detail: binaries.goose.first_found },
+        { id: "goose_runtime_receipt", ok: receipts.gooseRuntime.ok, detail: receipts.gooseRuntime.status },
+        { id: "goose_run_surface", ok: gooseRuntime?.runtime?.run_surface_ready === true, detail: gooseRuntime?.runtime?.version || null },
+        { id: "goose_ghost_guards", ok: gooseRuntime?.ghost_task?.ready_for_bounded_live_task === true, detail: gooseRuntime?.ghost_task?.path || null },
       ],
       blockers: [
         binaries.goose.found ? null : "Goose binary is not proven on this machine.",
         receipts.goose.ok ? null : "Goose envelope receipt is missing.",
+        receipts.gooseRuntime.ok ? null : "Goose runtime doctor receipt is missing.",
+        gooseRuntime?.runtime?.provider_configured === true ? null : "Goose provider/model is not configured through an Orangebox-approved rail.",
         "Needs one bounded ghost-worktree task with STRONGARM/Checkmate receipts before execution promotion.",
       ],
       intentional_non_promotion: true,
@@ -422,6 +430,7 @@ async function main() {
       tool_cards: cardsFile,
       horizon_review: horizonPath,
       elysia_latency_bakeoff: elysiaLatencyPath,
+      goose_runtime: gooseRuntimePath,
       visual_readiness: visualPath,
       toolmesh_doctor: toolmeshPath,
     },
@@ -441,6 +450,9 @@ async function main() {
       visual_runtime_ready_lanes: visualRuntimeReadyLanes,
       headless_image_runtime_ready: headlessImageRuntimeReady,
       goose_binary_found: binaries.goose.found,
+      goose_runtime_status: gooseRuntime?.status || null,
+      goose_provider_configured: gooseRuntime?.runtime?.provider_configured ?? null,
+      goose_ghost_task_ready: gooseRuntime?.ghost_task?.ready_for_bounded_live_task ?? null,
       openjarvis_eval_receipt_green: receipts.openjarvis.ok,
       hermes_pack_present: hermesPackPresent,
       openclaw_retired: openclaw?.status === "OPENCLAW_STARTUP_RETIRED",

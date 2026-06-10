@@ -182,6 +182,7 @@ async function main() {
   const toolmeshPhysical = readJson(path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json"));
   const horizonReview = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json")) || readJson(latestReceipt("orangebox-horizon-review-"));
   const horizonBakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json")) || readJson(latestReceipt("orangebox-horizon-promotion-bakeoff-"));
+  const gooseRuntime = readJson(path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json")) || readJson(latestReceipt("orangebox-v3-goose-runtime-doctor-", path.join(dataRoot, "v3", "receipts")));
   const elysiaLatency = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json")) || readJson(latestReceipt("orangebox-elysia-rail-latency-bakeoff-"));
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
   const headlessImageRuntime = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json")) || readJson(latestReceipt("orangebox-headless-image-runtime-"));
@@ -324,6 +325,12 @@ async function main() {
     horizonBakeoff?.summary?.horizon_review_green === true &&
     horizonBakeoff?.summary?.toolmesh_execution_blocked_until_promoted === true &&
     horizonBakeoff?.summary?.visual_artifact_pipeline_ready === true;
+  const gooseRuntimeReady =
+    gooseRuntime?.ok === true &&
+    ["GOOSE_RUNTIME_INSTALLED_UNCONFIGURED_GATED", "GOOSE_RUNTIME_CONFIGURED_GATED"].includes(gooseRuntime?.status) &&
+    gooseRuntime?.runtime?.run_surface_ready === true &&
+    gooseRuntime?.ghost_task?.ready_for_bounded_live_task === true &&
+    gooseRuntime?.constraints?.default_executor_promoted === false;
   const elysiaLatencyGreen =
     elysiaLatency?.ok === true &&
     elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" &&
@@ -519,6 +526,16 @@ async function main() {
       next: horizonBakeoffReady
         ? "Use horizon:bakeoff before promoting OBOX Jarvis/OpenJarvis, Goose, Context7, Hermes, visual runtimes, Continue, libSQL, Mastra, or GPU acceleration candidates."
         : "Run npm.cmd run horizon:bakeoff after horizon:review and fix the exact failed probe or receipt gate.",
+    },
+    {
+      area: "Goose runtime install proof",
+      status: status(gooseRuntimeReady, exists(path.join(repoRoot, "orangebox-v3", "goose", "runtime-doctor.ts"))),
+      reality: gooseRuntimeReady
+        ? `Goose runtime is installed and gated: version=${gooseRuntime?.runtime?.version || "unknown"}, provider_configured=${Boolean(gooseRuntime?.runtime?.provider_configured)}, provider_missing_expected_gate=${Boolean(gooseRuntime?.runtime?.provider_missing_expected_gate)}, ghost_task_ready=${Boolean(gooseRuntime?.ghost_task?.ready_for_bounded_live_task)}, default_executor_promoted=${Boolean(gooseRuntime?.constraints?.default_executor_promoted)}.`
+        : "Goose runtime doctor source exists or is planned, but no current installed-runtime receipt is green yet.",
+      next: gooseRuntimeReady
+        ? "Use Goose only inside the ghost-worktree envelope after an approved provider/model rail is configured and one STRONGARM/Checkmate task proves it beats the current executor."
+        : "Run npm.cmd run v3:goose:runtime and fix the exact missing binary, command surface, or guard proof.",
     },
     {
       area: "Bun/Elysia rail latency bakeoff",
@@ -870,6 +887,7 @@ async function main() {
         research_radar: packageScript("research:radar", packageJson),
         horizon_review: packageScript("horizon:review", packageJson),
         horizon_bakeoff: packageScript("horizon:bakeoff", packageJson),
+        goose_runtime: packageScript("v3:goose:runtime", packageJson),
         toolmesh_physical_doctor: packageScript("toolmesh:physical-doctor", packageJson),
         elysia_latency_bakeoff: packageScript("v3:api:bakeoff", packageJson),
         visual_readiness: packageScript("visual:readiness", packageJson),
@@ -1183,9 +1201,23 @@ async function main() {
         waves_total: horizonBakeoff?.summary?.waves_total ?? null,
         promotable_now: horizonBakeoff?.summary?.promotable_now ?? null,
         goose_binary_found: horizonBakeoff?.summary?.goose_binary_found ?? null,
+        goose_runtime_status: horizonBakeoff?.summary?.goose_runtime_status ?? null,
+        goose_provider_configured: horizonBakeoff?.summary?.goose_provider_configured ?? null,
+        goose_ghost_task_ready: horizonBakeoff?.summary?.goose_ghost_task_ready ?? null,
         openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
         hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
         visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+      },
+      goose_runtime: {
+        path: path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json"),
+        status: gooseRuntime?.status || null,
+        version: gooseRuntime?.runtime?.version || null,
+        provider_configured: gooseRuntime?.runtime?.provider_configured ?? null,
+        provider_missing_expected_gate: gooseRuntime?.runtime?.provider_missing_expected_gate ?? null,
+        run_surface_ready: gooseRuntime?.runtime?.run_surface_ready ?? null,
+        ghost_task_ready: gooseRuntime?.ghost_task?.ready_for_bounded_live_task ?? null,
+        default_executor_promoted: gooseRuntime?.constraints?.default_executor_promoted ?? null,
+        live_agent_execution_attempted: gooseRuntime?.constraints?.live_agent_execution_attempted ?? null,
       },
       elysia_latency_bakeoff: {
         path: elysiaLatency?.latest_path || path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json"),
