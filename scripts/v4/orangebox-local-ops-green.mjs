@@ -226,6 +226,7 @@ async function main() {
     { script: "v3:goose:envelope", timeout: 90_000 },
     { script: "v3:openjarvis:doctor", timeout: 90_000 },
     { script: "v3:mcp:doctor", timeout: 90_000 },
+    { script: "v3:api:bakeoff", timeout: 90_000 },
     { script: "visual:artifact-vault", timeout: 90_000 },
     { script: "visual:artifact-smoke", timeout: 90_000 },
     { script: "visual:readiness", timeout: 90_000 },
@@ -270,6 +271,7 @@ async function main() {
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
   const horizonReviewPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
   const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
+  const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const sessionSpinePath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
@@ -302,6 +304,7 @@ async function main() {
   const assurance = readJson(assurancePath);
   const horizonReview = readJson(horizonReviewPath);
   const horizonBakeoff = readJson(horizonBakeoffPath);
+  const elysiaLatency = readJson(elysiaLatencyPath);
   const visualReadiness = readJson(visualReadinessPath);
   const signalHygiene = readJson(signalHygienePath);
   const sessionSpine = readJson(sessionSpinePath);
@@ -423,6 +426,13 @@ async function main() {
       openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
       visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
     }),
+    gate("elysia_rail_latency_bakeoff_green", elysiaLatency?.ok === true && elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" && elysiaLatency?.benchmark?.latency_parity_green === true && elysiaLatency?.promotion?.default_api_replacement_approved === false, {
+      status: elysiaLatency?.status || null,
+      latency_parity_green: elysiaLatency?.benchmark?.latency_parity_green ?? null,
+      elysia_p95_ms: elysiaLatency?.benchmark?.elysia_health_p95_ms ?? null,
+      current_comparison_p95_ms: elysiaLatency?.benchmark?.current_comparison_p95_ms ?? null,
+      default_api_replacement_approved: elysiaLatency?.promotion?.default_api_replacement_approved ?? null,
+    }),
     gate("operator_signal_hygiene_green", signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN", { status: signalHygiene?.status || null, severity: signalHygiene?.signal_hygiene?.severity || null }),
     gate("doer_watcher_spine_green", sessionSpine?.ok === true && sessionSpine?.status === "ORANGEBOX_DOER_WATCHER_SPINE_GREEN", { status: sessionSpine?.status || null, failures: sessionSpine?.failures?.length ?? null }),
     gate("ops_gap_ledger_current", opsGapLedger?.ok === true && ["ORANGEBOX_OPS_GAP_LEDGER_REPORTED_OPEN_GAPS", "ORANGEBOX_OPS_GAP_LEDGER_GREEN_NO_OPEN_GAPS"].includes(opsGapLedger?.status), {
@@ -480,6 +490,7 @@ async function main() {
     visual_readiness: visualReadinessPath,
     horizon_review: horizonReviewPath,
     horizon_bakeoff: horizonBakeoffPath,
+    elysia_latency_bakeoff: elysiaLatencyPath,
     signal_hygiene: signalHygienePath,
       doer_watcher_spine: sessionSpinePath,
       ops_gap_ledger: opsGapLedgerPath,

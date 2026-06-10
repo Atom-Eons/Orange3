@@ -150,6 +150,7 @@ async function main() {
   const { file: cardsFile, cards } = toolCards();
 
   const horizonPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
+  const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const visualPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const toolmeshPath = path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json");
   const projectPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
@@ -163,6 +164,7 @@ async function main() {
 
   const receipts = {
     elysia: receiptEvidence(latestV3Receipt("api-bridge-doctor")),
+    elysiaLatency: receiptEvidence(elysiaLatencyPath),
     goose: receiptEvidence(latestV3Receipt("goose-envelope")),
     openjarvis: receiptEvidence(latestV3Receipt("openjarvis-eval-doctor")),
     context7: receiptEvidence(latestV3Receipt("mcp-context7-docs-lane")),
@@ -193,6 +195,11 @@ async function main() {
   };
 
   const hermesPackPresent = exists(path.join(repoRoot, "scripts", "v4", "hermes", "hermes-doctor.mjs"));
+  const elysiaLatency = readJson(elysiaLatencyPath, null);
+  const elysiaLatencyGreen = elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN"
+    && elysiaLatency?.ok === true
+    && elysiaLatency?.benchmark?.latency_parity_green === true
+    && elysiaLatency?.promotion?.default_api_replacement_approved === false;
   const visualArtifactPipelineReady = visual?.summary?.visual_artifact_pipeline_ready === true;
   const horizonReady = horizon?.ok === true && horizon?.status === "ORANGEBOX_HORIZON_REVIEW_READY";
   const toolmeshReady = toolmesh?.ok === true && toolmesh?.checks?.execution_blocked_until_promoted === true;
@@ -201,17 +208,19 @@ async function main() {
     candidate({
       id: "bun_elysia_api_bridge",
       wave: "wave_0_active_backend_speed",
-      status: "BENCHMARK_READY_NOT_DEFAULT",
+      status: elysiaLatencyGreen ? "BENCHMARK_GREEN_SIDECAR_NOT_DEFAULT" : "BENCHMARK_READY_NOT_DEFAULT",
       current_role: "Low-latency Bun/Elysia sidecar API bridge.",
-      next_proof_command: "npm.cmd run v3:api:doctor",
+      next_proof_command: "npm.cmd run v3:api:doctor && npm.cmd run v3:api:bakeoff",
       proofs: [
         { id: "bun_binary", ok: binaries.bun.found, detail: binaries.bun.first_found },
         { id: "elysia_dependency", ok: Boolean(pkg.deps.elysia), detail: pkg.deps.elysia || null },
         { id: "api_bridge_receipt", ok: receipts.elysia.ok, detail: receipts.elysia.status },
+        { id: "latency_bakeoff_receipt", ok: elysiaLatencyGreen, detail: receipts.elysiaLatency.status },
       ],
       blockers: [
         receipts.elysia.ok ? null : "Run v3:api:doctor and capture the receipt.",
-        "Needs apples-to-apples latency parity benchmark before replacing existing rails.",
+        elysiaLatencyGreen ? null : "Needs apples-to-apples latency parity benchmark before replacing existing rails.",
+        "Default replacement still needs route parity, rollback, and operator approval.",
       ],
       intentional_non_promotion: true,
     }),
@@ -405,6 +414,7 @@ async function main() {
       package_json: pkg.file,
       tool_cards: cardsFile,
       horizon_review: horizonPath,
+      elysia_latency_bakeoff: elysiaLatencyPath,
       visual_readiness: visualPath,
       toolmesh_doctor: toolmeshPath,
     },
@@ -414,6 +424,9 @@ async function main() {
       promotable_now: candidates.filter((item) => item.promotable_now).length,
       intentional_non_promotions: candidates.filter((item) => item.intentional_non_promotion === true).length,
       runtime_missing: candidates.filter((item) => /MISSING|NOT_INSTALLED|NOT_PROMOTED|NOT_N150/.test(item.status)).length,
+      elysia_latency_bakeoff_green: elysiaLatencyGreen,
+      elysia_p95_ms: elysiaLatency?.benchmark?.elysia_health_p95_ms ?? null,
+      current_api_comparison_p95_ms: elysiaLatency?.benchmark?.current_comparison_p95_ms ?? null,
       horizon_review_green: horizonReady,
       toolmesh_execution_blocked_until_promoted: toolmeshReady,
       visual_artifact_pipeline_ready: visualArtifactPipelineReady,

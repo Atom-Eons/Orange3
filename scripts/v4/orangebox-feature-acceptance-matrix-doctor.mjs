@@ -423,6 +423,38 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "elysia_rail_latency_bakeoff",
+      claim: "The Bun/Elysia API bridge is benchmarked as a temporary sidecar against the current live rails before any default transport switch.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run v3:api:bakeoff",
+      acceptance_gate: "Elysia bakeoff receipt is green, latency_parity_green=true, sidecar_candidate_green=true, and default_api_replacement_approved=false.",
+      rollback_path: "Delete generated api-bakeoff receipts and remove v3:api:bakeoff wiring; no rail defaults are changed by this proof.",
+      evidence: [
+        evidence(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json"), "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN"
+            && parsed?.ok === true
+            && parsed?.benchmark?.latency_parity_green === true
+            && Number.isFinite(parsed?.benchmark?.elysia_health_p95_ms)
+            && Number.isFinite(parsed?.benchmark?.current_comparison_p95_ms)
+            && parsed?.promotion?.sidecar_candidate_green === true
+            && parsed?.promotion?.default_api_replacement_approved === false
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.default_transport_changed === false
+            && parsed?.constraints?.paid_api_called === false
+            && parsed?.constraints?.host_mcp_config_mutated === false,
+          detail: (parsed) => ({
+            elysia_p95_ms: parsed?.benchmark?.elysia_health_p95_ms ?? null,
+            current_comparison_p95_ms: parsed?.benchmark?.current_comparison_p95_ms ?? null,
+            latency_parity_green: parsed?.benchmark?.latency_parity_green ?? null,
+            default_api_replacement_approved: parsed?.promotion?.default_api_replacement_approved ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "checkmate_eval_lane",
       claim: "Prompt/model/routing/tool changes are gated by deterministic CHECKMATE eval fixtures.",
       lane: "backend_ops",

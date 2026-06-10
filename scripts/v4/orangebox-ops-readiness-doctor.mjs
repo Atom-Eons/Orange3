@@ -117,6 +117,8 @@ function main() {
   const horizonReview = readJson(horizonReviewPath);
   const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
   const horizonBakeoff = readJson(horizonBakeoffPath);
+  const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
+  const elysiaLatency = readJson(elysiaLatencyPath);
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const visualReadiness = readJson(visualReadinessPath);
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
@@ -299,6 +301,20 @@ function main() {
       hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
       visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
       note: "Turns reviewed alpha candidates into a proof-ranked bakeoff matrix with binary/dependency probes, blockers, and no automatic promotion.",
+    },
+    elysia_rail_latency_bakeoff: {
+      ok:
+        elysiaLatency?.ok === true &&
+        elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" &&
+        elysiaLatency?.benchmark?.latency_parity_green === true &&
+        elysiaLatency?.promotion?.default_api_replacement_approved === false,
+      path: elysiaLatencyPath,
+      status: elysiaLatency?.status || null,
+      latency_parity_green: elysiaLatency?.benchmark?.latency_parity_green ?? null,
+      elysia_p95_ms: elysiaLatency?.benchmark?.elysia_health_p95_ms ?? null,
+      current_comparison_p95_ms: elysiaLatency?.benchmark?.current_comparison_p95_ms ?? null,
+      default_api_replacement_approved: elysiaLatency?.promotion?.default_api_replacement_approved ?? null,
+      note: "Proves the Bun/Elysia sidecar has measured rail-latency parity while keeping default API replacement unapproved.",
     },
     visual_production_readiness: {
       ok: visualReadiness?.ok === true && visualReadiness?.control_plane_green === true && visualReadiness?.summary?.visual_artifact_pipeline_ready === true,

@@ -149,6 +149,7 @@ const requiredOpsScripts = [
   "research:radar",
   "horizon:review",
   "horizon:bakeoff",
+  "v3:api:bakeoff",
   "littleorange:doctor",
   "visual:artifact-vault",
   "visual:artifact-smoke",
@@ -1015,6 +1016,54 @@ const tasks = [
           visual_ready: bakeoff.summary.visual_ready,
           feature_row: "horizon_promotion_bakeoff",
           candidates: required,
+        });
+    },
+  },
+  {
+    id: "elysia_rail_latency_bakeoff_truth",
+    category: "alpha_review",
+    oracle: "The Bun/Elysia rail candidate must have a measured sidecar latency bakeoff before default transport promotion.",
+    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    run(trace) {
+      const bakeoff = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json"), trace);
+      const horizon = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const failures = [];
+      const horizonCandidate = Array.isArray(horizon?.candidates)
+        ? horizon.candidates.find((candidate) => candidate.id === "bun_elysia_api_bridge")
+        : null;
+      if (!packageJson?.scripts?.["v3:api:bakeoff"]?.includes("orangebox-elysia-rail-latency-bakeoff.mjs")) failures.push("Package script v3:api:bakeoff missing or wrong");
+      if (bakeoff?.status !== "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" || bakeoff?.ok !== true) failures.push(`Elysia latency bakeoff not green: ${bakeoff?.status || "missing"}`);
+      if (bakeoff?.benchmark?.latency_parity_green !== true) failures.push("Elysia bakeoff does not prove latency parity");
+      if (!Number.isFinite(bakeoff?.benchmark?.elysia_health_p95_ms)) failures.push("Elysia p95 metric missing");
+      if (!Number.isFinite(bakeoff?.benchmark?.current_comparison_p95_ms)) failures.push("Current comparison p95 metric missing");
+      if (bakeoff?.promotion?.sidecar_candidate_green !== true) failures.push("Elysia sidecar candidate is not green");
+      if (bakeoff?.promotion?.default_api_replacement_approved !== false) failures.push("Elysia bakeoff must not approve default API replacement");
+      if (!Array.isArray(bakeoff?.promotion?.default_api_replacement_blockers) || bakeoff.promotion.default_api_replacement_blockers.length < 3) failures.push("Elysia default replacement blockers are incomplete");
+      if (bakeoff?.constraints?.frontend_touched !== false) failures.push("Elysia bakeoff must prove frontend_touched=false");
+      if (bakeoff?.constraints?.default_transport_changed !== false) failures.push("Elysia bakeoff must prove default_transport_changed=false");
+      if (bakeoff?.constraints?.paid_api_called !== false) failures.push("Elysia bakeoff must prove paid_api_called=false");
+      if (bakeoff?.constraints?.host_mcp_config_mutated !== false) failures.push("Elysia bakeoff must prove host_mcp_config_mutated=false");
+      if (!feature?.matrix?.some((row) => row.id === "elysia_rail_latency_bakeoff" && row.ok === true)) failures.push("Feature matrix does not prove elysia_rail_latency_bakeoff");
+      if (!String(horizonCandidate?.status || "").includes("BENCHMARK_GREEN")) failures.push(`Horizon bakeoff does not mirror Elysia benchmark-green sidecar status: ${horizonCandidate?.status || "missing"}`);
+      if (!horizonCandidate?.proofs?.some((item) => item.id === "latency_bakeoff_receipt" && item.ok === true)) failures.push("Horizon candidate does not include a green latency_bakeoff_receipt proof");
+      return failures.length
+        ? failTask("elysia_rail_latency_bakeoff_truth", failures, {
+          status: bakeoff?.status || null,
+          latency_parity_green: bakeoff?.benchmark?.latency_parity_green ?? null,
+          elysia_p95_ms: bakeoff?.benchmark?.elysia_health_p95_ms ?? null,
+          current_comparison_p95_ms: bakeoff?.benchmark?.current_comparison_p95_ms ?? null,
+          horizon_status: horizonCandidate?.status || null,
+        })
+        : okTask("elysia_rail_latency_bakeoff_truth", {
+          status: bakeoff.status,
+          latency_parity_green: bakeoff.benchmark.latency_parity_green,
+          elysia_p95_ms: bakeoff.benchmark.elysia_health_p95_ms,
+          current_comparison_p95_ms: bakeoff.benchmark.current_comparison_p95_ms,
+          default_api_replacement_approved: bakeoff.promotion.default_api_replacement_approved,
+          feature_row: "elysia_rail_latency_bakeoff",
+          horizon_status: horizonCandidate.status,
         });
     },
   },

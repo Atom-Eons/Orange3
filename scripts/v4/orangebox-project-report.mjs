@@ -181,6 +181,7 @@ async function main() {
   const toolmesh = readJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"));
   const horizonReview = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json")) || readJson(latestReceipt("orangebox-horizon-review-"));
   const horizonBakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json")) || readJson(latestReceipt("orangebox-horizon-promotion-bakeoff-"));
+  const elysiaLatency = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json")) || readJson(latestReceipt("orangebox-elysia-rail-latency-bakeoff-"));
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
   const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
@@ -306,6 +307,11 @@ async function main() {
     horizonBakeoff?.summary?.horizon_review_green === true &&
     horizonBakeoff?.summary?.toolmesh_execution_blocked_until_promoted === true &&
     horizonBakeoff?.summary?.visual_artifact_pipeline_ready === true;
+  const elysiaLatencyGreen =
+    elysiaLatency?.ok === true &&
+    elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" &&
+    elysiaLatency?.benchmark?.latency_parity_green === true &&
+    elysiaLatency?.promotion?.default_api_replacement_approved === false;
   const visualReadinessReported =
     visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" ||
     visualReadiness?.status === "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY";
@@ -467,6 +473,16 @@ async function main() {
       next: horizonBakeoffReady
         ? "Use horizon:bakeoff before promoting OBOX Jarvis/OpenJarvis, Goose, Context7, Hermes, visual runtimes, Continue, libSQL, Mastra, or GPU acceleration candidates."
         : "Run npm.cmd run horizon:bakeoff after horizon:review and fix the exact failed probe or receipt gate.",
+    },
+    {
+      area: "Bun/Elysia rail latency bakeoff",
+      status: status(elysiaLatencyGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-elysia-rail-latency-bakeoff.mjs"))),
+      reality: elysiaLatencyGreen
+        ? `Elysia sidecar latency parity is measured: p95=${elysiaLatency?.benchmark?.elysia_health_p95_ms ?? "unknown"}ms vs current comparison p95=${elysiaLatency?.benchmark?.current_comparison_p95_ms ?? "unknown"}ms; default_api_replacement_approved=${Boolean(elysiaLatency?.promotion?.default_api_replacement_approved)}.`
+        : "Elysia sidecar has not yet produced a green latency bakeoff receipt.",
+      next: elysiaLatencyGreen
+        ? "Keep Elysia sidecar candidate behind route-parity, rollback, and operator-approval gates before default transport changes."
+        : "Run npm.cmd run v3:api:bakeoff before changing API transport defaults.",
     },
     {
       area: "CHECKMATE eval lane",
@@ -808,6 +824,7 @@ async function main() {
         research_radar: packageScript("research:radar", packageJson),
         horizon_review: packageScript("horizon:review", packageJson),
         horizon_bakeoff: packageScript("horizon:bakeoff", packageJson),
+        elysia_latency_bakeoff: packageScript("v3:api:bakeoff", packageJson),
         visual_readiness: packageScript("visual:readiness", packageJson),
         assurance_doctor: packageScript("assurance:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
@@ -1098,6 +1115,14 @@ async function main() {
         openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
         hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
         visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+      },
+      elysia_latency_bakeoff: {
+        path: elysiaLatency?.latest_path || path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json"),
+        status: elysiaLatency?.status || null,
+        latency_parity_green: elysiaLatency?.benchmark?.latency_parity_green ?? null,
+        elysia_p95_ms: elysiaLatency?.benchmark?.elysia_health_p95_ms ?? null,
+        current_comparison_p95_ms: elysiaLatency?.benchmark?.current_comparison_p95_ms ?? null,
+        default_api_replacement_approved: elysiaLatency?.promotion?.default_api_replacement_approved ?? null,
       },
       checkmate_eval_lane: {
         path: path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"),
