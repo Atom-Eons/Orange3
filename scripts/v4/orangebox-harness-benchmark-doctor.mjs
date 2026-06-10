@@ -155,6 +155,7 @@ const requiredOpsScripts = [
   "visual:artifact-vault",
   "visual:artifact-smoke",
   "visual:runtime:headless-image",
+  "visual:runtime:headless-design",
   "visual:readiness",
   "knowledge:improvements",
   "assurance:doctor",
@@ -855,22 +856,26 @@ const tasks = [
     id: "visual_production_readiness_truth",
     category: "visual_runtime_truth",
     oracle: "Visual/media/design readiness must distinguish control-plane proof from promoted runtime power and must not touch the living frontend lane.",
-    budget: { timeout_ms: 1600, max_files_read: 7, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 8, max_tool_calls: 0 },
     run(trace) {
       const visual = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), trace);
       const vault = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-vault.json"), trace);
       const smoke = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-smoke.json"), trace);
       const headless = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json"), trace);
+      const headlessDesign = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-design", "latest-headless-design-runtime.json"), trace);
       const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
       const failures = [];
       const lanes = Array.isArray(visual?.lanes) ? visual.lanes : [];
       const visualRow = feature?.matrix?.find((row) => row.id === "visual_production_readiness");
+      const designRow = feature?.matrix?.find((row) => row.id === "visual_headless_design_runtime");
       const visualProjectRow = project?.scope?.find((row) => row.area === "Visual production readiness");
+      const designProjectRow = project?.scope?.find((row) => row.area === "Visual headless design runtime");
       if (!packageJson?.scripts?.["visual:artifact-vault"]?.includes("orangebox-visual-artifact-vault-doctor.mjs")) failures.push("Package script visual:artifact-vault missing or wrong");
       if (!packageJson?.scripts?.["visual:artifact-smoke"]?.includes("orangebox-visual-artifact-smoke-doctor.mjs")) failures.push("Package script visual:artifact-smoke missing or wrong");
       if (!packageJson?.scripts?.["visual:runtime:headless-image"]?.includes("orangebox-headless-image-runtime-doctor.mjs")) failures.push("Package script visual:runtime:headless-image missing or wrong");
+      if (!packageJson?.scripts?.["visual:runtime:headless-design"]?.includes("orangebox-headless-design-runtime-doctor.mjs")) failures.push("Package script visual:runtime:headless-design missing or wrong");
       if (!packageJson?.scripts?.["visual:readiness"]?.includes("orangebox-visual-production-readiness-doctor.mjs")) failures.push("Package script visual:readiness missing or wrong");
       if (vault?.status !== "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN" || vault?.vault_ready !== true) failures.push(`Visual artifact vault not green: ${vault?.status || "missing"}`);
       if (vault?.vault?.pointer_only !== true) failures.push("Visual artifact vault does not preserve pointer_only=true");
@@ -887,6 +892,13 @@ const tasks = [
       if (headless?.artifact?.ai_generated_media !== false) failures.push("Headless image runtime must keep ai_generated_media=false");
       if (!/^[a-f0-9]{64}$/.test(headless?.artifact?.sha256 || "")) failures.push("Headless image runtime sha256 missing/invalid");
       if (headless?.constraints?.frontend_touched !== false) failures.push("Headless image runtime touched frontend");
+      if (headlessDesign?.status !== "ORANGEBOX_HEADLESS_DESIGN_RUNTIME_GREEN" || headlessDesign?.runtime_ready !== true) failures.push(`Headless design runtime not green: ${headlessDesign?.status || "missing"}`);
+      if (headlessDesign?.artifact?.mime_type !== "image/svg+xml") failures.push(`Headless design runtime mime wrong: ${headlessDesign?.artifact?.mime_type || "missing"}`);
+      if (headlessDesign?.artifact?.runtime_generated_media !== true) failures.push("Headless design runtime does not claim runtime_generated_media=true");
+      if (headlessDesign?.artifact?.ai_generated_media !== false) failures.push("Headless design runtime must keep ai_generated_media=false");
+      if (headlessDesign?.artifact?.deterministic_renderer !== true) failures.push("Headless design runtime must declare deterministic_renderer=true");
+      if (!/^[a-f0-9]{64}$/.test(headlessDesign?.artifact?.sha256 || "")) failures.push("Headless design runtime sha256 missing/invalid");
+      if (headlessDesign?.constraints?.frontend_touched !== false) failures.push("Headless design runtime touched frontend");
       if (visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY") failures.push(`Visual readiness status wrong/missing: ${visual?.status || "missing"}`);
       if (visual?.ok !== true) failures.push("Visual readiness ok=true missing");
       if (visual?.control_plane_green !== true) failures.push("Visual readiness control_plane_green=true missing");
@@ -899,6 +911,9 @@ const tasks = [
       if (visual?.summary?.headless_image_runtime_ready !== true) failures.push("Visual readiness does not mirror headless_image_runtime_ready=true");
       if (visual?.summary?.headless_image_artifact_path !== headless?.artifact?.artifact_path) failures.push("Visual readiness does not mirror headless image artifact path");
       if (visual?.summary?.headless_image_artifact_sha256 !== headless?.artifact?.sha256) failures.push("Visual readiness does not mirror headless image artifact hash");
+      if (visual?.summary?.headless_design_runtime_ready !== true) failures.push("Visual readiness does not mirror headless_design_runtime_ready=true");
+      if (visual?.summary?.headless_design_artifact_path !== headlessDesign?.artifact?.artifact_path) failures.push("Visual readiness does not mirror headless design artifact path");
+      if (visual?.summary?.headless_design_artifact_sha256 !== headlessDesign?.artifact?.sha256) failures.push("Visual readiness does not mirror headless design artifact hash");
       if (typeof visual?.visual_ready !== "boolean") failures.push("Visual readiness does not expose boolean visual_ready");
       if ((visual?.summary?.visual_tool_cards || 0) < 19) failures.push(`Visual tool card count too low: ${visual?.summary?.visual_tool_cards || 0}`);
       if ((visual?.summary?.control_green_lanes || 0) !== 4) failures.push(`Control-green lane count is not 4: ${visual?.summary?.control_green_lanes || 0}`);
@@ -910,10 +925,13 @@ const tasks = [
         if (lane && lane.execution_blocked_until_promoted !== true) failures.push(`${lab} does not preserve execution_blocked_until_promoted`);
         if (lane && lane.artifact_pointer_policy_declared !== true) failures.push(`${lab} does not preserve artifact pointer policy`);
       }
+      if ((visual?.summary?.runtime_ready_lanes || 0) < 2) failures.push(`Runtime-ready lane count below image+design proof: ${visual?.summary?.runtime_ready_lanes || 0}`);
       if (visual?.visual_ready === true && (visual?.summary?.runtime_ready_lanes || 0) < 4) failures.push("visual_ready=true without all runtime lanes ready");
       if (!visualRow?.ok) failures.push("Feature matrix does not prove visual_production_readiness");
+      if (!designRow?.ok) failures.push("Feature matrix does not prove visual_headless_design_runtime");
       if (visualRow?.frontend_touch_allowed !== false) failures.push("Feature row must forbid frontend touch");
       if (visualProjectRow?.status !== "REAL") failures.push("Project report does not list visual production readiness as REAL control-plane truth");
+      if (designProjectRow?.status !== "REAL") failures.push("Project report does not list visual headless design runtime as REAL");
       if (!String(visualProjectRow?.reality || "").includes("visual_ready=false") && visual?.visual_ready === false) failures.push("Project report does not surface visual_ready=false");
       return failures.length
         ? failTask("visual_production_readiness_truth", failures, {
@@ -924,6 +942,7 @@ const tasks = [
           artifact_vault_status: vault?.status || null,
           artifact_smoke_status: smoke?.status || null,
           headless_image_status: headless?.status || null,
+          headless_design_status: headlessDesign?.status || null,
         })
         : okTask("visual_production_readiness_truth", {
           status: visual.status,
@@ -937,11 +956,14 @@ const tasks = [
           headless_image_runtime_ready: visual.summary.headless_image_runtime_ready,
           headless_image_artifact_path: visual.summary.headless_image_artifact_path,
           headless_image_artifact_sha256: visual.summary.headless_image_artifact_sha256,
+          headless_design_runtime_ready: visual.summary.headless_design_runtime_ready,
+          headless_design_artifact_path: visual.summary.headless_design_artifact_path,
+          headless_design_artifact_sha256: visual.summary.headless_design_artifact_sha256,
           visual_artifact_pipeline_ready: visual.summary.visual_artifact_pipeline_ready,
           visual_tool_cards: visual.summary.visual_tool_cards,
           control_green_lanes: visual.summary.control_green_lanes,
           runtime_ready_lanes: visual.summary.runtime_ready_lanes,
-          feature_row: "visual_production_readiness",
+          feature_rows: ["visual_production_readiness", "visual_headless_design_runtime"],
         });
     },
   },

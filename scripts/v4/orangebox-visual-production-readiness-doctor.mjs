@@ -60,6 +60,11 @@ function latestHeadlessImageRuntime() {
   return { file, report: readJson(file, null) };
 }
 
+function latestHeadlessDesignRuntime() {
+  const file = path.join(dataRoot, "visual-artifacts", "runtime", "headless-design", "latest-headless-design-runtime.json");
+  return { file, report: readJson(file, null) };
+}
+
 function summarizeLane(lab, cards, doctor, runtimeReceipt = null) {
   const laneCards = cards.filter((card) => card.lab === lab);
   const installedProbes = doctor?.summary?.installed_probe_count ?? 0;
@@ -85,7 +90,7 @@ function summarizeLane(lab, cards, doctor, runtimeReceipt = null) {
     execution_blocked_until_promoted: doctor?.checks?.execution_blocked_until_promoted === true,
     artifact_pointer_policy_declared: doctor?.checks?.artifact_pointer_policy_declared === true,
     immutable_template_gate: doctor?.checks?.immutable_templates_for_workflow_tools === true,
-    not_runtime_ready_because: [
+    not_runtime_ready_because: runtimeReady ? [] : [
       promoted === 0 ? "No visual tool card is promoted or installed." : null,
       installedProbes === 0 ? "No useful runtime binary/model install is proven by the latest lab doctor." : null,
       runtimeReceiptGreen ? null : "No promoted lab-specific generation/edit/render artifact receipt is present at this runtime layer yet.",
@@ -122,6 +127,7 @@ async function main() {
   const artifactVault = latestArtifactVault();
   const artifactSmoke = latestArtifactSmoke();
   const headlessImageRuntime = latestHeadlessImageRuntime();
+  const headlessDesignRuntime = latestHeadlessDesignRuntime();
   const artifactVaultReady = artifactVault.report?.ok === true
     && artifactVault.report?.status === "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN"
     && artifactVault.report?.vault_ready === true;
@@ -134,7 +140,7 @@ async function main() {
     "image-lab": headlessImageRuntime.report,
     "video-lab": null,
     "audio-lab": null,
-    "design-lab": null,
+    "design-lab": headlessDesignRuntime.report,
   };
   const lanes = visualLabs.map((lab) => summarizeLane(lab, cards, doctors[lab].report, promotedRuntimeReceipts[lab]));
   const allControlGreen = lanes.every((lane) => lane.control_plane_green);
@@ -167,6 +173,7 @@ async function main() {
       artifact_vault: artifactVault.file,
       artifact_smoke: artifactSmoke.file,
       headless_image_runtime: headlessImageRuntime.file,
+      headless_design_runtime: headlessDesignRuntime.file,
     },
     summary: {
       visual_labs: visualLabs.length,
@@ -191,6 +198,10 @@ async function main() {
       headless_image_runtime_status: headlessImageRuntime.report?.status || "missing",
       headless_image_artifact_path: headlessImageRuntime.report?.artifact?.artifact_path || null,
       headless_image_artifact_sha256: headlessImageRuntime.report?.artifact?.sha256 || null,
+      headless_design_runtime_ready: headlessDesignRuntime.report?.ok === true && headlessDesignRuntime.report?.runtime_ready === true,
+      headless_design_runtime_status: headlessDesignRuntime.report?.status || "missing",
+      headless_design_artifact_path: headlessDesignRuntime.report?.artifact?.artifact_path || null,
+      headless_design_artifact_sha256: headlessDesignRuntime.report?.artifact?.sha256 || null,
       promoted_runtime_receipts: lanes.filter((lane) => lane.runtime_ready).map((lane) => ({
         lab: lane.lab,
         status: lane.runtime_receipt?.status || null,
@@ -204,7 +215,9 @@ async function main() {
       anyRuntimeReady ? "ComfyUI/FLUX/Qwen Image/SDXL remain registered AI image candidates; the promoted image runtime is the local deterministic headless renderer." : "ComfyUI/FLUX/Qwen Image/SDXL are registered candidates, not promoted image runtimes.",
       "Wan/LTX/DaVinci Resolve/Kdenlive/OBS are registered candidates, not promoted video runtimes.",
       "Whisper/Audacity/Demucs/UVR are registered candidates, not promoted audio runtimes.",
-      "Penpot/Inkscape/Krita/GIMP/Blender are registered candidates, not promoted design runtimes.",
+      headlessDesignRuntime.report?.ok === true && headlessDesignRuntime.report?.runtime_ready === true
+        ? "Penpot/Inkscape/Krita/GIMP/Blender remain registered GUI/AI design candidates; the promoted design runtime is the local deterministic headless SVG exporter."
+        : "Penpot/Inkscape/Krita/GIMP/Blender are registered candidates, not promoted design runtimes.",
       artifactVaultReady ? null : "No visual artifact vault promotion receipt is present in this doctor.",
       artifactSmokeReady ? null : "No deterministic visual artifact smoke receipt is present in this doctor.",
       anyRuntimeReady ? "No promoted AI generator sample receipt proves ComfyUI/FLUX/Qwen Image/SDXL/video/audio/design generation yet." : "No promoted AI generator sample receipt proves a real generated image/video/design/audio artifact yet.",
@@ -213,6 +226,7 @@ async function main() {
       control_plane: allControlGreen,
       artifact_pipeline: artifactVaultReady && artifactSmokeReady,
       headless_image_runtime: headlessImageRuntime.report?.ok === true && headlessImageRuntime.report?.runtime_ready === true,
+      headless_design_runtime: headlessDesignRuntime.report?.ok === true && headlessDesignRuntime.report?.runtime_ready === true,
       ai_runtime_promoted: false,
       all_runtime_lanes_promoted: allRuntimeReady,
       separate_frontend_release: "separate_visual_lane",
@@ -263,9 +277,9 @@ async function main() {
       {
         wave: "V2 image runtime",
         action: anyRuntimeReady
-          ? "Headless image runtime is promoted; next image step is ComfyUI or another AI generator with install proof, immutable template, sample render receipt, hardware lock, and rollback."
+          ? "Headless image and/or design runtimes are promoted; next image step is ComfyUI or another AI generator with install proof, immutable template, sample render receipt, hardware lock, and rollback."
           : "Install or promote one local image path first, preferably the headless renderer before ComfyUI, with immutable templates and one sample render receipt.",
-        proof: "npm.cmd run visual:runtime:headless-image && npm.cmd run image-lab:doctor && npm.cmd run visual:readiness",
+        proof: "npm.cmd run visual:runtime:headless-image && npm.cmd run visual:runtime:headless-design && npm.cmd run image-lab:doctor && npm.cmd run visual:readiness",
       },
       {
         wave: "V3 design workspace",
@@ -281,7 +295,7 @@ async function main() {
     result_line: allRuntimeReady
       ? "Visual production runtime is promoted."
       : anyRuntimeReady
-        ? "Visual production has a promoted headless image runtime, artifact vault, and deterministic smoke proof; AI visual generators and the remaining lanes are still gated."
+        ? "Visual production has promoted headless image/design runtimes, artifact vault, and deterministic smoke proof; AI visual generators plus video/audio runtime lanes are still gated."
       : artifactVaultReady && artifactSmokeReady
         ? "Visual production control plane, artifact vault, and deterministic artifact smoke are green, but AI runtime tools are not promoted yet."
         : artifactVaultReady

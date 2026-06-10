@@ -402,6 +402,50 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "visual_headless_design_runtime",
+      claim: "Orangebox has one promoted local headless design runtime that produces a real SVG design artifact by pointer, manifest, SHA-256, and receipt without touching the frontend or calling cloud services.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:runtime:headless-design && npm.cmd run visual:readiness",
+      acceptance_gate: "Headless design runtime receipt is green, runtime_ready=true, artifact is SVG, runtime_generated_media=true, ai_generated_media=false, frontend_touched=false, and visual readiness mirrors the artifact hash/path.",
+      rollback_path: "Delete generated headless-design runtime artifacts/receipts and demote/remove the orangebox-headless-design-exporter ToolMesh card if superseded.",
+      evidence: [
+        evidence(path.join(dataRoot, "visual-artifacts", "runtime", "headless-design", "latest-headless-design-runtime.json"), "ORANGEBOX_HEADLESS_DESIGN_RUNTIME_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_HEADLESS_DESIGN_RUNTIME_GREEN"
+            && parsed?.ok === true
+            && parsed?.runtime_ready === true
+            && parsed?.artifact?.mime_type === "image/svg+xml"
+            && parsed?.artifact?.runtime_generated_media === true
+            && parsed?.artifact?.ai_generated_media === false
+            && parsed?.artifact?.deterministic_renderer === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.cloud_services_called === false,
+          detail: (parsed) => ({
+            artifact_path: parsed?.artifact?.artifact_path ?? null,
+            artifact_sha256: parsed?.artifact?.sha256 ?? null,
+            tool_card_id: parsed?.tool_card_id ?? null,
+            template_id: parsed?.template_id ?? null,
+            ai_generated_media: parsed?.artifact?.ai_generated_media ?? null,
+          }),
+        }),
+        evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY", {
+          accept: (parsed, status) => status === "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY"
+            && parsed?.ok === true
+            && Number(parsed?.summary?.runtime_ready_lanes || 0) >= 2
+            && parsed?.summary?.headless_design_runtime_ready === true
+            && typeof parsed?.summary?.headless_design_artifact_sha256 === "string",
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
+            headless_design_artifact_path: parsed?.summary?.headless_design_artifact_path ?? null,
+            headless_design_artifact_sha256: parsed?.summary?.headless_design_artifact_sha256 ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "visual_production_readiness",
       claim: "Orangebox reports visual/media/design runtime truth without touching the living frontend dashboard or mistaking candidate tool cards for promoted tools.",
       lane: "backend_ops",
@@ -431,6 +475,7 @@ async function main() {
             smoke_artifact_path: parsed?.summary?.smoke_artifact_path ?? null,
             smoke_artifact_sha256: parsed?.summary?.smoke_artifact_sha256 ?? null,
             runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
+            headless_design_runtime_ready: parsed?.summary?.headless_design_runtime_ready ?? null,
             visual_tool_cards: parsed?.summary?.visual_tool_cards ?? null,
           }),
         }),

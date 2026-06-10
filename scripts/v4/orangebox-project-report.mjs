@@ -187,6 +187,7 @@ async function main() {
   const elysiaLatency = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json")) || readJson(latestReceipt("orangebox-elysia-rail-latency-bakeoff-"));
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
   const headlessImageRuntime = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json")) || readJson(latestReceipt("orangebox-headless-image-runtime-"));
+  const headlessDesignRuntime = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-design", "latest-headless-design-runtime.json")) || readJson(latestReceipt("orangebox-headless-design-runtime-"));
   const checkmateEval = readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(latestReceipt("checkmate-eval-lane-"));
   const signalHygiene = readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(latestReceipt("orangebox-operator-signal-hygiene-"));
   const doerWatcherSpine = readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(latestReceipt("orangebox-doer-watcher-spine-"));
@@ -361,6 +362,15 @@ async function main() {
     headlessImageRuntime?.artifact?.runtime_generated_media === true &&
     headlessImageRuntime?.artifact?.ai_generated_media === false &&
     headlessImageRuntime?.constraints?.frontend_touched === false;
+  const headlessDesignRuntimeGreen =
+    headlessDesignRuntime?.ok === true &&
+    headlessDesignRuntime?.status === "ORANGEBOX_HEADLESS_DESIGN_RUNTIME_GREEN" &&
+    headlessDesignRuntime?.runtime_ready === true &&
+    headlessDesignRuntime?.artifact?.mime_type === "image/svg+xml" &&
+    headlessDesignRuntime?.artifact?.runtime_generated_media === true &&
+    headlessDesignRuntime?.artifact?.ai_generated_media === false &&
+    headlessDesignRuntime?.artifact?.deterministic_renderer === true &&
+    headlessDesignRuntime?.constraints?.frontend_touched === false;
   const checkmateEvalGreen = checkmateEval?.status === "CHECKMATE_EVAL_LANE_GREEN";
   const evalIntegrityGreen = checkmateEvalGreen
     && Array.isArray(checkmateEval?.fixtures)
@@ -500,10 +510,10 @@ async function main() {
       area: "Visual production readiness",
       status: status(visualReadinessDoctorGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-visual-production-readiness-doctor.mjs"))),
       reality: visualReadinessDoctorGreen
-        ? `Visual production control plane is reported: ${visualReadiness?.summary?.visual_tool_cards || 0} visual/media/design cards, ${visualReadiness?.summary?.control_green_lanes || 0}/4 lanes control-green, ${visualReadiness?.summary?.runtime_ready_lanes || 0}/4 runtime-ready, artifact_vault_ready=${Boolean(visualReadiness?.summary?.artifact_vault_ready)}, artifact_smoke_ready=${Boolean(visualReadiness?.summary?.artifact_smoke_ready)}, headless_image_runtime_ready=${Boolean(visualReadiness?.summary?.headless_image_runtime_ready)}, headless_image_artifact=${visualReadiness?.summary?.headless_image_artifact_path || "missing"}, smoke_artifact=${visualReadiness?.summary?.smoke_artifact_path || "missing"}, visual_ready=${Boolean(visualReadiness?.visual_ready)}.`
+        ? `Visual production control plane is reported: ${visualReadiness?.summary?.visual_tool_cards || 0} visual/media/design cards, ${visualReadiness?.summary?.control_green_lanes || 0}/4 lanes control-green, ${visualReadiness?.summary?.runtime_ready_lanes || 0}/4 runtime-ready, artifact_vault_ready=${Boolean(visualReadiness?.summary?.artifact_vault_ready)}, artifact_smoke_ready=${Boolean(visualReadiness?.summary?.artifact_smoke_ready)}, headless_image_runtime_ready=${Boolean(visualReadiness?.summary?.headless_image_runtime_ready)}, headless_design_runtime_ready=${Boolean(visualReadiness?.summary?.headless_design_runtime_ready)}, headless_image_artifact=${visualReadiness?.summary?.headless_image_artifact_path || "missing"}, headless_design_artifact=${visualReadiness?.summary?.headless_design_artifact_path || "missing"}, smoke_artifact=${visualReadiness?.summary?.smoke_artifact_path || "missing"}, visual_ready=${Boolean(visualReadiness?.visual_ready)}.`
         : "Visual production readiness doctor source exists or is planned, but no current readiness receipt is available yet.",
       next: visualReadinessDoctorGreen
-        ? "Promoted headless image runtime can be used for safe artifact proof; do not call AI visual generators ready until ComfyUI/FLUX/Qwen Image/video/audio/design sample receipts, hardware locks, and promotion gates are green."
+        ? "Promoted headless image/design runtimes can be used for safe artifact proof; do not call AI visual generators ready until ComfyUI/FLUX/Qwen Image/video/audio/design sample receipts, hardware locks, and promotion gates are green."
         : "Run npm.cmd run visual:readiness so visual/media/design runtime truth is visible in Ops reports.",
     },
     {
@@ -515,6 +525,16 @@ async function main() {
       next: headlessImageRuntimeGreen
         ? "Use this as the low-blast-radius visual runtime proof while heavier image/video/design/audio runtimes remain gated."
         : "Run npm.cmd run visual:artifact-vault && npm.cmd run visual:runtime:headless-image and fix the exact runtime receipt failure.",
+    },
+    {
+      area: "Visual headless design runtime",
+      status: status(headlessDesignRuntimeGreen, exists(path.join(repoRoot, "scripts", "v4", "orangebox-headless-design-runtime-doctor.mjs"))),
+      reality: headlessDesignRuntimeGreen
+        ? `One promoted local design runtime is green: tool=${headlessDesignRuntime?.tool_card_id || "unknown"}, template=${headlessDesignRuntime?.template_id || "unknown"}, artifact=${headlessDesignRuntime?.artifact?.artifact_path || "missing"}, sha256=${headlessDesignRuntime?.artifact?.sha256 || "missing"}, mime=${headlessDesignRuntime?.artifact?.mime_type || "missing"}, deterministic_renderer=${Boolean(headlessDesignRuntime?.artifact?.deterministic_renderer)}, frontend_touched=${Boolean(headlessDesignRuntime?.constraints?.frontend_touched)}.`
+        : "Headless design runtime source exists or is planned, but the current runtime receipt is not green yet.",
+      next: headlessDesignRuntimeGreen
+        ? "Use this as the low-blast-radius design/export proof while GUI design apps and AI generators remain gated."
+        : "Run npm.cmd run visual:artifact-vault && npm.cmd run visual:runtime:headless-design and fix the exact runtime receipt failure.",
     },
     {
       area: "Horizon review / new alpha stack",
@@ -911,6 +931,7 @@ async function main() {
         elysia_latency_bakeoff: packageScript("v3:api:bakeoff", packageJson),
         visual_readiness: packageScript("visual:readiness", packageJson),
         visual_headless_image_runtime: packageScript("visual:runtime:headless-image", packageJson),
+        visual_headless_design_runtime: packageScript("visual:runtime:headless-design", packageJson),
         assurance_doctor: packageScript("assurance:doctor", packageJson),
         harness_benchmark: packageScript("harness:benchmark", packageJson),
         tool_ergonomics: packageScript("tool:ergonomics", packageJson),
@@ -1272,6 +1293,9 @@ async function main() {
         headless_image_runtime_ready: visualReadiness?.summary?.headless_image_runtime_ready ?? null,
         headless_image_artifact_path: visualReadiness?.summary?.headless_image_artifact_path ?? null,
         headless_image_artifact_sha256: visualReadiness?.summary?.headless_image_artifact_sha256 ?? null,
+        headless_design_runtime_ready: visualReadiness?.summary?.headless_design_runtime_ready ?? null,
+        headless_design_artifact_path: visualReadiness?.summary?.headless_design_artifact_path ?? null,
+        headless_design_artifact_sha256: visualReadiness?.summary?.headless_design_artifact_sha256 ?? null,
       },
       visual_headless_image_runtime: {
         path: path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json"),
@@ -1281,6 +1305,17 @@ async function main() {
         artifact_sha256: headlessImageRuntime?.artifact?.sha256 ?? null,
         ai_generated_media: headlessImageRuntime?.artifact?.ai_generated_media ?? null,
         frontend_touched: headlessImageRuntime?.constraints?.frontend_touched ?? null,
+      },
+      visual_headless_design_runtime: {
+        path: path.join(dataRoot, "visual-artifacts", "runtime", "headless-design", "latest-headless-design-runtime.json"),
+        status: headlessDesignRuntime?.status || null,
+        runtime_ready: headlessDesignRuntime?.runtime_ready ?? null,
+        artifact_path: headlessDesignRuntime?.artifact?.artifact_path ?? null,
+        artifact_sha256: headlessDesignRuntime?.artifact?.sha256 ?? null,
+        mime_type: headlessDesignRuntime?.artifact?.mime_type ?? null,
+        deterministic_renderer: headlessDesignRuntime?.artifact?.deterministic_renderer ?? null,
+        ai_generated_media: headlessDesignRuntime?.artifact?.ai_generated_media ?? null,
+        frontend_touched: headlessDesignRuntime?.constraints?.frontend_touched ?? null,
       },
       checkmate_eval_lane: {
         path: path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json"),

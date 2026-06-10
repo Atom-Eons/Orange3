@@ -1,0 +1,27 @@
+{
+  "schema_version": "orangebox.template.headless_design.v1",
+  "template_id": "headless-design-export-v1",
+  "tool": "orangebox-headless-design-exporter",
+  "locked": true,
+  "allowed_variables": [
+    "accent",
+    "width",
+    "height",
+    "title",
+    "subtitle",
+    "output_artifact_pointer"
+  ],
+  "locked_fields": {
+    "svg_viewbox": "0 0 ${width} ${height}",
+    "layout_grid": "12-column-safe-area",
+    "receipt_policy": "manifest+sha256+pointer-only",
+    "artifact_pointer_policy": "no-inline-svg-in-receipts"
+  },
+  "defaults": {
+    "accent": "#ff7a00",
+    "width": 960,
+    "height": 540,
+    "title": "Orangebox Design Runtime",
+    "subtitle": "Headless SVG export proof"
+  }
+}

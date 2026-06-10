@@ -1369,6 +1369,113 @@
       "handoffArtifactTypes": []
     },
     {
+      "id": "orangebox-headless-design-exporter",
+      "name": "Orangebox Headless Design Exporter",
+      "category": "design_runtime",
+      "lab": "design-lab",
+      "phase": "Y2",
+      "status": "promoted",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "promoted deterministic headless design runtime for SVG/export artifact proof",
+      "capabilities": [
+        "svg",
+        "design export",
+        "template render",
+        "workflow"
+      ],
+      "input": [
+        "template variables",
+        "output artifact pointer"
+      ],
+      "output": [
+        "svg design file",
+        "manifest",
+        "runtime receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "visual:runtime:headless-design",
+      "promotionGate": [
+        "local Bun runtime proof",
+        "sample SVG export receipt",
+        "artifact vault pointer proof",
+        "rollback path"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "artifact vault missing",
+        "svg writer regression",
+        "manifest/hash mismatch"
+      ],
+      "rollback": "disable visual:runtime:headless-design promotion and remove generated runtime artifacts",
+      "binaryNames": [
+        "bun"
+      ],
+      "notes": "First promoted design runtime; proves real design artifact export without claiming Penpot/Inkscape/Krita/GIMP/Blender readiness.",
+      "hardwareProfile": {
+        "deviceClass": "cpu",
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 1,
+        "diskScratchGB": 0.05,
+        "preferredRuntime": "bun",
+        "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 4,
+        "estimatedRuntimeClass": "instant",
+        "oomRisk": "low",
+        "concurrencyLock": "cpu_design_runtime",
+        "notes": "No GPU, model, GUI app, or cloud runtime required."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": true,
+        "allowedVariables": [
+          "accent",
+          "width",
+          "height",
+          "title",
+          "subtitle",
+          "output_artifact_pointer"
+        ],
+        "templateIds": [
+          "headless-design-export-v1"
+        ]
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": true,
+        "templateRegistry": "orangebox-v3/free-alpha-toolmesh/templates/template-registry.json",
+        "allowedTemplateIds": [
+          "headless-design-export-v1"
+        ],
+        "variableInjectionOnly": true
+      },
+      "autonomyLevel": "execute_in_ghost",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
+    },
+    {
       "id": "penpot",
       "name": "Penpot",
       "category": "design",

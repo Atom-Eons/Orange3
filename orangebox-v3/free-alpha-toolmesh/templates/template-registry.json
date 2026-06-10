@@ -26,6 +26,14 @@
       "variableInjectionOnly": true
     },
     {
+      "template_id": "headless-design-export-v1",
+      "tool": "orangebox-headless-design-exporter",
+      "template_path": "orangebox-v3/free-alpha-toolmesh/templates/headless-design/headless-design-export-v1.json",
+      "allowedVariables": ["accent", "width", "height", "title", "subtitle", "output_artifact_pointer"],
+      "lockedFields": ["svg_viewbox", "layout_grid", "receipt_policy", "artifact_pointer_policy"],
+      "variableInjectionOnly": true
+    },
+    {
       "template_id": "ffmpeg-vertical-reel-export-v1",
       "tool": "ffmpeg",
       "template_path": "orangebox-v3/free-alpha-toolmesh/templates/ffmpeg/ffmpeg-vertical-reel-export-v1.json",
