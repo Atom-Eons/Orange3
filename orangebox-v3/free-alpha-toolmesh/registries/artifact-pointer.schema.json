@@ -1,0 +1,20 @@
+{
+  "schema_version": "orangebox.toolmesh.artifact_pointer.schema.v1",
+  "required": [
+    "artifact_id",
+    "uri",
+    "path",
+    "sha256",
+    "mime",
+    "size_bytes",
+    "created_at",
+    "tool",
+    "receipt_id",
+    "retentionClass"
+  ],
+  "returnsRawBytes": false,
+  "returnsFilePointer": true,
+  "maxInlineBytes": 8192,
+  "hashAlgorithm": "sha256",
+  "law": "Binary artifacts move through Orangebox as file pointers, hashes, and metadata only."
+}

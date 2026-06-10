@@ -1,0 +1,21 @@
+{
+  "schema_version": "orangebox.toolmesh.hardware_profile.schema.v1",
+  "required": [
+    "deviceClass",
+    "vramRequiredGB",
+    "ramRequiredGB",
+    "diskScratchGB",
+    "preferredRuntime",
+    "requiresLLMUnload",
+    "requiresExclusiveGPU",
+    "maxConcurrentJobs",
+    "estimatedRuntimeClass",
+    "oomRisk",
+    "concurrencyLock"
+  ],
+  "deviceClass": ["cpu", "gpu", "mixed", "external", "unknown"],
+  "preferredRuntime": ["ollama", "llama.cpp", "comfyui", "python", "bun", "docker", "native-gui", "cli", "unknown"],
+  "estimatedRuntimeClass": ["instant", "short", "medium", "long", "overnight"],
+  "oomRisk": ["low", "medium", "high", "unknown"],
+  "law": "Every ToolMesh tool declares its local physics before execution can be promoted."
+}

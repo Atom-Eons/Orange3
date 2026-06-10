@@ -1,0 +1,6 @@
+{
+  "schema_version": "orangebox.toolmesh.execution_mode.schema.v1",
+  "executionMode": ["headless", "api", "cli", "workspace_prep", "gui_assist", "human_finish", "required_manual", "unknown"],
+  "autonomyLevel": ["none", "prepare", "suggest", "execute_in_ghost", "execute_direct", "publish"],
+  "law": "GUI-heavy tools default to workspace preparation or human finish until reliable headless control is proven."
+}

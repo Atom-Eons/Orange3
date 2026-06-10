@@ -1,0 +1,29 @@
+{
+  "schema_version": "orangebox.toolmesh.template_registry.v1",
+  "templates": [
+    {
+      "template_id": "flux-book-cover-v1",
+      "tool": "comfyui",
+      "template_path": "orangebox-v3/free-alpha-toolmesh/templates/comfyui/flux-book-cover-v1.json",
+      "allowedVariables": ["prompt", "negative_prompt", "seed", "width", "height", "output_artifact_pointer"],
+      "lockedFields": ["node_ids", "model_loader", "vae", "sampler_type", "scheduler", "edge_graph"],
+      "variableInjectionOnly": true
+    },
+    {
+      "template_id": "sdxl-proof-render-v1",
+      "tool": "comfyui",
+      "template_path": "orangebox-v3/free-alpha-toolmesh/templates/comfyui/sdxl-proof-render-v1.json",
+      "allowedVariables": ["prompt", "negative_prompt", "seed", "width", "height", "output_artifact_pointer"],
+      "lockedFields": ["node_ids", "model_loader", "vae", "sampler_type", "scheduler", "edge_graph"],
+      "variableInjectionOnly": true
+    },
+    {
+      "template_id": "ffmpeg-vertical-reel-export-v1",
+      "tool": "ffmpeg",
+      "template_path": "orangebox-v3/free-alpha-toolmesh/templates/ffmpeg/ffmpeg-vertical-reel-export-v1.json",
+      "allowedVariables": ["input_artifact_pointer", "output_artifact_pointer", "height", "width", "fps"],
+      "lockedFields": ["command_template", "codec_family", "safe_flags"],
+      "variableInjectionOnly": true
+    }
+  ]
+}

@@ -163,6 +163,7 @@ const requiredOpsScripts = [
   "feature:proof",
   "harness:benchmark",
   "toolmesh:doctor",
+  "toolmesh:physical-doctor",
   "v3:doctor",
   "chatbackup:restore",
   "codexa:alert",
@@ -755,11 +756,16 @@ const tasks = [
       if (toolmesh?.checks?.hardware_profiles_declared !== true) failures.push("Hardware profiles are not declared on every tool card");
       if (toolmesh?.checks?.artifact_pointer_policy_declared !== true) failures.push("Artifact pointer policy is not declared on every tool card");
       if (toolmesh?.checks?.execution_modes_declared !== true) failures.push("Execution mode is not declared on every tool card");
+      if (toolmesh?.checks?.artifact_protocol_declared !== true) failures.push("Artifact protocol is not declared on every tool card");
+      if (toolmesh?.checks?.workflow_policy_declared !== true) failures.push("Workflow policy is not declared on every tool card");
+      if (toolmesh?.checks?.autonomy_levels_declared !== true) failures.push("Autonomy level is not declared on every tool card");
+      if (toolmesh?.checks?.handoff_truth_declared !== true) failures.push("Human handoff truth is not declared on every tool card");
       if (toolmesh?.checks?.immutable_templates_for_workflow_tools !== true) failures.push("Workflow tools do not all require immutable templates");
       if (toolmesh?.waveValidation?.preservedV3Count !== 16) failures.push(`Preserved V3 wave count is not 16: ${toolmesh?.waveValidation?.preservedV3Count || 0}`);
       if (toolmesh?.waveValidation?.toolmeshCount !== 10) failures.push(`ToolMesh wave count is not 10: ${toolmesh?.waveValidation?.toolmeshCount || 0}`);
       if (Array.isArray(toolmesh?.missingRequiredFirstBatch) && toolmesh.missingRequiredFirstBatch.length > 0) failures.push(`Missing first-batch ids: ${toolmesh.missingRequiredFirstBatch.join(", ")}`);
       if (!packageJson?.scripts?.["toolmesh:doctor"]) failures.push("Package script toolmesh:doctor missing");
+      if (!packageJson?.scripts?.["toolmesh:physical-doctor"]) failures.push("Package script toolmesh:physical-doctor missing");
       if (!packageJson?.scripts?.["v3:doctor"]) failures.push("Package script v3:doctor missing");
       if (!packageJson?.scripts?.["image-lab:doctor"]) failures.push("Package script image-lab:doctor missing");
       if (!packageJson?.scripts?.["releaseops:doctor"]) failures.push("Package script releaseops:doctor missing");
@@ -779,8 +785,67 @@ const tasks = [
           execution_blocked_until_promoted: toolmesh.checks.execution_blocked_until_promoted,
           hardware_profiles_declared: toolmesh.checks.hardware_profiles_declared,
           artifact_pointer_policy_declared: toolmesh.checks.artifact_pointer_policy_declared,
+          artifact_protocol_declared: toolmesh.checks.artifact_protocol_declared,
+          workflow_policy_declared: toolmesh.checks.workflow_policy_declared,
+          autonomy_levels_declared: toolmesh.checks.autonomy_levels_declared,
+          handoff_truth_declared: toolmesh.checks.handoff_truth_declared,
           immutable_templates_for_workflow_tools: toolmesh.checks.immutable_templates_for_workflow_tools,
           feature_row: "v3_free_alpha_toolmesh",
+        });
+    },
+  },
+  {
+    id: "toolmesh_physical_runtime_truth",
+    category: "toolmesh",
+    oracle: "V3 ToolMesh must prove local physics before visual/media/coding tools are considered runnable: hardware declarations, pointer-only artifacts, immutable templates, GUI handoff truth, and no Y0 execution.",
+    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
+    run(trace) {
+      const physical = readJson(path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const templateRegistry = readJson(path.join(repoRoot, "orangebox-v3", "free-alpha-toolmesh", "templates", "template-registry.json"), trace);
+      const failures = [];
+      if (!packageJson?.scripts?.["toolmesh:physical-doctor"]?.includes("physical-runtime-doctor.ts")) failures.push("Package script toolmesh:physical-doctor missing or wrong");
+      if (physical?.status !== "ORANGEBOX_TOOLMESH_PHYSICAL_RUNTIME_GREEN" || physical?.ok !== true) failures.push(`Physical runtime doctor not green: ${physical?.status || "missing"}`);
+      if ((physical?.summary?.cards_total || 0) < 39) failures.push(`Physical runtime card count too low: ${physical?.summary?.cards_total || 0}`);
+      if (physical?.summary?.pointerOnlyCount !== physical?.summary?.cards_total) failures.push("Not every card is pointer-only");
+      if ((physical?.summary?.handoffRequiredCount || 0) < 1) failures.push("No GUI/handoff tools declared");
+      if ((physical?.summary?.immutableTemplateRequiredCount || 0) < 1) failures.push("No immutable-template tools declared");
+      if (!physical?.summary?.hardwareSummary || (physical.summary.hardwareSummary.maxVramRequiredGB || 0) < 1) failures.push("Hardware summary does not expose VRAM requirements");
+      if (physical?.checks?.all_cards_physical_valid !== true) failures.push("Not all cards are physical-valid");
+      if (physical?.checks?.artifact_pointer_only_all_cards !== true) failures.push("Artifact pointer-only all-cards check is not green");
+      if (physical?.checks?.template_registry_valid !== true) failures.push("Template registry validation is not green");
+      if (physical?.checks?.gui_tools_handoff_only !== true) failures.push("GUI tools are not handoff-only");
+      if (physical?.checks?.artifact_pointer_schema_present !== true) failures.push("Artifact pointer schema is missing");
+      if (physical?.checks?.workflow_policy_schema_present !== true) failures.push("Workflow policy schema is missing");
+      if (physical?.checks?.hardware_profile_schema_present !== true) failures.push("Hardware profile schema is missing");
+      if (physical?.checks?.execution_mode_schema_present !== true) failures.push("Execution mode schema is missing");
+      if (physical?.checks?.no_execute_direct_in_y0 !== true) failures.push("Y0 direct execution guard is not green");
+      if (physical?.constraints?.external_tools_executed !== false) failures.push("Physical doctor must not execute external tools");
+      if (physical?.constraints?.cloud_services_called !== false) failures.push("Physical doctor must not call cloud services");
+      if (physical?.constraints?.frontend_touched !== false) failures.push("Physical doctor must not touch frontend");
+      if (!Array.isArray(templateRegistry?.templates) || templateRegistry.templates.length < 3) failures.push("Template registry does not include expected immutable templates");
+      if (!feature?.matrix?.some((row) => row.id === "toolmesh_physical_runtime_contract" && row.ok === true)) failures.push("Feature matrix does not prove toolmesh_physical_runtime_contract");
+      const projectRow = project?.scope?.find((row) => row.area === "ToolMesh physical runtime contract");
+      if (projectRow?.status !== "REAL") failures.push("Project report does not list ToolMesh physical runtime contract as REAL");
+      if (!String(projectRow?.reality || "").includes("no external execution")) failures.push("Project report does not surface no-external-execution physical truth");
+      return failures.length
+        ? failTask("toolmesh_physical_runtime_truth", failures, {
+          status: physical?.status || null,
+          cards_total: physical?.summary?.cards_total ?? null,
+          pointerOnlyCount: physical?.summary?.pointerOnlyCount ?? null,
+          handoffRequiredCount: physical?.summary?.handoffRequiredCount ?? null,
+        })
+        : okTask("toolmesh_physical_runtime_truth", {
+          status: physical.status,
+          cards_total: physical.summary.cards_total,
+          pointerOnlyCount: physical.summary.pointerOnlyCount,
+          handoffRequiredCount: physical.summary.handoffRequiredCount,
+          immutableTemplateRequiredCount: physical.summary.immutableTemplateRequiredCount,
+          maxVramRequiredGB: physical.summary.hardwareSummary.maxVramRequiredGB,
+          template_count: templateRegistry.templates.length,
+          feature_row: "toolmesh_physical_runtime_contract",
         });
     },
   },

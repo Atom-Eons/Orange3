@@ -288,8 +288,8 @@ async function main() {
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
-      proof_command: "npm.cmd run toolmesh:doctor && npm.cmd run v3:doctor",
-      acceptance_gate: "ToolMesh doctor is green with required first-batch cards registered, 16 preserved V3 waves, 10 ToolMesh waves, and execution blocked until promoted.",
+      proof_command: "npm.cmd run toolmesh:doctor && npm.cmd run toolmesh:physical-doctor && npm.cmd run v3:doctor",
+      acceptance_gate: "ToolMesh doctor is green with required first-batch cards registered, physical runtime fields declared, 16 preserved V3 waves, 10 ToolMesh waves, and execution blocked until promoted.",
       rollback_path: "Turn ORANGEBOX_FREE_ALPHA_TOOLMESH=0, remove ToolMesh package scripts, and rerun v3:doctor and feature:proof.",
       evidence: [
         evidence(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"), "GREEN", {
@@ -300,7 +300,11 @@ async function main() {
             && parsed?.checks?.execution_blocked_until_promoted === true
             && parsed?.checks?.hardware_profiles_declared === true
             && parsed?.checks?.artifact_pointer_policy_declared === true
+            && parsed?.checks?.artifact_protocol_declared === true
+            && parsed?.checks?.workflow_policy_declared === true
             && parsed?.checks?.execution_modes_declared === true
+            && parsed?.checks?.autonomy_levels_declared === true
+            && parsed?.checks?.handoff_truth_declared === true
             && parsed?.checks?.immutable_templates_for_workflow_tools === true
             && parsed?.waveValidation?.preservedV3Count === 16
             && parsed?.waveValidation?.toolmeshCount === 10
@@ -313,7 +317,43 @@ async function main() {
             execution_blocked_until_promoted: parsed?.checks?.execution_blocked_until_promoted ?? null,
             hardware_profiles_declared: parsed?.checks?.hardware_profiles_declared ?? null,
             artifact_pointer_policy_declared: parsed?.checks?.artifact_pointer_policy_declared ?? null,
+            artifact_protocol_declared: parsed?.checks?.artifact_protocol_declared ?? null,
+            workflow_policy_declared: parsed?.checks?.workflow_policy_declared ?? null,
             immutable_templates_for_workflow_tools: parsed?.checks?.immutable_templates_for_workflow_tools ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "toolmesh_physical_runtime_contract",
+      claim: "ToolMesh cards declare hardware physics, artifact pointer discipline, immutable workflow policy, execution mode, and GUI handoff truth before any external tool promotion.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run toolmesh:physical-doctor",
+      acceptance_gate: "Physical runtime doctor is green, all cards are pointer-only and physical-valid, template registry is valid, GUI tools are handoff-only, and no external tool execution/cloud call/frontend touch occurred.",
+      rollback_path: "Remove ToolMesh physical-runtime schemas/templates/doctor wiring and generated physical-runtime receipts, then rerun toolmesh:doctor, feature:proof, project:report, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json"), "ORANGEBOX_TOOLMESH_PHYSICAL_RUNTIME_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_TOOLMESH_PHYSICAL_RUNTIME_GREEN"
+            && parsed?.ok === true
+            && parsed?.checks?.all_cards_physical_valid === true
+            && parsed?.checks?.artifact_pointer_only_all_cards === true
+            && parsed?.checks?.template_registry_valid === true
+            && parsed?.checks?.gui_tools_handoff_only === true
+            && parsed?.checks?.no_execute_direct_in_y0 === true
+            && parsed?.constraints?.external_tools_executed === false
+            && parsed?.constraints?.cloud_services_called === false
+            && parsed?.constraints?.frontend_touched === false
+            && Number(parsed?.summary?.cards_total || 0) >= 39,
+          detail: (parsed) => ({
+            cards_total: parsed?.summary?.cards_total ?? null,
+            pointerOnlyCount: parsed?.summary?.pointerOnlyCount ?? null,
+            handoffRequiredCount: parsed?.summary?.handoffRequiredCount ?? null,
+            immutableTemplateRequiredCount: parsed?.summary?.immutableTemplateRequiredCount ?? null,
+            maxVramRequiredGB: parsed?.summary?.hardwareSummary?.maxVramRequiredGB ?? null,
+            template_count: parsed?.templateRegistry?.template_count ?? null,
           }),
         }),
       ],

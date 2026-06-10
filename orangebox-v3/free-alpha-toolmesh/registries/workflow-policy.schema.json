@@ -1,0 +1,12 @@
+{
+  "schema_version": "orangebox.toolmesh.workflow_policy.schema.v1",
+  "required": [
+    "allowsDynamicWorkflowGeneration",
+    "requiresImmutableTemplate",
+    "templateRegistry",
+    "allowedTemplateIds",
+    "variableInjectionOnly"
+  ],
+  "allowsDynamicWorkflowGeneration": false,
+  "law": "Rigid workflow tools use approved templates with variable injection, not model-invented graphs."
+}

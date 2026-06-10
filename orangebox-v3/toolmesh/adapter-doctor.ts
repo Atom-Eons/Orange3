@@ -73,7 +73,11 @@ export async function runToolMeshDoctor(scopeArg?: string) {
   }
   const hardwareSummary = summarizeHardware(cardsInScope);
   const cardsWithPointerPolicy = cardsInScope.filter((card) => card.artifactPolicy?.returnsPointersOnly === true && card.artifactPolicy?.maxInlineBytes === 0).length;
+  const cardsWithArtifactProtocol = cardsInScope.filter((card) => card.artifactProtocol?.returnsRawBytes === false && card.artifactProtocol?.returnsFilePointer === true && card.artifactProtocol?.hashAlgorithm === "sha256").length;
+  const cardsWithWorkflowPolicy = cardsInScope.filter((card) => card.workflowPolicy?.allowsDynamicWorkflowGeneration === false).length;
   const cardsWithExecutionMode = cardsInScope.filter((card) => Boolean(card.executionMode)).length;
+  const cardsWithAutonomy = cardsInScope.filter((card) => Boolean(card.autonomyLevel)).length;
+  const cardsWithHandoffTruth = cardsInScope.filter((card) => typeof card.humanHandoffRequired === "boolean" && Array.isArray(card.handoffArtifactTypes)).length;
   const immutableTemplateCards = cardsInScope.filter((card) => card.templatePolicy?.immutableTemplateRequired === true).length;
 
   const installedCount = binaryProbes.filter((probe) => probe.installed).length;
@@ -88,10 +92,14 @@ export async function runToolMeshDoctor(scopeArg?: string) {
     execution_blocked_until_promoted: true,
     hardware_profiles_declared: cardsInScope.every((card) => Boolean(card.hardwareProfile?.concurrencyLock)),
     artifact_pointer_policy_declared: cardsWithPointerPolicy === cardsInScope.length,
+    artifact_protocol_declared: cardsWithArtifactProtocol === cardsInScope.length,
+    workflow_policy_declared: cardsWithWorkflowPolicy === cardsInScope.length,
     execution_modes_declared: cardsWithExecutionMode === cardsInScope.length,
+    autonomy_levels_declared: cardsWithAutonomy === cardsInScope.length,
+    handoff_truth_declared: cardsWithHandoffTruth === cardsInScope.length,
     immutable_templates_for_workflow_tools: cardsInScope
       .filter((card) => card.capabilities.includes("workflow"))
-      .every((card) => card.templatePolicy?.immutableTemplateRequired === true),
+      .every((card) => card.templatePolicy?.immutableTemplateRequired === true && card.workflowPolicy?.requiresImmutableTemplate === true),
   };
   const ok = Object.values(checks).every(Boolean);
 
@@ -109,7 +117,11 @@ export async function runToolMeshDoctor(scopeArg?: string) {
       registry_hash: sha256(JSON.stringify(registry)),
       hardwareSummary,
       cardsWithPointerPolicy,
+      cardsWithArtifactProtocol,
+      cardsWithWorkflowPolicy,
       cardsWithExecutionMode,
+      cardsWithAutonomy,
+      cardsWithHandoffTruth,
       immutableTemplateCards,
     },
     checks,

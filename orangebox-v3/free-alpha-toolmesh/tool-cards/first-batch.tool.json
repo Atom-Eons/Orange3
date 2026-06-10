@@ -47,13 +47,20 @@
       ],
       "notes": "Registry only until installed and benchmarked.",
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 16,
         "ramRequiredGB": 32,
+        "diskScratchGB": 4,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "high",
         "concurrencyLock": "gpu_media",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -73,7 +80,30 @@
           "flux-book-cover-v1",
           "sdxl-proof-render-v1"
         ]
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": true,
+        "templateRegistry": "orangebox-v3/free-alpha-toolmesh/templates/template-registry.json",
+        "allowedTemplateIds": [
+          "flux-book-cover-v1",
+          "sdxl-proof-render-v1"
+        ],
+        "variableInjectionOnly": true
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "flux",
@@ -116,13 +146,20 @@
       "rollback": "remove model route from image lab",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 16,
         "ramRequiredGB": 32,
+        "diskScratchGB": 4,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "high",
         "concurrencyLock": "gpu_media",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -133,7 +170,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "qwen-image",
@@ -176,13 +233,20 @@
       "rollback": "remove model route from image lab",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 16,
         "ramRequiredGB": 32,
+        "diskScratchGB": 4,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "high",
         "concurrencyLock": "gpu_media",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -193,7 +257,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "qwen-image-layered",
@@ -236,13 +320,20 @@
       "rollback": "disable layered route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 16,
         "ramRequiredGB": 32,
+        "diskScratchGB": 4,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "high",
         "concurrencyLock": "gpu_media",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -253,7 +344,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "sdxl",
@@ -294,13 +405,20 @@
       "rollback": "remove model route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 10,
         "ramRequiredGB": 32,
+        "diskScratchGB": 4,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_media",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -311,7 +429,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "wan",
@@ -355,13 +493,20 @@
       "rollback": "disable video route and delete candidate artifacts",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 24,
         "ramRequiredGB": 48,
+        "diskScratchGB": 10,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "long",
+        "oomRisk": "high",
         "concurrencyLock": "gpu_media",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -372,7 +517,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "ltx",
@@ -415,13 +580,20 @@
       "rollback": "disable ltx route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 16,
         "ramRequiredGB": 48,
+        "diskScratchGB": 10,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "long",
+        "oomRisk": "high",
         "concurrencyLock": "gpu_media",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -432,7 +604,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "davinci-resolve",
@@ -478,9 +670,16 @@
         "Resolve.exe"
       ],
       "hardwareProfile": {
+        "deviceClass": "mixed",
         "vramRequiredGB": 4,
         "ramRequiredGB": 48,
+        "diskScratchGB": 10,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "long",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_media",
         "notes": "Light profile under normal ToolMesh gate."
       },
@@ -495,7 +694,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "kdenlive",
@@ -540,9 +764,16 @@
         "kdenlive"
       ],
       "hardwareProfile": {
+        "deviceClass": "mixed",
         "vramRequiredGB": 4,
         "ramRequiredGB": 48,
+        "diskScratchGB": 10,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "long",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_media",
         "notes": "Light profile under normal ToolMesh gate."
       },
@@ -557,7 +788,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "obs",
@@ -604,13 +860,20 @@
         "obs"
       ],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 4,
         "ramRequiredGB": 48,
+        "diskScratchGB": 10,
+        "preferredRuntime": "comfyui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "long",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_media",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -621,7 +884,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "whisper",
@@ -666,13 +949,20 @@
         "whisper"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 3,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "cpu_audio",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -683,7 +973,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "audacity",
@@ -727,9 +1037,16 @@
         "audacity"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 3,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "cpu_audio",
         "notes": "Light profile under normal ToolMesh gate."
       },
@@ -744,7 +1061,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "demucs",
@@ -788,13 +1130,20 @@
         "demucs"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 3,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "cpu_audio",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -805,7 +1154,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "uvr",
@@ -847,13 +1216,20 @@
       "rollback": "disable uvr route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 3,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "cpu_audio",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -864,7 +1240,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "penpot",
@@ -906,9 +1302,16 @@
       "rollback": "disable penpot route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 4,
         "ramRequiredGB": 16,
+        "diskScratchGB": 4,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_design",
         "notes": "Light profile under normal ToolMesh gate."
       },
@@ -923,7 +1326,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "inkscape",
@@ -969,9 +1397,16 @@
         "inkscape"
       ],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 4,
         "ramRequiredGB": 16,
+        "diskScratchGB": 4,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_design",
         "notes": "Light profile under normal ToolMesh gate."
       },
@@ -986,7 +1421,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "krita",
@@ -1030,9 +1490,16 @@
         "krita"
       ],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 4,
         "ramRequiredGB": 16,
+        "diskScratchGB": 4,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_design",
         "notes": "Light profile under normal ToolMesh gate."
       },
@@ -1047,7 +1514,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "gimp",
@@ -1091,9 +1583,16 @@
         "gimp"
       ],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 4,
         "ramRequiredGB": 16,
+        "diskScratchGB": 4,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_design",
         "notes": "Light profile under normal ToolMesh gate."
       },
@@ -1108,7 +1607,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "blender",
@@ -1155,9 +1679,16 @@
         "blender"
       ],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 8,
         "ramRequiredGB": 16,
+        "diskScratchGB": 4,
+        "preferredRuntime": "native-gui",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "medium",
         "concurrencyLock": "gpu_design",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
@@ -1172,7 +1703,32 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "project"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": true,
+      "handoffArtifactTypes": [
+        "asset_folder",
+        "brief",
+        "export_notes",
+        "receipt"
+      ]
     },
     {
       "id": "aider",
@@ -1219,13 +1775,20 @@
         "aider"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 16,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "repo_agent",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1236,7 +1799,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "continue",
@@ -1283,13 +1866,20 @@
         "continue"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 16,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "repo_agent",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1300,7 +1890,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "openhands",
@@ -1346,13 +1956,20 @@
       "rollback": "stop container/process and discard workspace",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 16,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "repo_agent",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1363,7 +1980,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "goose",
@@ -1410,13 +2047,20 @@
         "goose"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 16,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "repo_agent",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1427,7 +2071,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "n8n",
@@ -1474,13 +2138,20 @@
         "n8n"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "side_effect",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1497,7 +2168,27 @@
           "output_artifact_pointer"
         ],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "campaign"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": true,
+        "templateRegistry": "orangebox-v3/free-alpha-toolmesh/templates/template-registry.json",
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": true
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "node-red",
@@ -1542,13 +2233,20 @@
         "node-red"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "side_effect",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1559,7 +2257,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "campaign"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "windmill",
@@ -1605,13 +2323,20 @@
         "wmill"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "side_effect",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1628,7 +2353,27 @@
           "output_artifact_pointer"
         ],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "campaign"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": true,
+        "templateRegistry": "orangebox-v3/free-alpha-toolmesh/templates/template-registry.json",
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": true
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "matomo",
@@ -1671,13 +2416,20 @@
       "rollback": "disable analytics route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "data_service",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1688,7 +2440,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "plausible",
@@ -1729,13 +2501,20 @@
       "rollback": "disable plausible route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "data_service",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1746,7 +2525,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "umami",
@@ -1787,13 +2586,20 @@
       "rollback": "disable umami route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "data_service",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1804,7 +2610,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "posthog",
@@ -1846,13 +2672,20 @@
       "rollback": "disable posthog route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "data_service",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1863,7 +2696,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "metabase",
@@ -1906,13 +2759,20 @@
       "rollback": "disable metabase route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "data_service",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1923,7 +2783,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "langfuse",
@@ -1965,13 +2845,20 @@
       "rollback": "disable langfuse route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "trace_service",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -1982,7 +2869,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "phoenix",
@@ -2024,13 +2931,20 @@
       "rollback": "disable phoenix route",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "trace_service",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -2041,7 +2955,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "semgrep",
@@ -2086,13 +3020,20 @@
         "semgrep"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "security_scan",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -2103,7 +3044,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "trivy",
@@ -2148,13 +3109,20 @@
         "trivy"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "security_scan",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -2165,7 +3133,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "gitleaks",
@@ -2210,13 +3198,20 @@
         "gitleaks"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "security_scan",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -2227,7 +3222,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "flowise",
@@ -2276,13 +3291,20 @@
         "flowise"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 12,
+        "diskScratchGB": 1,
+        "preferredRuntime": "docker",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "medium",
+        "oomRisk": "low",
         "concurrencyLock": "public_agent",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "api",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -2293,7 +3315,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "campaign"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "act",
@@ -2340,13 +3382,20 @@
         "act"
       ],
       "hardwareProfile": {
+        "deviceClass": "cpu",
         "vramRequiredGB": 0,
         "ramRequiredGB": 8,
+        "diskScratchGB": 2,
+        "preferredRuntime": "cli",
         "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 2,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "low",
         "concurrencyLock": "release_rehearsal",
         "notes": "Light profile under normal ToolMesh gate."
       },
-      "executionMode": "headless_or_workspace_prep",
+      "executionMode": "cli",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -2357,7 +3406,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     },
     {
       "id": "tilelang",
@@ -2401,13 +3470,20 @@
       "rollback": "keep watchlist-only and do not install into runtime",
       "binaryNames": [],
       "hardwareProfile": {
+        "deviceClass": "gpu",
         "vramRequiredGB": 8,
         "ramRequiredGB": 16,
+        "diskScratchGB": 1,
+        "preferredRuntime": "unknown",
         "requiresLLMUnload": true,
+        "requiresExclusiveGPU": true,
+        "maxConcurrentJobs": 1,
+        "estimatedRuntimeClass": "short",
+        "oomRisk": "medium",
         "concurrencyLock": "alpha_benchmark",
         "notes": "Acquire lock and unload local LLM lane before execution."
       },
-      "executionMode": "registry_only",
+      "executionMode": "unknown",
       "artifactPolicy": {
         "returnsPointersOnly": true,
         "maxInlineBytes": 0,
@@ -2418,7 +3494,27 @@
         "immutableTemplateRequired": false,
         "allowedVariables": [],
         "templateIds": []
-      }
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": false,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": false,
+        "retentionClass": "ephemeral"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": false,
+        "templateRegistry": null,
+        "allowedTemplateIds": [],
+        "variableInjectionOnly": false
+      },
+      "autonomyLevel": "none",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
     }
   ]
 }

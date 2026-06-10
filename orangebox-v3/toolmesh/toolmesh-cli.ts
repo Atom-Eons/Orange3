@@ -3,6 +3,7 @@ import { dryRunToolAction } from "./adapter-runner";
 import { runToolMeshDoctor } from "./adapter-doctor";
 import { routeCapability } from "./capability-router";
 import { loadToolCards, loadWaveRegistry } from "./tool-registry";
+import { runPhysicalRuntimeDoctor } from "./physical-runtime-doctor";
 
 function usage() {
   return {
@@ -11,6 +12,7 @@ function usage() {
       "list [lab-or-category]",
       "route <intent>",
       "dry-run <tool-id> <task>",
+      "physical-doctor",
       "waves",
     ],
   };
@@ -56,6 +58,11 @@ export async function runToolMeshCli(argv = process.argv.slice(2)) {
   if (command === "dry-run") {
     const [toolId, ...taskWords] = rest;
     printResult(dryRunToolAction({ toolId, task: taskWords.join(" ") }));
+    return;
+  }
+
+  if (command === "physical-doctor") {
+    printResult(await runPhysicalRuntimeDoctor());
     return;
   }
 

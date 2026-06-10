@@ -179,6 +179,7 @@ async function main() {
   const skillLifecycle = readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(latestReceipt("orangebox-skill-lifecycle-doctor-"));
   const toolErgonomics = readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(latestReceipt("orangebox-tool-ergonomics-"));
   const toolmesh = readJson(path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json"));
+  const toolmeshPhysical = readJson(path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json"));
   const horizonReview = readJson(path.join(dataRoot, "horizon-review", "latest-horizon-review.json")) || readJson(latestReceipt("orangebox-horizon-review-"));
   const horizonBakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json")) || readJson(latestReceipt("orangebox-horizon-promotion-bakeoff-"));
   const elysiaLatency = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json")) || readJson(latestReceipt("orangebox-elysia-rail-latency-bakeoff-"));
@@ -295,9 +296,24 @@ async function main() {
     toolmesh?.checks?.hardware_profiles_declared === true &&
     toolmesh?.checks?.artifact_pointer_policy_declared === true &&
     toolmesh?.checks?.execution_modes_declared === true &&
+    toolmesh?.checks?.artifact_protocol_declared === true &&
+    toolmesh?.checks?.workflow_policy_declared === true &&
+    toolmesh?.checks?.autonomy_levels_declared === true &&
+    toolmesh?.checks?.handoff_truth_declared === true &&
     toolmesh?.checks?.immutable_templates_for_workflow_tools === true &&
     toolmesh?.waveValidation?.preservedV3Count === 16 &&
     toolmesh?.waveValidation?.toolmeshCount === 10;
+  const toolmeshPhysicalGreen =
+    toolmeshPhysical?.ok === true &&
+    toolmeshPhysical?.status === "ORANGEBOX_TOOLMESH_PHYSICAL_RUNTIME_GREEN" &&
+    toolmeshPhysical?.checks?.all_cards_physical_valid === true &&
+    toolmeshPhysical?.checks?.artifact_pointer_only_all_cards === true &&
+    toolmeshPhysical?.checks?.template_registry_valid === true &&
+    toolmeshPhysical?.checks?.gui_tools_handoff_only === true &&
+    toolmeshPhysical?.checks?.no_execute_direct_in_y0 === true &&
+    toolmeshPhysical?.constraints?.external_tools_executed === false &&
+    toolmeshPhysical?.constraints?.cloud_services_called === false &&
+    toolmeshPhysical?.constraints?.frontend_touched === false;
   const horizonReviewReady = horizonReview?.status === "ORANGEBOX_HORIZON_REVIEW_READY" && horizonReview?.ok === true;
   const horizonBakeoffReady =
     horizonBakeoff?.status === "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY" &&
@@ -438,11 +454,21 @@ async function main() {
       area: "V3 free-alpha ToolMesh",
       status: status(toolmeshGreen, exists(path.join(repoRoot, "orangebox-v3", "toolmesh", "toolmesh-cli.ts"))),
       reality: toolmeshGreen
-        ? `ToolMesh registry is green: ${toolmesh?.summary?.cards_total || 0} cards, ${toolmesh?.waveValidation?.preservedV3Count || 0} preserved V3 waves, ${toolmesh?.waveValidation?.toolmeshCount || 0} ToolMesh waves, execution blocked until promotion, hardware profiles and artifact-pointer policy declared.`
+        ? `ToolMesh registry is green: ${toolmesh?.summary?.cards_total || 0} cards, ${toolmesh?.waveValidation?.preservedV3Count || 0} preserved V3 waves, ${toolmesh?.waveValidation?.toolmeshCount || 0} ToolMesh waves, execution blocked until promotion, hardware profiles, artifact protocol, workflow policy, autonomy levels, and handoff truth declared.`
         : "ToolMesh source exists or is planned, but the current doctor receipt is not green yet.",
       next: toolmeshGreen
-        ? "Use lab doctors and benchmark gates before installing, executing, or promoting candidate tools."
+        ? "Use lab doctors, physical-runtime doctor, and benchmark gates before installing, executing, or promoting candidate tools."
         : "Run npm.cmd run toolmesh:doctor and fix the exact registry/card/wave failure.",
+    },
+    {
+      area: "ToolMesh physical runtime contract",
+      status: status(toolmeshPhysicalGreen, exists(path.join(repoRoot, "orangebox-v3", "toolmesh", "physical-runtime-doctor.ts"))),
+      reality: toolmeshPhysicalGreen
+        ? `Physical runtime contract is green: ${toolmeshPhysical?.summary?.cards_total || 0} cards, pointer-only=${toolmeshPhysical?.summary?.pointerOnlyCount || 0}, GUI handoff tools=${toolmeshPhysical?.summary?.handoffRequiredCount || 0}, immutable-template tools=${toolmeshPhysical?.summary?.immutableTemplateRequiredCount || 0}, max VRAM=${toolmeshPhysical?.summary?.hardwareSummary?.maxVramRequiredGB ?? "unknown"}GB; no external execution, cloud call, or frontend touch.`
+        : "Physical runtime contract source exists or is planned, but the current physical-runtime receipt is not green yet.",
+      next: toolmeshPhysicalGreen
+        ? "Treat visual/media/coding tools as governed physical jobs: schedule GPU/LLM residency, return artifact pointers, use immutable templates, and hand GUI work to humans until runtime proof promotes a lane."
+        : "Run npm.cmd run toolmesh:physical-doctor and fix the exact hardware/artifact/template/handoff failure.",
     },
     {
       area: "Visual production readiness",
@@ -824,6 +850,7 @@ async function main() {
         research_radar: packageScript("research:radar", packageJson),
         horizon_review: packageScript("horizon:review", packageJson),
         horizon_bakeoff: packageScript("horizon:bakeoff", packageJson),
+        toolmesh_physical_doctor: packageScript("toolmesh:physical-doctor", packageJson),
         elysia_latency_bakeoff: packageScript("v3:api:bakeoff", packageJson),
         visual_readiness: packageScript("visual:readiness", packageJson),
         assurance_doctor: packageScript("assurance:doctor", packageJson),
@@ -1094,6 +1121,29 @@ async function main() {
         hardware_profiles_declared: toolmesh?.checks?.hardware_profiles_declared ?? null,
         artifact_pointer_policy_declared: toolmesh?.checks?.artifact_pointer_policy_declared ?? null,
         immutable_templates_for_workflow_tools: toolmesh?.checks?.immutable_templates_for_workflow_tools ?? null,
+        artifact_protocol_declared: toolmesh?.checks?.artifact_protocol_declared ?? null,
+        workflow_policy_declared: toolmesh?.checks?.workflow_policy_declared ?? null,
+        autonomy_levels_declared: toolmesh?.checks?.autonomy_levels_declared ?? null,
+        handoff_truth_declared: toolmesh?.checks?.handoff_truth_declared ?? null,
+      },
+      toolmesh_physical_runtime: {
+        path: path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json"),
+        status: toolmeshPhysical?.status || null,
+        cards_total: toolmeshPhysical?.summary?.cards_total ?? null,
+        pointer_only_count: toolmeshPhysical?.summary?.pointerOnlyCount ?? null,
+        handoff_required_count: toolmeshPhysical?.summary?.handoffRequiredCount ?? null,
+        immutable_template_required_count: toolmeshPhysical?.summary?.immutableTemplateRequiredCount ?? null,
+        max_vram_required_gb: toolmeshPhysical?.summary?.hardwareSummary?.maxVramRequiredGB ?? null,
+        execution_mode_counts: toolmeshPhysical?.summary?.executionModeCounts || null,
+        runtime_counts: toolmeshPhysical?.summary?.hardwareSummary?.runtimeCounts || null,
+        all_cards_physical_valid: toolmeshPhysical?.checks?.all_cards_physical_valid ?? null,
+        artifact_pointer_only_all_cards: toolmeshPhysical?.checks?.artifact_pointer_only_all_cards ?? null,
+        template_registry_valid: toolmeshPhysical?.checks?.template_registry_valid ?? null,
+        gui_tools_handoff_only: toolmeshPhysical?.checks?.gui_tools_handoff_only ?? null,
+        no_execute_direct_in_y0: toolmeshPhysical?.checks?.no_execute_direct_in_y0 ?? null,
+        external_tools_executed: toolmeshPhysical?.constraints?.external_tools_executed ?? null,
+        cloud_services_called: toolmeshPhysical?.constraints?.cloud_services_called ?? null,
+        frontend_touched: toolmeshPhysical?.constraints?.frontend_touched ?? null,
       },
       horizon_review: {
         path: path.join(dataRoot, "horizon-review", "latest-horizon-review.json"),

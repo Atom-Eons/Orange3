@@ -1,0 +1,12 @@
+{
+  "template_id": "flux-book-cover-v1",
+  "tool": "comfyui",
+  "status": "stub_validated_not_executable",
+  "locked_graph": {
+    "node_ids": ["prompt", "sampler", "vae", "save"],
+    "model_loader": "approved_flux_loader",
+    "sampler_type": "approved_sampler",
+    "scheduler": "approved_scheduler"
+  },
+  "allowedVariables": ["prompt", "negative_prompt", "seed", "width", "height", "output_artifact_pointer"]
+}

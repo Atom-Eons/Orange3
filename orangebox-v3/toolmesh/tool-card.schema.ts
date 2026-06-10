@@ -20,7 +20,12 @@ export const TOOL_CARD_REQUIRED_FIELDS = [
   "failureModes",
   "rollback",
   "hardwareProfile",
+  "artifactProtocol",
+  "workflowPolicy",
   "executionMode",
+  "autonomyLevel",
+  "humanHandoffRequired",
+  "handoffArtifactTypes",
   "artifactPolicy",
   "templatePolicy",
 ] as const;
@@ -81,6 +86,58 @@ export const REQUIRED_FIRST_BATCH_TOOL_IDS = [
 
 export type ToolMeshLab = (typeof TOOLMESH_LABS)[number];
 
+export type ToolExecutionMode =
+  | "headless"
+  | "api"
+  | "cli"
+  | "workspace_prep"
+  | "gui_assist"
+  | "human_finish"
+  | "required_manual"
+  | "unknown";
+
+export type ToolAutonomyLevel =
+  | "none"
+  | "prepare"
+  | "suggest"
+  | "execute_in_ghost"
+  | "execute_direct"
+  | "publish";
+
+export type ToolHardwareProfile = {
+  deviceClass: "cpu" | "gpu" | "mixed" | "external" | "unknown";
+  vramRequiredGB: number;
+  ramRequiredGB: number;
+  diskScratchGB: number;
+  preferredRuntime: "ollama" | "llama.cpp" | "comfyui" | "python" | "bun" | "docker" | "native-gui" | "cli" | "unknown";
+  requiresLLMUnload: boolean;
+  requiresExclusiveGPU: boolean;
+  maxConcurrentJobs: number;
+  estimatedRuntimeClass: "instant" | "short" | "medium" | "long" | "overnight";
+  oomRisk: "low" | "medium" | "high" | "unknown";
+  concurrencyLock: string;
+  notes?: string;
+};
+
+export type ToolArtifactProtocol = {
+  returnsRawBytes: false;
+  returnsFilePointer: true;
+  maxInlineBytes: number;
+  artifactVaultRequired: boolean;
+  hashAlgorithm: "sha256";
+  metadataSidecar: boolean;
+  garbageCollectable: boolean;
+  retentionClass: "ephemeral" | "session" | "project" | "campaign" | "permanent";
+};
+
+export type ToolWorkflowPolicy = {
+  allowsDynamicWorkflowGeneration: boolean;
+  requiresImmutableTemplate: boolean;
+  templateRegistry: string | null;
+  allowedTemplateIds: string[];
+  variableInjectionOnly: boolean;
+};
+
 export type ToolCard = {
   id: string;
   name: string;
@@ -105,14 +162,13 @@ export type ToolCard = {
   privacyLevel: "local" | "local_first" | "cloud_warrant" | "blocked";
   failureModes: string[];
   rollback: string;
-  hardwareProfile: {
-    vramRequiredGB: number;
-    ramRequiredGB: number;
-    requiresLLMUnload: boolean;
-    concurrencyLock: string;
-    notes?: string;
-  };
-  executionMode: "headless" | "workspace_prep" | "headless_or_workspace_prep" | "registry_only";
+  hardwareProfile: ToolHardwareProfile;
+  artifactProtocol: ToolArtifactProtocol;
+  workflowPolicy: ToolWorkflowPolicy;
+  executionMode: ToolExecutionMode;
+  autonomyLevel: ToolAutonomyLevel;
+  humanHandoffRequired: boolean;
+  handoffArtifactTypes: string[];
   artifactPolicy: {
     returnsPointersOnly: boolean;
     maxInlineBytes: number;
@@ -162,13 +218,47 @@ export function validateToolCard(card: Partial<ToolCard>): ToolCardValidation {
   }
   if (card.hardwareProfile) {
     const profile = card.hardwareProfile as ToolCard["hardwareProfile"];
+    if (!["cpu", "gpu", "mixed", "external", "unknown"].includes(String(profile.deviceClass))) failures.push("hardwareProfile.deviceClass is invalid");
     if (typeof profile.vramRequiredGB !== "number") failures.push("hardwareProfile.vramRequiredGB must be a number");
     if (typeof profile.ramRequiredGB !== "number") failures.push("hardwareProfile.ramRequiredGB must be a number");
+    if (typeof profile.diskScratchGB !== "number") failures.push("hardwareProfile.diskScratchGB must be a number");
+    if (!["ollama", "llama.cpp", "comfyui", "python", "bun", "docker", "native-gui", "cli", "unknown"].includes(String(profile.preferredRuntime))) failures.push("hardwareProfile.preferredRuntime is invalid");
     if (typeof profile.requiresLLMUnload !== "boolean") failures.push("hardwareProfile.requiresLLMUnload must be boolean");
+    if (typeof profile.requiresExclusiveGPU !== "boolean") failures.push("hardwareProfile.requiresExclusiveGPU must be boolean");
+    if (typeof profile.maxConcurrentJobs !== "number" || profile.maxConcurrentJobs < 1) failures.push("hardwareProfile.maxConcurrentJobs must be a positive number");
+    if (!["instant", "short", "medium", "long", "overnight"].includes(String(profile.estimatedRuntimeClass))) failures.push("hardwareProfile.estimatedRuntimeClass is invalid");
+    if (!["low", "medium", "high", "unknown"].includes(String(profile.oomRisk))) failures.push("hardwareProfile.oomRisk is invalid");
     if (!profile.concurrencyLock) failures.push("hardwareProfile.concurrencyLock is required");
   }
-  if (card.executionMode && !["headless", "workspace_prep", "headless_or_workspace_prep", "registry_only"].includes(card.executionMode)) {
-    failures.push("executionMode must be headless, workspace_prep, headless_or_workspace_prep, or registry_only");
+  if (card.artifactProtocol) {
+    const protocol = card.artifactProtocol as ToolCard["artifactProtocol"];
+    if (protocol.returnsRawBytes !== false) failures.push("artifactProtocol.returnsRawBytes must be false");
+    if (protocol.returnsFilePointer !== true) failures.push("artifactProtocol.returnsFilePointer must be true");
+    if (typeof protocol.maxInlineBytes !== "number" || protocol.maxInlineBytes > 8192) failures.push("artifactProtocol.maxInlineBytes must be <= 8192");
+    if (typeof protocol.artifactVaultRequired !== "boolean") failures.push("artifactProtocol.artifactVaultRequired must be boolean");
+    if (protocol.hashAlgorithm !== "sha256") failures.push("artifactProtocol.hashAlgorithm must be sha256");
+    if (typeof protocol.metadataSidecar !== "boolean") failures.push("artifactProtocol.metadataSidecar must be boolean");
+    if (typeof protocol.garbageCollectable !== "boolean") failures.push("artifactProtocol.garbageCollectable must be boolean");
+    if (!["ephemeral", "session", "project", "campaign", "permanent"].includes(String(protocol.retentionClass))) failures.push("artifactProtocol.retentionClass is invalid");
+  }
+  if (card.workflowPolicy) {
+    const policy = card.workflowPolicy as ToolCard["workflowPolicy"];
+    if (policy.allowsDynamicWorkflowGeneration !== false) failures.push("workflowPolicy.allowsDynamicWorkflowGeneration must be false");
+    if (typeof policy.requiresImmutableTemplate !== "boolean") failures.push("workflowPolicy.requiresImmutableTemplate must be boolean");
+    if (!Array.isArray(policy.allowedTemplateIds)) failures.push("workflowPolicy.allowedTemplateIds must be an array");
+    if (typeof policy.variableInjectionOnly !== "boolean") failures.push("workflowPolicy.variableInjectionOnly must be boolean");
+  }
+  if (card.executionMode && !["headless", "api", "cli", "workspace_prep", "gui_assist", "human_finish", "required_manual", "unknown"].includes(card.executionMode)) {
+    failures.push("executionMode must be a V3 physical runtime mode");
+  }
+  if (card.autonomyLevel && !["none", "prepare", "suggest", "execute_in_ghost", "execute_direct", "publish"].includes(card.autonomyLevel)) {
+    failures.push("autonomyLevel must be none, prepare, suggest, execute_in_ghost, execute_direct, or publish");
+  }
+  if ("humanHandoffRequired" in card && typeof card.humanHandoffRequired !== "boolean") {
+    failures.push("humanHandoffRequired must be boolean");
+  }
+  if (card.handoffArtifactTypes && !Array.isArray(card.handoffArtifactTypes)) {
+    failures.push("handoffArtifactTypes must be an array");
   }
   if (card.artifactPolicy) {
     const policy = card.artifactPolicy as ToolCard["artifactPolicy"];
@@ -185,6 +275,15 @@ export function validateToolCard(card: Partial<ToolCard>): ToolCardValidation {
   }
   if (card.id === "comfyui" && card.templatePolicy?.immutableTemplateRequired !== true) {
     failures.push("ComfyUI must require immutable templates");
+  }
+  if (card.id === "comfyui" && card.workflowPolicy?.requiresImmutableTemplate !== true) {
+    failures.push("ComfyUI workflowPolicy must require immutable templates");
+  }
+  if (card.capabilities?.includes("workflow") && card.workflowPolicy?.allowsDynamicWorkflowGeneration !== false) {
+    failures.push("workflow-capable tools must reject dynamic workflow generation");
+  }
+  if (["workspace_prep", "gui_assist", "human_finish", "required_manual"].includes(String(card.executionMode)) && card.humanHandoffRequired !== true) {
+    failures.push("GUI/manual execution modes must require human handoff");
   }
   if (card.canPublish && !card.requiresReceipt) {
     failures.push("publishing tools must require receipts");

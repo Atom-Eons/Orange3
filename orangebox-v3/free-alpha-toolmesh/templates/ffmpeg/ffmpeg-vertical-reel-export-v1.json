@@ -1,0 +1,8 @@
+{
+  "template_id": "ffmpeg-vertical-reel-export-v1",
+  "tool": "ffmpeg",
+  "status": "stub_validated_not_executable",
+  "command_template": "ffmpeg -i {{input_artifact_pointer}} -vf scale={{width}}:{{height}},fps={{fps}} {{output_artifact_pointer}}",
+  "safe_flags": ["-i", "-vf"],
+  "allowedVariables": ["input_artifact_pointer", "output_artifact_pointer", "height", "width", "fps"]
+}

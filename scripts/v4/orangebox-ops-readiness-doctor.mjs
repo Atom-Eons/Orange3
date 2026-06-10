@@ -117,6 +117,8 @@ function main() {
   const horizonReview = readJson(horizonReviewPath);
   const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
   const horizonBakeoff = readJson(horizonBakeoffPath);
+  const toolmeshPhysicalPath = path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json");
+  const toolmeshPhysical = readJson(toolmeshPhysicalPath);
   const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const elysiaLatency = readJson(elysiaLatencyPath);
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
@@ -301,6 +303,26 @@ function main() {
       hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
       visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
       note: "Turns reviewed alpha candidates into a proof-ranked bakeoff matrix with binary/dependency probes, blockers, and no automatic promotion.",
+    },
+    toolmesh_physical_runtime: {
+      ok:
+        toolmeshPhysical?.ok === true &&
+        toolmeshPhysical?.status === "ORANGEBOX_TOOLMESH_PHYSICAL_RUNTIME_GREEN" &&
+        toolmeshPhysical?.checks?.all_cards_physical_valid === true &&
+        toolmeshPhysical?.checks?.artifact_pointer_only_all_cards === true &&
+        toolmeshPhysical?.checks?.template_registry_valid === true &&
+        toolmeshPhysical?.checks?.gui_tools_handoff_only === true &&
+        toolmeshPhysical?.constraints?.external_tools_executed === false &&
+        toolmeshPhysical?.constraints?.cloud_services_called === false &&
+        toolmeshPhysical?.constraints?.frontend_touched === false,
+      path: toolmeshPhysicalPath,
+      status: toolmeshPhysical?.status || null,
+      cards_total: toolmeshPhysical?.summary?.cards_total ?? null,
+      pointerOnlyCount: toolmeshPhysical?.summary?.pointerOnlyCount ?? null,
+      handoffRequiredCount: toolmeshPhysical?.summary?.handoffRequiredCount ?? null,
+      immutableTemplateRequiredCount: toolmeshPhysical?.summary?.immutableTemplateRequiredCount ?? null,
+      maxVramRequiredGB: toolmeshPhysical?.summary?.hardwareSummary?.maxVramRequiredGB ?? null,
+      note: "Proves ToolMesh physical-runtime safety: hardware declarations, pointer-only artifacts, immutable templates, GUI handoff, and no external execution.",
     },
     elysia_rail_latency_bakeoff: {
       ok:

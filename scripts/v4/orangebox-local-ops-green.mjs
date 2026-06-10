@@ -222,6 +222,7 @@ async function main() {
     { script: "checkmate:doctor", timeout: 60_000 },
     { script: "assurance:doctor", timeout: 60_000 },
     { script: "toolmesh:doctor", timeout: 90_000 },
+    { script: "toolmesh:physical-doctor", timeout: 90_000 },
     { script: "v3:api:doctor", timeout: 90_000 },
     { script: "v3:goose:envelope", timeout: 90_000 },
     { script: "v3:openjarvis:doctor", timeout: 90_000 },
@@ -271,6 +272,7 @@ async function main() {
   const assurancePath = path.join(dataRoot, "assurance-lab", "latest-assurance-lab.json");
   const horizonReviewPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
   const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
+  const toolmeshPhysicalPath = path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json");
   const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
@@ -304,6 +306,7 @@ async function main() {
   const assurance = readJson(assurancePath);
   const horizonReview = readJson(horizonReviewPath);
   const horizonBakeoff = readJson(horizonBakeoffPath);
+  const toolmeshPhysical = readJson(toolmeshPhysicalPath);
   const elysiaLatency = readJson(elysiaLatencyPath);
   const visualReadiness = readJson(visualReadinessPath);
   const signalHygiene = readJson(signalHygienePath);
@@ -426,6 +429,13 @@ async function main() {
       openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
       visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
     }),
+    gate("toolmesh_physical_runtime_green", toolmeshPhysical?.ok === true && toolmeshPhysical?.status === "ORANGEBOX_TOOLMESH_PHYSICAL_RUNTIME_GREEN" && toolmeshPhysical?.checks?.all_cards_physical_valid === true && toolmeshPhysical?.checks?.artifact_pointer_only_all_cards === true && toolmeshPhysical?.checks?.gui_tools_handoff_only === true, {
+      status: toolmeshPhysical?.status || null,
+      cards_total: toolmeshPhysical?.summary?.cards_total ?? null,
+      pointerOnlyCount: toolmeshPhysical?.summary?.pointerOnlyCount ?? null,
+      handoffRequiredCount: toolmeshPhysical?.summary?.handoffRequiredCount ?? null,
+      maxVramRequiredGB: toolmeshPhysical?.summary?.hardwareSummary?.maxVramRequiredGB ?? null,
+    }),
     gate("elysia_rail_latency_bakeoff_green", elysiaLatency?.ok === true && elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" && elysiaLatency?.benchmark?.latency_parity_green === true && elysiaLatency?.promotion?.default_api_replacement_approved === false, {
       status: elysiaLatency?.status || null,
       latency_parity_green: elysiaLatency?.benchmark?.latency_parity_green ?? null,
@@ -490,6 +500,7 @@ async function main() {
     visual_readiness: visualReadinessPath,
     horizon_review: horizonReviewPath,
     horizon_bakeoff: horizonBakeoffPath,
+    toolmesh_physical_runtime: toolmeshPhysicalPath,
     elysia_latency_bakeoff: elysiaLatencyPath,
     signal_hygiene: signalHygienePath,
       doer_watcher_spine: sessionSpinePath,

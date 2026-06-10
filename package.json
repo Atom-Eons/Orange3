@@ -110,6 +110,7 @@
     "v3:doctor": "bun ./orangebox-v3/v3-cli.ts doctor",
     "v3:flags": "bun ./orangebox-v3/v3-cli.ts flags",
     "toolmesh:doctor": "bun ./orangebox-v3/toolmesh/toolmesh-cli.ts doctor",
+    "toolmesh:physical-doctor": "bun ./orangebox-v3/toolmesh/physical-runtime-doctor.ts",
     "toolmesh:list": "bun ./orangebox-v3/toolmesh/toolmesh-cli.ts list",
     "toolmesh:route": "bun ./orangebox-v3/toolmesh/toolmesh-cli.ts route",
     "toolmesh:waves": "bun ./orangebox-v3/toolmesh/toolmesh-cli.ts waves",
