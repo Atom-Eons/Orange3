@@ -106,6 +106,112 @@
       "handoffArtifactTypes": []
     },
     {
+      "id": "orangebox-headless-png-renderer",
+      "name": "Orangebox Headless PNG Renderer",
+      "category": "image_runtime",
+      "lab": "image-lab",
+      "phase": "Y1",
+      "status": "promoted",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "promoted deterministic headless image runtime for artifact-pipeline proof",
+      "capabilities": [
+        "image",
+        "headless render",
+        "template render",
+        "workflow"
+      ],
+      "input": [
+        "template variables",
+        "output artifact pointer"
+      ],
+      "output": [
+        "png image",
+        "manifest",
+        "runtime receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "visual:runtime:headless-image",
+      "promotionGate": [
+        "local Bun runtime proof",
+        "sample render receipt",
+        "artifact vault pointer proof",
+        "rollback path"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "artifact vault missing",
+        "png writer regression",
+        "manifest/hash mismatch"
+      ],
+      "rollback": "disable visual:runtime:headless-image promotion and remove generated runtime artifacts",
+      "binaryNames": [
+        "bun"
+      ],
+      "notes": "First promoted visual runtime; proves real artifact generation without claiming heavyweight AI image model readiness.",
+      "hardwareProfile": {
+        "deviceClass": "cpu",
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 1,
+        "diskScratchGB": 0.05,
+        "preferredRuntime": "bun",
+        "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 4,
+        "estimatedRuntimeClass": "instant",
+        "oomRisk": "low",
+        "concurrencyLock": "cpu_visual_runtime",
+        "notes": "No GPU, model, or cloud runtime required."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": true,
+        "allowedVariables": [
+          "accent",
+          "width",
+          "height",
+          "label",
+          "output_artifact_pointer"
+        ],
+        "templateIds": [
+          "headless-image-proof-v1"
+        ]
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": true,
+        "templateRegistry": "orangebox-v3/free-alpha-toolmesh/templates/template-registry.json",
+        "allowedTemplateIds": [
+          "headless-image-proof-v1"
+        ],
+        "variableInjectionOnly": true
+      },
+      "autonomyLevel": "execute_in_ghost",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
+    },
+    {
       "id": "flux",
       "name": "FLUX",
       "category": "image_model",

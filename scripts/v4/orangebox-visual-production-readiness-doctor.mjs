@@ -55,7 +55,12 @@ function latestArtifactSmoke() {
   return { file, report: readJson(file, null) };
 }
 
-function summarizeLane(lab, cards, doctor) {
+function latestHeadlessImageRuntime() {
+  const file = path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json");
+  return { file, report: readJson(file, null) };
+}
+
+function summarizeLane(lab, cards, doctor, runtimeReceipt = null) {
   const laneCards = cards.filter((card) => card.lab === lab);
   const installedProbes = doctor?.summary?.installed_probe_count ?? 0;
   const promoted = laneCards.filter((card) => card.status === "promoted" || card.status === "installed").length;
@@ -63,10 +68,13 @@ function summarizeLane(lab, cards, doctor) {
   const maxVram = doctor?.summary?.hardwareSummary?.maxVramRequiredGB ?? Math.max(0, ...laneCards.map((card) => card.hardwareProfile?.vramRequiredGB || 0));
   const llmUnloadCount = doctor?.summary?.hardwareSummary?.llmUnloadCount ?? laneCards.filter((card) => card.hardwareProfile?.requiresLLMUnload).length;
   const binaries = doctor?.binaryProbes || [];
+  const controlPlaneGreen = doctor?.ok === true && doctor?.status === "GREEN";
+  const runtimeReceiptGreen = runtimeReceipt?.ok === true && runtimeReceipt?.runtime_ready === true;
+  const runtimeReady = controlPlaneGreen && promoted > 0 && runtimeReceiptGreen;
   return {
     lab,
-    control_plane_green: doctor?.ok === true && doctor?.status === "GREEN",
-    runtime_ready: false,
+    control_plane_green: controlPlaneGreen,
+    runtime_ready: runtimeReady,
     cards: laneCards.length,
     candidates,
     promoted_or_installed_cards: promoted,
@@ -80,8 +88,16 @@ function summarizeLane(lab, cards, doctor) {
     not_runtime_ready_because: [
       promoted === 0 ? "No visual tool card is promoted or installed." : null,
       installedProbes === 0 ? "No useful runtime binary/model install is proven by the latest lab doctor." : null,
-      "No promoted lab-specific generation/edit/render artifact receipt is present at this runtime layer yet.",
+      runtimeReceiptGreen ? null : "No promoted lab-specific generation/edit/render artifact receipt is present at this runtime layer yet.",
     ].filter(Boolean),
+    runtime_receipt: runtimeReceipt ? {
+      status: runtimeReceipt.status || null,
+      path: runtimeReceipt.latest_path || null,
+      artifact_path: runtimeReceipt.artifact?.artifact_path || null,
+      sha256: runtimeReceipt.artifact?.sha256 || null,
+      ai_generated_media: runtimeReceipt.artifact?.ai_generated_media ?? null,
+      deterministic_renderer: runtimeReceipt.artifact?.deterministic_renderer ?? null,
+    } : null,
     cards_by_id: laneCards.map((card) => ({
       id: card.id,
       name: card.name,
@@ -105,6 +121,7 @@ async function main() {
   }));
   const artifactVault = latestArtifactVault();
   const artifactSmoke = latestArtifactSmoke();
+  const headlessImageRuntime = latestHeadlessImageRuntime();
   const artifactVaultReady = artifactVault.report?.ok === true
     && artifactVault.report?.status === "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN"
     && artifactVault.report?.vault_ready === true;
@@ -113,7 +130,13 @@ async function main() {
     && artifactSmoke.report?.smoke_ready === true
     && artifactSmoke.report?.artifact?.mime_type === "image/png"
     && artifactSmoke.report?.artifact?.runtime_generated_media === false;
-  const lanes = visualLabs.map((lab) => summarizeLane(lab, cards, doctors[lab].report));
+  const promotedRuntimeReceipts = {
+    "image-lab": headlessImageRuntime.report,
+    "video-lab": null,
+    "audio-lab": null,
+    "design-lab": null,
+  };
+  const lanes = visualLabs.map((lab) => summarizeLane(lab, cards, doctors[lab].report, promotedRuntimeReceipts[lab]));
   const allControlGreen = lanes.every((lane) => lane.control_plane_green);
   const anyRuntimeReady = lanes.some((lane) => lane.runtime_ready);
   const allRuntimeReady = lanes.every((lane) => lane.runtime_ready);
@@ -123,7 +146,11 @@ async function main() {
     ok: true,
     schema_version: "orangebox.visual_production_readiness.v1",
     generated_at: generatedAt,
-    status: allRuntimeReady ? "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY" : "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED",
+    status: allRuntimeReady
+      ? "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY"
+      : anyRuntimeReady
+        ? "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY"
+        : "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED",
     visual_ready: allRuntimeReady,
     control_plane_green: allControlGreen,
     runtime_ready: allRuntimeReady,
@@ -139,6 +166,7 @@ async function main() {
       lab_doctors: Object.fromEntries(Object.entries(doctors).map(([lab, value]) => [lab, value.file])),
       artifact_vault: artifactVault.file,
       artifact_smoke: artifactSmoke.file,
+      headless_image_runtime: headlessImageRuntime.file,
     },
     summary: {
       visual_labs: visualLabs.length,
@@ -159,22 +187,34 @@ async function main() {
       smoke_artifact_sha256: artifactSmoke.report?.artifact?.sha256 || null,
       smoke_artifact_mime_type: artifactSmoke.report?.artifact?.mime_type || null,
       visual_artifact_pipeline_ready: artifactVaultReady && artifactSmokeReady,
+      headless_image_runtime_ready: headlessImageRuntime.report?.ok === true && headlessImageRuntime.report?.runtime_ready === true,
+      headless_image_runtime_status: headlessImageRuntime.report?.status || "missing",
+      headless_image_artifact_path: headlessImageRuntime.report?.artifact?.artifact_path || null,
+      headless_image_artifact_sha256: headlessImageRuntime.report?.artifact?.sha256 || null,
+      promoted_runtime_receipts: lanes.filter((lane) => lane.runtime_ready).map((lane) => ({
+        lab: lane.lab,
+        status: lane.runtime_receipt?.status || null,
+        artifact_path: lane.runtime_receipt?.artifact_path || null,
+        sha256: lane.runtime_receipt?.sha256 || null,
+      })),
       cards_hash: sha256(JSON.stringify(visualCards)),
     },
     lanes,
     blockers: [
-      "ComfyUI/FLUX/Qwen Image/SDXL are registered candidates, not promoted image runtimes.",
+      anyRuntimeReady ? "ComfyUI/FLUX/Qwen Image/SDXL remain registered AI image candidates; the promoted image runtime is the local deterministic headless renderer." : "ComfyUI/FLUX/Qwen Image/SDXL are registered candidates, not promoted image runtimes.",
       "Wan/LTX/DaVinci Resolve/Kdenlive/OBS are registered candidates, not promoted video runtimes.",
       "Whisper/Audacity/Demucs/UVR are registered candidates, not promoted audio runtimes.",
       "Penpot/Inkscape/Krita/GIMP/Blender are registered candidates, not promoted design runtimes.",
       artifactVaultReady ? null : "No visual artifact vault promotion receipt is present in this doctor.",
       artifactSmokeReady ? null : "No deterministic visual artifact smoke receipt is present in this doctor.",
-      "No promoted AI generator sample receipt proves a real generated image/video/design/audio artifact yet.",
+      anyRuntimeReady ? "No promoted AI generator sample receipt proves ComfyUI/FLUX/Qwen Image/SDXL/video/audio/design generation yet." : "No promoted AI generator sample receipt proves a real generated image/video/design/audio artifact yet.",
     ].filter(Boolean),
     readiness_levels: {
       control_plane: allControlGreen,
       artifact_pipeline: artifactVaultReady && artifactSmokeReady,
-      ai_runtime_promoted: allRuntimeReady,
+      headless_image_runtime: headlessImageRuntime.report?.ok === true && headlessImageRuntime.report?.runtime_ready === true,
+      ai_runtime_promoted: false,
+      all_runtime_lanes_promoted: allRuntimeReady,
       separate_frontend_release: "separate_visual_lane",
     },
     recommended_promotion_order: [
@@ -222,8 +262,10 @@ async function main() {
       },
       {
         wave: "V2 image runtime",
-        action: "Install one local image path first, preferably ComfyUI with immutable templates and one sample render receipt.",
-        proof: "image-lab doctor + sample render receipt + rollback proof",
+        action: anyRuntimeReady
+          ? "Headless image runtime is promoted; next image step is ComfyUI or another AI generator with install proof, immutable template, sample render receipt, hardware lock, and rollback."
+          : "Install or promote one local image path first, preferably the headless renderer before ComfyUI, with immutable templates and one sample render receipt.",
+        proof: "npm.cmd run visual:runtime:headless-image && npm.cmd run image-lab:doctor && npm.cmd run visual:readiness",
       },
       {
         wave: "V3 design workspace",
@@ -238,6 +280,8 @@ async function main() {
     ],
     result_line: allRuntimeReady
       ? "Visual production runtime is promoted."
+      : anyRuntimeReady
+        ? "Visual production has a promoted headless image runtime, artifact vault, and deterministic smoke proof; AI visual generators and the remaining lanes are still gated."
       : artifactVaultReady && artifactSmokeReady
         ? "Visual production control plane, artifact vault, and deterministic artifact smoke are green, but AI runtime tools are not promoted yet."
         : artifactVaultReady

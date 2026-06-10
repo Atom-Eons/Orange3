@@ -153,6 +153,7 @@ const requiredOpsScripts = [
   "littleorange:doctor",
   "visual:artifact-vault",
   "visual:artifact-smoke",
+  "visual:runtime:headless-image",
   "visual:readiness",
   "knowledge:improvements",
   "assurance:doctor",
@@ -853,11 +854,12 @@ const tasks = [
     id: "visual_production_readiness_truth",
     category: "visual_runtime_truth",
     oracle: "Visual/media/design readiness must distinguish control-plane proof from promoted runtime power and must not touch the living frontend lane.",
-    budget: { timeout_ms: 1600, max_files_read: 6, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 7, max_tool_calls: 0 },
     run(trace) {
       const visual = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), trace);
       const vault = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-vault.json"), trace);
       const smoke = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-smoke.json"), trace);
+      const headless = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json"), trace);
       const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
@@ -867,6 +869,7 @@ const tasks = [
       const visualProjectRow = project?.scope?.find((row) => row.area === "Visual production readiness");
       if (!packageJson?.scripts?.["visual:artifact-vault"]?.includes("orangebox-visual-artifact-vault-doctor.mjs")) failures.push("Package script visual:artifact-vault missing or wrong");
       if (!packageJson?.scripts?.["visual:artifact-smoke"]?.includes("orangebox-visual-artifact-smoke-doctor.mjs")) failures.push("Package script visual:artifact-smoke missing or wrong");
+      if (!packageJson?.scripts?.["visual:runtime:headless-image"]?.includes("orangebox-headless-image-runtime-doctor.mjs")) failures.push("Package script visual:runtime:headless-image missing or wrong");
       if (!packageJson?.scripts?.["visual:readiness"]?.includes("orangebox-visual-production-readiness-doctor.mjs")) failures.push("Package script visual:readiness missing or wrong");
       if (vault?.status !== "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN" || vault?.vault_ready !== true) failures.push(`Visual artifact vault not green: ${vault?.status || "missing"}`);
       if (vault?.vault?.pointer_only !== true) failures.push("Visual artifact vault does not preserve pointer_only=true");
@@ -877,7 +880,13 @@ const tasks = [
       if (smoke?.artifact?.runtime_generated_media !== false) failures.push("Visual artifact smoke incorrectly claims runtime_generated_media");
       if (smoke?.vault?.receipt_binary_payload_allowed !== false) failures.push("Visual artifact smoke does not forbid receipt binary payloads");
       if (!/^[a-f0-9]{64}$/.test(smoke?.artifact?.sha256 || "")) failures.push("Visual artifact smoke sha256 missing/invalid");
-      if (visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY") failures.push(`Visual readiness status wrong/missing: ${visual?.status || "missing"}`);
+      if (headless?.status !== "ORANGEBOX_HEADLESS_IMAGE_RUNTIME_GREEN" || headless?.runtime_ready !== true) failures.push(`Headless image runtime not green: ${headless?.status || "missing"}`);
+      if (headless?.artifact?.mime_type !== "image/png") failures.push(`Headless image runtime mime wrong: ${headless?.artifact?.mime_type || "missing"}`);
+      if (headless?.artifact?.runtime_generated_media !== true) failures.push("Headless image runtime does not claim runtime_generated_media=true");
+      if (headless?.artifact?.ai_generated_media !== false) failures.push("Headless image runtime must keep ai_generated_media=false");
+      if (!/^[a-f0-9]{64}$/.test(headless?.artifact?.sha256 || "")) failures.push("Headless image runtime sha256 missing/invalid");
+      if (headless?.constraints?.frontend_touched !== false) failures.push("Headless image runtime touched frontend");
+      if (visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY") failures.push(`Visual readiness status wrong/missing: ${visual?.status || "missing"}`);
       if (visual?.ok !== true) failures.push("Visual readiness ok=true missing");
       if (visual?.control_plane_green !== true) failures.push("Visual readiness control_plane_green=true missing");
       if (visual?.summary?.artifact_vault_ready !== true) failures.push("Visual readiness does not mirror artifact_vault_ready=true");
@@ -886,6 +895,9 @@ const tasks = [
       if (!visual?.summary?.artifact_manifest_path) failures.push("Visual readiness does not mirror artifact manifest path");
       if (visual?.summary?.smoke_artifact_path !== smoke?.artifact?.artifact_path) failures.push("Visual readiness does not mirror smoke artifact path");
       if (visual?.summary?.smoke_artifact_sha256 !== smoke?.artifact?.sha256) failures.push("Visual readiness does not mirror smoke artifact hash");
+      if (visual?.summary?.headless_image_runtime_ready !== true) failures.push("Visual readiness does not mirror headless_image_runtime_ready=true");
+      if (visual?.summary?.headless_image_artifact_path !== headless?.artifact?.artifact_path) failures.push("Visual readiness does not mirror headless image artifact path");
+      if (visual?.summary?.headless_image_artifact_sha256 !== headless?.artifact?.sha256) failures.push("Visual readiness does not mirror headless image artifact hash");
       if (typeof visual?.visual_ready !== "boolean") failures.push("Visual readiness does not expose boolean visual_ready");
       if ((visual?.summary?.visual_tool_cards || 0) < 19) failures.push(`Visual tool card count too low: ${visual?.summary?.visual_tool_cards || 0}`);
       if ((visual?.summary?.control_green_lanes || 0) !== 4) failures.push(`Control-green lane count is not 4: ${visual?.summary?.control_green_lanes || 0}`);
@@ -910,6 +922,7 @@ const tasks = [
           runtime_ready_lanes: visual?.summary?.runtime_ready_lanes ?? null,
           artifact_vault_status: vault?.status || null,
           artifact_smoke_status: smoke?.status || null,
+          headless_image_status: headless?.status || null,
         })
         : okTask("visual_production_readiness_truth", {
           status: visual.status,
@@ -920,6 +933,9 @@ const tasks = [
           artifact_smoke_ready: visual.summary.artifact_smoke_ready,
           smoke_artifact_path: visual.summary.smoke_artifact_path,
           smoke_artifact_sha256: visual.summary.smoke_artifact_sha256,
+          headless_image_runtime_ready: visual.summary.headless_image_runtime_ready,
+          headless_image_artifact_path: visual.summary.headless_image_artifact_path,
+          headless_image_artifact_sha256: visual.summary.headless_image_artifact_sha256,
           visual_artifact_pipeline_ready: visual.summary.visual_artifact_pipeline_ready,
           visual_tool_cards: visual.summary.visual_tool_cards,
           control_green_lanes: visual.summary.control_green_lanes,

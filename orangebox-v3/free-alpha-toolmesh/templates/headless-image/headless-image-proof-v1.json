@@ -1,0 +1,24 @@
+{
+  "schema_version": "orangebox.toolmesh.headless_image_template.v1",
+  "template_id": "headless-image-proof-v1",
+  "tool": "orangebox-headless-png-renderer",
+  "locked": {
+    "png_encoder": "bun-buffer-png-rgba-crc32",
+    "canvas_math": "fixed true-black canvas with orange signal rails",
+    "receipt_policy": "manifest + preview pointer + sha256 receipt",
+    "artifact_pointer_policy": "no binary payloads in receipt"
+  },
+  "variables": {
+    "accent": "orange",
+    "width": 160,
+    "height": 90,
+    "label": "Orangebox runtime proof",
+    "output_artifact_pointer": null
+  },
+  "execution": {
+    "mode": "headless",
+    "cloud_allowed": false,
+    "frontend_touch_allowed": false,
+    "repo_mutation_allowed": false
+  }
+}

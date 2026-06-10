@@ -15,9 +15,9 @@ This is an Orangebox Operations backend merge lane. AtomSmasher is allowed to up
 
 ## Tool Surface
 
-- Package scripts scanned: 219
+- Package scripts scanned: 220
 - Eligible backend tools: 151
-- Excluded visual/product tools: 27
+- Excluded visual/product tools: 28
 - Sleeping other tools: 41
 
 ## Top Eligible Tools

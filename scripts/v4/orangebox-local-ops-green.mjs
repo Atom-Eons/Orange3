@@ -230,6 +230,7 @@ async function main() {
     { script: "v3:api:bakeoff", timeout: 90_000 },
     { script: "visual:artifact-vault", timeout: 90_000 },
     { script: "visual:artifact-smoke", timeout: 90_000 },
+    { script: "visual:runtime:headless-image", timeout: 90_000 },
     { script: "visual:readiness", timeout: 90_000 },
     { script: "horizon:review", timeout: 90_000 },
     { script: "horizon:bakeoff", timeout: 90_000 },

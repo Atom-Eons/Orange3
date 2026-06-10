@@ -123,6 +123,8 @@ function main() {
   const elysiaLatency = readJson(elysiaLatencyPath);
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const visualReadiness = readJson(visualReadinessPath);
+  const headlessImageRuntimePath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json");
+  const headlessImageRuntime = readJson(headlessImageRuntimePath);
   const signalHygienePath = path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json");
   const signalHygiene = readJson(signalHygienePath);
   const doerWatcherPath = path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json");
@@ -302,6 +304,8 @@ function main() {
       openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
       hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
       visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+      visual_runtime_ready_lanes: horizonBakeoff?.summary?.visual_runtime_ready_lanes ?? null,
+      headless_image_runtime_ready: horizonBakeoff?.summary?.headless_image_runtime_ready ?? null,
       note: "Turns reviewed alpha candidates into a proof-ranked bakeoff matrix with binary/dependency probes, blockers, and no automatic promotion.",
     },
     toolmesh_physical_runtime: {
@@ -349,10 +353,23 @@ function main() {
       artifact_smoke_ready: visualReadiness?.summary?.artifact_smoke_ready ?? null,
       smoke_artifact_path: visualReadiness?.summary?.smoke_artifact_path ?? null,
       smoke_artifact_sha256: visualReadiness?.summary?.smoke_artifact_sha256 ?? null,
+      headless_image_runtime_ready: visualReadiness?.summary?.headless_image_runtime_ready ?? null,
+      headless_image_artifact_path: visualReadiness?.summary?.headless_image_artifact_path ?? null,
+      headless_image_artifact_sha256: visualReadiness?.summary?.headless_image_artifact_sha256 ?? null,
       visual_artifact_pipeline_ready: visualReadiness?.summary?.visual_artifact_pipeline_ready ?? null,
       runtime_ready_lanes: visualReadiness?.summary?.runtime_ready_lanes ?? null,
       visual_tool_cards: visualReadiness?.summary?.visual_tool_cards ?? null,
-      note: "Reports visual/media/design runtime truth and artifact vault readiness. It may be green as a readiness doctor while visual_ready remains false until runtime tools are promoted.",
+      note: "Reports visual/media/design runtime truth and artifact vault readiness. It can show partial runtime promotion while visual_ready remains false until all runtime lanes are promoted.",
+    },
+    visual_headless_image_runtime: {
+      ok: headlessImageRuntime?.ok === true && headlessImageRuntime?.status === "ORANGEBOX_HEADLESS_IMAGE_RUNTIME_GREEN" && headlessImageRuntime?.runtime_ready === true,
+      path: headlessImageRuntimePath,
+      status: headlessImageRuntime?.status || null,
+      artifact_path: headlessImageRuntime?.artifact?.artifact_path ?? null,
+      artifact_sha256: headlessImageRuntime?.artifact?.sha256 ?? null,
+      ai_generated_media: headlessImageRuntime?.artifact?.ai_generated_media ?? null,
+      frontend_touched: headlessImageRuntime?.constraints?.frontend_touched ?? null,
+      note: "Proves one promoted local headless image runtime with a real PNG artifact receipt while heavier AI visual runtimes remain gated.",
     },
     operator_signal_hygiene: {
       ok: signalHygiene?.ok === true && signalHygiene?.status === "ORANGEBOX_OPERATOR_SIGNAL_HYGIENE_GREEN",

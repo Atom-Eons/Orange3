@@ -18,6 +18,14 @@
       "variableInjectionOnly": true
     },
     {
+      "template_id": "headless-image-proof-v1",
+      "tool": "orangebox-headless-png-renderer",
+      "template_path": "orangebox-v3/free-alpha-toolmesh/templates/headless-image/headless-image-proof-v1.json",
+      "allowedVariables": ["accent", "width", "height", "label", "output_artifact_pointer"],
+      "lockedFields": ["png_encoder", "canvas_math", "receipt_policy", "artifact_pointer_policy"],
+      "variableInjectionOnly": true
+    },
+    {
       "template_id": "ffmpeg-vertical-reel-export-v1",
       "tool": "ffmpeg",
       "template_path": "orangebox-v3/free-alpha-toolmesh/templates/ffmpeg/ffmpeg-vertical-reel-export-v1.json",

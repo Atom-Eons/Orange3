@@ -152,12 +152,14 @@ async function main() {
   const horizonPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
   const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const visualPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
+  const headlessImagePath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json");
   const toolmeshPath = path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json");
   const projectPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
 
   const horizon = readJson(horizonPath, null);
   const visual = readJson(visualPath, null);
+  const headlessImage = readJson(headlessImagePath, null);
   const toolmesh = readJson(toolmeshPath, null);
   const project = readJson(projectPath, null);
   const openclaw = readJson(openclawPath, null);
@@ -169,6 +171,7 @@ async function main() {
     openjarvis: receiptEvidence(latestV3Receipt("openjarvis-eval-doctor")),
     context7: receiptEvidence(latestV3Receipt("mcp-context7-docs-lane")),
     visual: receiptEvidence(visualPath),
+    headlessImage: receiptEvidence(headlessImagePath),
     toolmesh: receiptEvidence(toolmeshPath),
     openclaw: receiptEvidence(openclawPath),
     codexaRemote: receiptEvidence(latestByPrefix(receiptDir, "orangebox-codexa-remote-runtime-proof-")),
@@ -201,6 +204,8 @@ async function main() {
     && elysiaLatency?.benchmark?.latency_parity_green === true
     && elysiaLatency?.promotion?.default_api_replacement_approved === false;
   const visualArtifactPipelineReady = visual?.summary?.visual_artifact_pipeline_ready === true;
+  const headlessImageRuntimeReady = headlessImage?.ok === true && headlessImage?.runtime_ready === true && headlessImage?.status === "ORANGEBOX_HEADLESS_IMAGE_RUNTIME_GREEN";
+  const visualRuntimeReadyLanes = Number(visual?.summary?.runtime_ready_lanes || 0);
   const horizonReady = horizon?.ok === true && horizon?.status === "ORANGEBOX_HORIZON_REVIEW_READY";
   const toolmeshReady = toolmesh?.ok === true && toolmesh?.checks?.execution_blocked_until_promoted === true;
 
@@ -308,12 +313,13 @@ async function main() {
     candidate({
       id: "visual_runtime_toolmesh",
       wave: "wave_2_codexa_visual_runtime_promotion",
-      status: visual?.visual_ready === true ? "VISUAL_RUNTIME_READY" : "CONTROL_READY_RUNTIME_NOT_PROMOTED",
+      status: visual?.visual_ready === true ? "VISUAL_RUNTIME_READY" : headlessImageRuntimeReady ? "PARTIAL_RUNTIME_READY_IMAGE_LAB" : "CONTROL_READY_RUNTIME_NOT_PROMOTED",
       current_role: "Image/video/audio/design runtime lane with artifact vault and sample receipts.",
-      next_proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:readiness",
+      next_proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:runtime:headless-image && npm.cmd run visual:readiness",
       proofs: [
         { id: "visual_readiness_receipt", ok: receipts.visual.ok, detail: receipts.visual.status },
         { id: "artifact_pipeline_ready", ok: visualArtifactPipelineReady, detail: visual?.summary?.smoke_artifact_path || null },
+        { id: "headless_image_runtime_ready", ok: headlessImageRuntimeReady, detail: headlessImage?.artifact?.artifact_path || null },
         { id: "visual_cards_present", ok: Number(visual?.summary?.visual_tool_cards || 0) >= 19, detail: visual?.summary?.visual_tool_cards || null },
         { id: "ffmpeg_binary", ok: binaries.ffmpeg.found, detail: binaries.ffmpeg.first_found, required: false },
         { id: "blender_binary", ok: binaries.blender.found, detail: binaries.blender.first_found, required: false },
@@ -321,8 +327,9 @@ async function main() {
       ],
       blockers: [
         visualArtifactPipelineReady ? null : "Visual artifact pipeline is not green.",
-        visual?.visual_ready === true ? null : "No promoted visual runtime has install proof plus generated/edited artifact receipt.",
-        "Promote image first, then design, audio, video; heavy GPU lanes belong on Codexa.",
+        headlessImageRuntimeReady ? null : "No promoted visual runtime has install proof plus generated/edited artifact receipt.",
+        visual?.visual_ready === true ? null : `Only ${visualRuntimeReadyLanes}/4 visual runtime lanes are promoted; image headless proof does not promote design/audio/video or AI image generators.`,
+        "Next: promote an AI image generator or deterministic design export after install proof, sample artifact receipt, hardware lock, and rollback.",
       ],
       intentional_non_promotion: visual?.visual_ready !== true,
     }),
@@ -431,6 +438,8 @@ async function main() {
       toolmesh_execution_blocked_until_promoted: toolmeshReady,
       visual_artifact_pipeline_ready: visualArtifactPipelineReady,
       visual_ready: visual?.visual_ready === true,
+      visual_runtime_ready_lanes: visualRuntimeReadyLanes,
+      headless_image_runtime_ready: headlessImageRuntimeReady,
       goose_binary_found: binaries.goose.found,
       openjarvis_eval_receipt_green: receipts.openjarvis.ok,
       hermes_pack_present: hermesPackPresent,
