@@ -156,6 +156,8 @@ const requiredOpsScripts = [
   "visual:artifact-smoke",
   "visual:runtime:headless-image",
   "visual:runtime:headless-design",
+  "visual:runtime:headless-audio",
+  "visual:runtime:headless-animation",
   "visual:readiness",
   "knowledge:improvements",
   "assurance:doctor",
@@ -856,13 +858,15 @@ const tasks = [
     id: "visual_production_readiness_truth",
     category: "visual_runtime_truth",
     oracle: "Visual/media/design readiness must distinguish control-plane proof from promoted runtime power and must not touch the living frontend lane.",
-    budget: { timeout_ms: 1600, max_files_read: 8, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 10, max_tool_calls: 0 },
     run(trace) {
       const visual = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), trace);
       const vault = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-vault.json"), trace);
       const smoke = readJson(path.join(dataRoot, "visual-artifacts", "latest-visual-artifact-smoke.json"), trace);
       const headless = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json"), trace);
       const headlessDesign = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-design", "latest-headless-design-runtime.json"), trace);
+      const headlessAudio = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-audio", "latest-headless-audio-runtime.json"), trace);
+      const headlessAnimation = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-animation", "latest-headless-animation-runtime.json"), trace);
       const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
       const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
@@ -870,12 +874,18 @@ const tasks = [
       const lanes = Array.isArray(visual?.lanes) ? visual.lanes : [];
       const visualRow = feature?.matrix?.find((row) => row.id === "visual_production_readiness");
       const designRow = feature?.matrix?.find((row) => row.id === "visual_headless_design_runtime");
+      const audioRow = feature?.matrix?.find((row) => row.id === "visual_headless_audio_runtime");
+      const animationRow = feature?.matrix?.find((row) => row.id === "visual_headless_animation_runtime");
       const visualProjectRow = project?.scope?.find((row) => row.area === "Visual production readiness");
       const designProjectRow = project?.scope?.find((row) => row.area === "Visual headless design runtime");
+      const audioProjectRow = project?.scope?.find((row) => row.area === "Visual headless audio runtime");
+      const animationProjectRow = project?.scope?.find((row) => row.area === "Visual headless animation runtime");
       if (!packageJson?.scripts?.["visual:artifact-vault"]?.includes("orangebox-visual-artifact-vault-doctor.mjs")) failures.push("Package script visual:artifact-vault missing or wrong");
       if (!packageJson?.scripts?.["visual:artifact-smoke"]?.includes("orangebox-visual-artifact-smoke-doctor.mjs")) failures.push("Package script visual:artifact-smoke missing or wrong");
       if (!packageJson?.scripts?.["visual:runtime:headless-image"]?.includes("orangebox-headless-image-runtime-doctor.mjs")) failures.push("Package script visual:runtime:headless-image missing or wrong");
       if (!packageJson?.scripts?.["visual:runtime:headless-design"]?.includes("orangebox-headless-design-runtime-doctor.mjs")) failures.push("Package script visual:runtime:headless-design missing or wrong");
+      if (!packageJson?.scripts?.["visual:runtime:headless-audio"]?.includes("orangebox-headless-audio-runtime-doctor.mjs")) failures.push("Package script visual:runtime:headless-audio missing or wrong");
+      if (!packageJson?.scripts?.["visual:runtime:headless-animation"]?.includes("orangebox-headless-animation-runtime-doctor.mjs")) failures.push("Package script visual:runtime:headless-animation missing or wrong");
       if (!packageJson?.scripts?.["visual:readiness"]?.includes("orangebox-visual-production-readiness-doctor.mjs")) failures.push("Package script visual:readiness missing or wrong");
       if (vault?.status !== "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN" || vault?.vault_ready !== true) failures.push(`Visual artifact vault not green: ${vault?.status || "missing"}`);
       if (vault?.vault?.pointer_only !== true) failures.push("Visual artifact vault does not preserve pointer_only=true");
@@ -899,6 +909,21 @@ const tasks = [
       if (headlessDesign?.artifact?.deterministic_renderer !== true) failures.push("Headless design runtime must declare deterministic_renderer=true");
       if (!/^[a-f0-9]{64}$/.test(headlessDesign?.artifact?.sha256 || "")) failures.push("Headless design runtime sha256 missing/invalid");
       if (headlessDesign?.constraints?.frontend_touched !== false) failures.push("Headless design runtime touched frontend");
+      if (headlessAudio?.status !== "ORANGEBOX_HEADLESS_AUDIO_RUNTIME_GREEN" || headlessAudio?.runtime_ready !== true) failures.push(`Headless audio runtime not green: ${headlessAudio?.status || "missing"}`);
+      if (headlessAudio?.artifact?.mime_type !== "audio/wav") failures.push(`Headless audio runtime mime wrong: ${headlessAudio?.artifact?.mime_type || "missing"}`);
+      if (headlessAudio?.artifact?.runtime_generated_media !== true) failures.push("Headless audio runtime does not claim runtime_generated_media=true");
+      if (headlessAudio?.artifact?.ai_generated_media !== false) failures.push("Headless audio runtime must keep ai_generated_media=false");
+      if (headlessAudio?.artifact?.deterministic_renderer !== true) failures.push("Headless audio runtime must declare deterministic_renderer=true");
+      if (!/^[a-f0-9]{64}$/.test(headlessAudio?.artifact?.sha256 || "")) failures.push("Headless audio runtime sha256 missing/invalid");
+      if (headlessAudio?.constraints?.frontend_touched !== false) failures.push("Headless audio runtime touched frontend");
+      if (headlessAnimation?.status !== "ORANGEBOX_HEADLESS_ANIMATION_RUNTIME_GREEN" || headlessAnimation?.runtime_ready !== true) failures.push(`Headless animation runtime not green: ${headlessAnimation?.status || "missing"}`);
+      if (headlessAnimation?.artifact?.mime_type !== "image/svg+xml") failures.push(`Headless animation runtime mime wrong: ${headlessAnimation?.artifact?.mime_type || "missing"}`);
+      if (headlessAnimation?.artifact?.runtime_generated_media !== true) failures.push("Headless animation runtime does not claim runtime_generated_media=true");
+      if (headlessAnimation?.artifact?.ai_generated_media !== false) failures.push("Headless animation runtime must keep ai_generated_media=false");
+      if (headlessAnimation?.artifact?.deterministic_renderer !== true) failures.push("Headless animation runtime must declare deterministic_renderer=true");
+      if (headlessAnimation?.artifact?.animated_media !== true) failures.push("Headless animation runtime must declare animated_media=true");
+      if (!/^[a-f0-9]{64}$/.test(headlessAnimation?.artifact?.sha256 || "")) failures.push("Headless animation runtime sha256 missing/invalid");
+      if (headlessAnimation?.constraints?.frontend_touched !== false) failures.push("Headless animation runtime touched frontend");
       if (visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY" && visual?.status !== "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY") failures.push(`Visual readiness status wrong/missing: ${visual?.status || "missing"}`);
       if (visual?.ok !== true) failures.push("Visual readiness ok=true missing");
       if (visual?.control_plane_green !== true) failures.push("Visual readiness control_plane_green=true missing");
@@ -914,8 +939,14 @@ const tasks = [
       if (visual?.summary?.headless_design_runtime_ready !== true) failures.push("Visual readiness does not mirror headless_design_runtime_ready=true");
       if (visual?.summary?.headless_design_artifact_path !== headlessDesign?.artifact?.artifact_path) failures.push("Visual readiness does not mirror headless design artifact path");
       if (visual?.summary?.headless_design_artifact_sha256 !== headlessDesign?.artifact?.sha256) failures.push("Visual readiness does not mirror headless design artifact hash");
+      if (visual?.summary?.headless_audio_runtime_ready !== true) failures.push("Visual readiness does not mirror headless_audio_runtime_ready=true");
+      if (visual?.summary?.headless_audio_artifact_path !== headlessAudio?.artifact?.artifact_path) failures.push("Visual readiness does not mirror headless audio artifact path");
+      if (visual?.summary?.headless_audio_artifact_sha256 !== headlessAudio?.artifact?.sha256) failures.push("Visual readiness does not mirror headless audio artifact hash");
+      if (visual?.summary?.headless_animation_runtime_ready !== true) failures.push("Visual readiness does not mirror headless_animation_runtime_ready=true");
+      if (visual?.summary?.headless_animation_artifact_path !== headlessAnimation?.artifact?.artifact_path) failures.push("Visual readiness does not mirror headless animation artifact path");
+      if (visual?.summary?.headless_animation_artifact_sha256 !== headlessAnimation?.artifact?.sha256) failures.push("Visual readiness does not mirror headless animation artifact hash");
       if (typeof visual?.visual_ready !== "boolean") failures.push("Visual readiness does not expose boolean visual_ready");
-      if ((visual?.summary?.visual_tool_cards || 0) < 19) failures.push(`Visual tool card count too low: ${visual?.summary?.visual_tool_cards || 0}`);
+      if ((visual?.summary?.visual_tool_cards || 0) < 23) failures.push(`Visual tool card count too low: ${visual?.summary?.visual_tool_cards || 0}`);
       if ((visual?.summary?.control_green_lanes || 0) !== 4) failures.push(`Control-green lane count is not 4: ${visual?.summary?.control_green_lanes || 0}`);
       if (lanes.length !== 4) failures.push(`Visual lane count is not 4: ${lanes.length}`);
       for (const lab of ["image-lab", "video-lab", "audio-lab", "design-lab"]) {
@@ -925,13 +956,17 @@ const tasks = [
         if (lane && lane.execution_blocked_until_promoted !== true) failures.push(`${lab} does not preserve execution_blocked_until_promoted`);
         if (lane && lane.artifact_pointer_policy_declared !== true) failures.push(`${lab} does not preserve artifact pointer policy`);
       }
-      if ((visual?.summary?.runtime_ready_lanes || 0) < 2) failures.push(`Runtime-ready lane count below image+design proof: ${visual?.summary?.runtime_ready_lanes || 0}`);
+      if ((visual?.summary?.runtime_ready_lanes || 0) < 4) failures.push(`Runtime-ready lane count below image+design+audio+animation proof: ${visual?.summary?.runtime_ready_lanes || 0}`);
       if (visual?.visual_ready === true && (visual?.summary?.runtime_ready_lanes || 0) < 4) failures.push("visual_ready=true without all runtime lanes ready");
       if (!visualRow?.ok) failures.push("Feature matrix does not prove visual_production_readiness");
       if (!designRow?.ok) failures.push("Feature matrix does not prove visual_headless_design_runtime");
+      if (!audioRow?.ok) failures.push("Feature matrix does not prove visual_headless_audio_runtime");
+      if (!animationRow?.ok) failures.push("Feature matrix does not prove visual_headless_animation_runtime");
       if (visualRow?.frontend_touch_allowed !== false) failures.push("Feature row must forbid frontend touch");
       if (visualProjectRow?.status !== "REAL") failures.push("Project report does not list visual production readiness as REAL control-plane truth");
       if (designProjectRow?.status !== "REAL") failures.push("Project report does not list visual headless design runtime as REAL");
+      if (audioProjectRow?.status !== "REAL") failures.push("Project report does not list visual headless audio runtime as REAL");
+      if (animationProjectRow?.status !== "REAL") failures.push("Project report does not list visual headless animation runtime as REAL");
       if (!String(visualProjectRow?.reality || "").includes("visual_ready=false") && visual?.visual_ready === false) failures.push("Project report does not surface visual_ready=false");
       return failures.length
         ? failTask("visual_production_readiness_truth", failures, {
@@ -943,6 +978,8 @@ const tasks = [
           artifact_smoke_status: smoke?.status || null,
           headless_image_status: headless?.status || null,
           headless_design_status: headlessDesign?.status || null,
+          headless_audio_status: headlessAudio?.status || null,
+          headless_animation_status: headlessAnimation?.status || null,
         })
         : okTask("visual_production_readiness_truth", {
           status: visual.status,
@@ -959,11 +996,17 @@ const tasks = [
           headless_design_runtime_ready: visual.summary.headless_design_runtime_ready,
           headless_design_artifact_path: visual.summary.headless_design_artifact_path,
           headless_design_artifact_sha256: visual.summary.headless_design_artifact_sha256,
+          headless_audio_runtime_ready: visual.summary.headless_audio_runtime_ready,
+          headless_audio_artifact_path: visual.summary.headless_audio_artifact_path,
+          headless_audio_artifact_sha256: visual.summary.headless_audio_artifact_sha256,
+          headless_animation_runtime_ready: visual.summary.headless_animation_runtime_ready,
+          headless_animation_artifact_path: visual.summary.headless_animation_artifact_path,
+          headless_animation_artifact_sha256: visual.summary.headless_animation_artifact_sha256,
           visual_artifact_pipeline_ready: visual.summary.visual_artifact_pipeline_ready,
           visual_tool_cards: visual.summary.visual_tool_cards,
           control_green_lanes: visual.summary.control_green_lanes,
           runtime_ready_lanes: visual.summary.runtime_ready_lanes,
-          feature_rows: ["visual_production_readiness", "visual_headless_design_runtime"],
+          feature_rows: ["visual_production_readiness", "visual_headless_design_runtime", "visual_headless_audio_runtime", "visual_headless_animation_runtime"],
         });
     },
   },

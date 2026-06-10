@@ -389,8 +389,7 @@ async function main() {
         evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY", {
           accept: (parsed) => parsed?.ok === true
             && parsed?.summary?.headless_image_runtime_ready === true
-            && Number(parsed?.summary?.runtime_ready_lanes || 0) >= 1
-            && parsed?.visual_ready === false,
+            && Number(parsed?.summary?.runtime_ready_lanes || 0) >= 1,
           detail: (parsed) => ({
             status: parsed?.status ?? null,
             runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
@@ -430,7 +429,10 @@ async function main() {
           }),
         }),
         evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY", {
-          accept: (parsed, status) => status === "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY"
+          accept: (parsed, status) => (
+            status === "ORANGEBOX_VISUAL_PRODUCTION_PARTIAL_RUNTIME_READY" ||
+            status === "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY"
+          )
             && parsed?.ok === true
             && Number(parsed?.summary?.runtime_ready_lanes || 0) >= 2
             && parsed?.summary?.headless_design_runtime_ready === true
@@ -446,13 +448,100 @@ async function main() {
       operator_approval_required: false,
     }),
     matrixRow({
+      id: "visual_headless_audio_runtime",
+      claim: "Orangebox has one promoted local headless audio runtime that produces a real WAV artifact by pointer, manifest, SHA-256, and receipt without touching the frontend or calling cloud services.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:runtime:headless-audio && npm.cmd run visual:readiness",
+      acceptance_gate: "Headless audio runtime receipt is green, runtime_ready=true, artifact is WAV, runtime_generated_media=true, ai_generated_media=false, frontend_touched=false, and visual readiness mirrors the artifact hash/path.",
+      rollback_path: "Delete generated headless-audio runtime artifacts/receipts and demote/remove the orangebox-headless-audio-renderer ToolMesh card if superseded.",
+      evidence: [
+        evidence(path.join(dataRoot, "visual-artifacts", "runtime", "headless-audio", "latest-headless-audio-runtime.json"), "ORANGEBOX_HEADLESS_AUDIO_RUNTIME_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_HEADLESS_AUDIO_RUNTIME_GREEN"
+            && parsed?.ok === true
+            && parsed?.runtime_ready === true
+            && parsed?.artifact?.mime_type === "audio/wav"
+            && parsed?.artifact?.runtime_generated_media === true
+            && parsed?.artifact?.ai_generated_media === false
+            && parsed?.artifact?.deterministic_renderer === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.cloud_services_called === false,
+          detail: (parsed) => ({
+            artifact_path: parsed?.artifact?.artifact_path ?? null,
+            artifact_sha256: parsed?.artifact?.sha256 ?? null,
+            tool_card_id: parsed?.tool_card_id ?? null,
+            template_id: parsed?.template_id ?? null,
+            ai_generated_media: parsed?.artifact?.ai_generated_media ?? null,
+          }),
+        }),
+        evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY", {
+          accept: (parsed) => parsed?.ok === true
+            && Number(parsed?.summary?.runtime_ready_lanes || 0) >= 3
+            && parsed?.summary?.headless_audio_runtime_ready === true
+            && typeof parsed?.summary?.headless_audio_artifact_sha256 === "string",
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
+            headless_audio_artifact_path: parsed?.summary?.headless_audio_artifact_path ?? null,
+            headless_audio_artifact_sha256: parsed?.summary?.headless_audio_artifact_sha256 ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "visual_headless_animation_runtime",
+      claim: "Orangebox has one promoted local headless animation runtime that produces a real motion SVG artifact by pointer, manifest, SHA-256, and receipt without touching the frontend or calling cloud services.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:runtime:headless-animation && npm.cmd run visual:readiness",
+      acceptance_gate: "Headless animation runtime receipt is green, runtime_ready=true, artifact is animated SVG, runtime_generated_media=true, ai_generated_media=false, frontend_touched=false, and visual readiness mirrors the artifact hash/path.",
+      rollback_path: "Delete generated headless-animation runtime artifacts/receipts and demote/remove the orangebox-headless-animation-renderer ToolMesh card if superseded.",
+      evidence: [
+        evidence(path.join(dataRoot, "visual-artifacts", "runtime", "headless-animation", "latest-headless-animation-runtime.json"), "ORANGEBOX_HEADLESS_ANIMATION_RUNTIME_GREEN", {
+          accept: (parsed, status) => status === "ORANGEBOX_HEADLESS_ANIMATION_RUNTIME_GREEN"
+            && parsed?.ok === true
+            && parsed?.runtime_ready === true
+            && parsed?.artifact?.mime_type === "image/svg+xml"
+            && parsed?.artifact?.runtime_generated_media === true
+            && parsed?.artifact?.ai_generated_media === false
+            && parsed?.artifact?.deterministic_renderer === true
+            && parsed?.artifact?.animated_media === true
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.cloud_services_called === false,
+          detail: (parsed) => ({
+            artifact_path: parsed?.artifact?.artifact_path ?? null,
+            artifact_sha256: parsed?.artifact?.sha256 ?? null,
+            tool_card_id: parsed?.tool_card_id ?? null,
+            template_id: parsed?.template_id ?? null,
+            ai_generated_media: parsed?.artifact?.ai_generated_media ?? null,
+          }),
+        }),
+        evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_RUNTIME_READY", {
+          accept: (parsed) => parsed?.ok === true
+            && Number(parsed?.summary?.runtime_ready_lanes || 0) >= 4
+            && parsed?.summary?.headless_animation_runtime_ready === true
+            && typeof parsed?.summary?.headless_animation_artifact_sha256 === "string",
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
+            headless_animation_artifact_path: parsed?.summary?.headless_animation_artifact_path ?? null,
+            headless_animation_artifact_sha256: parsed?.summary?.headless_animation_artifact_sha256 ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
       id: "visual_production_readiness",
       claim: "Orangebox reports visual/media/design runtime truth without touching the living frontend dashboard or mistaking candidate tool cards for promoted tools.",
       lane: "backend_ops",
       status: "REAL",
       frontend_touch_allowed: false,
-      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:runtime:headless-image && npm.cmd run visual:readiness",
-      acceptance_gate: "Visual readiness receipt is present, control_plane_green=true, artifact_vault_ready=true, artifact_smoke_ready=true, visual_tool_cards >= 19, and visual_ready remains explicit.",
+      proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:runtime:headless-image && npm.cmd run visual:runtime:headless-design && npm.cmd run visual:runtime:headless-audio && npm.cmd run visual:runtime:headless-animation && npm.cmd run visual:readiness",
+      acceptance_gate: "Visual readiness receipt is present, control_plane_green=true, artifact_vault_ready=true, artifact_smoke_ready=true, visual_tool_cards >= 23, and baseline runtime lanes are explicit.",
       rollback_path: "Remove the visual artifact vault/smoke/readiness package scripts and doctors, then rerun package-script-doctor and feature:proof.",
       evidence: [
         evidence(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), "ORANGEBOX_VISUAL_PRODUCTION_CONTROL_READY_RUNTIME_NOT_PROMOTED", {
@@ -464,7 +553,8 @@ async function main() {
             && parsed?.control_plane_green === true
             && parsed?.summary?.artifact_vault_ready === true
             && parsed?.summary?.artifact_smoke_ready === true
-            && Number(parsed?.summary?.visual_tool_cards || 0) >= 19
+            && Number(parsed?.summary?.visual_tool_cards || 0) >= 23
+            && Number(parsed?.summary?.runtime_ready_lanes || 0) >= 4
             && typeof parsed?.visual_ready === "boolean",
           detail: (parsed) => ({
             visual_ready: parsed?.visual_ready ?? null,
@@ -476,6 +566,8 @@ async function main() {
             smoke_artifact_sha256: parsed?.summary?.smoke_artifact_sha256 ?? null,
             runtime_ready_lanes: parsed?.summary?.runtime_ready_lanes ?? null,
             headless_design_runtime_ready: parsed?.summary?.headless_design_runtime_ready ?? null,
+            headless_audio_runtime_ready: parsed?.summary?.headless_audio_runtime_ready ?? null,
+            headless_animation_runtime_ready: parsed?.summary?.headless_animation_runtime_ready ?? null,
             visual_tool_cards: parsed?.summary?.visual_tool_cards ?? null,
           }),
         }),

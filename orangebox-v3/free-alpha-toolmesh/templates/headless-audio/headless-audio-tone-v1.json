@@ -1,0 +1,25 @@
+{
+  "schema_version": "orangebox.template.headless_audio.v1",
+  "template_id": "headless-audio-tone-v1",
+  "tool": "orangebox-headless-audio-renderer",
+  "locked": true,
+  "allowed_variables": [
+    "duration_seconds",
+    "sample_rate",
+    "frequency_hz",
+    "amplitude",
+    "output_artifact_pointer"
+  ],
+  "locked_fields": {
+    "wav_encoder": "riff-wave-pcm16-mono",
+    "pcm_format": "mono 16-bit little-endian",
+    "receipt_policy": "manifest+sha256+pointer-only",
+    "artifact_pointer_policy": "no-inline-audio-in-receipts"
+  },
+  "defaults": {
+    "duration_seconds": 1,
+    "sample_rate": 22050,
+    "frequency_hz": 440,
+    "amplitude": 0.22
+  }
+}

@@ -154,6 +154,8 @@ async function main() {
   const visualPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
   const headlessImagePath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json");
   const headlessDesignPath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-design", "latest-headless-design-runtime.json");
+  const headlessAudioPath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-audio", "latest-headless-audio-runtime.json");
+  const headlessAnimationPath = path.join(dataRoot, "visual-artifacts", "runtime", "headless-animation", "latest-headless-animation-runtime.json");
   const gooseRuntimePath = path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json");
   const openJarvisEvalPath = path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json");
   const toolmeshPath = path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json");
@@ -164,6 +166,8 @@ async function main() {
   const visual = readJson(visualPath, null);
   const headlessImage = readJson(headlessImagePath, null);
   const headlessDesign = readJson(headlessDesignPath, null);
+  const headlessAudio = readJson(headlessAudioPath, null);
+  const headlessAnimation = readJson(headlessAnimationPath, null);
   const gooseRuntime = readJson(gooseRuntimePath, null);
   const openJarvisEval = readJson(openJarvisEvalPath, null);
   const toolmesh = readJson(toolmeshPath, null);
@@ -181,6 +185,8 @@ async function main() {
     visual: receiptEvidence(visualPath),
     headlessImage: receiptEvidence(headlessImagePath),
     headlessDesign: receiptEvidence(headlessDesignPath),
+    headlessAudio: receiptEvidence(headlessAudioPath),
+    headlessAnimation: receiptEvidence(headlessAnimationPath),
     toolmesh: receiptEvidence(toolmeshPath),
     openclaw: receiptEvidence(openclawPath),
     codexaRemote: receiptEvidence(latestByPrefix(receiptDir, "orangebox-codexa-remote-runtime-proof-")),
@@ -215,6 +221,8 @@ async function main() {
   const visualArtifactPipelineReady = visual?.summary?.visual_artifact_pipeline_ready === true;
   const headlessImageRuntimeReady = headlessImage?.ok === true && headlessImage?.runtime_ready === true && headlessImage?.status === "ORANGEBOX_HEADLESS_IMAGE_RUNTIME_GREEN";
   const headlessDesignRuntimeReady = headlessDesign?.ok === true && headlessDesign?.runtime_ready === true && headlessDesign?.status === "ORANGEBOX_HEADLESS_DESIGN_RUNTIME_GREEN";
+  const headlessAudioRuntimeReady = headlessAudio?.ok === true && headlessAudio?.runtime_ready === true && headlessAudio?.status === "ORANGEBOX_HEADLESS_AUDIO_RUNTIME_GREEN";
+  const headlessAnimationRuntimeReady = headlessAnimation?.ok === true && headlessAnimation?.runtime_ready === true && headlessAnimation?.status === "ORANGEBOX_HEADLESS_ANIMATION_RUNTIME_GREEN";
   const visualRuntimeReadyLanes = Number(visual?.summary?.runtime_ready_lanes || 0);
   const horizonReady = horizon?.ok === true && horizon?.status === "ORANGEBOX_HORIZON_REVIEW_READY";
   const toolmeshReady = toolmesh?.ok === true && toolmesh?.checks?.execution_blocked_until_promoted === true;
@@ -335,26 +343,28 @@ async function main() {
     candidate({
       id: "visual_runtime_toolmesh",
       wave: "wave_2_codexa_visual_runtime_promotion",
-      status: visual?.visual_ready === true ? "VISUAL_RUNTIME_READY" : (headlessImageRuntimeReady || headlessDesignRuntimeReady) ? "PARTIAL_RUNTIME_READY_IMAGE_OR_DESIGN_LAB" : "CONTROL_READY_RUNTIME_NOT_PROMOTED",
+      status: visual?.visual_ready === true ? "BASELINE_VISUAL_RUNTIME_READY" : (headlessImageRuntimeReady || headlessDesignRuntimeReady || headlessAudioRuntimeReady || headlessAnimationRuntimeReady) ? "PARTIAL_RUNTIME_READY_BASELINE_LABS" : "CONTROL_READY_RUNTIME_NOT_PROMOTED",
       current_role: "Image/video/audio/design runtime lane with artifact vault and sample receipts.",
-      next_proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:runtime:headless-image && npm.cmd run visual:runtime:headless-design && npm.cmd run visual:readiness",
+      next_proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:runtime:headless-image && npm.cmd run visual:runtime:headless-design && npm.cmd run visual:runtime:headless-audio && npm.cmd run visual:runtime:headless-animation && npm.cmd run visual:readiness",
       proofs: [
         { id: "visual_readiness_receipt", ok: receipts.visual.ok, detail: receipts.visual.status },
         { id: "artifact_pipeline_ready", ok: visualArtifactPipelineReady, detail: visual?.summary?.smoke_artifact_path || null },
         { id: "headless_image_runtime_ready", ok: headlessImageRuntimeReady, detail: headlessImage?.artifact?.artifact_path || null },
         { id: "headless_design_runtime_ready", ok: headlessDesignRuntimeReady, detail: headlessDesign?.artifact?.artifact_path || null },
-        { id: "visual_cards_present", ok: Number(visual?.summary?.visual_tool_cards || 0) >= 19, detail: visual?.summary?.visual_tool_cards || null },
+        { id: "headless_audio_runtime_ready", ok: headlessAudioRuntimeReady, detail: headlessAudio?.artifact?.artifact_path || null },
+        { id: "headless_animation_runtime_ready", ok: headlessAnimationRuntimeReady, detail: headlessAnimation?.artifact?.artifact_path || null },
+        { id: "visual_cards_present", ok: Number(visual?.summary?.visual_tool_cards || 0) >= 23, detail: visual?.summary?.visual_tool_cards || null },
         { id: "ffmpeg_binary", ok: binaries.ffmpeg.found, detail: binaries.ffmpeg.first_found, required: false },
         { id: "blender_binary", ok: binaries.blender.found, detail: binaries.blender.first_found, required: false },
         { id: "inkscape_binary", ok: binaries.inkscape.found, detail: binaries.inkscape.first_found, required: false },
       ],
       blockers: [
         visualArtifactPipelineReady ? null : "Visual artifact pipeline is not green.",
-        (headlessImageRuntimeReady || headlessDesignRuntimeReady) ? null : "No promoted visual runtime has install proof plus generated/edited artifact receipt.",
-        visual?.visual_ready === true ? null : `Only ${visualRuntimeReadyLanes}/4 visual runtime lanes are promoted; headless proof does not promote audio/video or AI image/design generators.`,
+        (headlessImageRuntimeReady || headlessDesignRuntimeReady || headlessAudioRuntimeReady || headlessAnimationRuntimeReady) ? null : "No promoted visual runtime has install proof plus generated/edited artifact receipt.",
+        visual?.visual_ready === true ? "Baseline four-lane runtime is ready; AI image generators, external codecs, GUI design tools, and transcription/editing tools still need their own promotion receipts before default use." : `Only ${visualRuntimeReadyLanes}/4 visual runtime lanes are promoted; baseline proof does not promote AI image/design generators, external codecs, transcription engines, or GUI tools.`,
         "Next: promote an AI image generator, audio transcription lane, or video/export lane after install proof, sample artifact receipt, hardware lock, and rollback.",
       ],
-      intentional_non_promotion: visual?.visual_ready !== true,
+      intentional_non_promotion: true,
     }),
     candidate({
       id: "littleorange_void_continue_surface",
@@ -448,6 +458,8 @@ async function main() {
       goose_runtime: gooseRuntimePath,
       openjarvis_eval: openJarvisEvalPath,
       headless_design_runtime: headlessDesignPath,
+      headless_audio_runtime: headlessAudioPath,
+      headless_animation_runtime: headlessAnimationPath,
       visual_readiness: visualPath,
       toolmesh_doctor: toolmeshPath,
     },
@@ -467,6 +479,8 @@ async function main() {
       visual_runtime_ready_lanes: visualRuntimeReadyLanes,
       headless_image_runtime_ready: headlessImageRuntimeReady,
       headless_design_runtime_ready: headlessDesignRuntimeReady,
+      headless_audio_runtime_ready: headlessAudioRuntimeReady,
+      headless_animation_runtime_ready: headlessAnimationRuntimeReady,
       goose_binary_found: binaries.goose.found,
       goose_runtime_status: gooseRuntime?.status || null,
       goose_provider_configured: gooseRuntime?.runtime?.provider_configured ?? null,

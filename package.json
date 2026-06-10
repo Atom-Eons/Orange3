@@ -49,6 +49,8 @@
     "visual:artifact-smoke": "bun ./scripts/v4/orangebox-visual-artifact-smoke-doctor.mjs --json --receipt",
     "visual:runtime:headless-image": "bun ./scripts/v4/orangebox-headless-image-runtime-doctor.mjs --json --receipt",
     "visual:runtime:headless-design": "bun ./scripts/v4/orangebox-headless-design-runtime-doctor.mjs --json --receipt",
+    "visual:runtime:headless-audio": "bun ./scripts/v4/orangebox-headless-audio-runtime-doctor.mjs --json --receipt",
+    "visual:runtime:headless-animation": "bun ./scripts/v4/orangebox-headless-animation-runtime-doctor.mjs --json --receipt",
     "visual:readiness": "bun ./scripts/v4/orangebox-visual-production-readiness-doctor.mjs --json --receipt",
     "assurance:doctor": "bun ./scripts/v4/orangebox-assurance-lab-doctor.mjs --json --receipt",
     "tool:ergonomics": "bun ./scripts/v4/orangebox-tool-ergonomics-doctor.mjs --json --receipt",

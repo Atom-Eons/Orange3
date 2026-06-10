@@ -34,6 +34,22 @@
       "variableInjectionOnly": true
     },
     {
+      "template_id": "headless-audio-tone-v1",
+      "tool": "orangebox-headless-audio-renderer",
+      "template_path": "orangebox-v3/free-alpha-toolmesh/templates/headless-audio/headless-audio-tone-v1.json",
+      "allowedVariables": ["duration_seconds", "sample_rate", "frequency_hz", "amplitude", "output_artifact_pointer"],
+      "lockedFields": ["wav_encoder", "pcm_format", "receipt_policy", "artifact_pointer_policy"],
+      "variableInjectionOnly": true
+    },
+    {
+      "template_id": "headless-animation-proof-v1",
+      "tool": "orangebox-headless-animation-renderer",
+      "template_path": "orangebox-v3/free-alpha-toolmesh/templates/headless-animation/headless-animation-proof-v1.json",
+      "allowedVariables": ["accent", "width", "height", "duration_ms", "title", "output_artifact_pointer"],
+      "lockedFields": ["svg_animation_timeline", "layout_grid", "receipt_policy", "artifact_pointer_policy"],
+      "variableInjectionOnly": true
+    },
+    {
       "template_id": "ffmpeg-vertical-reel-export-v1",
       "tool": "ffmpeg",
       "template_path": "orangebox-v3/free-alpha-toolmesh/templates/ffmpeg/ffmpeg-vertical-reel-export-v1.json",

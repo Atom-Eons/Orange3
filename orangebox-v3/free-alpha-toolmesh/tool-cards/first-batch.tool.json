@@ -558,6 +558,113 @@
       "handoffArtifactTypes": []
     },
     {
+      "id": "orangebox-headless-animation-renderer",
+      "name": "Orangebox Headless Animation Renderer",
+      "category": "video_runtime",
+      "lab": "video-lab",
+      "phase": "Y4",
+      "status": "promoted",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "promoted deterministic headless animation runtime for video-lab artifact proof",
+      "capabilities": [
+        "animation",
+        "svg",
+        "motion proof",
+        "template render"
+      ],
+      "input": [
+        "template variables",
+        "output artifact pointer"
+      ],
+      "output": [
+        "animated svg file",
+        "manifest",
+        "runtime receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "visual:runtime:headless-animation",
+      "promotionGate": [
+        "local Bun runtime proof",
+        "sample animated SVG receipt",
+        "artifact vault pointer proof",
+        "rollback path"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "artifact vault missing",
+        "animation writer regression",
+        "manifest/hash mismatch"
+      ],
+      "rollback": "disable visual:runtime:headless-animation promotion and remove generated runtime artifacts",
+      "binaryNames": [
+        "bun"
+      ],
+      "notes": "Baseline video-lab runtime; proves motion artifact output without claiming Wan/LTX/OBS/ffmpeg/Kdenlive readiness.",
+      "hardwareProfile": {
+        "deviceClass": "cpu",
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 1,
+        "diskScratchGB": 0.05,
+        "preferredRuntime": "bun",
+        "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 4,
+        "estimatedRuntimeClass": "instant",
+        "oomRisk": "low",
+        "concurrencyLock": "cpu_video_runtime",
+        "notes": "No GPU, model, GUI app, external codec, or cloud runtime required."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": true,
+        "allowedVariables": [
+          "accent",
+          "width",
+          "height",
+          "duration_ms",
+          "title",
+          "output_artifact_pointer"
+        ],
+        "templateIds": [
+          "headless-animation-proof-v1"
+        ]
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": true,
+        "templateRegistry": "orangebox-v3/free-alpha-toolmesh/templates/template-registry.json",
+        "allowedTemplateIds": [
+          "headless-animation-proof-v1"
+        ],
+        "variableInjectionOnly": true
+      },
+      "autonomyLevel": "execute_in_ghost",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
+    },
+    {
       "id": "wan",
       "name": "Wan",
       "category": "video_model",
@@ -1009,6 +1116,112 @@
         "variableInjectionOnly": false
       },
       "autonomyLevel": "prepare",
+      "humanHandoffRequired": false,
+      "handoffArtifactTypes": []
+    },
+    {
+      "id": "orangebox-headless-audio-renderer",
+      "name": "Orangebox Headless Audio Renderer",
+      "category": "audio_runtime",
+      "lab": "audio-lab",
+      "phase": "Y3",
+      "status": "promoted",
+      "cost": "free",
+      "local": true,
+      "openSource": true,
+      "cloud": false,
+      "orangeboxRole": "promoted deterministic headless audio runtime for WAV artifact proof",
+      "capabilities": [
+        "audio",
+        "wav",
+        "tone generation",
+        "template render"
+      ],
+      "input": [
+        "template variables",
+        "output artifact pointer"
+      ],
+      "output": [
+        "wav audio file",
+        "manifest",
+        "runtime receipt"
+      ],
+      "canTouchRepo": false,
+      "canPublish": false,
+      "requiresReceipt": true,
+      "requiresSTRONGARM": false,
+      "doctor": "visual:runtime:headless-audio",
+      "promotionGate": [
+        "local Bun runtime proof",
+        "sample WAV receipt",
+        "artifact vault pointer proof",
+        "rollback path"
+      ],
+      "privacyLevel": "local",
+      "failureModes": [
+        "artifact vault missing",
+        "wav writer regression",
+        "manifest/hash mismatch"
+      ],
+      "rollback": "disable visual:runtime:headless-audio promotion and remove generated runtime artifacts",
+      "binaryNames": [
+        "bun"
+      ],
+      "notes": "Baseline audio-lab runtime; proves audio artifact output without claiming Whisper/Audacity/Demucs/UVR readiness.",
+      "hardwareProfile": {
+        "deviceClass": "cpu",
+        "vramRequiredGB": 0,
+        "ramRequiredGB": 1,
+        "diskScratchGB": 0.05,
+        "preferredRuntime": "bun",
+        "requiresLLMUnload": false,
+        "requiresExclusiveGPU": false,
+        "maxConcurrentJobs": 4,
+        "estimatedRuntimeClass": "instant",
+        "oomRisk": "low",
+        "concurrencyLock": "cpu_audio",
+        "notes": "No GPU, model, GUI app, external codec, or cloud runtime required."
+      },
+      "executionMode": "headless",
+      "artifactPolicy": {
+        "returnsPointersOnly": true,
+        "maxInlineBytes": 0,
+        "vaultRequired": true,
+        "gcEligible": true
+      },
+      "templatePolicy": {
+        "immutableTemplateRequired": true,
+        "allowedVariables": [
+          "duration_seconds",
+          "sample_rate",
+          "frequency_hz",
+          "amplitude",
+          "output_artifact_pointer"
+        ],
+        "templateIds": [
+          "headless-audio-tone-v1"
+        ]
+      },
+      "artifactProtocol": {
+        "returnsRawBytes": false,
+        "returnsFilePointer": true,
+        "maxInlineBytes": 8192,
+        "artifactVaultRequired": true,
+        "hashAlgorithm": "sha256",
+        "metadataSidecar": true,
+        "garbageCollectable": true,
+        "retentionClass": "session"
+      },
+      "workflowPolicy": {
+        "allowsDynamicWorkflowGeneration": false,
+        "requiresImmutableTemplate": true,
+        "templateRegistry": "orangebox-v3/free-alpha-toolmesh/templates/template-registry.json",
+        "allowedTemplateIds": [
+          "headless-audio-tone-v1"
+        ],
+        "variableInjectionOnly": true
+      },
+      "autonomyLevel": "execute_in_ghost",
       "humanHandoffRequired": false,
       "handoffArtifactTypes": []
     },

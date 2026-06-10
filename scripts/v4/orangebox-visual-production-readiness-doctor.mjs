@@ -65,6 +65,16 @@ function latestHeadlessDesignRuntime() {
   return { file, report: readJson(file, null) };
 }
 
+function latestHeadlessAudioRuntime() {
+  const file = path.join(dataRoot, "visual-artifacts", "runtime", "headless-audio", "latest-headless-audio-runtime.json");
+  return { file, report: readJson(file, null) };
+}
+
+function latestHeadlessAnimationRuntime() {
+  const file = path.join(dataRoot, "visual-artifacts", "runtime", "headless-animation", "latest-headless-animation-runtime.json");
+  return { file, report: readJson(file, null) };
+}
+
 function summarizeLane(lab, cards, doctor, runtimeReceipt = null) {
   const laneCards = cards.filter((card) => card.lab === lab);
   const installedProbes = doctor?.summary?.installed_probe_count ?? 0;
@@ -128,6 +138,8 @@ async function main() {
   const artifactSmoke = latestArtifactSmoke();
   const headlessImageRuntime = latestHeadlessImageRuntime();
   const headlessDesignRuntime = latestHeadlessDesignRuntime();
+  const headlessAudioRuntime = latestHeadlessAudioRuntime();
+  const headlessAnimationRuntime = latestHeadlessAnimationRuntime();
   const artifactVaultReady = artifactVault.report?.ok === true
     && artifactVault.report?.status === "ORANGEBOX_VISUAL_ARTIFACT_VAULT_GREEN"
     && artifactVault.report?.vault_ready === true;
@@ -138,8 +150,8 @@ async function main() {
     && artifactSmoke.report?.artifact?.runtime_generated_media === false;
   const promotedRuntimeReceipts = {
     "image-lab": headlessImageRuntime.report,
-    "video-lab": null,
-    "audio-lab": null,
+    "video-lab": headlessAnimationRuntime.report,
+    "audio-lab": headlessAudioRuntime.report,
     "design-lab": headlessDesignRuntime.report,
   };
   const lanes = visualLabs.map((lab) => summarizeLane(lab, cards, doctors[lab].report, promotedRuntimeReceipts[lab]));
@@ -174,6 +186,8 @@ async function main() {
       artifact_smoke: artifactSmoke.file,
       headless_image_runtime: headlessImageRuntime.file,
       headless_design_runtime: headlessDesignRuntime.file,
+      headless_audio_runtime: headlessAudioRuntime.file,
+      headless_animation_runtime: headlessAnimationRuntime.file,
     },
     summary: {
       visual_labs: visualLabs.length,
@@ -202,6 +216,14 @@ async function main() {
       headless_design_runtime_status: headlessDesignRuntime.report?.status || "missing",
       headless_design_artifact_path: headlessDesignRuntime.report?.artifact?.artifact_path || null,
       headless_design_artifact_sha256: headlessDesignRuntime.report?.artifact?.sha256 || null,
+      headless_audio_runtime_ready: headlessAudioRuntime.report?.ok === true && headlessAudioRuntime.report?.runtime_ready === true,
+      headless_audio_runtime_status: headlessAudioRuntime.report?.status || "missing",
+      headless_audio_artifact_path: headlessAudioRuntime.report?.artifact?.artifact_path || null,
+      headless_audio_artifact_sha256: headlessAudioRuntime.report?.artifact?.sha256 || null,
+      headless_animation_runtime_ready: headlessAnimationRuntime.report?.ok === true && headlessAnimationRuntime.report?.runtime_ready === true,
+      headless_animation_runtime_status: headlessAnimationRuntime.report?.status || "missing",
+      headless_animation_artifact_path: headlessAnimationRuntime.report?.artifact?.artifact_path || null,
+      headless_animation_artifact_sha256: headlessAnimationRuntime.report?.artifact?.sha256 || null,
       promoted_runtime_receipts: lanes.filter((lane) => lane.runtime_ready).map((lane) => ({
         lab: lane.lab,
         status: lane.runtime_receipt?.status || null,
@@ -213,8 +235,12 @@ async function main() {
     lanes,
     blockers: [
       anyRuntimeReady ? "ComfyUI/FLUX/Qwen Image/SDXL remain registered AI image candidates; the promoted image runtime is the local deterministic headless renderer." : "ComfyUI/FLUX/Qwen Image/SDXL are registered candidates, not promoted image runtimes.",
-      "Wan/LTX/DaVinci Resolve/Kdenlive/OBS are registered candidates, not promoted video runtimes.",
-      "Whisper/Audacity/Demucs/UVR are registered candidates, not promoted audio runtimes.",
+      headlessAnimationRuntime.report?.ok === true && headlessAnimationRuntime.report?.runtime_ready === true
+        ? "Wan/LTX/DaVinci Resolve/Kdenlive/OBS remain registered video candidates; the promoted video-lab baseline is the local deterministic headless animation renderer."
+        : "Wan/LTX/DaVinci Resolve/Kdenlive/OBS are registered candidates, not promoted video runtimes.",
+      headlessAudioRuntime.report?.ok === true && headlessAudioRuntime.report?.runtime_ready === true
+        ? "Whisper/Audacity/Demucs/UVR remain registered audio candidates; the promoted audio-lab baseline is the local deterministic headless WAV renderer."
+        : "Whisper/Audacity/Demucs/UVR are registered candidates, not promoted audio runtimes.",
       headlessDesignRuntime.report?.ok === true && headlessDesignRuntime.report?.runtime_ready === true
         ? "Penpot/Inkscape/Krita/GIMP/Blender remain registered GUI/AI design candidates; the promoted design runtime is the local deterministic headless SVG exporter."
         : "Penpot/Inkscape/Krita/GIMP/Blender are registered candidates, not promoted design runtimes.",
@@ -227,6 +253,8 @@ async function main() {
       artifact_pipeline: artifactVaultReady && artifactSmokeReady,
       headless_image_runtime: headlessImageRuntime.report?.ok === true && headlessImageRuntime.report?.runtime_ready === true,
       headless_design_runtime: headlessDesignRuntime.report?.ok === true && headlessDesignRuntime.report?.runtime_ready === true,
+      headless_audio_runtime: headlessAudioRuntime.report?.ok === true && headlessAudioRuntime.report?.runtime_ready === true,
+      headless_animation_runtime: headlessAnimationRuntime.report?.ok === true && headlessAnimationRuntime.report?.runtime_ready === true,
       ai_runtime_promoted: false,
       all_runtime_lanes_promoted: allRuntimeReady,
       separate_frontend_release: "separate_visual_lane",
@@ -249,15 +277,15 @@ async function main() {
       {
         rank: 3,
         lane: "audio-lab",
-        first_runtime: "Whisper transcription",
-        why: "CPU-friendly and easy to verify with a short known sample.",
+        first_runtime: "Headless WAV proof, then Whisper transcription",
+        why: "The baseline WAV renderer proves artifact rails; Whisper adds real transcription once installed and gated.",
         pass_gate: "Install proof, sample transcript receipt, output hash, privacy boundary.",
       },
       {
         rank: 4,
         lane: "video-lab",
-        first_runtime: "OBS capture or Kdenlive/ffmpeg export before generative video",
-        why: "Video generation is heavier; start with proof capture/export before Wan/LTX.",
+        first_runtime: "Headless animation proof, then OBS/Kdenlive/ffmpeg export before generative video",
+        why: "The baseline animation renderer proves motion artifact rails; video generation is heavier, so promote export/capture before Wan/LTX.",
         pass_gate: "Install proof, short clip artifact receipt, GPU/media lock, LLM unload policy, timeout, cleanup.",
       },
     ],
@@ -277,9 +305,9 @@ async function main() {
       {
         wave: "V2 image runtime",
         action: anyRuntimeReady
-          ? "Headless image and/or design runtimes are promoted; next image step is ComfyUI or another AI generator with install proof, immutable template, sample render receipt, hardware lock, and rollback."
+          ? "Headless image/design/audio/animation baseline runtimes may be promoted; next image step is ComfyUI or another AI generator with install proof, immutable template, sample render receipt, hardware lock, and rollback."
           : "Install or promote one local image path first, preferably the headless renderer before ComfyUI, with immutable templates and one sample render receipt.",
-        proof: "npm.cmd run visual:runtime:headless-image && npm.cmd run visual:runtime:headless-design && npm.cmd run image-lab:doctor && npm.cmd run visual:readiness",
+        proof: "npm.cmd run visual:runtime:headless-image && npm.cmd run visual:runtime:headless-design && npm.cmd run visual:runtime:headless-audio && npm.cmd run visual:runtime:headless-animation && npm.cmd run visual:readiness",
       },
       {
         wave: "V3 design workspace",
@@ -293,7 +321,7 @@ async function main() {
       },
     ],
     result_line: allRuntimeReady
-      ? "Visual production runtime is promoted."
+      ? "Baseline visual/media runtime is promoted across image, design, audio, and animation; AI generators, external codecs, GUI tools, and the separate frontend lane remain gated."
       : anyRuntimeReady
         ? "Visual production has promoted headless image/design runtimes, artifact vault, and deterministic smoke proof; AI visual generators plus video/audio runtime lanes are still gated."
       : artifactVaultReady && artifactSmokeReady
