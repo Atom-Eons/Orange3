@@ -25,13 +25,20 @@ async function index(scope: string, args: string[]) {
   if (scope === "receipts") result = await indexReceipts(limit);
   else if (scope === "primers") result = await indexPrimers(limit);
   else if (scope === "coldtruth") result = cold;
-  else if (scope === "chat") result = { ok: false, status: "K3_CHAT_INDEX_DISABLED_IN_W1", reason: "Chat archives are explicitly disabled until receipts/primers/coldtruth pass recall benchmark." };
+  else if (scope === "chat") result = {
+    ok: true,
+    status: "K3_CHAT_INDEX_DISABLED_IN_W1",
+    indexed: 0,
+    chat_archive_indexing_performed: false,
+    reason: "Chat archives are explicitly disabled until receipts/primers/coldtruth pass recall benchmark.",
+  };
   else result = { ok: false, status: "K3_UNKNOWN_INDEX_SCOPE", scope };
   const receipt = await writeK3Receipt(`index-${scope}`, { ...result, coldtruth_seed: cold });
   return { ...result, coldtruth_seed: cold, receipt_path: receipt.receipt_path };
 }
 
 async function query(q: string) {
+  if (!q.trim()) return { ok: false, status: "K3_QUERY_REQUIRED", usage: "bun ./orangebox-v3/memory-wildcard/k3-cli.ts query \"heavy memory compiler\"" };
   const result = await alphaMatch(q, 10);
   const receipt = await writeK3Receipt("query", result);
   return { ...result, receipt_path: receipt.receipt_path };

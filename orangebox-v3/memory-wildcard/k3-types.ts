@@ -7,6 +7,7 @@ export type K3Card = {
   source_mtime: string | null;
   authority_level: number;
   title: string;
+  repo_root: string;
   symbols: string[];
   aliases: string[];
   tags: string[];
@@ -25,6 +26,7 @@ export type K3Candidate = {
   source_hash: string | null;
   authority_level: number;
   title: string;
+  repo_root?: string | null;
   aliases: string[];
   tags: string[];
   exact_score: number;
@@ -35,6 +37,8 @@ export type K3Candidate = {
   recency_score: number;
   stale_penalty: number;
   failed_doctor_penalty: number;
+  active_repo_score?: number;
+  source_exists?: boolean;
   final_score: number;
   cold_truth_gate?: "passed" | "failed" | "not_run";
   gate_reason?: string;

@@ -18,7 +18,29 @@ export async function openK3Db() {
   for (const statement of schema.split(/;\s*(?:\r?\n|$)/).map((s) => s.trim()).filter(Boolean)) {
     db.run(statement);
   }
+  ensureK3Migrations(db);
   return db;
+}
+
+function hasColumn(db: Database, table: string, column: string) {
+  const rows = db.query(`PRAGMA table_info(${table})`).all() as Array<{ name?: string }>;
+  return rows.some((row) => row.name === column);
+}
+
+function ensureColumn(db: Database, table: string, column: string, definition: string) {
+  if (!hasColumn(db, table, column)) {
+    try {
+      db.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    } catch (error) {
+      if (!/duplicate column/i.test(String((error as Error)?.message || error))) throw error;
+    }
+  }
+}
+
+function ensureK3Migrations(db: Database) {
+  ensureColumn(db, "memory_card", "repo_root", "TEXT");
+  ensureColumn(db, "memory_card", "active", "INTEGER DEFAULT 1");
+  ensureColumn(db, "memory_card", "last_indexed_at", "TEXT");
 }
 
 export async function makeCard(input: {
@@ -49,6 +71,7 @@ export async function makeCard(input: {
     source_mtime: stat?.mtime?.toISOString() || null,
     authority_level: input.authority_level,
     title,
+    repo_root: repoRoot,
     symbols,
     aliases,
     tags,
@@ -65,9 +88,9 @@ export async function upsertCard(db: Database, card: K3Card) {
   const now = new Date().toISOString();
   db.query(`INSERT OR REPLACE INTO memory_card (
     card_id, source_path, source_type, source_hash, source_size, source_mtime, authority_level, title,
-    symbols_json, aliases_json, tags_json, receipt_id, soul_genome_ref, atom_smasher_ref,
-    created_at, updated_at, index_version, embedding_model, chunk_count, search_text
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT created_at FROM memory_card WHERE card_id = ?), ?), ?, ?, ?, ?, ?)`).run(
+    repo_root, symbols_json, aliases_json, tags_json, receipt_id, soul_genome_ref, atom_smasher_ref,
+    created_at, updated_at, index_version, embedding_model, chunk_count, active, last_indexed_at, search_text
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT created_at FROM memory_card WHERE card_id = ?), ?), ?, ?, ?, ?, ?, ?, ?)`).run(
     card.card_id,
     card.source_path,
     card.source_type,
@@ -76,6 +99,7 @@ export async function upsertCard(db: Database, card: K3Card) {
     card.source_mtime,
     card.authority_level,
     card.title,
+    card.repo_root,
     JSON.stringify(card.symbols),
     JSON.stringify(card.aliases),
     JSON.stringify(card.tags),
@@ -88,8 +112,11 @@ export async function upsertCard(db: Database, card: K3Card) {
     card.index_version,
     card.embedding_model,
     0,
+    1,
+    now,
     card.search_text,
   );
+  db.query("DELETE FROM k3_fts WHERE card_id = ?").run(card.card_id);
   try {
     db.query("INSERT INTO k3_fts(card_id, search_text) VALUES (?, ?)").run(card.card_id, card.search_text);
   } catch {}

@@ -35,5 +35,5 @@ acceptance_tests:
 visual_required: false
 visual_policy: current_visual_build_paused; AECode governs visuals, it does not force redesign
 approval_required: true
-created_at: 2026-06-10T06:51:12.710Z
+created_at: 2026-06-10T07:35:37.396Z
 status: IN_PROGRESS

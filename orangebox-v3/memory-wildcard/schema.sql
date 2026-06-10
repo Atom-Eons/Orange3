@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS memory_card (
   source_mtime TEXT,
   authority_level INTEGER DEFAULT 0,
   title TEXT,
+  repo_root TEXT,
   symbols_json TEXT DEFAULT '[]',
   aliases_json TEXT DEFAULT '[]',
   tags_json TEXT DEFAULT '[]',
@@ -18,6 +19,8 @@ CREATE TABLE IF NOT EXISTS memory_card (
   index_version TEXT,
   embedding_model TEXT,
   chunk_count INTEGER DEFAULT 0,
+  active INTEGER DEFAULT 1,
+  last_indexed_at TEXT,
   search_text TEXT DEFAULT ''
 );
 
