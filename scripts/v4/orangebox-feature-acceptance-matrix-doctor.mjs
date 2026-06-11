@@ -1349,8 +1349,14 @@ async function main() {
         evidence(backendProofInProgress ? path.join(repoRoot, "package.json") : (finalPackagePath || finalManifestPath), null, {
           accept: (parsed) => backendProofInProgress
             ? Boolean(parsed?.scripts?.["final:verify"])
-            : parsed?.frontend_included === false && parsed?.frontend_required_for_backend === false,
+            : parsed?.ok === true
+              && parsed?.status === "ORANGEBOX_DELTA_FINAL_VERIFIED_GREEN"
+              && parsed?.verification?.ok === true
+              && parsed?.frontend_included === false
+              && parsed?.frontend_required_for_backend === false,
           detail: (parsed) => ({
+            status: parsed?.status || null,
+            verify_ok: parsed?.verification?.ok ?? null,
             frontend_included: parsed?.frontend_included ?? (backendProofInProgress ? false : null),
             frontend_required_for_backend: parsed?.frontend_required_for_backend ?? (backendProofInProgress ? false : null),
             final_verify_script: parsed?.scripts?.["final:verify"] || null,

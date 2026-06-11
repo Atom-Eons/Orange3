@@ -197,6 +197,7 @@ async function main() {
     codexaRemoteProof?.codexa_remote_runtime_green === true;
   const codexaRemoteControlOk = codexaAlert?.remote_control_available === true || codexaAccess?.access?.rdp === true || codexaAccess?.access?.winrm === true;
   const codexaSmbStageOk = codexaSmbStage?.stage_ready === true || codexaSmbStage?.stage_written === true;
+  const codexaRailStagingAlternativeOk = codexaCommandOk && codexaRemoteProof?.codexa_remote_runtime_green === true;
   const modelCoreInstalled = Number(modelInventory?.summary?.core_installed || 0);
   const modelCoreTotal = Number(modelInventory?.summary?.core_total || 0);
   const modelRequiredInstalled = Number(modelInventory?.summary?.required_installed || 0);
@@ -261,7 +262,7 @@ async function main() {
       evidence_refs: [fileSummary(path.join(dataRoot, "alerts", "codexa-link", "latest-codexa-alert.json"))],
     }));
   }
-  if (codexaAlert?.smb_port_visible === true && !codexaSmbStageOk) {
+  if (codexaAlert?.smb_port_visible === true && !codexaSmbStageOk && !codexaRailStagingAlternativeOk) {
     gaps.push(makeGap({
       id: "codexa_smb_visible_no_share_access",
       severity: "attention",
@@ -336,6 +337,15 @@ async function main() {
     },
     local_ops_green: localOpsGreen,
     full_system_green_claim_allowed: fullSystemGreenClaimAllowed,
+    nonblocking_attentions: [
+      ...(codexaAlert?.smb_port_visible === true && !codexaSmbStageOk && codexaRailStagingAlternativeOk ? [{
+        id: "codexa_smb_visible_no_share_access",
+        scope: "file_staging",
+        current_evidence: `smb_visible=true; stage_ready=${codexaSmbStage?.stage_ready ?? null}; stage_written=${codexaSmbStage?.stage_written ?? null}; command_rail=${statusText(codexaCommandOk)}; remote_runtime=${codexaRemoteProof?.status || "missing"}`,
+        interpretation: "SMB share access is denied/unavailable, but Codexa command rail and remote runtime proof are green. SMB is an optional staging path, not an Ops gap.",
+        proof_commands: ["npm.cmd run codexa:smb-stage", "npm.cmd run codexa:remote-proof", "npm.cmd run project:report"],
+      }] : []),
+    ],
     gap_count: gaps.length,
     critical_gap_count: gaps.filter((gap) => gap.severity === "critical").length,
     operator_action_required_count: gaps.filter((gap) => gap.operator_action_required).length,

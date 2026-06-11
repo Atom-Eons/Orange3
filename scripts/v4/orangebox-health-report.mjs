@@ -258,6 +258,8 @@ async function main() {
     skill_lifecycle: latestReceipt("orangebox-skill-lifecycle-doctor-"),
     tool_ergonomics: latestReceipt("orangebox-tool-ergonomics-"),
     checkmate_eval_lane: latestReceipt("checkmate-eval-lane-"),
+    strongarm: latestReceipt("orangebox-strongarm-doctor-"),
+    gremlin: latestReceipt("orangebox-gremlin-misfits-doctor-"),
     model_inventory: latestReceipt("orangebox-model-inventory-report-"),
     signal_hygiene: latestReceipt("orangebox-operator-signal-hygiene-"),
     doer_watcher_spine: latestReceipt("orangebox-doer-watcher-spine-"),
@@ -287,6 +289,8 @@ async function main() {
     skill_lifecycle: readJson(path.join(dataRoot, "skills", "latest-skill-lifecycle.json")) || readJson(receiptPaths.skill_lifecycle || ""),
     tool_ergonomics: readJson(path.join(dataRoot, "tool-ergonomics", "latest-tool-ergonomics.json")) || readJson(receiptPaths.tool_ergonomics || ""),
     checkmate_eval_lane: readJson(path.join(dataRoot, "checkmate", "latest-checkmate-eval-lane.json")) || readJson(receiptPaths.checkmate_eval_lane || ""),
+    strongarm: readJson(path.join(dataRoot, "strongarm", "latest-strongarm-doctor.json")) || readJson(receiptPaths.strongarm || ""),
+    gremlin: readJson(path.join(dataRoot, "misfits", "latest-gremlin-misfits-doctor.json")) || readJson(receiptPaths.gremlin || ""),
     model_inventory: readJson(path.join(dataRoot, "reports", "models", "latest-model-inventory-report.json")) || readJson(receiptPaths.model_inventory || ""),
     signal_hygiene: readJson(path.join(dataRoot, "signal-hygiene", "latest-operator-signal-hygiene.json")) || readJson(receiptPaths.signal_hygiene || ""),
     doer_watcher_spine: readJson(path.join(dataRoot, "doer-watcher", "latest-doer-watcher-spine.json")) || readJson(receiptPaths.doer_watcher_spine || ""),
@@ -314,6 +318,8 @@ async function main() {
   const aiBoxDirectOllamaOk = aiBoxProbes.direct_ollama_11434.ok || aiBoxProbes.lan_ollama_11434.ok;
   const aiBoxRemoteRuntimeOk = latest.codexa_remote_proof?.codexa_remote_runtime_green === true;
   const aiBoxOllamaOk = aiBoxDirectOllamaOk || aiBoxRemoteRuntimeOk;
+  const smbShareDenied = latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS";
+  const smbNonblockingByRail = smbShareDenied && aiBoxCommandOk && aiBoxRemoteRuntimeOk;
   const recoveryArtifacts = latest.codexa_alert?.recovery_artifacts || {
     obox2_setup_pack: fileSummary(path.join(downloadsRoot, "Orangebox_V2_Internal_Setup_Pack.zip")),
     rail_recovery_pack: fileSummary(path.join(dataRoot, "exports", "codexa-rail-recovery-pack-WINDOWS-NATIVE.zip")),
@@ -331,6 +337,11 @@ async function main() {
     topKnowledgeExecution?.auto_promote === false &&
     topKnowledgeExecution?.scope === "backend_ops_only" &&
     topKnowledgeExecution?.frontend_touch_allowed === false;
+  const topKnowledgeExecutionAlreadyProved =
+    topKnowledgeExecution?.area === "judge_reliability_and_strongarm" &&
+    latest.strongarm?.status === "STRONGARM_ORANGEBOX_GATE_GREEN" &&
+    latest.gremlin?.status === "GREMLIN_MISFITS_ELITE_GREEN" &&
+    latest.harness_benchmark?.status === "ORANGEBOX_HARNESS_BENCHMARK_GREEN";
 
   const startupOpenClaw = startupPath("OpenClaw Gateway (atomeons).cmd");
   const openclawStartupMoved = Array.isArray(latest.openclaw_retirement?.startup_matches)
@@ -373,7 +384,7 @@ async function main() {
   if (!aiBoxOllamaOk) warnings.push("AI Box Ollama/model runtime is not proven through direct port or command-rail remote proof.");
   if (latest.codexa_alert?.remote_control_available === false) warnings.push("AI Box remote control is not reachable from this cockpit.");
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) warnings.push("AI Box SMB port is visible, but no remote execution path is proven.");
-  if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") warnings.push("AI Box SMB port is visible, but share access is denied/unavailable for staging.");
+  if (smbShareDenied && !smbNonblockingByRail) warnings.push("AI Box SMB port is visible, but share access is denied/unavailable for staging.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN") warnings.push("OBOX2 package doctor is not green yet.");
   if (!obox2Contracts.ok || obox2Contracts.check_count < 30) warnings.push(`OBOX2 setup contract proof is not green enough (${obox2Contracts.check_count} checks, ${obox2Contracts.failed_count} failed).`);
   if (!recoveryArtifacts.rail_recovery_pack?.exists && !aiBoxCommandOk) warnings.push("Codexa rail recovery zip is not generated.");
@@ -392,7 +403,7 @@ async function main() {
   if (!aiBoxCommandOk && !recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push("Run npm.cmd run codexa:rail-pack to generate a small Windows-native rail recovery zip.");
   if (!aiBoxCommandOk && recoveryArtifacts.rail_recovery_pack?.exists) nextActions.push(`Use the rail recovery zip at ${recoveryArtifacts.rail_recovery_pack.path} when the full OBOX2 pack is too heavy.`);
   if (latest.codexa_alert?.smb_port_visible === true && latest.codexa_alert?.remote_execution_available === false) nextActions.push("Treat SMB as staging-only until RDP, WinRM, or the 8097 command rail is reachable.");
-  if (latest.codexa_smb_stage?.status === "CODEXA_SMB_VISIBLE_NO_SHARE_ACCESS") nextActions.push("SMB staging is not available from this cockpit without credentials/share access; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097.");
+  if (smbShareDenied && !smbNonblockingByRail) nextActions.push("SMB staging is not available from this cockpit without credentials/share access; use the OBOX2 setup zip directly on Codexa or restore RDP/WinRM/8097.");
   if (!latest.codexa_smb_stage?.status) nextActions.push("Run npm.cmd run codexa:smb-stage to prove whether SMB staging is available before relying on it.");
   if (!aiBoxOllamaOk) nextActions.push("Run npm.cmd run codexa:remote-proof. If Codexa loopback Ollama/models are still not green, run RUN_INSTALL_CORE_LLMS_ON_CODEXA.cmd, then RUN_MODEL_DOCTOR_ON_CODEXA.cmd, or rerun START_HERE_OBOX2_INTERNAL.ps1 with -Mode core.");
   if (latest.obox2_package?.status !== "OBOX2_PACKAGE_VERIFIED_GREEN" || !obox2Contracts.ok || obox2Contracts.check_count < 30) nextActions.push("Run npm.cmd run obox2:pack and npm.cmd run obox2:doctor; do not treat the Codexa setup pack as proven until setup contracts are green.");
@@ -404,7 +415,7 @@ async function main() {
   if (!["CODEXA_HANDOFF_READY_WITH_OPEN_GAPS", "CODEXA_HANDOFF_READY_NO_OPEN_GAPS"].includes(latest.codexa_handoff?.status)) nextActions.push("Run npm.cmd run codexa:handoff so the AI Box setup first-click path and verification order are current.");
   if (latest.knowledge_improvements?.status !== "KNOWLEDGE_IMPROVEMENT_CANDIDATES_READY") nextActions.push("Run npm.cmd run knowledge:improvements before promoting any learned system upgrade.");
   else if (!knowledgeBacklogReady) nextActions.push("Rerun npm.cmd run knowledge:improvements after the queue script upgrade so learned candidates include backend-only execution proof.");
-  else if (topKnowledgeExecution) nextActions.push(`Top learned backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}); prove with ${topKnowledgeExecution.proof_command}.`);
+  else if (topKnowledgeExecution && !topKnowledgeExecutionAlreadyProved) nextActions.push(`Top learned backend candidate: ${topKnowledgeExecution.area} (${topKnowledgeExecution.execution_score}); prove with ${topKnowledgeExecution.proof_command}.`);
   if (latest.project_report?.full_project_green === false) nextActions.push("Review npm.cmd run project:report output before claiming full project completion.");
   if (!latest.codexa_alert?.status) nextActions.push("Run npm.cmd run codexa:alert:popup once so AI Box disconnects become visible operator alerts.");
   if (latest.mcp_doctor?.ok !== true || latest.mcp_doctor?.summary?.failed !== 0) nextActions.push("Run npm.cmd run mcp:doctor to verify the MCP quarantine/tool bridge.");
@@ -454,6 +465,14 @@ async function main() {
     },
     repo_root: repoRoot,
     data_root: dataRoot,
+    nonblocking_attentions: [
+      ...(smbNonblockingByRail ? [{
+        id: "codexa_smb_visible_no_share_access",
+        scope: "file_staging",
+        current_evidence: "SMB share access denied/unavailable; Codexa command rail and remote runtime proof are green.",
+        interpretation: "SMB is optional staging only, not a health warning while command rail and remote runtime proof are green.",
+      }] : []),
+    ],
     dev: {
       probes: devProbes,
       openclaw_startup_retired: {
