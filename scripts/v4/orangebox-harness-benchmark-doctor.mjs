@@ -355,7 +355,7 @@ const tasks = [
     id: "codexa_gap_truth_guard",
     category: "state_adaptation",
     oracle: "If Codexa rails or Ollama are down, reports must preserve warning state and refuse full-project green.",
-    budget: { timeout_ms: 1600, max_files_read: 4, max_tool_calls: 0 },
+    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
     run(trace) {
       const health = readJson(path.join(dataRoot, "reports", "health", "latest-health-report.json"), trace);
       const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
@@ -1123,6 +1123,7 @@ const tasks = [
       ];
       if (!packageJson?.scripts?.["horizon:bakeoff"]?.includes("orangebox-horizon-promotion-bakeoff-doctor.mjs")) failures.push("Package script horizon:bakeoff missing or wrong");
       if (!packageJson?.scripts?.["v3:goose:runtime"]?.includes("orangebox-v3/goose/runtime-doctor.ts")) failures.push("Package script v3:goose:runtime missing or wrong");
+      if (!packageJson?.scripts?.["v3:openjarvis:runtime"]?.includes("orangebox-v3/openjarvis/runtime-doctor.ts")) failures.push("Package script v3:openjarvis:runtime missing or wrong");
       if (bakeoff?.status !== "ORANGEBOX_HORIZON_PROMOTION_BAKEOFF_READY" || bakeoff?.ok !== true) failures.push(`Horizon bakeoff not green: ${bakeoff?.status || "missing"}`);
       if ((bakeoff?.summary?.candidates_total || 0) < 10) failures.push(`Bakeoff candidate count too low: ${bakeoff?.summary?.candidates_total || 0}`);
       if ((bakeoff?.summary?.waves_total || 0) < 5) failures.push(`Bakeoff wave count too low: ${bakeoff?.summary?.waves_total || 0}`);
@@ -1136,6 +1137,9 @@ const tasks = [
       if (bakeoff?.summary?.goose_ghost_task_ready !== true) failures.push("Bakeoff does not prove Goose ghost task guard ready");
       if (Number(bakeoff?.summary?.openjarvis_baseline_score || 0) < 0.85) failures.push("Bakeoff does not prove OBOX Jarvis baseline score");
       if (Number(bakeoff?.summary?.openjarvis_primitive_coverage_score || 0) < 0.8) failures.push("Bakeoff does not prove OBOX Jarvis primitive coverage");
+      if (!String(bakeoff?.summary?.openjarvis_runtime_status || "").startsWith("OBOX_JARVIS_RUNTIME_")) failures.push("Bakeoff does not surface OBOX Jarvis runtime status");
+      if (bakeoff?.summary?.openjarvis_same_task_manifest_ready !== true) failures.push("Bakeoff does not prove OBOX Jarvis same-task bakeoff manifest ready");
+      if (bakeoff?.summary?.openjarvis_runtime_promoted !== false) failures.push("Bakeoff does not keep OBOX Jarvis runtime unpromoted");
       if (bakeoff?.summary?.openjarvis_router_approved !== false) failures.push("Bakeoff does not keep OBOX Jarvis router approval false");
       if (openJarvisEval?.status !== "OPENJARVIS_EVAL_HARNESS_BASELINE_GREEN") failures.push(`OpenJarvis scorecard not green: ${openJarvisEval?.status || "missing"}`);
       if (openJarvisEval?.runtime_truth?.default_router_approved !== false) failures.push("OpenJarvis eval does not keep default router approval false");
@@ -1153,6 +1157,9 @@ const tasks = [
       if (!String(jarvis?.current_role || "").includes("not router authority")) failures.push("OBOX Jarvis current role does not reject router authority");
       if (!jarvis?.proofs?.some((proof) => proof.id === "trilane_baseline_comparison" && proof.ok === true)) failures.push("OBOX Jarvis candidate lacks green TriLane baseline comparison proof");
       if (!jarvis?.proofs?.some((proof) => proof.id === "router_not_promoted" && proof.ok === true)) failures.push("OBOX Jarvis candidate lacks router-not-promoted proof");
+      if (!jarvis?.proofs?.some((proof) => proof.id === "openjarvis_runtime_reality_receipt" && proof.ok === true)) failures.push("OBOX Jarvis candidate lacks runtime-reality proof");
+      if (!jarvis?.proofs?.some((proof) => proof.id === "openjarvis_same_task_manifest_ready" && proof.ok === true)) failures.push("OBOX Jarvis candidate lacks same-task manifest proof");
+      if (!jarvis?.proofs?.some((proof) => proof.id === "runtime_not_promoted" && proof.ok === true)) failures.push("OBOX Jarvis candidate lacks runtime-not-promoted proof");
       if (!String(visual?.status || "").includes("RUNTIME") && !String(visual?.status || "").includes("CONTROL_READY")) failures.push("Visual runtime candidate is not status-gated");
       if (!String(hermes?.current_role || "").includes("cannot own Orangebox authority")) failures.push("Hermes candidate does not reject hidden authority");
       if (!featureRow?.ok) failures.push("Feature matrix does not prove horizon_promotion_bakeoff");
@@ -1174,11 +1181,68 @@ const tasks = [
           openjarvis_eval_receipt_green: bakeoff.summary.openjarvis_eval_receipt_green,
           openjarvis_baseline_score: bakeoff.summary.openjarvis_baseline_score,
           openjarvis_primitive_coverage_score: bakeoff.summary.openjarvis_primitive_coverage_score,
+          openjarvis_runtime_status: bakeoff.summary.openjarvis_runtime_status,
+          openjarvis_same_task_manifest_ready: bakeoff.summary.openjarvis_same_task_manifest_ready,
           openjarvis_router_approved: bakeoff.summary.openjarvis_router_approved,
           hermes_pack_present: bakeoff.summary.hermes_pack_present,
           visual_ready: bakeoff.summary.visual_ready,
           feature_row: "horizon_promotion_bakeoff",
           candidates: required,
+        });
+    },
+  },
+  {
+    id: "obox_jarvis_runtime_reality_truth",
+    category: "alpha_review",
+    oracle: "OBOX Jarvis must expose runtime/config truth and a same-task bakeoff manifest before anyone can mistake it for an installed router.",
+    budget: { timeout_ms: 1600, max_files_read: 5, max_tool_calls: 0 },
+    run(trace) {
+      const runtime = readJson(path.join(dataRoot, "openjarvis", "runtime", "latest-openjarvis-runtime.json"), trace);
+      const feature = readJson(path.join(dataRoot, "feature-proof", "latest-feature-acceptance-matrix.json"), trace);
+      const project = readJson(path.join(dataRoot, "reports", "project", "latest-project-report.json"), trace);
+      const bakeoff = readJson(path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json"), trace);
+      const packageJson = readJson(path.join(repoRoot, "package.json"), trace);
+      const failures = [];
+      const featureRow = feature?.matrix?.find((row) => row.id === "obox_jarvis_runtime_reality_gate");
+      const projectRow = project?.scope?.find((row) => row.area === "OBOX Jarvis / OpenJarvis runtime reality gate");
+      const jarvisCandidate = Array.isArray(bakeoff?.candidates)
+        ? bakeoff.candidates.find((candidate) => candidate.id === "obox_jarvis_openjarvis")
+        : null;
+
+      if (!packageJson?.scripts?.["v3:openjarvis:runtime"]?.includes("orangebox-v3/openjarvis/runtime-doctor.ts")) failures.push("Package script v3:openjarvis:runtime missing or wrong");
+      if (runtime?.ok !== true || !String(runtime?.status || "").startsWith("OBOX_JARVIS_RUNTIME_")) failures.push(`OBOX Jarvis runtime receipt not valid: ${runtime?.status || "missing"}`);
+      if (typeof runtime?.runtime_truth?.runtime_found !== "boolean") failures.push("OBOX Jarvis runtime_found truth is not explicit");
+      if (runtime?.same_task_bakeoff?.manifest_ready !== true) failures.push("OBOX Jarvis same-task bakeoff manifest is not ready");
+      if (!runtime?.same_task_bakeoff?.manifest_path || !exists(runtime.same_task_bakeoff.manifest_path)) failures.push("OBOX Jarvis same-task bakeoff manifest file is missing");
+      if (runtime?.constraints?.frontend_touched !== false) failures.push("OBOX Jarvis runtime gate touched or failed to prove no frontend touch");
+      if (runtime?.constraints?.repo_mutated_by_openjarvis !== false) failures.push("OBOX Jarvis runtime gate mutated repo");
+      if (runtime?.constraints?.provider_config_mutated !== false) failures.push("OBOX Jarvis runtime gate mutated provider config");
+      if (runtime?.constraints?.paid_api_attempted !== false) failures.push("OBOX Jarvis runtime gate attempted paid API");
+      if (runtime?.constraints?.live_runtime_execution_attempted !== false) failures.push("OBOX Jarvis runtime gate attempted live runtime execution");
+      if (runtime?.constraints?.default_router_promoted !== false) failures.push("OBOX Jarvis runtime gate promoted default router");
+      if (runtime?.constraints?.hidden_startup_registered !== false) failures.push("OBOX Jarvis runtime gate registered hidden startup");
+      if (runtime?.promotion?.promotable_now !== false) failures.push("OBOX Jarvis runtime gate made itself promotable");
+      if (featureRow?.ok !== true) failures.push("Feature matrix does not prove obox_jarvis_runtime_reality_gate");
+      if (projectRow?.status !== "REAL") failures.push("Project report does not list OBOX Jarvis runtime reality gate as REAL");
+      if (bakeoff?.summary?.openjarvis_same_task_manifest_ready !== true) failures.push("Horizon bakeoff does not mirror same-task manifest readiness");
+      if (!jarvisCandidate?.proofs?.some((proof) => proof.id === "openjarvis_runtime_reality_receipt" && proof.ok === true)) failures.push("Horizon candidate lacks runtime-reality receipt proof");
+      if (!jarvisCandidate?.proofs?.some((proof) => proof.id === "runtime_not_promoted" && proof.ok === true)) failures.push("Horizon candidate lacks runtime-not-promoted proof");
+
+      return failures.length
+        ? failTask("obox_jarvis_runtime_reality_truth", failures, {
+          status: runtime?.status || null,
+          runtime_found: runtime?.runtime_truth?.runtime_found ?? null,
+          manifest_ready: runtime?.same_task_bakeoff?.manifest_ready ?? null,
+          feature_row_ok: featureRow?.ok ?? null,
+          project_row_status: projectRow?.status || null,
+        })
+        : okTask("obox_jarvis_runtime_reality_truth", {
+          status: runtime.status,
+          runtime_found: runtime.runtime_truth.runtime_found,
+          manifest_path: runtime.same_task_bakeoff.manifest_path,
+          live_runtime_execution_attempted: runtime.constraints.live_runtime_execution_attempted,
+          default_router_promoted: runtime.constraints.default_router_promoted,
+          feature_row: "obox_jarvis_runtime_reality_gate",
         });
     },
   },

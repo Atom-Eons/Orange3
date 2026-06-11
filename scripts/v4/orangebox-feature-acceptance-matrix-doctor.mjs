@@ -637,6 +637,9 @@ async function main() {
             openjarvis_eval_receipt_green: parsed?.summary?.openjarvis_eval_receipt_green ?? null,
             openjarvis_baseline_score: parsed?.summary?.openjarvis_baseline_score ?? null,
             openjarvis_primitive_coverage_score: parsed?.summary?.openjarvis_primitive_coverage_score ?? null,
+            openjarvis_runtime_status: parsed?.summary?.openjarvis_runtime_status ?? null,
+            openjarvis_runtime_found: parsed?.summary?.openjarvis_runtime_found ?? null,
+            openjarvis_same_task_manifest_ready: parsed?.summary?.openjarvis_same_task_manifest_ready ?? null,
             openjarvis_router_approved: parsed?.summary?.openjarvis_router_approved ?? null,
             hermes_pack_present: parsed?.summary?.hermes_pack_present ?? null,
             visual_ready: parsed?.summary?.visual_ready ?? null,
@@ -673,6 +676,46 @@ async function main() {
             task_card_score: parsed?.comparison?.task_card_score ?? null,
             openjarvis_runtime_installed: parsed?.runtime_truth?.openjarvis_runtime_installed ?? null,
             default_router_approved: parsed?.runtime_truth?.default_router_approved ?? null,
+            promotable_now: parsed?.promotion?.promotable_now ?? null,
+          }),
+        }),
+      ],
+      operator_approval_required: false,
+    }),
+    matrixRow({
+      id: "obox_jarvis_runtime_reality_gate",
+      claim: "OBOX Jarvis/OpenJarvis has an explicit runtime-reality gate and same-task bakeoff manifest, so Orangebox cannot mistake a spec idea for an installed router.",
+      lane: "backend_ops",
+      status: "REAL",
+      frontend_touch_allowed: false,
+      proof_command: "npm.cmd run v3:openjarvis:doctor && npm.cmd run v3:openjarvis:runtime && npm.cmd run horizon:bakeoff",
+      acceptance_gate: "Runtime receipt is valid, config/binary/module truth is explicit, same-task bakeoff manifest exists, live runtime execution is false, default router promotion is false, and provider/startup mutation is false.",
+      rollback_path: "Remove orangebox-v3/openjarvis/runtime-doctor.ts and v3:openjarvis:runtime script wiring; delete generated OpenJarvis runtime receipts/candidate manifests; rerun feature:proof, project:report, horizon:bakeoff, and harness:benchmark.",
+      evidence: [
+        evidence(path.join(dataRoot, "openjarvis", "runtime", "latest-openjarvis-runtime.json"), null, {
+          accept: (parsed) => parsed?.ok === true
+            && /^OBOX_JARVIS_RUNTIME_/.test(parsed?.status || "")
+            && typeof parsed?.runtime_truth?.runtime_found === "boolean"
+            && parsed?.same_task_bakeoff?.manifest_ready === true
+            && parsed?.same_task_bakeoff?.manifest_path
+            && parsed?.constraints?.frontend_touched === false
+            && parsed?.constraints?.repo_mutated_by_openjarvis === false
+            && parsed?.constraints?.provider_config_mutated === false
+            && parsed?.constraints?.paid_api_attempted === false
+            && parsed?.constraints?.live_runtime_execution_attempted === false
+            && parsed?.constraints?.default_router_promoted === false
+            && parsed?.constraints?.hidden_startup_registered === false
+            && parsed?.promotion?.promotable_now === false,
+          detail: (parsed) => ({
+            status: parsed?.status || null,
+            runtime_found: parsed?.runtime_truth?.runtime_found ?? null,
+            config_found: parsed?.runtime_truth?.config_found ?? null,
+            binary_found: parsed?.runtime_truth?.binary_found ?? null,
+            python_module_found: parsed?.runtime_truth?.python_module_found ?? null,
+            manifest_ready: parsed?.same_task_bakeoff?.manifest_ready ?? null,
+            manifest_path: parsed?.same_task_bakeoff?.manifest_path || null,
+            live_runtime_execution_attempted: parsed?.constraints?.live_runtime_execution_attempted ?? null,
+            default_router_promoted: parsed?.constraints?.default_router_promoted ?? null,
             promotable_now: parsed?.promotion?.promotable_now ?? null,
           }),
         }),

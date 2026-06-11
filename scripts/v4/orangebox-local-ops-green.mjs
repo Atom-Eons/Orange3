@@ -228,15 +228,16 @@ async function main() {
     { script: "v3:goose:runtime", timeout: 90_000 },
     { script: "v3:goose:ghost-task", timeout: 90_000 },
     { script: "v3:openjarvis:doctor", timeout: 90_000 },
+    { script: "v3:openjarvis:runtime", timeout: 90_000 },
     { script: "v3:mcp:doctor", timeout: 90_000 },
     { script: "v3:api:bakeoff", timeout: 90_000 },
     { script: "visual:artifact-vault", timeout: 90_000 },
-  { script: "visual:artifact-smoke", timeout: 90_000 },
-  { script: "visual:runtime:headless-image", timeout: 90_000 },
-  { script: "visual:runtime:headless-design", timeout: 90_000 },
-  { script: "visual:runtime:headless-audio", timeout: 90_000 },
-  { script: "visual:runtime:headless-animation", timeout: 90_000 },
-  { script: "visual:readiness", timeout: 90_000 },
+    { script: "visual:artifact-smoke", timeout: 90_000 },
+    { script: "visual:runtime:headless-image", timeout: 90_000 },
+    { script: "visual:runtime:headless-design", timeout: 90_000 },
+    { script: "visual:runtime:headless-audio", timeout: 90_000 },
+    { script: "visual:runtime:headless-animation", timeout: 90_000 },
+    { script: "visual:readiness", timeout: 90_000 },
     { script: "horizon:review", timeout: 90_000 },
     { script: "horizon:bakeoff", timeout: 90_000 },
     { script: "signal:hygiene", timeout: 60_000 },
@@ -279,6 +280,7 @@ async function main() {
   const horizonReviewPath = path.join(dataRoot, "horizon-review", "latest-horizon-review.json");
   const horizonBakeoffPath = path.join(dataRoot, "horizon-bakeoff", "latest-horizon-promotion-bakeoff.json");
   const gooseGhostTaskPath = path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json");
+  const openJarvisRuntimePath = path.join(dataRoot, "openjarvis", "runtime", "latest-openjarvis-runtime.json");
   const toolmeshPhysicalPath = path.join(dataRoot, "v3", "toolmesh", "physical-runtime", "latest-physical-runtime-doctor.json");
   const elysiaLatencyPath = path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json");
   const visualReadinessPath = path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json");
@@ -314,6 +316,7 @@ async function main() {
   const horizonReview = readJson(horizonReviewPath);
   const horizonBakeoff = readJson(horizonBakeoffPath);
   const gooseGhostTask = readJson(gooseGhostTaskPath);
+  const openJarvisRuntime = readJson(openJarvisRuntimePath);
   const toolmeshPhysical = readJson(toolmeshPhysicalPath);
   const elysiaLatency = readJson(elysiaLatencyPath);
   const visualReadiness = readJson(visualReadinessPath);
@@ -436,7 +439,20 @@ async function main() {
       goose_binary_found: horizonBakeoff?.summary?.goose_binary_found ?? null,
       goose_bounded_ghost_task_green: horizonBakeoff?.summary?.goose_bounded_ghost_task_green ?? null,
       openjarvis_eval_receipt_green: horizonBakeoff?.summary?.openjarvis_eval_receipt_green ?? null,
+      openjarvis_runtime_status: horizonBakeoff?.summary?.openjarvis_runtime_status ?? null,
+      openjarvis_same_task_manifest_ready: horizonBakeoff?.summary?.openjarvis_same_task_manifest_ready ?? null,
       visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
+    }),
+    gate("obox_jarvis_runtime_reality_green", openJarvisRuntime?.ok === true && /^OBOX_JARVIS_RUNTIME_/.test(openJarvisRuntime?.status || "") && typeof openJarvisRuntime?.runtime_truth?.runtime_found === "boolean" && openJarvisRuntime?.same_task_bakeoff?.manifest_ready === true && openJarvisRuntime?.constraints?.frontend_touched === false && openJarvisRuntime?.constraints?.repo_mutated_by_openjarvis === false && openJarvisRuntime?.constraints?.provider_config_mutated === false && openJarvisRuntime?.constraints?.paid_api_attempted === false && openJarvisRuntime?.constraints?.live_runtime_execution_attempted === false && openJarvisRuntime?.constraints?.default_router_promoted === false && openJarvisRuntime?.constraints?.hidden_startup_registered === false && openJarvisRuntime?.promotion?.promotable_now === false, {
+      status: openJarvisRuntime?.status || null,
+      runtime_found: openJarvisRuntime?.runtime_truth?.runtime_found ?? null,
+      config_found: openJarvisRuntime?.runtime_truth?.config_found ?? null,
+      binary_found: openJarvisRuntime?.runtime_truth?.binary_found ?? null,
+      python_module_found: openJarvisRuntime?.runtime_truth?.python_module_found ?? null,
+      same_task_manifest_ready: openJarvisRuntime?.same_task_bakeoff?.manifest_ready ?? null,
+      manifest_path: openJarvisRuntime?.same_task_bakeoff?.manifest_path || null,
+      live_runtime_execution_attempted: openJarvisRuntime?.constraints?.live_runtime_execution_attempted ?? null,
+      default_router_promoted: openJarvisRuntime?.constraints?.default_router_promoted ?? null,
     }),
     gate("goose_bounded_ghost_task_green", gooseGhostTask?.ok === true && gooseGhostTask?.status === "GOOSE_GHOST_TASK_BOUNDED_PROOF_GREEN" && gooseGhostTask?.runtime?.command_surfaces_green === true && gooseGhostTask?.evidence?.strongarm?.ok === true && gooseGhostTask?.evidence?.checkmate?.ok === true && gooseGhostTask?.constraints?.live_agent_execution_attempted === false && gooseGhostTask?.constraints?.default_executor_promoted === false, {
       status: gooseGhostTask?.status || null,

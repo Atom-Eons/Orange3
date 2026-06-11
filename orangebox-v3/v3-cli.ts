@@ -48,7 +48,7 @@ const phaseFiles: Record<string, string[]> = {
   inference: ["inference/speculative-sidecar.ts"],
   gpu: ["gpu/gpu-budget.ts"],
   mcp: ["mcp/docs-lane.ts"],
-  openjarvis: ["openjarvis/eval-runner.ts"],
+  openjarvis: ["openjarvis/eval-runner.ts", "openjarvis/runtime-doctor.ts"],
   theater: ["theater/theater-manifest.ts"],
   forge: ["forge/predict-next-actions.ts"],
   goose: ["goose/goose-envelope.ts"],

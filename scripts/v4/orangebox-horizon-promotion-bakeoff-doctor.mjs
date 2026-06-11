@@ -159,6 +159,7 @@ async function main() {
   const gooseRuntimePath = path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json");
   const gooseGhostTaskPath = path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json");
   const openJarvisEvalPath = path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json");
+  const openJarvisRuntimePath = path.join(dataRoot, "openjarvis", "runtime", "latest-openjarvis-runtime.json");
   const toolmeshPath = path.join(dataRoot, "v3", "toolmesh", "latest-toolmesh-doctor.json");
   const projectPath = path.join(dataRoot, "reports", "project", "latest-project-report.json");
   const openclawPath = path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json");
@@ -172,6 +173,7 @@ async function main() {
   const gooseRuntime = readJson(gooseRuntimePath, null);
   const gooseGhostTask = readJson(gooseGhostTaskPath, null);
   const openJarvisEval = readJson(openJarvisEvalPath, null);
+  const openJarvisRuntime = readJson(openJarvisRuntimePath, null);
   const toolmesh = readJson(toolmeshPath, null);
   const project = readJson(projectPath, null);
   const openclaw = readJson(openclawPath, null);
@@ -184,6 +186,7 @@ async function main() {
     gooseGhostTask: receiptEvidence(gooseGhostTaskPath),
     openjarvis: receiptEvidence(latestV3Receipt("openjarvis-eval-doctor")),
     openjarvisLatest: receiptEvidence(openJarvisEvalPath),
+    openjarvisRuntime: receiptEvidence(openJarvisRuntimePath),
     context7: receiptEvidence(latestV3Receipt("mcp-context7-docs-lane")),
     visual: receiptEvidence(visualPath),
     headlessImage: receiptEvidence(headlessImagePath),
@@ -284,21 +287,26 @@ async function main() {
       id: "obox_jarvis_openjarvis",
       wave: "wave_1_routing_efficiency_bakeoff",
       status: "EVAL_READY_RUNTIME_NOT_PROMOTED",
-      current_role: "OBOX Jarvis/OpenJarvis-style efficiency/spec harness for TriLane, not router authority.",
-      next_proof_command: "npm.cmd run v3:openjarvis:doctor",
+      current_role: "OBOX Jarvis/OpenJarvis-style efficiency/spec harness plus runtime-reality gate for TriLane, not router authority.",
+      next_proof_command: "npm.cmd run v3:openjarvis:doctor && npm.cmd run v3:openjarvis:runtime",
       proofs: [
         { id: "openjarvis_eval_receipt", ok: receipts.openjarvis.ok, detail: receipts.openjarvis.status },
         { id: "openjarvis_latest_scorecard", ok: receipts.openjarvisLatest.ok, detail: receipts.openjarvisLatest.status },
+        { id: "openjarvis_runtime_reality_receipt", ok: openJarvisRuntime?.ok === true && /OBOX_JARVIS_RUNTIME_/.test(openJarvisRuntime?.status || ""), detail: openJarvisRuntime?.status || null },
+        { id: "openjarvis_same_task_manifest_ready", ok: openJarvisRuntime?.same_task_bakeoff?.manifest_ready === true && exists(openJarvisRuntime?.same_task_bakeoff?.manifest_path), detail: openJarvisRuntime?.same_task_bakeoff?.manifest_path || null },
         { id: "trilane_baseline_comparison", ok: openJarvisEval?.comparison?.baseline_score >= 0.85, detail: openJarvisEval?.comparison?.status || null },
         { id: "five_primitive_coverage", ok: openJarvisEval?.comparison?.primitive_coverage_score >= 0.8, detail: openJarvisEval?.comparison?.primitive_coverage_score ?? null },
         { id: "router_not_promoted", ok: openJarvisEval?.runtime_truth?.default_router_approved === false && openJarvisEval?.promotion?.promotable_now === false, detail: "promotion remains gated" },
+        { id: "runtime_not_promoted", ok: openJarvisRuntime?.constraints?.default_router_promoted === false && openJarvisRuntime?.constraints?.live_runtime_execution_attempted === false, detail: openJarvisRuntime?.promotion?.reason || null },
         { id: "five_primitive_mapping_present", ok: horizon?.candidates?.some((item) => item.id === "openjarvis_eval" && item.orangebox_mapping), detail: "horizon candidate mapping" },
       ],
       blockers: [
         receipts.openjarvis.ok ? null : "Run v3:openjarvis:doctor.",
         receipts.openjarvisLatest.ok ? null : "OpenJarvis latest scorecard is missing.",
+        openJarvisRuntime?.ok === true ? null : "Run v3:openjarvis:runtime so runtime truth is explicit.",
+        openJarvisRuntime?.same_task_bakeoff?.manifest_ready === true ? null : "OpenJarvis same-task bakeoff manifest is missing.",
         openJarvisEval?.comparison?.baseline_score >= 0.85 ? null : "Current TriLane baseline score is not strong enough for a useful OpenJarvis comparison.",
-        openJarvisEval?.runtime_truth?.openjarvis_runtime_installed === true ? null : "OpenJarvis runtime itself is not installed/configured; current proof is spec/eval only.",
+        openJarvisRuntime?.runtime_truth?.runtime_found === true ? null : "OpenJarvis runtime itself is not installed/configured; current runtime proof is a gated reality check plus bakeoff manifest.",
         "Needs one direct same-task runtime bakeoff before any routing promotion.",
       ],
       intentional_non_promotion: true,
@@ -468,6 +476,7 @@ async function main() {
       goose_runtime: gooseRuntimePath,
       goose_ghost_task: gooseGhostTaskPath,
       openjarvis_eval: openJarvisEvalPath,
+      openjarvis_runtime: openJarvisRuntimePath,
       headless_design_runtime: headlessDesignPath,
       headless_audio_runtime: headlessAudioPath,
       headless_animation_runtime: headlessAnimationPath,
@@ -501,6 +510,10 @@ async function main() {
       openjarvis_baseline_score: openJarvisEval?.comparison?.baseline_score ?? null,
       openjarvis_primitive_coverage_score: openJarvisEval?.comparison?.primitive_coverage_score ?? null,
       openjarvis_runtime_installed: openJarvisEval?.runtime_truth?.openjarvis_runtime_installed ?? null,
+      openjarvis_runtime_status: openJarvisRuntime?.status || null,
+      openjarvis_runtime_found: openJarvisRuntime?.runtime_truth?.runtime_found ?? null,
+      openjarvis_same_task_manifest_ready: openJarvisRuntime?.same_task_bakeoff?.manifest_ready ?? null,
+      openjarvis_runtime_promoted: openJarvisRuntime?.constraints?.default_router_promoted ?? null,
       openjarvis_router_approved: openJarvisEval?.runtime_truth?.default_router_approved ?? null,
       openjarvis_eval_receipt_green: receipts.openjarvis.ok,
       hermes_pack_present: hermesPackPresent,

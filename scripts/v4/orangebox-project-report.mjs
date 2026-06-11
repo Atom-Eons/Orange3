@@ -185,6 +185,7 @@ async function main() {
   const gooseRuntime = readJson(path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json")) || readJson(latestReceipt("orangebox-v3-goose-runtime-doctor-", path.join(dataRoot, "v3", "receipts")));
   const gooseGhostTask = readJson(path.join(dataRoot, "goose", "ghost-task", "latest-goose-ghost-task.json")) || readJson(latestReceipt("orangebox-v3-goose-ghost-task-doctor-", path.join(dataRoot, "v3", "receipts")));
   const openJarvisEval = readJson(path.join(dataRoot, "openjarvis", "latest-openjarvis-eval.json")) || readJson(latestReceipt("orangebox-v3-openjarvis-eval-doctor-", path.join(dataRoot, "v3", "receipts")));
+  const openJarvisRuntime = readJson(path.join(dataRoot, "openjarvis", "runtime", "latest-openjarvis-runtime.json")) || readJson(latestReceipt("orangebox-v3-openjarvis-runtime-doctor-", path.join(dataRoot, "v3", "receipts")));
   const elysiaLatency = readJson(path.join(dataRoot, "api-bakeoff", "latest-elysia-rail-latency-bakeoff.json")) || readJson(latestReceipt("orangebox-elysia-rail-latency-bakeoff-"));
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json")) || readJson(latestReceipt("orangebox-visual-production-readiness-"));
   const headlessImageRuntime = readJson(path.join(dataRoot, "visual-artifacts", "runtime", "headless-image", "latest-headless-image-runtime.json")) || readJson(latestReceipt("orangebox-headless-image-runtime-"));
@@ -352,6 +353,19 @@ async function main() {
     Number(openJarvisEval?.comparison?.primitive_coverage_score || 0) >= 0.8 &&
     openJarvisEval?.runtime_truth?.default_router_approved === false &&
     openJarvisEval?.promotion?.promotable_now === false;
+  const openJarvisRuntimeReady =
+    openJarvisRuntime?.ok === true &&
+    /^OBOX_JARVIS_RUNTIME_/.test(openJarvisRuntime?.status || "") &&
+    typeof openJarvisRuntime?.runtime_truth?.runtime_found === "boolean" &&
+    openJarvisRuntime?.same_task_bakeoff?.manifest_ready === true &&
+    openJarvisRuntime?.constraints?.frontend_touched === false &&
+    openJarvisRuntime?.constraints?.repo_mutated_by_openjarvis === false &&
+    openJarvisRuntime?.constraints?.provider_config_mutated === false &&
+    openJarvisRuntime?.constraints?.paid_api_attempted === false &&
+    openJarvisRuntime?.constraints?.live_runtime_execution_attempted === false &&
+    openJarvisRuntime?.constraints?.default_router_promoted === false &&
+    openJarvisRuntime?.constraints?.hidden_startup_registered === false &&
+    openJarvisRuntime?.promotion?.promotable_now === false;
   const elysiaLatencyGreen =
     elysiaLatency?.ok === true &&
     elysiaLatency?.status === "ORANGEBOX_ELYSIA_RAIL_LATENCY_BAKEOFF_GREEN" &&
@@ -600,7 +614,7 @@ async function main() {
       area: "Horizon promotion bakeoff",
       status: status(horizonBakeoffReady, exists(path.join(repoRoot, "scripts", "v4", "orangebox-horizon-promotion-bakeoff-doctor.mjs"))),
       reality: horizonBakeoffReady
-        ? `Promotion bakeoff is current: ${horizonBakeoff?.summary?.candidates_total || 0} candidates across ${horizonBakeoff?.summary?.waves_total || 0} waves, promotable_now=${horizonBakeoff?.summary?.promotable_now ?? "unknown"}, Goose binary=${Boolean(horizonBakeoff?.summary?.goose_binary_found)}, OBOX Jarvis eval=${Boolean(horizonBakeoff?.summary?.openjarvis_eval_receipt_green)}, Hermes pack=${Boolean(horizonBakeoff?.summary?.hermes_pack_present)}, visual_ready=${Boolean(horizonBakeoff?.summary?.visual_ready)}. No candidate is promoted by review alone.`
+        ? `Promotion bakeoff is current: ${horizonBakeoff?.summary?.candidates_total || 0} candidates across ${horizonBakeoff?.summary?.waves_total || 0} waves, promotable_now=${horizonBakeoff?.summary?.promotable_now ?? "unknown"}, Goose binary=${Boolean(horizonBakeoff?.summary?.goose_binary_found)}, OBOX Jarvis eval=${Boolean(horizonBakeoff?.summary?.openjarvis_eval_receipt_green)}, OBOX Jarvis runtime=${horizonBakeoff?.summary?.openjarvis_runtime_status || "unknown"}, same_task_manifest=${Boolean(horizonBakeoff?.summary?.openjarvis_same_task_manifest_ready)}, Hermes pack=${Boolean(horizonBakeoff?.summary?.hermes_pack_present)}, visual_ready=${Boolean(horizonBakeoff?.summary?.visual_ready)}. No candidate is promoted by review alone.`
         : "Horizon bakeoff source exists or is planned, but no current bakeoff receipt is green yet.",
       next: horizonBakeoffReady
         ? "Use horizon:bakeoff before promoting OBOX Jarvis/OpenJarvis, Goose, Context7, Hermes, visual runtimes, Continue, libSQL, Mastra, or GPU acceleration candidates."
@@ -615,6 +629,16 @@ async function main() {
       next: openJarvisEvalGreen
         ? "Use OBOX Jarvis as an efficiency/spec evaluator only; direct runtime promotion still needs an isolated same-task bakeoff against TriLane."
         : "Run npm.cmd run v3:openjarvis:doctor && npm.cmd run horizon:bakeoff and fix the exact missing scorecard or router-boundary gate.",
+    },
+    {
+      area: "OBOX Jarvis / OpenJarvis runtime reality gate",
+      status: status(openJarvisRuntimeReady, exists(path.join(repoRoot, "orangebox-v3", "openjarvis", "runtime-doctor.ts"))),
+      reality: openJarvisRuntimeReady
+        ? `OBOX Jarvis runtime reality is explicit: status=${openJarvisRuntime?.status || "unknown"}, runtime_found=${Boolean(openJarvisRuntime?.runtime_truth?.runtime_found)}, config_found=${Boolean(openJarvisRuntime?.runtime_truth?.config_found)}, binary_found=${Boolean(openJarvisRuntime?.runtime_truth?.binary_found)}, python_module_found=${Boolean(openJarvisRuntime?.runtime_truth?.python_module_found)}, same_task_manifest=${openJarvisRuntime?.same_task_bakeoff?.manifest_path || "missing"}, live_runtime_execution_attempted=${Boolean(openJarvisRuntime?.constraints?.live_runtime_execution_attempted)}, default_router_promoted=${Boolean(openJarvisRuntime?.constraints?.default_router_promoted)}.`
+        : "OBOX Jarvis runtime reality gate source exists or is planned, but no current receipt proves runtime/config truth plus same-task bakeoff staging.",
+      next: openJarvisRuntimeReady
+        ? "Keep Jarvis as a gated runtime candidate until a same-task TriLane-vs-OpenJarvis bakeoff wins with receipts, rollback, and operator approval."
+        : "Run npm.cmd run v3:openjarvis:runtime and fix the exact missing runtime probe, bakeoff manifest, or authority-boundary proof.",
     },
     {
       area: "Goose runtime install proof",
@@ -1313,6 +1337,10 @@ async function main() {
         openjarvis_baseline_score: horizonBakeoff?.summary?.openjarvis_baseline_score ?? null,
         openjarvis_primitive_coverage_score: horizonBakeoff?.summary?.openjarvis_primitive_coverage_score ?? null,
         openjarvis_runtime_installed: horizonBakeoff?.summary?.openjarvis_runtime_installed ?? null,
+        openjarvis_runtime_status: horizonBakeoff?.summary?.openjarvis_runtime_status ?? null,
+        openjarvis_runtime_found: horizonBakeoff?.summary?.openjarvis_runtime_found ?? null,
+        openjarvis_same_task_manifest_ready: horizonBakeoff?.summary?.openjarvis_same_task_manifest_ready ?? null,
+        openjarvis_runtime_promoted: horizonBakeoff?.summary?.openjarvis_runtime_promoted ?? null,
         openjarvis_router_approved: horizonBakeoff?.summary?.openjarvis_router_approved ?? null,
         hermes_pack_present: horizonBakeoff?.summary?.hermes_pack_present ?? null,
         visual_ready: horizonBakeoff?.summary?.visual_ready ?? null,
@@ -1327,6 +1355,19 @@ async function main() {
         runtime_installed: openJarvisEval?.runtime_truth?.openjarvis_runtime_installed ?? null,
         default_router_approved: openJarvisEval?.runtime_truth?.default_router_approved ?? null,
         promotable_now: openJarvisEval?.promotion?.promotable_now ?? null,
+      },
+      openjarvis_runtime: {
+        path: path.join(dataRoot, "openjarvis", "runtime", "latest-openjarvis-runtime.json"),
+        status: openJarvisRuntime?.status || null,
+        runtime_found: openJarvisRuntime?.runtime_truth?.runtime_found ?? null,
+        config_found: openJarvisRuntime?.runtime_truth?.config_found ?? null,
+        binary_found: openJarvisRuntime?.runtime_truth?.binary_found ?? null,
+        python_module_found: openJarvisRuntime?.runtime_truth?.python_module_found ?? null,
+        manifest_ready: openJarvisRuntime?.same_task_bakeoff?.manifest_ready ?? null,
+        manifest_path: openJarvisRuntime?.same_task_bakeoff?.manifest_path || null,
+        live_runtime_execution_attempted: openJarvisRuntime?.constraints?.live_runtime_execution_attempted ?? null,
+        default_router_promoted: openJarvisRuntime?.constraints?.default_router_promoted ?? null,
+        promotable_now: openJarvisRuntime?.promotion?.promotable_now ?? null,
       },
       goose_runtime: {
         path: path.join(dataRoot, "goose", "runtime", "latest-goose-runtime.json"),

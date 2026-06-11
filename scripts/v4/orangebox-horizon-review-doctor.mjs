@@ -85,11 +85,13 @@ async function main() {
     elysia_bridge: latestReceiptStatus("api-bridge-doctor"),
     goose_envelope: latestReceiptStatus("goose-envelope"),
     openjarvis_eval: latestReceiptStatus("openjarvis-eval-doctor"),
+    openjarvis_runtime: latestReceiptStatus("openjarvis-runtime-doctor"),
     mcp_context7_docs_lane: latestReceiptStatus("mcp-context7-docs-lane"),
   };
   const hermesDir = path.join(repoRoot, "scripts", "v4", "hermes");
   const openclawRetirement = readJson(path.join(dataRoot, "openclaw-retirement", "latest-openclaw-retirement.json"), null);
   const visualReadiness = readJson(path.join(dataRoot, "visual-production-readiness", "latest-visual-production-readiness.json"), null);
+  const openJarvisRuntime = readJson(path.join(dataRoot, "openjarvis", "runtime", "latest-openjarvis-runtime.json"), null);
   const ledgerText = readText(path.join(repoRoot, "orangebox-v3", "docs", "V3_MASTER_LEDGER.md"));
   const candidates = [
     {
@@ -121,12 +123,16 @@ async function main() {
       id: "openjarvis_eval",
       name: "OpenJarvis / OBOX Jarvis eval harness",
       horizon_decision: "CANDIDATE_EVALUATE_ROUTING_EFFICIENCY",
-      orangebox_state: evidence.openjarvis_eval.ok ? "eval_harness_ready_not_router_replacement" : "eval_harness_missing",
-      installed_or_present: false,
-      current_role: "evaluate efficiency, latency, energy proxy, budget, trace quality, and spec-search ideas for local agents",
-      promotion_blocker: "No OpenJarvis runtime install is proven. Orangebox receipt states it is evaluation/spec harness only. It may improve TriLane specs, but it cannot become strategy authority without a benchmark win.",
-      next_action: "Map one TriLane lane into an OpenJarvis-style five-primitive spec and compare against current baseline.",
-      proof_command: "npm.cmd run v3:openjarvis:doctor",
+      orangebox_state: evidence.openjarvis_eval.ok && evidence.openjarvis_runtime.ok
+        ? "eval_harness_ready_runtime_reality_gated"
+        : evidence.openjarvis_eval.ok
+          ? "eval_harness_ready_runtime_reality_missing"
+          : "eval_harness_missing",
+      installed_or_present: Boolean(openJarvisRuntime?.runtime_truth?.runtime_found),
+      current_role: "evaluate efficiency, latency, energy proxy, budget, trace quality, spec-search ideas, and runtime readiness for local agents",
+      promotion_blocker: "OpenJarvis/OBOX Jarvis is not strategy authority. Runtime/config discovery and same-task bakeoff must be green before any router promotion.",
+      next_action: "Keep the spec/eval harness green, then run the runtime-reality gate and same-task bakeoff manifest before any direct runtime comparison.",
+      proof_command: "npm.cmd run v3:openjarvis:doctor && npm.cmd run v3:openjarvis:runtime",
       primary_sources: ["https://scalingintelligence.stanford.edu/blogs/openjarvis/", "https://github.com/open-jarvis/OpenJarvis", "https://arxiv.org/abs/2605.17172"],
       orangebox_mapping: {
         intelligence: "TriLane model registry and council lanes",
@@ -264,11 +270,17 @@ async function main() {
     {
       id: "visual_runtime_toolmesh",
       name: "Visual runtime ToolMesh",
-      horizon_decision: "CONTROL_PLANE_GREEN_RUNTIME_NOT_PROMOTED",
-      orangebox_state: visualReadiness?.summary?.visual_artifact_pipeline_ready === true ? "artifact_pipeline_ready_runtime_tools_candidate" : "artifact_pipeline_incomplete",
+      horizon_decision: visualReadiness?.visual_ready === true ? "CONTROL_PLANE_GREEN_BASELINE_RUNTIME_READY_AI_GENERATORS_GATED" : "CONTROL_PLANE_GREEN_RUNTIME_NOT_PROMOTED",
+      orangebox_state: visualReadiness?.visual_ready === true
+        ? "baseline_visual_runtime_ready_ai_generators_gated"
+        : visualReadiness?.summary?.visual_artifact_pipeline_ready === true
+          ? "artifact_pipeline_ready_runtime_tools_candidate"
+          : "artifact_pipeline_incomplete",
       installed_or_present: visualReadiness?.summary?.visual_artifact_pipeline_ready === true,
-      current_role: "image/video/audio/design generation/editing capability registry with artifact vault, deterministic smoke proof, hardware locks, and promotion gates",
-      promotion_blocker: "ComfyUI, FLUX, Wan, LTX, Whisper, Blender, Krita, GIMP, Resolve, and related tools need install proof plus sample artifact receipts before visual_ready can be true.",
+      current_role: "image/video/audio/design capability registry with artifact vault, deterministic baseline runtime proofs, hardware locks, and promotion gates",
+      promotion_blocker: visualReadiness?.visual_ready === true
+        ? "Baseline visual runtime is ready; ComfyUI, FLUX, Wan, LTX, Whisper, Blender, Krita, GIMP, Resolve, and related AI/GUI tools still need install proof plus sample artifact receipts before default use."
+        : "Visual control plane is not fully ready until artifact vault, smoke proof, and baseline runtime receipts are green.",
       next_action: "Promote one local image runtime first, then design, audio, and video in that order; keep living frontend edits in the separate visual lane.",
       proof_command: "npm.cmd run visual:artifact-vault && npm.cmd run visual:artifact-smoke && npm.cmd run visual:readiness",
       primary_sources: ["orangebox-v3/free-alpha-toolmesh/tool-cards/first-batch.tool.json", "scripts/v4/orangebox-visual-production-readiness-doctor.mjs"],
@@ -307,6 +319,11 @@ async function main() {
       openclaw_retired: openclawRetirement?.status === "OPENCLAW_STARTUP_RETIRED",
       littleorange_doctor_present: Boolean(pkg.scripts["littleorange:doctor"]),
       visual_artifact_pipeline_ready: visualReadiness?.summary?.visual_artifact_pipeline_ready === true,
+      visual_ready: visualReadiness?.visual_ready === true,
+      visual_runtime_ready_lanes: visualReadiness?.summary?.runtime_ready_lanes ?? null,
+      openjarvis_runtime_status: openJarvisRuntime?.status || null,
+      openjarvis_runtime_found: openJarvisRuntime?.runtime_truth?.runtime_found ?? null,
+      openjarvis_same_task_manifest_ready: openJarvisRuntime?.same_task_bakeoff?.manifest_ready ?? null,
       ledger_mentions_v3_phases: ["Elysia API Bridge", "MCP + Context7", "Goose Executor", "OpenJarvis Eval Harness"].every((text) => ledgerText.includes(text)),
       package_hash: sha256(JSON.stringify(pkg.deps)),
     },
@@ -336,7 +353,9 @@ async function main() {
       "LittleOrange/Cortex has a doctor and separate visual-surface boundary; Ops verifies it but does not edit its frontend lane here.",
       "Void and Continue are useful references/candidates, not promoted Orangebox bases.",
       "AI SDK/Ollama, libSQL vectors, Mastra, TileLang, TileKernels, and DFlash are not active dependencies in this repo right now.",
-      "Visual runtime ToolMesh is control-plane ready, but visual_ready remains false until real generator/editor runtimes produce sample artifact receipts.",
+      visualReadiness?.visual_ready === true
+        ? `Visual runtime ToolMesh baseline is ready across ${visualReadiness?.summary?.runtime_ready_lanes ?? 0} runtime lanes; AI generators, external codecs, GUI tools, and transcription/editing tools remain separately gated.`
+        : "Visual runtime ToolMesh control plane exists, but baseline visual runtime is not yet fully ready.",
     ],
     next_actions_ranked: [
       "Run visual:readiness whenever ToolMesh cards or lab doctors change.",
