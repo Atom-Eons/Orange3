@@ -17,6 +17,8 @@ Assume this chat has no prior memory, no prior Orangebox context, and may be run
 
 Read `references/zero-memory-bootstrap.md` before acting if the agent is new, uncertain, or outside the OBox See-Suite.
 
+If the host is Antigravity, or the operator says Antigravity is project lead, read `ANTIGRAVITY_OBOX_INSTRUCTIONS.md` before planning. In lead mode, Antigravity owns orchestration, lane routing, delegation, project truth, and receipt-backed definition of done.
+
 ## First Move
 
 Start by proving the local system state. Do not assume this chat is using Orangebox just because the user says Orangebox.
