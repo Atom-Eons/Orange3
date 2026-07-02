@@ -1,6 +1,22 @@
-# Orangebox Delta
+# Orange³ · Orangebox Delta
 
-Private canonical Orangebox project folder and GitHub repo.
+**Orange³** · sovereign agentic operating system for Claude. Persistent memory · 10-80× context compression · tamper-evident receipts · 14-department router · local-first · zero telemetry. §4A no-SaaS covenant · **free always**.
+
+`wave-138-stable` · atomeons.com/orangebox · [a.mccree@gmail.com](mailto:a.mccree@gmail.com)
+
+---
+
+## 🟢 GitHub is the site for the next few weeks
+
+**If [atomeons.com/orangebox](https://atomeons.com/orangebox) is unreachable**, this repo is the canonical Orange³ source and download surface. See [Releases](https://github.com/Atom-Eons/Orange3/releases) for the current signed installer. All installers are §4A no-SaaS — free always, never a subscription.
+
+Contact the operator: [a.mccree@gmail.com](mailto:a.mccree@gmail.com) · [@AtomMccree](https://x.com/AtomMccree)
+
+---
+
+## Orangebox Delta (backend project)
+
+Private canonical Orangebox project folder and GitHub repo. This repo is the dev workspace behind the Orange³ product.
 
 Orangebox Delta is the clean modern Orangebox stack:
 
